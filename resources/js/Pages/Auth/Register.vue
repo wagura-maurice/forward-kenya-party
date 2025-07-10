@@ -25,6 +25,16 @@ const props = defineProps({
     genders: Object,
 });
 
+// Residence reasons for residents
+const residenceReasons = ref([
+    "Work",
+    "Family",
+    "Education",
+    "Business",
+    "Retirement",
+    "Other",
+]);
+
 // State for collapsible sections
 const expandedSections = ref({
     personal: true, // Personal Information
@@ -1041,7 +1051,10 @@ const toggleSection = (section) => {
                         />
                         <VueSelect
                             v-model="form.reason_for_residence"
-                            :options="[...residenceReasons, 'Other']"
+                            :options="[
+                                ...(residenceReasons.value || []),
+                                'Other',
+                            ]"
                             placeholder="Select reason for residence"
                             class="mt-1 block w-full"
                             :class="{
