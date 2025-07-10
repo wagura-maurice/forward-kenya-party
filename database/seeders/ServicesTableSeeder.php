@@ -19,133 +19,133 @@ class ServicesTableSeeder extends Seeder
         $services = [
             [
                 'uuid' => Str::uuid(),
-                'type_id' => 1, // Replace with actual type_id
-                'category_id' => 1, // Replace with actual category_id
-                'name' => 'Apply for a Passport',
-                'slug' => 'apply-for-passport',
-                'description' => 'Get your travel documents online.',
-                'configuration' => json_encode(['key' => 'value']), // Example configuration
-                '_status' => Service::ACTIVE, // Assuming 1 corresponds to 'Active'
-                'logo_path' => 'https://demoadmin.ecitizen.pesaflow.com/assets/uploads/2023/05/agency-directorate-of-immigration-services.png',
-                'is_featured' => true,
-                'requires_payment' => true,
-            ],
-            [
-                'uuid' => Str::uuid(),
-                'type_id' => 2, // Replace with actual type_id
-                'category_id' => 2, // Replace with actual category_id
-                'name' => 'Driving License Renewal',
-                'slug' => 'driving-license-renewal',
-                'description' => 'Renew your license with ease.',
-                'configuration' => json_encode(['key' => 'value']), // Example configuration
-                '_status' => Service::ACTIVE, // Assuming 1 corresponds to 'Active'
-                'logo_path' => 'https://demoadmin.ecitizen.pesaflow.com/assets/uploads/2023/05/agency-national-transport-and-safety-authority.png',
-                'is_featured' => true,
-                'requires_payment' => true,
-            ],
-            [
-                'uuid' => Str::uuid(),
-                'type_id' => 3, // Replace with actual type_id
-                'category_id' => 3, // Replace with actual category_id
-                'name' => 'Business Registration',
-                'slug' => 'business-registration',
-                'description' => 'Start your business journey.',
-                'configuration' => json_encode(['key' => 'value']), // Example configuration
-                '_status' => Service::ACTIVE, // Assuming 1 corresponds to 'Active'
-                'logo_path' => 'https://demoadmin.ecitizen.pesaflow.com/assets/uploads/2023/05/agency-business-registration-services.png',
-                'is_featured' => true,
-                'requires_payment' => true,
-            ],
-            [
-                'uuid' => Str::uuid(),
-                'type_id' => 4, // Replace with actual type_id
-                'category_id' => 4, // Replace with actual category_id
-                'name' => 'Police Clearance Certificate',
-                'slug' => 'police-clearance-certificate',
-                'description' => 'Access the Directorate of Criminal Investigations\' online platform for police clearance certificate services and more.',
-                'configuration' => json_encode(['key' => 'value']), // Example configuration
-                '_status' => Service::ACTIVE, // Assuming 1 corresponds to 'Active'
-                'logo_path' => 'https://demoadmin.ecitizen.pesaflow.com/assets/uploads/2023/05/agency-directorate-of-criminal-investigations.png',
-                'is_featured' => true,
-                'requires_payment' => true,
-            ],
-            [
-                'uuid' => Str::uuid(),
-                'type_id' => 5, // Replace with actual type_id
-                'category_id' => 5, // Replace with actual category_id
-                'name' => 'Tax Compliance',
-                'slug' => 'tax-compliance',
-                'description' => 'Ensure compliance with tax and customs laws.',
-                'configuration' => json_encode(['key' => 'value']), // Example configuration
-                '_status' => Service::ACTIVE, // Assuming 1 corresponds to 'Active'
-                'logo_path' => 'https://demoadmin.ecitizen.pesaflow.com/assets/uploads/2023/05/agency-kenya-revenue-authority.png',
-                'is_featured' => true,
-                'requires_payment' => true,
-            ],
-            [
-                'uuid' => Str::uuid(),
-                'type_id' => 6, // Replace with actual type_id
-                'category_id' => 6, // Replace with actual category_id
-                'name' => 'Marriage Registration',
-                'slug' => 'marriage-registration',
-                'description' => 'Utilize OAG\'s online services for efficient marriage registration and other legal services.',
-                'configuration' => json_encode(['key' => 'value']), // Example configuration
-                '_status' => Service::ACTIVE, // Assuming 1 corresponds to 'Active'
-                'logo_path' => 'https://demoadmin.ecitizen.pesaflow.com/assets/uploads/2023/05/coa-republic-of-kenya.png',
-                'is_featured' => true,
-                'requires_payment' => true,
-            ],
-            [
-                'uuid' => Str::uuid(),
-                'type_id' => 7, // Replace with actual type_id
-                'category_id' => 7, // Replace with actual category_id
-                'name' => 'Birth and Death Registration',
-                'slug' => 'birth-death-registration',
-                'description' => 'Access CRS\'s online platform to conveniently apply and pay for birth and death registration services.',
-                'configuration' => json_encode(['key' => 'value']), // Example configuration
-                '_status' => Service::ACTIVE, // Assuming 1 corresponds to 'Active'
-                'logo_path' => 'https://demoadmin.ecitizen.pesaflow.com/assets/uploads/2023/05/coa-republic-of-kenya.png',
-                'is_featured' => true,
-                'requires_payment' => true,
-            ],
-            [
-                'uuid' => Str::uuid(),
-                'type_id' => 8, // Replace with actual type_id
-                'category_id' => 8, // Replace with actual category_id
-                'name' => 'Affordable Housing Program',
-                'slug' => 'affordable-housing-program',
-                'description' => 'The Boma Yangu platform is the gateway into the Affordable Housing Program. Start your journey towards home ownership.',
-                'configuration' => json_encode(['key' => 'value']), // Example configuration
-                '_status' => Service::ACTIVE, // Assuming 1 corresponds to 'Active'
-                'logo_path' => 'https://demoadmin.ecitizen.pesaflow.com/assets/uploads/2023/05/agency-boma-yangu.png',
-                'is_featured' => true,
-                'requires_payment' => true,
-            ],
-            [
-                'uuid' => Str::uuid(),
-                'type_id' => 9, // Replace with actual type_id
-                'category_id' => 9, // Replace with actual category_id
-                'name' => 'Disability Services',
-                'slug' => 'disability-services',
-                'description' => 'To promote and protect equalization of opportunities and realization of human rights for PWDs to live descent livelihoods.',
-                'configuration' => json_encode(['key' => 'value']), // Example configuration
-                '_status' => Service::ACTIVE, // Assuming 1 corresponds to 'Active'
-                'logo_path' => 'https://demoadmin.ecitizen.pesaflow.com/assets/uploads/NCPWD-Logo.jpg',
+                'type_id' => 1,
+                'category_id' => 1,
+                'name' => 'Membership Registration',
+                'slug' => 'membership-registration',
+                'description' => 'Join Forward Kenya Party and become an official member.',
+                'configuration' => json_encode(['key' => 'value']),
+                '_status' => Service::ACTIVE,
+                'logo_path' => '/assets/FKP COLLATERALS/FKP PNG/Secondary logo/Asset 1FKP.png',
                 'is_featured' => true,
                 'requires_payment' => false,
             ],
             [
                 'uuid' => Str::uuid(),
-                'type_id' => 10, // Replace with actual type_id
-                'category_id' => 10, // Replace with actual category_id
-                'name' => 'Standards and Certification',
-                'slug' => 'standards-and-certification',
-                'description' => 'The Kenya Bureau of Standards (KEBS) provides Standards, Metrology, and Conformity Assessment services.',
-                'configuration' => json_encode(['key' => 'value']), // Example configuration
-                '_status' => Service::ACTIVE, // Assuming 1 corresponds to 'Active'
-                'logo_path' => 'https://demoadmin.ecitizen.pesaflow.com/assets/uploads/kebs_logo.png',
+                'type_id' => 2,
+                'category_id' => 2,
+                'name' => 'Event Participation',
+                'slug' => 'event-participation',
+                'description' => 'Sign up for rallies, conferences, and party events.',
+                'configuration' => json_encode(['key' => 'value']),
+                '_status' => Service::ACTIVE,
+                'logo_path' => '/assets/FKP COLLATERALS/FKP PNG/Secondary logo/Asset 2FKP.png',
+                'is_featured' => true,
+                'requires_payment' => false,
+            ],
+            [
+                'uuid' => Str::uuid(),
+                'type_id' => 3,
+                'category_id' => 3,
+                'name' => 'Volunteer Signup',
+                'slug' => 'volunteer-signup',
+                'description' => 'Volunteer for party activities and community outreach.',
+                'configuration' => json_encode(['key' => 'value']),
+                '_status' => Service::ACTIVE,
+                'logo_path' => '/assets/FKP COLLATERALS/FKP PNG/Secondary logo/Asset 3FKP.png',
+                'is_featured' => true,
+                'requires_payment' => false,
+            ],
+            [
+                'uuid' => Str::uuid(),
+                'type_id' => 4,
+                'category_id' => 4,
+                'name' => 'Policy Suggestion',
+                'slug' => 'policy-suggestion',
+                'description' => 'Submit your ideas and feedback to help shape party policy.',
+                'configuration' => json_encode(['key' => 'value']),
+                '_status' => Service::ACTIVE,
+                'logo_path' => '/assets/FKP COLLATERALS/FKP PNG/Secondary logo/Asset 4FKP.png',
+                'is_featured' => true,
+                'requires_payment' => false,
+            ],
+            [
+                'uuid' => Str::uuid(),
+                'type_id' => 5,
+                'category_id' => 5,
+                'name' => 'Donations',
+                'slug' => 'donations',
+                'description' => 'Support Forward Kenya Party through financial contributions.',
+                'configuration' => json_encode(['key' => 'value']),
+                '_status' => Service::ACTIVE,
+                'logo_path' => '/assets/FKP COLLATERALS/FKP PNG/Secondary logo/Asset 5FKP.png',
                 'is_featured' => true,
                 'requires_payment' => true,
+            ],
+            [
+                'uuid' => Str::uuid(),
+                'type_id' => 6,
+                'category_id' => 6,
+                'name' => 'Leadership Application',
+                'slug' => 'leadership-application',
+                'description' => 'Apply for leadership and nomination positions within the party.',
+                'configuration' => json_encode(['key' => 'value']),
+                '_status' => Service::ACTIVE,
+                'logo_path' => '/assets/FKP COLLATERALS/FKP PNG/Secondary logo/Asset 1FKP.png',
+                'is_featured' => true,
+                'requires_payment' => false,
+            ],
+            [
+                'uuid' => Str::uuid(),
+                'type_id' => 7,
+                'category_id' => 7,
+                'name' => 'Women Empowerment Program',
+                'slug' => 'women-empowerment',
+                'description' => 'Participate in women-focused initiatives and leadership training.',
+                'configuration' => json_encode(['key' => 'value']),
+                '_status' => Service::ACTIVE,
+                'logo_path' => '/assets/FKP COLLATERALS/FKP PNG/Secondary logo/Asset 2FKP.png',
+                'is_featured' => true,
+                'requires_payment' => false,
+            ],
+            [
+                'uuid' => Str::uuid(),
+                'type_id' => 8,
+                'category_id' => 8,
+                'name' => 'Youth Program',
+                'slug' => 'youth-program',
+                'description' => 'Join youth engagement, mentorship, and empowerment programs.',
+                'configuration' => json_encode(['key' => 'value']),
+                '_status' => Service::ACTIVE,
+                'logo_path' => '/assets/FKP COLLATERALS/FKP PNG/Secondary logo/Asset 3FKP.png',
+                'is_featured' => true,
+                'requires_payment' => false,
+            ],
+            [
+                'uuid' => Str::uuid(),
+                'type_id' => 9,
+                'category_id' => 9,
+                'name' => 'Party News Subscription',
+                'slug' => 'party-news-subscription',
+                'description' => 'Subscribe to receive party news, updates, and newsletters.',
+                'configuration' => json_encode(['key' => 'value']),
+                '_status' => Service::ACTIVE,
+                'logo_path' => '/assets/FKP COLLATERALS/FKP PNG/Secondary logo/Asset 4FKP.png',
+                'is_featured' => true,
+                'requires_payment' => false,
+            ],
+            [
+                'uuid' => Str::uuid(),
+                'type_id' => 10,
+                'category_id' => 10,
+                'name' => 'Grievance Submission',
+                'slug' => 'grievance-submission',
+                'description' => 'Submit complaints, grievances, or suggestions to party leadership.',
+                'configuration' => json_encode(['key' => 'value']),
+                '_status' => Service::ACTIVE,
+                'logo_path' => '/assets/FKP COLLATERALS/FKP PNG/Secondary logo/Asset 5FKP.png',
+                'is_featured' => true,
+                'requires_payment' => false,
             ],
         ];
 
