@@ -125,22 +125,52 @@ onUnmounted(() => {
                         </nav>
 
                         <!-- Authentication Buttons -->
-                        <div class="hidden md:flex items-center space-x-4">
+                        <div class="hidden md:flex items-center justify-center">
                             <template v-if="isAuthenticated">
-                                <a
-                                    href="/dashboard"
-                                    class="text-white bg-gradient-to-r from-blue-500 to-indigo-500 hover:bg-gradient-to-l hover:from-blue-600 hover:to-indigo-600 focus:ring-4 focus:outline-none focus:ring-indigo-200 dark:focus:ring-blue-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center mr-2"
-                                >
-                                    Dashboard
-                                </a>
-                                <form method="POST" action="/logout">
-                                    <button
-                                        type="submit"
-                                        class="text-white bg-gradient-to-r from-red-500 to-pink-500 hover:bg-gradient-to-l hover:from-red-600 hover:to-pink-600 focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-red-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
+                                <div class="flex flex-row">
+                                    <a
+                                        href="/dashboard"
+                                        class="flex items-center justify-center text-white bg-gradient-to-r from-blue-500 to-indigo-500 hover:bg-gradient-to-l hover:from-blue-600 hover:to-indigo-600 focus:ring-4 focus:outline-none focus:ring-indigo-200 dark:focus:ring-blue-700 font-medium text-sm px-5 py-2.5 text-center rounded-l-full rounded-r-none"
+                                        aria-label="Dashboard"
                                     >
-                                        Sign Out
-                                    </button>
-                                </form>
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            class="h-5 w-5"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
+                                        >
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8v-10h-8v10zm0-18v6h8V3h-8z"
+                                            />
+                                        </svg>
+                                    </a>
+                                    <form method="POST" action="/logout">
+                                        <button
+                                            type="submit"
+                                            class="flex items-center justify-center text-white bg-gradient-to-r from-red-500 to-pink-500 hover:bg-gradient-to-l hover:from-red-600 hover:to-pink-600 focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-red-700 font-medium text-sm px-5 py-2.5 text-center rounded-r-full rounded-l-none"
+                                            aria-label="Sign Out"
+                                        >
+                                            <svg
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                class="h-5 w-5"
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                            >
+                                                <path
+                                                    stroke-linecap="round"
+                                                    stroke-linejoin="round"
+                                                    stroke-width="2"
+                                                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1"
+                                                />
+                                            </svg>
+                                        </button>
+                                    </form>
+                                </div>
                             </template>
                             <template v-else>
                                 <a
@@ -194,20 +224,50 @@ onUnmounted(() => {
                 </ul>
                 <div class="py-4 px-4">
                     <template v-if="isAuthenticated">
-                        <a
-                            href="/dashboard"
-                            class="block py-2.5 px-5 text-white bg-gradient-to-r from-blue-500 to-indigo-500 hover:bg-gradient-to-l hover:from-blue-600 hover:to-indigo-600 focus:ring-4 focus:outline-none focus:ring-indigo-200 dark:focus:ring-blue-700 font-medium rounded-lg text-sm text-center mb-2"
-                        >
-                            Dashboard
-                        </a>
-                        <form method="POST" action="/logout">
-                            <button
-                                type="submit"
-                                class="w-full py-2.5 px-5 text-white bg-gradient-to-r from-red-500 to-pink-500 hover:bg-gradient-to-l hover:from-red-600 hover:to-pink-600 focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-red-700 font-medium rounded-lg text-sm text-center"
+                        <div class="flex flex-row justify-center w-full">
+                            <a
+                                href="/dashboard"
+                                class="flex items-center justify-center py-2.5 px-5 text-white bg-gradient-to-r from-blue-500 to-indigo-500 hover:bg-gradient-to-l hover:from-blue-600 hover:to-indigo-600 focus:ring-4 focus:outline-none focus:ring-indigo-200 dark:focus:ring-blue-700 font-medium text-sm text-center rounded-l-full rounded-r-none"
+                                aria-label="Dashboard"
                             >
-                                Sign Out
-                            </button>
-                        </form>
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    class="h-5 w-5"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path
+                                        stroke-linecap="round"
+                                        stroke-linejoin="round"
+                                        stroke-width="2"
+                                        d="M3 13h8V3H3v10zm0 8h8v-6H3v6zm10 0h8v-10h-8v10zm0-18v6h8V3h-8z"
+                                    />
+                                </svg>
+                            </a>
+                            <form method="POST" action="/logout" class="w-full">
+                                <button
+                                    type="submit"
+                                    class="flex items-center justify-center w-full py-2.5 px-5 text-white bg-gradient-to-r from-red-500 to-pink-500 hover:bg-gradient-to-l hover:from-red-600 hover:to-pink-600 focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-red-700 font-medium text-sm text-center rounded-r-full rounded-l-none"
+                                    aria-label="Sign Out"
+                                >
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        class="h-5 w-5"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        stroke="currentColor"
+                                    >
+                                        <path
+                                            stroke-linecap="round"
+                                            stroke-linejoin="round"
+                                            stroke-width="2"
+                                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1"
+                                        />
+                                    </svg>
+                                </button>
+                            </form>
+                        </div>
                     </template>
                     <template v-else>
                         <a
@@ -268,7 +328,9 @@ onUnmounted(() => {
                         <p
                             class="text-gray-600 dark:text-gray-300 mb-4 text-sm leading-relaxed"
                         >
-                            Empowering Kenyans through Forward Kenya Party's digital platform for political engagement, community action, and inclusive participation.
+                            Empowering Kenyans through Forward Kenya Party's
+                            digital platform for political engagement, community
+                            action, and inclusive participation.
                         </p>
                         <div
                             class="flex items-center space-x-2 bg-white dark:bg-gray-700 px-3 py-1.5 rounded-full w-fit"
