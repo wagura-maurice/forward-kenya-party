@@ -33,6 +33,13 @@ class Foreigner extends Model
     const MEDIUM_TERM = 1;
     const LONG_TERM = 2;
 
+    // Purpose of visit constants
+    const TOURISM = 0;
+    const BUSINESS = 1;
+    const STUDY = 2;
+    const WORK = 3;
+    const OTHER = 4;
+
     public static function visaTypeLabels()
     {
         return [
@@ -71,6 +78,17 @@ class Foreigner extends Model
         ];
     }
 
+    public static function purposeOfVisitLabels()
+    {
+        return [
+            self::TOURISM => 'Tourism',
+            self::BUSINESS => 'Business',
+            self::STUDY => 'Study',
+            self::WORK => 'Work',
+            self::OTHER => 'Other',
+        ];
+    }
+
     public static function getVisaTypeValueByLabel(string $label)
     {
         $visaTypeOptions = self::visaTypeLabels();
@@ -98,6 +116,11 @@ class Foreigner extends Model
     public static function getLengthOfStayValueByLabel(string $label)
     {
         return self::getValueByLabel(self::lengthOfStayLabels(), $label);
+    }
+    
+    public static function getPurposeOfVisitValueByLabel(string $label)
+    {
+        return self::getValueByLabel(self::purposeOfVisitLabels(), $label);
     }
     
     protected static function getValueByLabel(array $options, string $label)
@@ -232,7 +255,7 @@ class Foreigner extends Model
             'entry_point' => 'required|integer|in:' . implode(',', array_keys(self::entryPointLabels())),
             'arrival_date' => 'required|date',
             'departure_date' => 'nullable|date|after:arrival_date',
-            'purpose_of_visit' => 'nullable|string|max:255',
+            'purpose_of_visit' => 'nullable|integer|in:' . implode(',', array_keys(self::purposeOfVisitLabels())),
             'type_of_visa' => 'required|integer|in:' . implode(',', [
                 self::SINGLE_ENTRY,
                 self::MULTIPLE_ENTRY,
@@ -290,7 +313,7 @@ class Foreigner extends Model
             'entry_point' => 'nullable|integer|in:' . implode(',', array_keys(self::entryPointLabels())),
             'arrival_date' => 'nullable|date',
             'departure_date' => 'nullable|date|after:arrival_date',
-            'purpose_of_visit' => 'nullable|string|max:255',
+            'purpose_of_visit' => 'nullable|integer|in:' . implode(',', array_keys(self::purposeOfVisitLabels())),
             'type_of_visa' => 'nullable|integer|in:' . implode(',', [
                 self::SINGLE_ENTRY,
                 self::MULTIPLE_ENTRY,
