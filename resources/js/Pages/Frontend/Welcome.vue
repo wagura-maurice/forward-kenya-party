@@ -46,13 +46,13 @@
                                     :href="route('frontend.services')"
                                     class="inline-block bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white font-semibold px-8 py-4 rounded-full shadow-lg transform hover:-translate-y-1 transition-all duration-300"
                                 >
-                                    Explore Services
+                                    Explore Party Services
                                 </Link>
                                 <Link
                                     :href="route('frontend.departments')"
                                     class="inline-block bg-white/10 hover:bg-white/20 text-white font-semibold px-8 py-4 rounded-full backdrop-blur-sm border border-white/20 shadow-lg transform hover:-translate-y-1 transition-all duration-300"
                                 >
-                                    Our Departments
+                                    Party Departments
                                 </Link>
                             </div>
                         </div>
@@ -80,7 +80,7 @@
                     <h2
                         class="text-3xl font-bold text-gray-800 dark:text-white mb-3"
                     >
-                        The single point of access for all government services
+                        Your Gateway to Forward Kenya Party
                     </h2>
                     <div
                         class="w-20 h-1 bg-gradient-to-r from-green-500 to-blue-500 mx-auto mb-4"
@@ -88,9 +88,10 @@
                     <p
                         class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto"
                     >
-                        Enjoy the convenience. Get information about government
-                        online services and make applications quickly and
-                        easily.
+                        Welcome to Forward Kenya Party's digital platform—your
+                        home for participation, engagement, and empowerment.
+                        Access member resources, join events, and help shape our
+                        party's future.
                     </p>
                 </div>
 
@@ -109,11 +110,13 @@
                         <h3
                             class="text-xl font-bold text-center text-gray-900 dark:text-white mb-3"
                         >
-                            One Log-in, all government services
+                            One Log-in, All Party Activities
                         </h3>
                         <p class="text-gray-600 dark:text-gray-300 text-center">
-                            All you need is one account. Citizens and residents
-                            can register with an ID number.
+                            All you need is one account. Members and supporters
+                            can register to access exclusive Forward Kenya Party
+                            content, participate in decision-making, and stay
+                            informed.
                         </p>
                     </div>
 
@@ -131,12 +134,12 @@
                         <h3
                             class="text-xl font-bold text-center text-gray-900 dark:text-white mb-3"
                         >
-                            A single unified citizen's profile
+                            Unified Member Profile
                         </h3>
                         <p class="text-gray-600 dark:text-gray-300 text-center">
-                            Your information as a citizen or resident from
-                            across government will be accessible through your
-                            profile.
+                            Your Forward Kenya Party profile keeps you
+                            connected—making it easy to participate, engage, and
+                            contribute to our shared mission.
                         </p>
                     </div>
 
@@ -154,12 +157,12 @@
                         <h3
                             class="text-xl font-bold text-center text-gray-900 dark:text-white mb-3"
                         >
-                            Convenient service access
+                            Engage with Forward Kenya Party
                         </h3>
                         <p class="text-gray-600 dark:text-gray-300 text-center">
-                            Search, apply and pay for services online, receive
-                            progress notifications and access all your downloads
-                            in one place.
+                            Join party events, participate in discussions, and
+                            access important Forward Kenya Party documents and
+                            updates—all in one place.
                         </p>
                     </div>
                 </div>
@@ -176,7 +179,7 @@
                     <h2
                         class="text-3xl font-bold text-gray-800 dark:text-white mb-3"
                     >
-                        Our Impacts
+                        Our Party's Impact
                     </h2>
                     <div
                         class="w-20 h-1 bg-gradient-to-r from-green-500 to-blue-500 mx-auto mb-4"
@@ -184,11 +187,12 @@
                     <p
                         class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto"
                     >
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                        Quae aliquam dolor nobis pariatur vero temporibus,
-                        perferendis architecto quia consequatur magnam! Incidunt
-                        illum, commodi asperiores reprehenderit animi eius
-                        soluta cupiditate fugiat.
+                        Forward Kenya Party is dedicated to building a more
+                        inclusive, just, and prosperous nation. Our impact is
+                        measured by the positive change we bring to communities,
+                        the empowerment of our members, and our advocacy for
+                        transparent, accountable leadership. Join us as we drive
+                        meaningful progress across Kenya.
                     </p>
                 </div>
                 <div
@@ -198,25 +202,25 @@
                         v-for="(stat, key) in [
                             {
                                 value: animatedStats.users,
-                                label: 'Users Registered',
+                                label: 'Members Registered',
                                 icon: 'fa-users',
                                 color: 'from-blue-500 to-blue-600',
                             },
                             {
                                 value: animatedStats.services,
-                                label: 'Services',
+                                label: 'Party Services',
                                 icon: 'fa-cogs',
                                 color: 'from-green-500 to-green-600',
                             },
                             {
                                 value: animatedStats.departments,
-                                label: 'Departments',
+                                label: 'Party Departments',
                                 icon: 'fa-building',
                                 color: 'from-purple-500 to-purple-600',
                             },
                             {
                                 value: animatedStats.activities,
-                                label: 'Activities',
+                                label: 'Party Activities',
                                 icon: 'fa-chart-line',
                                 color: 'from-red-500 to-red-600',
                             },
@@ -259,7 +263,7 @@
                     <h2
                         class="text-3xl font-bold text-gray-800 dark:text-white mb-3"
                     >
-                        Our Services
+                        Party Services
                     </h2>
                     <div
                         class="w-20 h-1 bg-gradient-to-r from-green-500 to-blue-500 mx-auto mb-4"
@@ -267,8 +271,9 @@
                     <p
                         class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto"
                     >
-                        Explore our range of government services designed to
-                        make your life easier.
+                        Explore Forward Kenya Party's services designed to
+                        empower members, support communities, and advance our
+                        mission for a better Kenya.
                     </p>
                 </div>
                 <div class="relative">
@@ -440,7 +445,7 @@
                     <h2
                         class="text-3xl font-bold text-gray-800 dark:text-white mb-3"
                     >
-                        Our Departments
+                        Party Departments
                     </h2>
                     <div
                         class="w-20 h-1 bg-gradient-to-r from-green-500 to-blue-500 mx-auto mb-4"
@@ -448,8 +453,9 @@
                     <p
                         class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto"
                     >
-                        Connect with various government departments and access
-                        their services seamlessly.
+                        Connect with Forward Kenya Party's departments to learn
+                        more about our leadership, initiatives, and how you can
+                        get involved.
                     </p>
                 </div>
                 <div class="relative">
@@ -610,11 +616,12 @@
                     <p
                         class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto"
                     >
-                        Lorem ipsum dolor sit amet consectetur adipisicing elit.
-                        Quae aliquam dolor nobis pariatur vero temporibus,
-                        perferendis architecto quia consequatur magnam! Incidunt
-                        illum, commodi asperiores reprehenderit animi eius
-                        soluta cupiditate fugiat.
+                        Forward Kenya Party collaborates with civic
+                        organizations, grassroots groups, and progressive allies
+                        to advance our shared vision for Kenya. Our partners
+                        help us amplify our impact, empower communities, and
+                        create sustainable change. Together, we are building a
+                        stronger, more united nation.
                     </p>
                 </div>
 
@@ -732,7 +739,7 @@ const partners = [
         url: "https://www.delivery.go.ke/",
     },
     {
-        name: "E-Government",
+        name: "Forward Kenya Party",
         logo: "https://www.egpkenya.go.ke/assets/images/kenya-logo.png",
         url: "https://www.egpkenya.go.ke/",
     },

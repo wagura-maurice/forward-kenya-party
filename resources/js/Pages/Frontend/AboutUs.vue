@@ -30,10 +30,13 @@ defineProps({
             <p
                 class="mb-8 lg:mb-16 font-light text-gray-500 dark:text-gray-400 sm:text-xl"
             >
-                Our e-government platform is designed to empower citizens by
-                providing seamless access to essential government services with
-                a mission to create a more efficient, inclusive, and accessible
-                government experience for all.
+                Forward Kenya Party is a new, inclusive platform dedicated to
+                addressing the needs and aspirations of all people of Kenya. We
+                serve citizens, refugees, diplomats, foreigners, residents, and
+                work in partnership with communities and stakeholders to
+                build a better, more just society. The party's mission is to empower
+                every individual, regardless of status, to have a voice and
+                access to opportunities for positive change.
             </p>
 
             <!-- Showcase Section -->
@@ -47,51 +50,51 @@ defineProps({
                         <h2
                             class="mb-4 text-4xl tracking-tight font-bold text-gray-900 dark:text-white"
                         >
-                            Powering E-Government Innovation for
+                            Powering Forward Kenya Party for
                             <span class="font-extrabold"
-                                >millions of citizens and government
-                                entities</span
+                                >all people of Kenya</span
                             >
                         </h2>
                         <p class="mb-4 font-light">
-                            Our e-government platform is transforming how
-                            citizens, refugees, diplomats, foreigners, and
-                            residents interact with government agencies. By
-                            offering specialized access to services based on
-                            roles, we enable each user group to seamlessly
-                            engage with government processes. Through advanced
-                            technology, we ensure that everyone—regardless of
-                            their status—has easy and secure access to essential
-                            public services.
+                            Our platform is transforming how people engage with
+                            Forward Kenya Party and community advocacy. By
+                            offering tailored engagement and resources based on
+                            roles—including citizens, refugees, diplomats,
+                            foreigners, residents, and party supporters—we ensure that
+                            every voice is heard and every member can
+                            participate meaningfully in shaping Kenya's future.
+                            Through innovative outreach and technology, we
+                            connect, inform, and mobilize for collective
+                            progress.
                         </p>
                         <p class="mb-4 font-medium">
-                            The platform is designed with flexibility in mind,
-                            catering to various user roles including citizens,
-                            refugees, diplomats, foreigners, and residents. Each
-                            group will have access to tailored services,
-                            ensuring that their unique needs are met by
-                            government agencies on the platform. This allows for
-                            efficient service delivery, regardless of the
-                            individual's status.
+                            Forward Kenya Party is built on a foundation of
+                            flexibility and inclusivity. We recognize the
+                            diverse backgrounds and needs of our members and
+                            supporters—whether you are a citizen, refugee,
+                            diplomat, foreigner, resident, or party
+                            supporter. Each group is provided with dedicated
+                            channels for engagement, advocacy, and support,
+                            ensuring that everyone can contribute to and benefit
+                            from our shared vision for Kenya.
                         </p>
                         <p class="mb-4 font-light">
-                            Citizens and residents can easily access a wide
-                            range of services, from requesting local government
-                            services to making payments for taxes and utilities.
-                            Refugees and diplomats will find dedicated channels
-                            for their specific needs, such as registering with
-                            the government or accessing diplomatic services.
-                            Foreigners will be supported with visa applications,
-                            residency permits, and other services essential to
-                            their stay in the country.
+                            Whether you are looking to join the party,
+                            participate in events, access member resources, or
+                            collaborate on community initiatives, Forward Kenya
+                            Party provides the tools and support you need. Our
+                            approach ensures that all groups—citizens, refugees,
+                            diplomats, foreigners, residents, and party
+                            supporters—can engage with the party in meaningful ways and help
+                            drive positive change for Kenya.
                         </p>
 
-                        <!-- E-Government Principles -->
+                        <!-- Forward Kenya Party Principles -->
                         <div class="mt-8">
                             <h3
                                 class="text-3xl font-bold text-gray-900 dark:text-white mb-4"
                             >
-                                Core Principles of E-Government
+                                Core Principles of Forward Kenya Party
                             </h3>
                             <div class="space-y-4">
                                 <div class="grid grid-cols-12 gap-2">
@@ -99,10 +102,10 @@ defineProps({
                                         Accessibility:
                                     </div>
                                     <div class="col-span-10">
-                                        Ensuring all citizens, refugees,
-                                        diplomats, foreigners, and residents can
-                                        easily access government services that
-                                        match their role and status.
+                                        Ensuring all people—regardless of
+                                        background or status—can easily engage
+                                        with the party, access resources, and
+                                        participate in shaping our agenda.
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-12 gap-2">
@@ -110,21 +113,45 @@ defineProps({
                                         Transparency:
                                     </div>
                                     <div class="col-span-10">
-                                        Government processes are open and clear
-                                        to all users, with tailored information
-                                        available based on user type, ensuring
-                                        fairness and understanding.
+                                        Party processes and decision-making are
+                                        open, clear, and inclusive. We provide
+                                        tailored information and encourage open
+                                        dialogue to foster trust and
+                                        accountability.
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-12 gap-2">
                                     <div class="col-span-2 font-semibold">
-                                        Efficiency:
+                                        Participation:
                                     </div>
                                     <div class="col-span-10">
-                                        The platform streamlines service
-                                        delivery based on role-specific needs,
-                                        reducing delays and providing efficient
-                                        access to services for all user groups.
+                                        We empower members and supporters to
+                                        actively participate in party
+                                        activities, discussions, and leadership,
+                                        ensuring every voice is valued in our
+                                        movement.
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-12 gap-2">
+                                    <div class="col-span-2 font-semibold">
+                                        Advocacy:
+                                    </div>
+                                    <div class="col-span-10">
+                                        We champion the needs and rights of all
+                                        groups in Kenya, working collaboratively
+                                        with partners and communities to create
+                                        lasting positive change.
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-12 gap-2">
+                                    <div class="col-span-2 font-semibold">
+                                        Innovation:
+                                    </div>
+                                    <div class="col-span-10">
+                                        We leverage technology and new ideas to
+                                        connect, inform, and mobilize our
+                                        members, making Forward Kenya Party a
+                                        leader in modern political engagement.
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-12 gap-2">

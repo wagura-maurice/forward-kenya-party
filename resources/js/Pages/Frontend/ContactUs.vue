@@ -88,8 +88,13 @@ const submitForm = () => {
             <p
                 class="mb-8 lg:mb-16 font-light text-gray-500 dark:text-gray-400 sm:text-xl"
             >
-                Got a technical issue? Want to send feedback about a beta
-                feature? Need details about our Business plan? Let us know.
+                Are you an aspirant looking for a party to join? Do you have
+                suggestions on how we can improve our party? Are you seeking
+                information about our party manifesto? Do you have any
+                recommendations for our party candidates? Are you looking for
+                information about our party structures? Do you want to report an
+                issue with our party website or social media channels? Let us
+                know.
             </p>
 
             <!-- Contact Information Grid -->
@@ -139,10 +144,10 @@ const submitForm = () => {
                     </div>
                     <p class="ml-16 text-gray-600 dark:text-gray-400">Email:</p>
                     <a
-                        href="mailto:info@e-government.go.ke"
+                        href="mailto:info@forwardkenyaparty.com"
                         class="ml-16 text-green-600 dark:text-green-400 font-semibold"
                     >
-                        info@e-government.go.ke
+                        info@forwardkenyaparty.com
                     </a>
                 </div>
 
