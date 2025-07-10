@@ -6,7 +6,7 @@ import { ref, computed, watch, onMounted } from "vue";
 const props = defineProps({
     title: {
         type: String,
-        default: "Services",
+        default: "Party Services",
     },
     logoUrl: {
         type: String,
@@ -235,8 +235,7 @@ const paginationRange = computed(() => {
             <p
                 class="mb-8 lg:mb-16 font-light text-gray-500 dark:text-gray-400 sm:text-xl"
             >
-                Discover a wide range of government services designed to make
-                your life easier.
+                Discover a wide range of Forward Kenya Party services designed to empower members, support communities, and advance our mission.
             </p>
 
             <!-- Search and Filter -->
@@ -244,7 +243,7 @@ const paginationRange = computed(() => {
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div class="md:col-span-2">
                         <label for="search" class="sr-only"
-                            >Search services</label
+                            >Search party services</label
                         >
                         <div class="relative">
                             <div
@@ -258,7 +257,7 @@ const paginationRange = computed(() => {
                                 v-model="search"
                                 @keydown="handleKeyDown"
                                 class="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                placeholder="Search services..."
+                                placeholder="Search party services..."
                             />
                             <div
                                 class="absolute inset-y-0 right-0 flex items-center pr-3"
@@ -275,7 +274,7 @@ const paginationRange = computed(() => {
                     </div>
                     <div>
                         <label for="department" class="sr-only"
-                            >Filter by department</label
+                            >Filter by party department</label
                         >
                         <div class="relative">
                             <select
@@ -289,7 +288,7 @@ const paginationRange = computed(() => {
                                 }"
                             >
                                 <option value="" class="text-gray-400">
-                                    All Departments
+                                    All Party Departments
                                 </option>
                                 <option
                                     v-for="dept in departments"
@@ -309,7 +308,7 @@ const paginationRange = computed(() => {
                 class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4"
             >
                 <h2 class="text-xl font-bold text-gray-900 dark:text-white">
-                    All Services
+                    All Party Services
                 </h2>
                 <div class="relative ml-auto">
                     <div class="flex items-center">
