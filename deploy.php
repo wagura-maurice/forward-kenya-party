@@ -38,9 +38,9 @@ task('release:application', function () {
     // serve the app down
     run('{{bin/php}} {{release_path}}/artisan down');
     // Clear caches
-    run('{{bin/php}} {{release_path}}/artisan cache:clear');
+    // run('{{bin/php}} {{release_path}}/artisan cache:clear');
     // Clear expired password reset tokens
-    run('{{bin/php}} {{release_path}}/artisan auth:clear-resets');
+    // run('{{bin/php}} {{release_path}}/artisan auth:clear-resets');
     // Clear and cache routes
     run('{{bin/php}} {{release_path}}/artisan route:clear');
     // Clear and cache config
