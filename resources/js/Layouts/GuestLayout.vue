@@ -268,8 +268,7 @@ onUnmounted(() => {
                         <p
                             class="text-gray-600 dark:text-gray-300 mb-4 text-sm leading-relaxed"
                         >
-                            Simplifying access to government services through
-                            digital innovation and citizen-centered solutions.
+                            Empowering Kenyans through Forward Kenya Party's digital platform for political engagement, community action, and inclusive participation.
                         </p>
                         <div
                             class="flex items-center space-x-2 bg-white dark:bg-gray-700 px-3 py-1.5 rounded-full w-fit"
@@ -450,10 +449,10 @@ onUnmounted(() => {
                                         Email Us
                                     </h4>
                                     <a
-                                        href="mailto:info@e-government.go.ke"
+                                        href="mailto:info@forwardkenyaparty.com"
                                         class="text-gray-700 dark:text-gray-200 text-sm hover:text-green-600 dark:hover:text-green-400"
                                     >
-                                        info@e-government.go.ke
+                                        info@forwardkenyaparty.com
                                     </a>
                                 </div>
                             </li>
