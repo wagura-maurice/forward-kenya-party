@@ -5,10 +5,10 @@ namespace Deployer;
 require 'recipe/laravel.php';
 
 // Project name
-set('application', 'e-government');
+set('application', 'forward-kenya-party');
 
 // Project repository
-set('repository', 'git@github.com:wagura-maurice/e-government.git');
+set('repository', 'git@github.com:wagura-maurice/forward-kenya-party.git');
 
 // [Optional] Allocate tty for git clone. Default value is false.
 set('git_tty', true);

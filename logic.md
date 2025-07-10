@@ -65,7 +65,6 @@ consulate -only whey they are non citizens? but is not a must to be ansewerd. ca
 
 refugee- only whey they refugees an is nullable.
 
-
 php artisan make:model BankType -m
 php artisan make:model BankCategory -m
 php artisan make:model Bank -m
@@ -81,7 +80,6 @@ php artisan make:resource API/BankResource
 php artisan make:request API/BankTypeRequest
 php artisan make:request API/BankCategoryRequest
 php artisan make:request API/BankRequest
-
 
 php artisan make:policy BankTypePolicy --model=BankType
 php artisan make:policy BankCategoryPolicy --model=BankCategory
