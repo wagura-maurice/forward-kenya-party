@@ -6,7 +6,7 @@ import { ref, computed, watch, onMounted } from "vue";
 const props = defineProps({
     title: {
         type: String,
-        default: "Departments",
+        default: "Party Departments",
     },
     logoUrl: {
         type: String,
@@ -218,13 +218,12 @@ const paginationRange = computed(() => {
             <p
                 class="mb-8 lg:mb-16 font-light text-gray-500 dark:text-gray-400 sm:text-xl"
             >
-                Connect with various government departments and access their
-                services.
+                Connect with Forward Kenya Party departments, discover our leadership, and get involved in our party's mission.
             </p>
 
             <!-- Search and Filter -->
             <div class="mb-8 bg-white dark:bg-gray-800 rounded-lg shadow p-6">
-                <label for="search" class="sr-only">Search departments</label>
+                <label for="search" class="sr-only">Search party departments</label>
                 <div class="relative">
                     <div
                         class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none"
@@ -237,7 +236,7 @@ const paginationRange = computed(() => {
                         v-model="search"
                         @keydown="handleKeyDown"
                         class="block w-full pl-10 pr-12 py-3 border border-gray-300 rounded-md focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                        placeholder="Search departments..."
+                        placeholder="Search party departments..."
                     />
                     <div
                         class="absolute inset-y-0 right-0 flex items-center pr-3"
@@ -257,7 +256,7 @@ const paginationRange = computed(() => {
                 class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4"
             >
                 <h2 class="text-xl font-bold text-gray-900 dark:text-white">
-                    All Departments
+                    All Party Departments
                 </h2>
                 <div class="relative ml-auto">
                     <div class="flex items-center">
