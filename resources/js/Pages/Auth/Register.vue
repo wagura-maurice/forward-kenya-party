@@ -2677,12 +2677,7 @@ const toggleSection = (section) => {
                                         {{ form.occupation || "Not specified" }}
                                     </p>
                                 </div>
-                                <InputLabel
-                                    for="proof_of_identity"
-                                    value="Proof of Identity"
-                                />
-                                <div
-                                    @dragover.prevent="dragOver = true"
+
                                     @dragleave="dragOver = false"
                                     @drop.prevent="
                                         handleFileDrop(
