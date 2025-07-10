@@ -91,7 +91,8 @@ return new class extends Migration
                   ->comment('The point of entry into the country the foreigner visit: 0 = airport, 1 = border, 2 = crossing, 3 = etc, 4 = Other');
             $table->timestamp('arrival_date')->nullable()->comment('Date when the foreigner arrived in the country');
             $table->timestamp('departure_date')->nullable()->comment('Date when the foreigner is expected to leave the country, if applicable');
-            $table->string('purpose_of_visit')->nullable()->comment('Purpose of the foreigners visit (e.g., tourism, business, study, work, etc.)');
+            $table->integer('purpose_of_visit')->default(Foreigner::OTHER)
+                        ->comment('Purpose of the foreigners visit: 0 = Tourism, 1 = Business, 2 = Study, 3 = Work, 4 = Other');
             $table->integer('type_of_visa')->default(Foreigner::SINGLE_ENTRY)
                   ->comment('Type of visa issued to the foreigner: 0 = Single-entry, 1 = Multiple-entry, 2 = Transit, 3 Visa Free');
             $table->string('visa_number')->nullable()->unique()->comment('Unique visa number assigned to the foreigner');
