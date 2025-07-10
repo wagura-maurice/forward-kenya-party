@@ -297,7 +297,7 @@ class CreateNewUser implements CreatesNewUsers
      */
     public function create(array $input)
     {
-        // dd($input);
+        dd($input);
 
         Log::info('Registration attempt started', ['input' => array_merge($input, ['password' => '***', 'password_confirmation' => '***'])]);
 
