@@ -28,41 +28,41 @@ const props = defineProps({
 
 // Options for Step 3 enhanced fields
 const disabilityStatusOptions = [
-    { value: '', label: 'None' },
-    { value: 'physical', label: 'Physical' },
-    { value: 'visual', label: 'Visual' },
-    { value: 'hearing', label: 'Hearing' },
-    { value: 'mental', label: 'Mental' },
-    { value: 'other', label: 'Other' },
+    { value: "", label: "None" },
+    { value: "physical", label: "Physical" },
+    { value: "visual", label: "Visual" },
+    { value: "hearing", label: "Hearing" },
+    { value: "mental", label: "Mental" },
+    { value: "other", label: "Other" },
 ];
 const maritalStatusOptions = [
-    { value: 0, label: 'Single' },
-    { value: 1, label: 'Married' },
-    { value: 2, label: 'Divorced' },
-    { value: 3, label: 'Separated' },
-    { value: 4, label: 'Widowed' },
+    { value: 0, label: "Single" },
+    { value: 1, label: "Married" },
+    { value: 2, label: "Divorced" },
+    { value: 3, label: "Separated" },
+    { value: 4, label: "Widowed" },
 ];
 const educationLevelOptions = [
-    { value: 0, label: 'Primary' },
-    { value: 1, label: 'Secondary' },
-    { value: 2, label: 'High School' },
-    { value: 3, label: 'University' },
-    { value: 4, label: 'Other' },
+    { value: 0, label: "Primary" },
+    { value: 1, label: "Secondary" },
+    { value: 2, label: "High School" },
+    { value: 3, label: "University" },
+    { value: 4, label: "Other" },
 ];
 const ethnicityOptions = [
-    { value: 1, label: 'Ethnicity 1' },
-    { value: 2, label: 'Ethnicity 2' },
-    { value: 3, label: 'Ethnicity 3' },
+    { value: 1, label: "Ethnicity 1" },
+    { value: 2, label: "Ethnicity 2" },
+    { value: 3, label: "Ethnicity 3" },
 ];
 const languageOptions = [
-    { value: 1, label: 'Language 1' },
-    { value: 2, label: 'Language 2' },
-    { value: 3, label: 'Language 3' },
+    { value: 1, label: "Language 1" },
+    { value: 2, label: "Language 2" },
+    { value: 3, label: "Language 3" },
 ];
 const religionOptions = [
-    { value: 1, label: 'Religion 1' },
-    { value: 2, label: 'Religion 2' },
-    { value: 3, label: 'Religion 3' },
+    { value: 1, label: "Religion 1" },
+    { value: 2, label: "Religion 2" },
+    { value: 3, label: "Religion 3" },
 ];
 
 // Step name mapping for navigation buttons
@@ -1460,98 +1460,143 @@ const toggleSection = (section) => {
                     <!-- Disability Status -->
                     <div class="mt-4">
                         <div class="flex items-center">
-                            <InputLabel for="disability_status" value="Disability Status" />
-                            <i class="fas fa-star text-red-500 text-xs ml-1" aria-hidden="true"></i>
+                            <InputLabel
+                                for="disability_status"
+                                value="Disability Status"
+                            />
+                            <i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
                         </div>
                         <VueSelect
                             v-model="form.disability_status"
                             :options="disabilityStatusOptions"
                             placeholder="Select your disability status"
                             label="label"
-                            :reduce="option => option.value"
+                            :reduce="(option) => option.value"
                             class="mt-1 block w-full"
                         />
-                        <InputError :message="form.errors.disability_status" class="mt-2" />
+                        <InputError
+                            :message="form.errors.disability_status"
+                            class="mt-2"
+                        />
                     </div>
                     <!-- Ethnicity -->
                     <div class="mt-4">
                         <div class="flex items-center">
                             <InputLabel for="ethnicity_id" value="Ethnicity" />
-                            <i class="fas fa-star text-red-500 text-xs ml-1" aria-hidden="true"></i>
+                            <i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
                         </div>
                         <VueSelect
                             v-model="form.ethnicity_id"
                             :options="ethnicityOptions"
                             placeholder="Select your ethnicity"
                             label="label"
-                            :reduce="option => option.value"
+                            :reduce="(option) => option.value"
                             class="mt-1 block w-full"
                         />
-                        <InputError :message="form.errors.ethnicity_id" class="mt-2" />
+                        <InputError
+                            :message="form.errors.ethnicity_id"
+                            class="mt-2"
+                        />
                     </div>
                     <!-- Language -->
                     <div class="mt-4">
                         <div class="flex items-center">
                             <InputLabel for="language_id" value="Language" />
-                            <i class="fas fa-star text-red-500 text-xs ml-1" aria-hidden="true"></i>
+                            <i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
                         </div>
                         <VueSelect
                             v-model="form.language_id"
                             :options="languageOptions"
                             placeholder="Select your language"
                             label="label"
-                            :reduce="option => option.value"
+                            :reduce="(option) => option.value"
                             class="mt-1 block w-full"
                         />
-                        <InputError :message="form.errors.language_id" class="mt-2" />
+                        <InputError
+                            :message="form.errors.language_id"
+                            class="mt-2"
+                        />
                     </div>
                     <!-- Religion -->
                     <div class="mt-4">
                         <div class="flex items-center">
                             <InputLabel for="religion_id" value="Religion" />
-                            <i class="fas fa-star text-red-500 text-xs ml-1" aria-hidden="true"></i>
+                            <i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
                         </div>
                         <VueSelect
                             v-model="form.religion_id"
                             :options="religionOptions"
                             placeholder="Select your religion"
                             label="label"
-                            :reduce="option => option.value"
+                            :reduce="(option) => option.value"
                             class="mt-1 block w-full"
                         />
-                        <InputError :message="form.errors.religion_id" class="mt-2" />
+                        <InputError
+                            :message="form.errors.religion_id"
+                            class="mt-2"
+                        />
                     </div>
                     <!-- Marital Status -->
                     <div class="mt-4">
                         <div class="flex items-center">
-                            <InputLabel for="marital_status" value="Marital Status" />
-                            <i class="fas fa-star text-red-500 text-xs ml-1" aria-hidden="true"></i>
+                            <InputLabel
+                                for="marital_status"
+                                value="Marital Status"
+                            />
+                            <i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
                         </div>
                         <VueSelect
                             v-model="form.marital_status"
                             :options="maritalStatusOptions"
                             placeholder="Select your marital status"
                             label="label"
-                            :reduce="option => option.value"
+                            :reduce="(option) => option.value"
                             class="mt-1 block w-full"
                         />
-                        <InputError :message="form.errors.marital_status" class="mt-2" />
+                        <InputError
+                            :message="form.errors.marital_status"
+                            class="mt-2"
+                        />
                     </div>
                     <!-- Highest Level of Education -->
                     <div class="mt-4">
                         <div class="flex items-center">
-                            <InputLabel for="highest_level_of_education" value="Highest Level of Education" />
-                            <i class="fas fa-star text-red-500 text-xs ml-1" aria-hidden="true"></i>
+                            <InputLabel
+                                for="highest_level_of_education"
+                                value="Highest Level of Education"
+                            />
+                            <i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
                         </div>
                         <VueSelect
                             v-model="form.highest_level_of_education"
                             :options="educationLevelOptions"
                             placeholder="Select your highest education level"
                             label="label"
-                            :reduce="option => option.value"
+                            :reduce="(option) => option.value"
                             class="mt-1 block w-full"
                         />
-                        <InputError :message="form.errors.highest_level_of_education" class="mt-2" />
+                        <InputError
+                            :message="form.errors.highest_level_of_education"
+                            class="mt-2"
+                        />
                     </div>
                 </div>
 
@@ -2677,52 +2722,8 @@ const toggleSection = (section) => {
                                         {{ form.occupation || "Not specified" }}
                                     </p>
                                 </div>
-
-                                    @dragleave="dragOver = false"
-                                    @drop.prevent="
-                                        handleFileDrop(
-                                            $event,
-                                            'proof_of_identity'
-                                        )
-                                    "
-                                    :class="[
-                                        'border-2 border-dashed rounded-lg p-6 text-center transition-colors mt-1',
-                                        dragOver
-                                            ? 'border-green-500 bg-green-50'
-                                            : 'border-gray-300',
-                                    ]"
-                                >
-                                    <div v-if="!form.proof_of_identity">
-                                        <i
-                                            class="fas fa-cloud-upload-alt text-4xl text-gray-400 mb-2"
-                                        ></i>
-                                        <p class="text-sm text-gray-500">
-                                            Drag and drop your file here, or
-                                            <label
-                                                class="text-green-600 hover:text-green-700 cursor-pointer"
-                                            >
-                                                click to browse
-                                                <input
-                                                    type="file"
-                                                    class="hidden"
-                                                    @change="
-                                                        handleFileUpload(
-                                                            $event,
-                                                            'proof_of_identity'
-                                                        )
-                                                    "
-                                                    accept=".pdf,.jpg,.jpeg,.png"
-                                                />
-                                            </label>
-                                        </p>
-                                        <p class="text-xs text-gray-400 mt-1">
-                                            Max file size: 5MB. Supported
-                                            formats: PDF, JPG, PNG
-                                        </p>
-                                    </div>
-                                    <div
-                                        v-else
-                                        class="flex items-center justify-between"
+                                <div v-if="form.employer_details" class="md:col-span-2">
+                                    <p class="text-sm text-gray-500">Employer Details</p>
                                     >
                                         <div
                                             class="flex items-center space-x-3"
