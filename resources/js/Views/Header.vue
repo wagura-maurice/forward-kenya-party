@@ -8,7 +8,7 @@
         >
             <!-- Logo -->
             <div class="text-lg font-bold text-black dark:text-white">
-                <Link :href="route('home')">e-Government KE</Link>
+                <Link :href="route('home')">Forward Kenya Party KE</Link>
             </div>
 
             <!-- Navigation Links and Buttons -->

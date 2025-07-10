@@ -174,7 +174,7 @@ onMounted(() => {
                             />
                             <span
                                 class="self-center text-2xl font-semibold whitespace-nowrap dark:text-white"
-                                >e-Government KE</span
+                                >Forward Kenya Party KE</span
                             >
                         </a>
                     </div>
@@ -190,7 +190,7 @@ onMounted(() => {
                             >
                                 <li class="mb-4">
                                     <a href="/" class="hover:underline"
-                                        >e-Government KE</a
+                                        >Forward Kenya Party KE</a
                                     >
                                 </li>
                                 <li>
@@ -257,7 +257,7 @@ onMounted(() => {
                     <span
                         class="text-sm text-gray-500 sm:text-center dark:text-gray-400"
                         >© 2023
-                        <a href="/" class="hover:underline">e-Government KE™</a
+                        <a href="/" class="hover:underline">Forward Kenya Party KE™</a
                         >. All Rights Reserved.
                     </span>
                     <div class="flex mt-4 sm:justify-center sm:mt-0">
