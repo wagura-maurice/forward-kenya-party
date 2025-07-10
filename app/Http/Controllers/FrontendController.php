@@ -77,7 +77,7 @@ class FrontendController extends Controller
             ],
             'canLogin' => Route::has('login'),
             'canRegister' => Route::has('register'),
-            'logoUrl' => 'https://accounts.ecitizen.go.ke/en/images/logo.svg',
+            'logoUrl' => asset('assets/FKP COLLATERALS/FKP PNG/Secondary logo/Asset 5FKP.png'),
             'title' => 'Our Services',
         ]);
     }
@@ -135,7 +135,7 @@ class FrontendController extends Controller
             ],
             'canLogin' => Route::has('login'),
             'canRegister' => Route::has('register'),
-            'logoUrl' => 'https://accounts.ecitizen.go.ke/en/images/logo.svg',
+            'logoUrl' => asset('assets/FKP COLLATERALS/FKP PNG/Secondary logo/Asset 5FKP.png'),
             'title' => 'Our Departments',
         ]);
     }
@@ -174,24 +174,24 @@ class FrontendController extends Controller
         return Inertia::render('Frontend/Welcome', [
             'canLogin' => Route::has('login'),
             'canRegister' => Route::has('register'),
-            'logoUrl' => 'https://accounts.ecitizen.go.ke/en/images/logo.svg',
+            'logoUrl' => asset('assets/FKP COLLATERALS/FKP PNG/Secondary logo/Asset 5FKP.png'),
             'title' => "Welcome",
             'laravelVersion' => Application::VERSION,
             'phpVersion' => PHP_VERSION,
             'heroSlides' => [
                 [
                     'file_path' => 'https://accounts.ecitizen.go.ke/en/images/hero-home-1.jpg',
-                    'name' => 'Welcome to eCitizen',
+                    'name' => 'Welcome to Forward Kenya Party',
                     'description' => 'Your gateway to government services.',
                 ],
                 [
                     'file_path' => 'https://demoadmin.ecitizen.pesaflow.com/assets/uploads/eCitizen-hero-banner-3.jpg',
-                    'name' => 'Seamless Government Interaction',
+                    'name' => 'Seamless Kenyan Interaction',
                     'description' => 'Access services anytime, anywhere.',
                 ],
                 [
                     'file_path' => 'https://demoadmin.ecitizen.pesaflow.com/assets/uploads/eCitizen-hero-banner-8.jpg',
-                    'name' => 'Empowering Citizens',
+                    'name' => 'Empowering Kenyans',
                     'description' => 'Transforming service delivery.',
                 ],
             ],
@@ -211,7 +211,7 @@ class FrontendController extends Controller
         return Inertia::render('Frontend/AboutUs', [
             'canLogin' => Route::has('login'),
             'canRegister' => Route::has('register'),
-            'logoUrl' => 'https://accounts.ecitizen.go.ke/en/images/logo.svg', // asset('assets/img/logo.svg'),
+            'logoUrl' => asset('assets/FKP COLLATERALS/FKP PNG/Secondary logo/Asset 5FKP.png'), // asset('assets/img/logo.svg'),
             'title' => "About Us",
         ]);
     }
@@ -221,7 +221,7 @@ class FrontendController extends Controller
         return Inertia::render('Frontend/ContactUs', [
             'canLogin' => Route::has('login'),
             'canRegister' => Route::has('register'),
-            'logoUrl' => 'https://accounts.ecitizen.go.ke/en/images/logo.svg', // asset('assets/img/logo.svg'),
+            'logoUrl' => asset('assets/FKP COLLATERALS/FKP PNG/Secondary logo/Asset 5FKP.png'), // asset('assets/img/logo.svg'),
             'title' => "Contact Us",
         ]);
     }
@@ -231,7 +231,7 @@ class FrontendController extends Controller
         return Inertia::render('Frontend/HelpSupport', [
             'canLogin' => Route::has('login'),
             'canRegister' => Route::has('register'),
-            'logoUrl' => 'https://accounts.ecitizen.go.ke/en/images/logo.svg', // asset('assets/img/logo.svg'),
+            'logoUrl' => asset('assets/FKP COLLATERALS/FKP PNG/Secondary logo/Asset 5FKP.png'), // asset('assets/img/logo.svg'),
             'title' => "Help and Support",
         ]);
     }
@@ -241,7 +241,7 @@ class FrontendController extends Controller
         return Inertia::render('Frontend/FrequentlyAskedQuestions', [
             'canLogin' => Route::has('login'),
             'canRegister' => Route::has('register'),
-            'logoUrl' => 'https://accounts.ecitizen.go.ke/en/images/logo.svg', // asset('assets/img/logo.svg'),
+            'logoUrl' => asset('assets/FKP COLLATERALS/FKP PNG/Secondary logo/Asset 5FKP.png'), // asset('assets/img/logo.svg'),
             'title' => "Frequently Asked Questions",
         ]);
     }
@@ -251,7 +251,7 @@ class FrontendController extends Controller
         return Inertia::render('Frontend/TermsConditions', [
             'canLogin' => Route::has('login'),
             'canRegister' => Route::has('register'),
-            'logoUrl' => 'https://accounts.ecitizen.go.ke/en/images/logo.svg', // asset('assets/img/logo.svg'),
+            'logoUrl' => asset('assets/FKP COLLATERALS/FKP PNG/Secondary logo/Asset 5FKP.png'), // asset('assets/img/logo.svg'),
             'title' => "Terms and Conditions",
         ]);
     }
@@ -260,7 +260,7 @@ class FrontendController extends Controller
     {
         return Inertia::render('Frontend/PrivacyPolicy', [
             'title' => 'Privacy Policy',
-            'logoUrl' => 'https://accounts.ecitizen.go.ke/en/images/logo.svg',
+            'logoUrl' => asset('assets/FKP COLLATERALS/FKP PNG/Secondary logo/Asset 5FKP.png'),
         ]);
     }
 
@@ -310,7 +310,7 @@ class FrontendController extends Controller
 
         return Inertia::render('Frontend/Services/Show', [
             'title' => $service->name,
-            'logoUrl' => 'https://accounts.ecitizen.go.ke/en/images/logo.svg',
+            'logoUrl' => asset('assets/FKP COLLATERALS/FKP PNG/Secondary logo/Asset 5FKP.png'),
             'service' => $service->makeHidden([
                 'created_at',
                 'updated_at',
@@ -404,7 +404,7 @@ class FrontendController extends Controller
 
         return Inertia::render('Frontend/Departments/Show', [
             'title' => $department->name,
-            'logoUrl' => 'https://accounts.ecitizen.go.ke/en/images/logo.svg',
+            'logoUrl' => asset('assets/FKP COLLATERALS/FKP PNG/Secondary logo/Asset 5FKP.png'),
             'department' => $department->makeHidden([
                 'created_at',
                 'updated_at',
