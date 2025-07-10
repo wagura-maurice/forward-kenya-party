@@ -1,0 +1,74 @@
+/* resources/css/app.css */
+
+/* Imports */
+@import url("https://fonts.googleapis.com/css2?family=Josefin+Sans:wght@200;300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Rubik:ital,wght@0,300..900;1,300..900&display=swap");
+
+/* Tailwind CSS */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom styles */
+[x-cloak] {
+    display: none;
+}
+
+/* SweetAlert2 Custom Styles */
+.swal2-popup {
+    @apply font-sans rounded-lg shadow-xl;
+}
+
+.swal2-title {
+    @apply text-2xl font-bold text-gray-800;
+}
+
+.swal2-html-container {
+    @apply text-gray-700;
+}
+
+.swal2-confirm {
+    @apply bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-6 rounded-md transition duration-200;
+}
+
+.swal2-cancel {
+    @apply bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium py-2 px-6 rounded-md transition duration-200 ml-3;
+}
+
+/* Toast Styles */
+.swal2-toast {
+    @apply rounded-lg shadow-lg;
+}
+
+.swal2-toast .swal2-title {
+    @apply text-base font-medium;
+}
+
+.swal2-toast .swal2-html-container {
+    @apply text-sm;
+}
+
+/* Success Toast */
+.swal2-toast.swal2-icon-success {
+    @apply bg-green-100 border-l-4 border-green-500;
+}
+
+/* Error Toast */
+.swal2-toast.swal2-icon-error {
+    @apply bg-red-100 border-l-4 border-red-500;
+}
+
+/* Warning Toast */
+.swal2-toast.swal2-icon-warning {
+    @apply bg-yellow-100 border-l-4 border-yellow-500;
+}
+
+/* Info Toast */
+.swal2-toast.swal2-icon-info {
+    @apply bg-blue-100 border-l-4 border-blue-500;
+}
+
+/* Question Toast */
+.swal2-toast.swal2-icon-question {
+    @apply bg-gray-100 border-l-4 border-gray-500;
+}

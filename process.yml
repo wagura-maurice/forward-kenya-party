@@ -1,0 +1,23 @@
+# process.yml at /var/www/html/e-government/current which is root dir of the project
+# * * * * * cd /var/www/html/e-government/current && /usr/bin/php8.3 artisan schedule:run >> /dev/null 2>&1
+apps:
+  # Run php artisan queue:work to execute queue job
+  - script: "artisan"
+    name: "e-government-queue-work"
+    cwd: "/var/www/html/e-government/current"
+    args: "queue:work"
+    interpreter: "php"
+
+  # Run php artisan queue:listen to listen for new jobs on the queue
+  - script: "artisan"
+    name: "e-government-queue-listen"
+    cwd: "/var/www/html/e-government/current"
+    args: "queue:listen"
+    interpreter: "php"
+
+  # Run php artisan horizon to start the Laravel Horizon process
+  - script: "artisan"
+    name: "e-government-horizon"
+    cwd: "/var/www/html/e-government/current"
+    args: "horizon"
+    interpreter: "php"
