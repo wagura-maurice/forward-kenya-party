@@ -82,49 +82,49 @@ class DatabaseSeeder extends Seeder
         // create default administrator
         User::factory()->create([
             'name' => 'administrator',
-            'email' => 'administrator@e-government.co.ke',
+            'email' => 'administrator@forwardkenyaparty.com',
         ])->assignRole('administrator');
 
         // create default manager
         User::factory()->create([
             'name' => 'manager',
-            'email' => 'manager@e-government.co.ke',
+            'email' => 'manager@forwardkenyaparty.com',
         ])->assignRole('manager');
 
         // create default citizen
         User::factory()->create([
             'name' => 'citizen',
-            'email' => 'citizen@e-government.co.ke',
+            'email' => 'citizen@forwardkenyaparty.com',
         ])->assignRole('citizen');
 
         // create default resident
         User::factory()->create([
             'name' => 'resident',
-            'email' => 'resident@e-government.co.ke',
+            'email' => 'resident@forwardkenyaparty.com',
         ])->assignRole('resident');
 
         // create default refugee
         User::factory()->create([
             'name' => 'refugee',
-            'email' => 'refugee@e-government.co.ke',
+            'email' => 'refugee@forwardkenyaparty.com',
         ])->assignRole('refugee');
 
         // create default diplomat
         User::factory()->create([
             'name' => 'diplomat',
-            'email' => 'diplomat@e-government.co.ke',
+            'email' => 'diplomat@forwardkenyaparty.com',
         ])->assignRole('diplomat');
 
         // create default foreigner
         User::factory()->create([
             'name' => 'foreigner',
-            'email' => 'foreigner@e-government.co.ke',
+            'email' => 'foreigner@forwardkenyaparty.com',
         ])->assignRole('foreigner');
 
         // create default guest
         User::factory()->create([
             'name' => 'guest',
-            'email' => 'guest@e-government.co.ke',
+            'email' => 'guest@forwardkenyaparty.com',
         ])->assignRole('guest');
     }
 }
