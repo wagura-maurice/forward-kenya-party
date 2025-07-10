@@ -18,12 +18,64 @@ import PrimaryButton from "@/Components/PrimaryButton.vue";
 import TextInput from "@/Components/TextInput.vue";
 import VueSelect from "vue-select";
 import "vue-select/dist/vue-select.css";
+import "@/Components/VueSelectCustom.css";
 
 // Define the countries prop
 const props = defineProps({
     countries: Array,
     genders: Object,
 });
+
+// Options for Step 3 enhanced fields
+const disabilityStatusOptions = [
+    { value: '', label: 'None' },
+    { value: 'physical', label: 'Physical' },
+    { value: 'visual', label: 'Visual' },
+    { value: 'hearing', label: 'Hearing' },
+    { value: 'mental', label: 'Mental' },
+    { value: 'other', label: 'Other' },
+];
+const maritalStatusOptions = [
+    { value: 0, label: 'Single' },
+    { value: 1, label: 'Married' },
+    { value: 2, label: 'Divorced' },
+    { value: 3, label: 'Separated' },
+    { value: 4, label: 'Widowed' },
+];
+const educationLevelOptions = [
+    { value: 0, label: 'Primary' },
+    { value: 1, label: 'Secondary' },
+    { value: 2, label: 'High School' },
+    { value: 3, label: 'University' },
+    { value: 4, label: 'Other' },
+];
+const ethnicityOptions = [
+    { value: 1, label: 'Ethnicity 1' },
+    { value: 2, label: 'Ethnicity 2' },
+    { value: 3, label: 'Ethnicity 3' },
+];
+const languageOptions = [
+    { value: 1, label: 'Language 1' },
+    { value: 2, label: 'Language 2' },
+    { value: 3, label: 'Language 3' },
+];
+const religionOptions = [
+    { value: 1, label: 'Religion 1' },
+    { value: 2, label: 'Religion 2' },
+    { value: 3, label: 'Religion 3' },
+];
+
+// Step name mapping for navigation buttons
+const stepNames = [
+    "Basic Details", // 1
+    "Role Selection", // 2
+    "Personal Info", // 3
+    "Address Info", // 4
+    "Location Details", // 5
+    "Education & Employment", // 6
+    "Document Uploads", // 7
+    "Review & Submit", // 8
+];
 
 // Residence reasons for residents
 const residenceReasons = ref([
@@ -34,6 +86,51 @@ const residenceReasons = ref([
     "Retirement",
     "Other",
 ]);
+
+// Refugee reasons for demonstration (replace with real data as needed)
+const refugeeReasons = ref([
+    "Conflict/War",
+    "Persecution",
+    "Natural Disaster",
+    "Economic Hardship",
+    "Other",
+]);
+
+// Static location options for demonstration (replace with dynamic data/API later)
+const purposeOfVisitOptions = [
+    { value: "Tourism", label: "Tourism" },
+    { value: "Business", label: "Business" },
+    { value: "Study", label: "Study" },
+    { value: "Work", label: "Work" },
+    { value: "Visiting Family", label: "Visiting Family" },
+    { value: "Transit", label: "Transit" },
+    { value: "Medical", label: "Medical" },
+    { value: "Other", label: "Other" },
+];
+
+const counties = [
+    { value: 1, label: "Nairobi" },
+    { value: 2, label: "Mombasa" },
+    { value: 3, label: "Kisumu" },
+];
+
+const subCounties = [
+    { value: 11, label: "Westlands" },
+    { value: 12, label: "Lang'ata" },
+    { value: 13, label: "Kisauni" },
+];
+
+const constituencies = [
+    { value: 21, label: "Westlands Constituency" },
+    { value: 22, label: "Lang'ata Constituency" },
+    { value: 23, label: "Kisauni Constituency" },
+];
+
+const wards = [
+    { value: 31, label: "Kangemi" },
+    { value: 32, label: "Karen" },
+    { value: 33, label: "Mkomani" },
+];
 
 // State for collapsible sections
 const expandedSections = ref({
@@ -96,12 +193,21 @@ const form = useForm({
     nationality: "Kenya",
     idNumber: "",
     idType: "national_id",
+    purpose_of_visit: "", // Only for foreigner role
 
     // Personal Details
     first_name: "",
     middle_name: "",
     last_name: "",
     gender: "male",
+    marital_status: "",
+    disability: "",
+    plwd_number: "",
+    disability_status: "",
+    ethnicity_id: null,
+    language_id: null,
+    religion_id: null,
+    highest_level_of_education: null,
     date_of_birth: "",
 
     // Contact Information
@@ -781,7 +887,14 @@ const toggleSection = (section) => {
                         Step {{ currentStep }}: {{ stepDescription }}
                     </h2>
                     <div>
-                        <InputLabel for="name" value="Username" />
+                        <div class="flex items-center">
+                            <InputLabel for="name" value="Username"
+                                >Username</InputLabel
+                            ><i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
                         <TextInput
                             id="name"
                             v-model="form.name"
@@ -795,7 +908,14 @@ const toggleSection = (section) => {
                     </div>
 
                     <div>
-                        <InputLabel for="email" value="Email" />
+                        <div class="flex items-center">
+                            <InputLabel for="email" value="Email"
+                                >Email</InputLabel
+                            ><i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
                         <TextInput
                             id="email"
                             v-model="form.email"
@@ -808,30 +928,28 @@ const toggleSection = (section) => {
                     </div>
 
                     <div>
-                        <InputLabel for="telephone" value="Telephone" />
+                        <div class="flex items-center">
+                            <InputLabel for="telephone" value="Telephone" />
+                            <i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
                         <div class="flex space-x-2">
                             <div class="w-1/3">
-                                <select
+                                <VueSelect
                                     v-model="form.phoneCountryCode"
-                                    class="mt-1 block w-full rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500 shadow-sm"
-                                >
-                                    <option
-                                        v-for="country in countryCodes"
-                                        :key="country.code"
-                                        :value="
-                                            country.code === 'US' ||
-                                            country.code === 'CA'
-                                                ? '1'
-                                                : country.code === 'GB'
-                                                ? '44'
-                                                : country.code === 'AU'
-                                                ? '61'
-                                                : '254'
-                                        "
-                                    >
-                                        {{ country.name }}
-                                    </option>
-                                </select>
+                                    :options="
+                                        countryCodes.map((country) => ({
+                                            value: country.code,
+                                            label: country.name,
+                                        }))
+                                    "
+                                    placeholder="Select country code"
+                                    label="label"
+                                    :reduce="(option) => option.value"
+                                    class="mt-1 block w-full"
+                                />
                             </div>
                             <div class="flex-1">
                                 <input
@@ -863,7 +981,14 @@ const toggleSection = (section) => {
                     </div>
 
                     <div>
-                        <InputLabel for="password" value="Password" />
+                        <div class="flex items-center">
+                            <InputLabel for="password" value="Password"
+                                >Password</InputLabel
+                            ><i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
                         <TextInput
                             id="password"
                             v-model="form.password"
@@ -883,10 +1008,16 @@ const toggleSection = (section) => {
                     </div>
 
                     <div>
-                        <InputLabel
-                            for="password_confirmation"
-                            value="Confirm Password"
-                        />
+                        <div class="flex items-center">
+                            <InputLabel
+                                for="password_confirmation"
+                                value="Confirm Password"
+                                >Confirm Password</InputLabel
+                            ><i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
                         <TextInput
                             id="password_confirmation"
                             v-model="form.password_confirmation"
@@ -910,22 +1041,28 @@ const toggleSection = (section) => {
                         Step {{ currentStep }}: {{ stepDescription }}
                     </h2>
                     <div>
-                        <InputLabel for="role" value="Role" />
-                        <select
+                        <div class="flex items-center">
+                            <InputLabel for="role" value="Role" />
+                            <i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
+                        <VueSelect
                             v-model="form.role"
-                            id="role"
-                            class="mt-1 block w-full rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500 shadow-sm"
+                            :options="[
+                                { value: 'citizen', label: 'Citizen' },
+                                { value: 'resident', label: 'Resident' },
+                                { value: 'refugee', label: 'Refugee' },
+                                { value: 'diplomat', label: 'Diplomat' },
+                                { value: 'foreigner', label: 'Foreigner' },
+                            ]"
+                            placeholder="Select your role"
+                            label="label"
+                            :reduce="(option) => option.value"
                             required
-                        >
-                            <option value="" disabled selected>
-                                Select your role
-                            </option>
-                            <option value="citizen">Citizen</option>
-                            <option value="resident">Resident</option>
-                            <option value="refugee">Refugee</option>
-                            <option value="diplomat">Diplomat</option>
-                            <option value="foreigner">Foreigner</option>
-                        </select>
+                            class="mt-1 block w-full"
+                        />
                         <InputError :message="form.errors.role" class="mt-2" />
                     </div>
 
@@ -954,7 +1091,13 @@ const toggleSection = (section) => {
                     </div>
 
                     <div>
-                        <InputLabel :for="idField" :value="idLabel" />
+                        <div class="flex items-center">
+                            <InputLabel :for="idField" :value="idLabel" />
+                            <i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
                         <TextInput
                             :id="idField"
                             v-model="form.idNumber"
@@ -969,6 +1112,37 @@ const toggleSection = (section) => {
                         />
                         <InputError
                             :message="form.errors.idNumber"
+                            class="mt-2"
+                        />
+                    </div>
+
+                    <!-- Foreigner: Purpose of Visit -->
+                    <div v-if="form.role === 'foreigner'">
+                        <InputLabel
+                            for="purpose_of_visit"
+                            value="Purpose of Visit"
+                        >
+                            <template #default>
+                                <span
+                                    >Purpose of Visit
+                                    <i
+                                        class="fas fa-star text-red-500 text-xs align-middle ml-1"
+                                        aria-hidden="true"
+                                    ></i
+                                ></span>
+                            </template>
+                        </InputLabel>
+                        <VueSelect
+                            id="purpose_of_visit"
+                            v-model="form.purpose_of_visit"
+                            :options="purposeOfVisitOptions"
+                            placeholder="Select purpose of visit"
+                            class="mt-1 block w-full"
+                            :reduce="(option) => option.value"
+                            required
+                        />
+                        <InputError
+                            :message="form.errors.purpose_of_visit"
                             class="mt-2"
                         />
                     </div>
@@ -1084,22 +1258,72 @@ const toggleSection = (section) => {
 
                     <!-- Citizen: Polling Station (if applicable) -->
                     <div v-if="form.role === 'citizen'">
-                        <InputLabel
-                            for="polling_station_id"
-                            value="Polling Station (optional)"
-                        />
+                        <InputLabel for="county_id" value="County" />
                         <VueSelect
-                            v-model="form.polling_station_id"
-                            :options="pollingStations"
-                            placeholder="Select polling station"
+                            v-model="form.county_id"
+                            :options="counties"
+                            placeholder="Select your county"
                             class="mt-1 block w-full"
-                            :class="{
-                                'border-red-500':
-                                    form.errors.polling_station_id,
-                            }"
+                            :class="{ 'border-red-500': form.errors.county_id }"
                         />
                         <InputError
-                            :message="form.errors.polling_station_id"
+                            :message="form.errors.county_id"
+                            class="mt-2"
+                        />
+
+                        <InputLabel
+                            for="sub_county_id"
+                            value="Sub-County"
+                            class="mt-4"
+                        />
+                        <VueSelect
+                            v-model="form.sub_county_id"
+                            :options="subCounties"
+                            placeholder="Select your sub-county"
+                            class="mt-1 block w-full"
+                            :class="{
+                                'border-red-500': form.errors.sub_county_id,
+                            }"
+                            :disabled="!form.county_id"
+                        />
+                        <InputError
+                            :message="form.errors.sub_county_id"
+                            class="mt-2"
+                        />
+
+                        <InputLabel
+                            for="constituency_id"
+                            value="Constituency"
+                            class="mt-4"
+                        />
+                        <VueSelect
+                            v-model="form.constituency_id"
+                            :options="constituencies"
+                            placeholder="Select your constituency"
+                            class="mt-1 block w-full"
+                            :class="{
+                                'border-red-500': form.errors.constituency_id,
+                            }"
+                            :disabled="!form.county_id"
+                        />
+                        <InputError
+                            :message="form.errors.constituency_id"
+                            class="mt-2"
+                        />
+
+                        <InputLabel for="ward_id" value="Ward" class="mt-4" />
+                        <VueSelect
+                            v-model="form.ward_id"
+                            :options="wards"
+                            placeholder="Select your ward"
+                            class="mt-1 block w-full"
+                            :class="{ 'border-red-500': form.errors.ward_id }"
+                            :disabled="
+                                !form.constituency_id && !form.sub_county_id
+                            "
+                        />
+                        <InputError
+                            :message="form.errors.ward_id"
                             class="mt-2"
                         />
                     </div>
@@ -1114,7 +1338,14 @@ const toggleSection = (section) => {
                     </h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <InputLabel for="first_name" value="First Name" />
+                            <div class="flex items-center">
+                                <InputLabel for="first_name" value="First Name"
+                                    >First Name</InputLabel
+                                ><i
+                                    class="fas fa-star text-red-500 text-xs ml-1"
+                                    aria-hidden="true"
+                                ></i>
+                            </div>
                             <TextInput
                                 id="first_name"
                                 v-model="form.first_name"
@@ -1149,7 +1380,14 @@ const toggleSection = (section) => {
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <InputLabel for="last_name" value="Last Name" />
+                            <div class="flex items-center">
+                                <InputLabel for="last_name" value="Last Name"
+                                    >Last Name</InputLabel
+                                ><i
+                                    class="fas fa-star text-red-500 text-xs ml-1"
+                                    aria-hidden="true"
+                                ></i>
+                            </div>
                             <TextInput
                                 id="last_name"
                                 v-model="form.last_name"
@@ -1164,23 +1402,31 @@ const toggleSection = (section) => {
                             />
                         </div>
                         <div>
-                            <InputLabel for="gender" value="Gender" />
-                            <select
-                                id="gender"
+                            <div class="flex items-center">
+                                <InputLabel for="gender" value="Gender"
+                                    >Gender</InputLabel
+                                ><i
+                                    class="fas fa-star text-red-500 text-xs ml-1"
+                                    aria-hidden="true"
+                                ></i>
+                            </div>
+                            <VueSelect
                                 v-model="form.gender"
-                                class="mt-1 block w-full rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500 shadow-sm"
+                                :options="[
+                                    { value: 'male', label: 'Male' },
+                                    { value: 'female', label: 'Female' },
+                                    { value: 'other', label: 'Other' },
+                                    {
+                                        value: 'prefer_not_to_say',
+                                        label: 'Prefer not to say',
+                                    },
+                                ]"
+                                placeholder="Select your gender"
+                                label="label"
+                                :reduce="(option) => option.value"
                                 required
-                            >
-                                <option value="" disabled selected>
-                                    Select your gender
-                                </option>
-                                <option value="male">Male</option>
-                                <option value="female">Female</option>
-                                <option value="other">Other</option>
-                                <option value="prefer_not_to_say">
-                                    Prefer not to say
-                                </option>
-                            </select>
+                                class="mt-1 block w-full"
+                            />
                             <InputError
                                 :message="form.errors.gender"
                                 class="mt-2"
@@ -1189,7 +1435,16 @@ const toggleSection = (section) => {
                     </div>
 
                     <div>
-                        <InputLabel for="date_of_birth" value="Date of Birth" />
+                        <div class="flex items-center">
+                            <InputLabel
+                                for="date_of_birth"
+                                value="Date of Birth"
+                                >Date of Birth</InputLabel
+                            ><i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
                         <TextInput
                             id="date_of_birth"
                             v-model="form.date_of_birth"
@@ -1202,6 +1457,102 @@ const toggleSection = (section) => {
                             class="mt-2"
                         />
                     </div>
+                    <!-- Disability Status -->
+                    <div class="mt-4">
+                        <div class="flex items-center">
+                            <InputLabel for="disability_status" value="Disability Status" />
+                            <i class="fas fa-star text-red-500 text-xs ml-1" aria-hidden="true"></i>
+                        </div>
+                        <VueSelect
+                            v-model="form.disability_status"
+                            :options="disabilityStatusOptions"
+                            placeholder="Select your disability status"
+                            label="label"
+                            :reduce="option => option.value"
+                            class="mt-1 block w-full"
+                        />
+                        <InputError :message="form.errors.disability_status" class="mt-2" />
+                    </div>
+                    <!-- Ethnicity -->
+                    <div class="mt-4">
+                        <div class="flex items-center">
+                            <InputLabel for="ethnicity_id" value="Ethnicity" />
+                            <i class="fas fa-star text-red-500 text-xs ml-1" aria-hidden="true"></i>
+                        </div>
+                        <VueSelect
+                            v-model="form.ethnicity_id"
+                            :options="ethnicityOptions"
+                            placeholder="Select your ethnicity"
+                            label="label"
+                            :reduce="option => option.value"
+                            class="mt-1 block w-full"
+                        />
+                        <InputError :message="form.errors.ethnicity_id" class="mt-2" />
+                    </div>
+                    <!-- Language -->
+                    <div class="mt-4">
+                        <div class="flex items-center">
+                            <InputLabel for="language_id" value="Language" />
+                            <i class="fas fa-star text-red-500 text-xs ml-1" aria-hidden="true"></i>
+                        </div>
+                        <VueSelect
+                            v-model="form.language_id"
+                            :options="languageOptions"
+                            placeholder="Select your language"
+                            label="label"
+                            :reduce="option => option.value"
+                            class="mt-1 block w-full"
+                        />
+                        <InputError :message="form.errors.language_id" class="mt-2" />
+                    </div>
+                    <!-- Religion -->
+                    <div class="mt-4">
+                        <div class="flex items-center">
+                            <InputLabel for="religion_id" value="Religion" />
+                            <i class="fas fa-star text-red-500 text-xs ml-1" aria-hidden="true"></i>
+                        </div>
+                        <VueSelect
+                            v-model="form.religion_id"
+                            :options="religionOptions"
+                            placeholder="Select your religion"
+                            label="label"
+                            :reduce="option => option.value"
+                            class="mt-1 block w-full"
+                        />
+                        <InputError :message="form.errors.religion_id" class="mt-2" />
+                    </div>
+                    <!-- Marital Status -->
+                    <div class="mt-4">
+                        <div class="flex items-center">
+                            <InputLabel for="marital_status" value="Marital Status" />
+                            <i class="fas fa-star text-red-500 text-xs ml-1" aria-hidden="true"></i>
+                        </div>
+                        <VueSelect
+                            v-model="form.marital_status"
+                            :options="maritalStatusOptions"
+                            placeholder="Select your marital status"
+                            label="label"
+                            :reduce="option => option.value"
+                            class="mt-1 block w-full"
+                        />
+                        <InputError :message="form.errors.marital_status" class="mt-2" />
+                    </div>
+                    <!-- Highest Level of Education -->
+                    <div class="mt-4">
+                        <div class="flex items-center">
+                            <InputLabel for="highest_level_of_education" value="Highest Level of Education" />
+                            <i class="fas fa-star text-red-500 text-xs ml-1" aria-hidden="true"></i>
+                        </div>
+                        <VueSelect
+                            v-model="form.highest_level_of_education"
+                            :options="educationLevelOptions"
+                            placeholder="Select your highest education level"
+                            label="label"
+                            :reduce="option => option.value"
+                            class="mt-1 block w-full"
+                        />
+                        <InputError :message="form.errors.highest_level_of_education" class="mt-2" />
+                    </div>
                 </div>
 
                 <!-- Step 4: Address Information -->
@@ -1212,10 +1563,16 @@ const toggleSection = (section) => {
                         Step {{ currentStep }}: {{ stepDescription }}
                     </h2>
                     <div>
-                        <InputLabel
-                            for="address_line_1"
-                            value="Address Line 1"
-                        />
+                        <div class="flex items-center">
+                            <InputLabel
+                                for="address_line_1"
+                                value="Address Line 1"
+                            />
+                            <i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
                         <TextInput
                             id="address_line_1"
                             v-model="form.address_line_1"
@@ -1250,7 +1607,13 @@ const toggleSection = (section) => {
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <InputLabel for="city" value="City/Town" />
+                            <div class="flex items-center">
+                                <InputLabel for="city" value="City/Town" />
+                                <i
+                                    class="fas fa-star text-red-500 text-xs ml-1"
+                                    aria-hidden="true"
+                                ></i>
+                            </div>
                             <TextInput
                                 id="city"
                                 v-model="form.city"
@@ -1265,7 +1628,13 @@ const toggleSection = (section) => {
                             />
                         </div>
                         <div>
-                            <InputLabel for="state" value="State/County" />
+                            <div class="flex items-center">
+                                <InputLabel for="state" value="State/County" />
+                                <i
+                                    class="fas fa-star text-red-500 text-xs ml-1"
+                                    aria-hidden="true"
+                                ></i>
+                            </div>
                             <TextInput
                                 id="state"
                                 v-model="form.state"
@@ -1294,23 +1663,20 @@ const toggleSection = (section) => {
                             for="education_level"
                             value="Highest Education Level"
                         />
-                        <select
-                            id="education_level"
+                        <VueSelect
                             v-model="form.education_level"
-                            class="mt-1 block w-full rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500 shadow-sm"
+                            :options="
+                                educationLevels.map((level) => ({
+                                    value: level,
+                                    label: level,
+                                }))
+                            "
+                            placeholder="Select your education level"
+                            label="label"
+                            :reduce="(option) => option.value"
                             required
-                        >
-                            <option value="" disabled selected>
-                                Select education level
-                            </option>
-                            <option
-                                v-for="level in educationLevels"
-                                :key="level"
-                                :value="level"
-                            >
-                                {{ level }}
-                            </option>
-                        </select>
+                            class="mt-1 block w-full"
+                        />
                         <InputError
                             :message="form.errors.education_level"
                             class="mt-2"
@@ -1370,23 +1736,20 @@ const toggleSection = (section) => {
                             for="security_question"
                             value="Security Question"
                         />
-                        <select
-                            id="security_question"
+                        <VueSelect
                             v-model="form.security_question"
-                            class="mt-1 block w-full rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500 shadow-sm"
+                            :options="
+                                securityQuestions.map((q) => ({
+                                    value: q,
+                                    label: q,
+                                }))
+                            "
+                            placeholder="Select a security question"
+                            label="label"
+                            :reduce="(option) => option.value"
                             required
-                        >
-                            <option value="" disabled selected>
-                                Select a security question
-                            </option>
-                            <option
-                                v-for="(question, index) in securityQuestions"
-                                :key="index"
-                                :value="question"
-                            >
-                                {{ question }}
-                            </option>
-                        </select>
+                            class="mt-1 block w-full"
+                        />
                         <InputError
                             :message="form.errors.security_question"
                             class="mt-2"
@@ -1428,21 +1791,28 @@ const toggleSection = (section) => {
                             />
                             <div class="mt-4 space-y-2">
                                 <div class="flex space-x-2">
-                                    <select
+                                    <VueSelect
                                         v-model="form.proof_of_identity_type"
-                                        class="w-1/3 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
-                                    >
-                                        <option value="national_id">
-                                            National ID
-                                        </option>
-                                        <option value="passport">
-                                            Passport
-                                        </option>
-                                        <option value="driving_license">
-                                            Driving License
-                                        </option>
-                                        <option value="other">Other</option>
-                                    </select>
+                                        :options="[
+                                            {
+                                                value: 'national_id',
+                                                label: 'National ID',
+                                            },
+                                            {
+                                                value: 'passport',
+                                                label: 'Passport',
+                                            },
+                                            {
+                                                value: 'driving_license',
+                                                label: 'Driving License',
+                                            },
+                                            { value: 'other', label: 'Other' },
+                                        ]"
+                                        placeholder="Select document type"
+                                        label="label"
+                                        :reduce="(option) => option.value"
+                                        class="w-1/3"
+                                    />
                                     <input
                                         type="file"
                                         accept=".pdf,.jpg,.jpeg,.png"
@@ -1560,21 +1930,28 @@ const toggleSection = (section) => {
                             />
                             <div class="mt-4 space-y-2">
                                 <div class="flex space-x-2">
-                                    <select
+                                    <VueSelect
                                         v-model="form.proof_of_address_type"
-                                        class="w-1/3 rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm"
-                                    >
-                                        <option value="utility_bill">
-                                            Utility Bill
-                                        </option>
-                                        <option value="bank_statement">
-                                            Bank Statement
-                                        </option>
-                                        <option value="rental_agreement">
-                                            Rental Agreement
-                                        </option>
-                                        <option value="other">Other</option>
-                                    </select>
+                                        :options="[
+                                            {
+                                                value: 'utility_bill',
+                                                label: 'Utility Bill',
+                                            },
+                                            {
+                                                value: 'bank_statement',
+                                                label: 'Bank Statement',
+                                            },
+                                            {
+                                                value: 'rental_agreement',
+                                                label: 'Rental Agreement',
+                                            },
+                                            { value: 'other', label: 'Other' },
+                                        ]"
+                                        placeholder="Select address document type"
+                                        label="label"
+                                        :reduce="(option) => option.value"
+                                        class="w-1/3"
+                                    />
                                     <input
                                         type="file"
                                         accept=".pdf,.jpg,.jpeg,.png"
@@ -1749,6 +2126,172 @@ const toggleSection = (section) => {
                                             {{ form.gender }}
                                         </p>
                                     </div>
+                                    <template v-if="form.role === 'citizen'">
+                                        <div class="space-y-1">
+                                            <p class="text-sm text-gray-500">
+                                                County
+                                            </p>
+                                            <p
+                                                class="font-medium text-gray-900"
+                                            >
+                                                {{
+                                                    counties.find(
+                                                        (c) =>
+                                                            c.value ===
+                                                            form.county_id
+                                                    )?.label || "Not specified"
+                                                }}
+                                            </p>
+                                        </div>
+                                        <div class="space-y-1">
+                                            <p class="text-sm text-gray-500">
+                                                Sub-County
+                                            </p>
+                                            <p
+                                                class="font-medium text-gray-900"
+                                            >
+                                                {{
+                                                    subCounties.find(
+                                                        (s) =>
+                                                            s.value ===
+                                                            form.sub_county_id
+                                                    )?.label || "Not specified"
+                                                }}
+                                            </p>
+                                        </div>
+                                        <div class="space-y-1">
+                                            <p class="text-sm text-gray-500">
+                                                Constituency
+                                            </p>
+                                            <p
+                                                class="font-medium text-gray-900"
+                                            >
+                                                {{
+                                                    constituencies.find(
+                                                        (c) =>
+                                                            c.value ===
+                                                            form.constituency_id
+                                                    )?.label || "Not specified"
+                                                }}
+                                            </p>
+                                        </div>
+                                        <div class="space-y-1">
+                                            <p class="text-sm text-gray-500">
+                                                Ward
+                                            </p>
+                                            <p
+                                                class="font-medium text-gray-900"
+                                            >
+                                                {{
+                                                    wards.find(
+                                                        (w) =>
+                                                            w.value ===
+                                                            form.ward_id
+                                                    )?.label || "Not specified"
+                                                }}
+                                            </p>
+                                        </div>
+                                    </template>
+                                    <template
+                                        v-else-if="form.role === 'resident'"
+                                    >
+                                        <div class="space-y-1">
+                                            <p class="text-sm text-gray-500">
+                                                Reason for Residence
+                                            </p>
+                                            <p
+                                                class="font-medium text-gray-900"
+                                            >
+                                                {{
+                                                    form.reason_for_residence ===
+                                                    "Other"
+                                                        ? form.reason_for_residence_other
+                                                        : form.reason_for_residence ||
+                                                          "Not specified"
+                                                }}
+                                            </p>
+                                        </div>
+                                    </template>
+                                    <template
+                                        v-else-if="form.role === 'refugee'"
+                                    >
+                                        <div class="space-y-1">
+                                            <p class="text-sm text-gray-500">
+                                                Reason for Refugee Status
+                                            </p>
+                                            <p
+                                                class="font-medium text-gray-900"
+                                            >
+                                                {{
+                                                    form.reason_for_refugee ===
+                                                    "Other"
+                                                        ? form.reason_for_refugee_other
+                                                        : form.reason_for_refugee ||
+                                                          "Not specified"
+                                                }}
+                                            </p>
+                                        </div>
+                                        <div class="space-y-1">
+                                            <p class="text-sm text-gray-500">
+                                                Refugee Center
+                                            </p>
+                                            <p
+                                                class="font-medium text-gray-900"
+                                            >
+                                                {{
+                                                    (refugeeCenters &&
+                                                        refugeeCenters.find(
+                                                            (rc) =>
+                                                                rc.value ===
+                                                                form.refugee_center_id
+                                                        )?.label) ||
+                                                    "Not specified"
+                                                }}
+                                            </p>
+                                        </div>
+                                    </template>
+                                    <template
+                                        v-else-if="form.role === 'diplomat'"
+                                    >
+                                        <div class="space-y-1">
+                                            <p class="text-sm text-gray-500">
+                                                Consulate
+                                            </p>
+                                            <p
+                                                class="font-medium text-gray-900"
+                                            >
+                                                {{
+                                                    (consulates &&
+                                                        consulates.find(
+                                                            (c) =>
+                                                                c.value ===
+                                                                form.consulate_id
+                                                        )?.label) ||
+                                                    "Not specified"
+                                                }}
+                                            </p>
+                                        </div>
+                                    </template>
+                                    <template
+                                        v-else-if="form.role === 'foreigner'"
+                                    >
+                                        <div class="space-y-1">
+                                            <p class="text-sm text-gray-500">
+                                                Purpose of Visit
+                                            </p>
+                                            <p
+                                                class="font-medium text-gray-900"
+                                            >
+                                                {{
+                                                    purposeOfVisitOptions.find(
+                                                        (opt) =>
+                                                            opt.value ===
+                                                            form.purpose_of_visit
+                                                    )?.label || "Not specified"
+                                                }}
+                                            </p>
+                                        </div>
+                                    </template>
                                 </div>
                             </div>
                         </div>
@@ -2344,14 +2887,14 @@ const toggleSection = (section) => {
                                     class="fas fa-spinner fa-spin mr-2"
                                 ></i>
                                 <span class="hidden sm:inline">
-                                    {{
-                                        currentStep === 7
-                                            ? "Review & Submit"
-                                            : "Next"
-                                    }}
+                                    Next: {{ stepNames[currentStep] }}
                                 </span>
                                 <span class="sm:hidden">
-                                    {{ currentStep === 7 ? "Review" : "Next" }}
+                                    {{
+                                        currentStep === 7
+                                            ? "Review"
+                                            : "Next: " + stepNames[currentStep]
+                                    }}
                                 </span>
                                 <i
                                     v-if="!form.processing"
