@@ -48,10 +48,10 @@ return new class extends Migration
             $table->bigInteger('population')->nullable()->comment('Estimated population');
         
             // Government
-            $table->integer('government_type')->default(Country::Republic)
+            $table->integer('government_type')->default(Country::REPUBLIC)
                 ->comment('Type of government of the country: 0 = Republic, 1 = Presidential, 2 = Parliamentary, 3 = Monarchy');
 
-            $table->integer('driving_side')->default(Country::Left)
+            $table->integer('driving_side')->default(Country::LEFT)
                 ->comment('Side of the road used for driving of the country: 0 = Left, 1 = Right');
         
             // Codes & Communication
@@ -73,7 +73,7 @@ return new class extends Migration
             // Miscellaneous
             $table->json('configuration')->nullable()->comment('JSON configuration for the country metadata');
 
-            $table->integer('_status')->default(Country::Active)
+            $table->integer('_status')->default(Country::ACTIVE)
                   ->comment('Status of the country: 0 = Pending, 1 = Active, 2 = Inactive, 3 = Suspended');
         
             // Timestamps & Soft Deletes
