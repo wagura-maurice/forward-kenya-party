@@ -2,9 +2,13 @@
 // app/Http/Middleware/HandleInertiaRequests.php
 namespace App\Http\Middleware;
 
+use App\Models\Ward;
+use App\Models\County;
 use App\Models\Service;
 use Inertia\Middleware;
+use App\Models\SubCounty;
 use App\Models\Department;
+use App\Models\Constituency;
 use Illuminate\Http\Request;
 
 class HandleInertiaRequests extends Middleware
@@ -46,6 +50,16 @@ class HandleInertiaRequests extends Middleware
                 'error' => $request->session()->get('error'),
             ],
         ];
+
+        // Share all location data for the registration page
+        if ($request->routeIs('register')) {
+            $sharedData['locationData'] = [
+                'counties' => County::select('id', 'name')->get(),
+                'subCounties' => SubCounty::select('id', 'name', 'county_id')->get(),
+                'constituencies' => Constituency::select('id', 'name', 'county_id')->get(),
+                'wards' => Ward::select('id', 'name', 'county_id', 'constituency_id')->get(),
+            ];
+        }
 
         // Share departments for Inertia requests
         if ($request->isMethod('GET') /* && $request->header('X-Inertia') */) {
