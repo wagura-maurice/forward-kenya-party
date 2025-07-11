@@ -548,9 +548,15 @@ const nextStep = () => {
         // Role-specific validation
         switch (form.role) {
             case "citizen":
+                if (!form.nationality) missing.push("Nationality");
                 if (!form.idNumber) missing.push("National ID Number");
+                if (!form.county_id) missing.push("County");
+                if (!form.sub_county_id) missing.push("Sub-County");
+                if (!form.constituency_id) missing.push("Constituency");
+                if (!form.ward_id) missing.push("Ward");
                 break;
             case "resident":
+                if (!form.nationality) missing.push("Nationality");
                 if (!form.idNumber) missing.push("Alien ID Number");
                 if (!form.reason_for_residence) {
                     missing.push("Reason for Residence");
@@ -562,6 +568,7 @@ const nextStep = () => {
                 }
                 break;
             case "refugee":
+                if (!form.nationality) missing.push("Nationality");
                 if (!form.idNumber) missing.push("Refugee ID Number");
                 if (!form.reason_for_refugee) {
                     missing.push("Reason for Refugee Status");
@@ -571,16 +578,17 @@ const nextStep = () => {
                 ) {
                     missing.push("Custom Reason for Refugee Status");
                 }
+                if (!form.refugee_center_id) missing.push("Refugee Center");
                 break;
             case "diplomat":
+                if (!form.nationality) missing.push("Nationality");
                 if (!form.idNumber) missing.push("Diplomat ID Number");
                 if (!form.consulate_id) missing.push("Consulate");
                 break;
             case "foreigner":
+                if (!form.nationality) missing.push("Nationality");
                 if (!form.idNumber) missing.push("Passport Number");
-                break;
-            case "guest":
-                // No extra required fields
+                if (!form.purpose_of_visit) missing.push("Purpose of Visit");
                 break;
         }
         if (missing.length > 0) {
@@ -595,32 +603,55 @@ const nextStep = () => {
             isValid = false;
         }
     } else if (currentStep.value === 3) {
-        if (
-            !form.first_name ||
-            !form.last_name ||
-            !form.gender ||
-            !form.date_of_birth
-        ) {
-            form.setError("form", "Please fill in all required fields");
+        let missing = [];
+        if (!form.first_name) missing.push("First Name");
+        if (!form.last_name) missing.push("Last Name");
+        if (!form.gender) missing.push("Gender");
+        if (!form.date_of_birth) missing.push("Date of Birth");
+        if (!form.disability_status) missing.push("Disability Status");
+        if (!form.ethnicity_id) missing.push("Ethnicity");
+        if (!form.language_id) missing.push("Language");
+        if (!form.religion_id) missing.push("Religion");
+        if (!form.marital_status) missing.push("Marital Status");
+        if (missing.length > 0) {
+            form.setError("form", `Please fill in: ${missing.join(", ")}`);
             window.Toast.fire({
                 icon: "warning",
                 title: "Incomplete Form",
-                text: "Please complete all required fields before proceeding.",
+                text: `Please complete: ${missing.join(
+                    ", "
+                )} before proceeding.`,
             });
             isValid = false;
         }
     } else if (currentStep.value === 4) {
-        if (!form.address_line_1 || !form.city || !form.state) {
-            form.setError("form", "Please fill in all required address fields");
+        let missing = [];
+        if (!form.address_line_1) missing.push("Address Line 1");
+        if (!form.city) missing.push("City/Town");
+        if (!form.state) missing.push("State/County");
+        if (missing.length > 0) {
+            form.setError("form", `Please fill in: ${missing.join(", ")}`);
+            window.Toast.fire({
+                icon: "warning",
+                title: "Incomplete Address",
+                text: `Please complete: ${missing.join(", ")}
+                before proceeding.`,
+            });
             isValid = false;
         }
     } else if (currentStep.value === 5) {
-        if (!form.education_level || !form.occupation) {
-            form.setError("form", "Please fill in all required fields");
+        let missing = [];
+        if (!form.education_level) missing.push("Education Level");
+        if (!form.occupation) missing.push("Occupation");
+        if (!form.employer_details) missing.push("Employer Details");
+        if (missing.length > 0) {
+            form.setError("form", `Please fill in: ${missing.join(", ")}`);
             window.Toast.fire({
                 icon: "warning",
                 title: "Incomplete Form",
-                text: "Please complete all required fields before proceeding.",
+                text: `Please complete: ${missing.join(
+                    ", "
+                )} before proceeding.`,
             });
             isValid = false;
         }
@@ -904,6 +935,10 @@ const toggleSection = (section) => {
                             required
                             autofocus
                         />
+                        <p class="text-xs text-gray-500 mt-1">
+                            Your username will be used for login and display
+                            purposes.
+                        </p>
                         <InputError :message="form.errors.name" class="mt-2" />
                     </div>
 
@@ -924,6 +959,10 @@ const toggleSection = (section) => {
                             class="mt-1 block w-full rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500 shadow-sm"
                             required
                         />
+                        <p class="text-xs text-gray-500 mt-1">
+                            Enter a valid email address. This will be used for
+                            account verification and notifications.
+                        </p>
                         <InputError :message="form.errors.email" class="mt-2" />
                     </div>
 
@@ -968,16 +1007,14 @@ const toggleSection = (section) => {
                                 />
                             </div>
                         </div>
-                        <p class="mt-1 text-xs text-gray-500">
-                            Enter your phone number with country code
+                        <p class="text-xs text-gray-500 mt-1">
+                            Enter your complete phone number, starting with the
+                            country code and followed by your mobile number
+                            (e.g., +254712345678). This number will be used for
+                            account verification, important notifications, and
+                            password recovery. Your phone number will remain
+                            private and will not be shared without your consent.
                         </p>
-                        <InputError
-                            class="mt-2"
-                            :message="
-                                form.errors.telephone ||
-                                form.errors.phoneCountryCode
-                            "
-                        />
                     </div>
 
                     <div>
@@ -1026,6 +1063,9 @@ const toggleSection = (section) => {
                             class="mt-1 block w-full rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500 shadow-sm"
                             required
                         />
+                        <p class="text-xs text-gray-500 mt-1">
+                            Please re-enter your password to confirm it matches.
+                        </p>
                         <InputError
                             :message="form.errors.password_confirmation"
                             class="mt-2"
@@ -1063,6 +1103,10 @@ const toggleSection = (section) => {
                             required
                             class="mt-1 block w-full"
                         />
+                        <p class="text-xs text-gray-500 mt-1">
+                            Select your role in the country. This determines
+                            your application path.
+                        </p>
                         <InputError :message="form.errors.role" class="mt-2" />
                     </div>
 
@@ -1084,6 +1128,10 @@ const toggleSection = (section) => {
                             }"
                             :disabled="form.role === 'citizen'"
                         />
+                        <p class="text-xs text-gray-500 mt-1">
+                            Choose your nationality. Citizens are defaulted to
+                            Kenya.
+                        </p>
                         <InputError
                             class="mt-2"
                             :message="form.errors.nationality"
@@ -1110,6 +1158,21 @@ const toggleSection = (section) => {
                             class="mt-1 block w-full rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500 shadow-sm"
                             required
                         />
+                        <p class="text-xs text-gray-500 mt-1">
+                            {{
+                                form.role === "citizen"
+                                    ? "Enter your Kenyan National ID Number."
+                                    : form.role === "resident"
+                                    ? "Enter your Alien ID Number as provided by immigration authorities."
+                                    : form.role === "refugee"
+                                    ? "Enter your official Refugee ID Number."
+                                    : form.role === "diplomat"
+                                    ? "Enter your Diplomat ID Number as assigned by your embassy."
+                                    : form.role === "foreigner"
+                                    ? "Enter your Passport Number as shown in your travel document."
+                                    : "Enter your identification number."
+                            }}
+                        </p>
                         <InputError
                             :message="form.errors.idNumber"
                             class="mt-2"
@@ -1118,20 +1181,16 @@ const toggleSection = (section) => {
 
                     <!-- Foreigner: Purpose of Visit -->
                     <div v-if="form.role === 'foreigner'">
-                        <InputLabel
-                            for="purpose_of_visit"
-                            value="Purpose of Visit"
-                        >
-                            <template #default>
-                                <span
-                                    >Purpose of Visit
-                                    <i
-                                        class="fas fa-star text-red-500 text-xs align-middle ml-1"
-                                        aria-hidden="true"
-                                    ></i
-                                ></span>
-                            </template>
-                        </InputLabel>
+                        <div class="flex items-center">
+                            <InputLabel
+                                for="purpose_of_visit"
+                                value="Purpose of Visit"
+                            />
+                            <i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
                         <VueSelect
                             id="purpose_of_visit"
                             v-model="form.purpose_of_visit"
@@ -1141,6 +1200,10 @@ const toggleSection = (section) => {
                             :reduce="(option) => option.value"
                             required
                         />
+                        <p class="text-xs text-gray-500 mt-1">
+                            Indicate the main reason for your visit to the
+                            country.
+                        </p>
                         <InputError
                             :message="form.errors.purpose_of_visit"
                             class="mt-2"
@@ -1149,7 +1212,13 @@ const toggleSection = (section) => {
 
                     <!-- Diplomat: Consulate -->
                     <div v-if="form.role === 'diplomat'">
-                        <InputLabel for="consulate_id" value="Consulate" />
+                        <div class="flex items-center">
+                            <InputLabel for="consulate_id" value="Consulate" />
+                            <i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
                         <VueSelect
                             v-model="form.consulate_id"
                             :options="consulates"
@@ -1158,7 +1227,12 @@ const toggleSection = (section) => {
                             :class="{
                                 'border-red-500': form.errors.consulate_id,
                             }"
+                            required
                         />
+                        <p class="text-xs text-gray-500 mt-1">
+                            Select the consulate you are attached to as a
+                            diplomat.
+                        </p>
                         <InputError
                             :message="form.errors.consulate_id"
                             class="mt-2"
@@ -1167,10 +1241,16 @@ const toggleSection = (section) => {
 
                     <!-- Refugee: Reason & Center -->
                     <div v-if="form.role === 'refugee'">
-                        <InputLabel
-                            for="reason_for_refugee"
-                            value="Reason for Refugee Status"
-                        />
+                        <div class="flex items-center">
+                            <InputLabel
+                                for="reason_for_refugee"
+                                value="Reason for Refugee Status"
+                            />
+                            <i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
                         <VueSelect
                             v-model="form.reason_for_refugee"
                             :options="[...refugeeReasons, 'Other']"
@@ -1180,7 +1260,12 @@ const toggleSection = (section) => {
                                 'border-red-500':
                                     form.errors.reason_for_refugee,
                             }"
+                            required
                         />
+                        <p class="text-xs text-gray-500 mt-1">
+                            Select the reason for your refugee status. If
+                            'Other', please specify.
+                        </p>
                         <!-- Show text input if 'Other' is selected -->
                         <div v-if="form.reason_for_refugee === 'Other'">
                             <TextInput
@@ -1197,11 +1282,16 @@ const toggleSection = (section) => {
                             :message="form.errors.reason_for_refugee"
                             class="mt-2"
                         />
-                        <InputLabel
-                            for="refugee_center_id"
-                            value="Refugee Center"
-                            class="mt-4"
-                        />
+                        <div class="flex items-center mt-4">
+                            <InputLabel
+                                for="refugee_center_id"
+                                value="Refugee Center"
+                            />
+                            <i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
                         <VueSelect
                             v-model="form.refugee_center_id"
                             :options="refugeeCenters"
@@ -1210,7 +1300,11 @@ const toggleSection = (section) => {
                             :class="{
                                 'border-red-500': form.errors.refugee_center_id,
                             }"
+                            required
                         />
+                        <p class="text-xs text-gray-500 mt-1">
+                            Choose the refugee center where you are registered.
+                        </p>
                         <InputError
                             :message="form.errors.refugee_center_id"
                             class="mt-2"
@@ -1219,10 +1313,16 @@ const toggleSection = (section) => {
 
                     <!-- Resident: Reason for Residence -->
                     <div v-if="form.role === 'resident'">
-                        <InputLabel
-                            for="reason_for_residence"
-                            value="Reason for Residence"
-                        />
+                        <div class="flex items-center">
+                            <InputLabel
+                                for="reason_for_residence"
+                                value="Reason for Residence"
+                            />
+                            <i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
                         <VueSelect
                             v-model="form.reason_for_residence"
                             :options="[
@@ -1235,7 +1335,11 @@ const toggleSection = (section) => {
                                 'border-red-500':
                                     form.errors.reason_for_residence,
                             }"
+                            required
                         />
+                        <p class="text-xs text-gray-500 mt-1">
+                            Select the reason for your residence in the country.
+                        </p>
                         <!-- Show text input if 'Other' is selected -->
                         <div v-if="form.reason_for_residence === 'Other'">
                             <TextInput
@@ -1270,6 +1374,10 @@ const toggleSection = (section) => {
                                         'border-red-500': form.errors.county_id,
                                     }"
                                 />
+                                <p class="text-xs text-gray-500 mt-1">
+                                    Select the county where you are registered
+                                    or reside.
+                                </p>
                                 <InputError
                                     :message="form.errors.county_id"
                                     class="mt-2"
@@ -1291,6 +1399,10 @@ const toggleSection = (section) => {
                                     }"
                                     :disabled="!form.county_id"
                                 />
+                                <p class="text-xs text-gray-500 mt-1">
+                                    Choose your sub-county within the selected
+                                    county.
+                                </p>
                                 <InputError
                                     :message="form.errors.sub_county_id"
                                     class="mt-2"
@@ -1314,6 +1426,10 @@ const toggleSection = (section) => {
                                     }"
                                     :disabled="!form.county_id"
                                 />
+                                <p class="text-xs text-gray-500 mt-1">
+                                    Specify your constituency for more accurate
+                                    location details.
+                                </p>
                                 <InputError
                                     :message="form.errors.constituency_id"
                                     class="mt-2"
@@ -1334,6 +1450,10 @@ const toggleSection = (section) => {
                                         !form.sub_county_id
                                     "
                                 />
+                                <p class="text-xs text-gray-500 mt-1">
+                                    Indicate your ward for the most specific
+                                    address information.
+                                </p>
                                 <InputError
                                     :message="form.errors.ward_id"
                                     class="mt-2"
@@ -1368,6 +1488,10 @@ const toggleSection = (section) => {
                                 class="mt-1 block w-full rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500 shadow-sm"
                                 required
                             />
+                            <p class="text-xs text-gray-500 mt-1">
+                                Enter your legal first name as shown on your
+                                official documents.
+                            </p>
                             <InputError
                                 :message="form.errors.first_name"
                                 class="mt-2"
@@ -1410,6 +1534,10 @@ const toggleSection = (section) => {
                                 class="mt-1 block w-full rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500 shadow-sm"
                                 required
                             />
+                            <p class="text-xs text-gray-500 mt-1">
+                                Enter your legal surname/family name as shown on
+                                your official documents.
+                            </p>
                             <InputError
                                 :message="form.errors.last_name"
                                 class="mt-2"
@@ -1441,6 +1569,9 @@ const toggleSection = (section) => {
                                 required
                                 class="mt-1 block w-full"
                             />
+                            <p class="text-xs text-gray-500 mt-1">
+                                Select your gender identity.
+                            </p>
                             <InputError
                                 :message="form.errors.gender"
                                 class="mt-2"
@@ -1467,6 +1598,10 @@ const toggleSection = (section) => {
                                 class="mt-1 block w-full rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500 shadow-sm"
                                 required
                             />
+                            <p class="text-xs text-gray-500 mt-1">
+                                Provide your date of birth. You must be at least
+                                18 years old to register.
+                            </p>
                             <InputError
                                 :message="form.errors.date_of_birth"
                                 class="mt-2"
@@ -1491,6 +1626,11 @@ const toggleSection = (section) => {
                                 :reduce="(option) => option.value"
                                 class="mt-1 block w-full"
                             />
+                            <p class="text-xs text-gray-500 mt-1">
+                                Indicate if you have any form of disability.
+                                This information helps us provide better
+                                services.
+                            </p>
                             <InputError
                                 :message="form.errors.disability_status"
                                 class="mt-2"
@@ -1517,6 +1657,10 @@ const toggleSection = (section) => {
                                 :reduce="(option) => option.value"
                                 class="mt-1 block w-full"
                             />
+                            <p class="text-xs text-gray-500 mt-1">
+                                Select your tribe or ethnic group for
+                                demographic purposes.
+                            </p>
                             <InputError
                                 :message="form.errors.ethnicity_id"
                                 class="mt-2"
@@ -1541,6 +1685,10 @@ const toggleSection = (section) => {
                                 :reduce="(option) => option.value"
                                 class="mt-1 block w-full"
                             />
+                            <p class="text-xs text-gray-500 mt-1">
+                                Choose the language you speak most often at
+                                home.
+                            </p>
                             <InputError
                                 :message="form.errors.language_id"
                                 class="mt-2"
@@ -1567,6 +1715,10 @@ const toggleSection = (section) => {
                                 :reduce="(option) => option.value"
                                 class="mt-1 block w-full"
                             />
+                            <p class="text-xs text-gray-500 mt-1">
+                                Indicate your religion for demographic purposes.
+                                This is optional for some services.
+                            </p>
                             <InputError
                                 :message="form.errors.religion_id"
                                 class="mt-2"
@@ -1591,6 +1743,9 @@ const toggleSection = (section) => {
                                 :reduce="(option) => option.value"
                                 class="mt-1 block w-full"
                             />
+                            <p class="text-xs text-gray-500 mt-1">
+                                Select your current marital status.
+                            </p>
                             <InputError
                                 :message="form.errors.marital_status"
                                 class="mt-2"
@@ -1625,6 +1780,9 @@ const toggleSection = (section) => {
                             placeholder="Enter your address line 1"
                             required
                         />
+                        <p class="text-xs text-gray-500 mt-1">
+                            Enter the main address where you currently reside.
+                        </p>
                         <InputError
                             :message="form.errors.address_line_1"
                             class="mt-2"
@@ -1666,6 +1824,9 @@ const toggleSection = (section) => {
                                 placeholder="Enter your city"
                                 required
                             />
+                            <p class="text-xs text-gray-500 mt-1">
+                                Specify your city or town of residence.
+                            </p>
                             <InputError
                                 :message="form.errors.city"
                                 class="mt-2"
@@ -1687,6 +1848,10 @@ const toggleSection = (section) => {
                                 placeholder="Enter your state"
                                 required
                             />
+                            <p class="text-xs text-gray-500 mt-1">
+                                Enter your state or county as shown in your
+                                address.
+                            </p>
                             <InputError
                                 :message="form.errors.state"
                                 class="mt-2"
@@ -1703,10 +1868,16 @@ const toggleSection = (section) => {
                         Step {{ currentStep }}: {{ stepDescription }}
                     </h2>
                     <div>
-                        <InputLabel
-                            for="education_level"
-                            value="Highest Education Level"
-                        />
+                        <div class="flex items-center">
+                            <InputLabel
+                                for="education_level"
+                                value="Highest Education Level"
+                            />
+                            <i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
                         <VueSelect
                             v-model="form.education_level"
                             :options="
@@ -1721,6 +1892,9 @@ const toggleSection = (section) => {
                             required
                             class="mt-1 block w-full"
                         />
+                        <p class="text-xs text-gray-500 mt-1">
+                            Select your highest completed level of education.
+                        </p>
                         <InputError
                             :message="form.errors.education_level"
                             class="mt-2"
@@ -1728,10 +1902,16 @@ const toggleSection = (section) => {
                     </div>
 
                     <div>
-                        <InputLabel
-                            for="occupation"
-                            value="Current Occupation"
-                        />
+                        <div class="flex items-center">
+                            <InputLabel
+                                for="occupation"
+                                value="Current Occupation"
+                            />
+                            <i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
                         <TextInput
                             id="occupation"
                             v-model="form.occupation"
@@ -1740,6 +1920,9 @@ const toggleSection = (section) => {
                             class="mt-1 block w-full rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500 shadow-sm"
                             required
                         />
+                        <p class="text-xs text-gray-500 mt-1">
+                            Enter your current job or profession.
+                        </p>
                         <p class="mt-1 text-xs text-gray-500">
                             Please enter your current job title or occupation
                         </p>
@@ -1750,10 +1933,16 @@ const toggleSection = (section) => {
                     </div>
 
                     <div>
-                        <InputLabel
-                            for="employer_details"
-                            value="Employer Details"
-                        />
+                        <div class="flex items-center">
+                            <InputLabel
+                                for="employer_details"
+                                value="Employer Details"
+                            />
+                            <i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
                         <textarea
                             id="employer_details"
                             v-model="form.employer_details"
@@ -1761,6 +1950,10 @@ const toggleSection = (section) => {
                             class="mt-1 block w-full rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500 shadow-sm"
                             placeholder="Current employer name, position, and address"
                         ></textarea>
+                        <p class="text-xs text-gray-500 mt-1">
+                            Provide details of your current employer, including
+                            name, position, and address.
+                        </p>
                         <InputError
                             :message="form.errors.employer_details"
                             class="mt-2"
@@ -1776,10 +1969,16 @@ const toggleSection = (section) => {
                         Step {{ currentStep }}: {{ stepDescription }}
                     </h2>
                     <div>
-                        <InputLabel
-                            for="security_question"
-                            value="Security Question"
-                        />
+                        <div class="flex items-center">
+                            <InputLabel
+                                for="security_question"
+                                value="Security Question"
+                            />
+                            <i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
                         <VueSelect
                             v-model="form.security_question"
                             :options="
@@ -1794,6 +1993,10 @@ const toggleSection = (section) => {
                             required
                             class="mt-1 block w-full"
                         />
+                        <p class="text-xs text-gray-500 mt-1">
+                            Choose a question only you can answer. This helps
+                            recover your account if you forget your password.
+                        </p>
                         <InputError
                             :message="form.errors.security_question"
                             class="mt-2"
@@ -1801,7 +2004,16 @@ const toggleSection = (section) => {
                     </div>
 
                     <div>
-                        <InputLabel for="security_answer" value="Your Answer" />
+                        <div class="flex items-center">
+                            <InputLabel
+                                for="security_answer"
+                                value="Your Answer"
+                            />
+                            <i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
                         <TextInput
                             id="security_answer"
                             v-model="form.security_answer"
@@ -1810,6 +2022,10 @@ const toggleSection = (section) => {
                             class="mt-1 block w-full rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500 shadow-sm"
                             required
                         />
+                        <p class="text-xs text-gray-500 mt-1">
+                            Enter your answer. Remember it for future account
+                            recovery.
+                        </p>
                         <InputError
                             :message="form.errors.security_answer"
                             class="mt-2"
@@ -1855,21 +2071,48 @@ const toggleSection = (section) => {
                                         placeholder="Select document type"
                                         label="label"
                                         :reduce="(option) => option.value"
-                                        class="w-1/3"
+                                        class="w-1/3 custom-select"
                                     />
-                                    <input
-                                        type="file"
-                                        accept=".pdf,.jpg,.jpeg,.png"
-                                        @change="
-                                            (e) =>
-                                                handleFileUpload(
-                                                    e,
-                                                    'proof_of_identity'
-                                                )
+                                    <div
+                                        class="flex-1 dropzone-area"
+                                        @dragover.prevent="isDragging = true"
+                                        @dragleave.prevent="isDragging = false"
+                                        @drop.prevent="
+                                            onDrop($event, 'proof_of_identity')
                                         "
-                                        class="flex-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 placeholder-gray-400"
-                                        placeholder="Choose ID document (PDF, JPG, PNG)"
-                                    />
+                                        :class="{
+                                            'dropzone-active': isDragging,
+                                        }"
+                                        @click="
+                                            triggerFileInput(
+                                                'proof_of_identity'
+                                            )
+                                        "
+                                        style="cursor: pointer"
+                                    >
+                                        <input
+                                            ref="fileInputIdentity"
+                                            type="file"
+                                            accept=".pdf,.jpg,.jpeg,.png"
+                                            @change="
+                                                (e) =>
+                                                    handleFileUpload(
+                                                        e,
+                                                        'proof_of_identity'
+                                                    )
+                                            "
+                                            class="hidden"
+                                        />
+                                        <div class="text-center text-gray-400">
+                                            <i
+                                                class="fas fa-cloud-upload-alt text-2xl mb-1"
+                                            ></i>
+                                            <div>
+                                                Drag & drop or click to select
+                                                ID document (PDF, JPG, PNG)
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <!-- File Preview -->
                                 <div
@@ -1994,21 +2237,46 @@ const toggleSection = (section) => {
                                         placeholder="Select address document type"
                                         label="label"
                                         :reduce="(option) => option.value"
-                                        class="w-1/3"
+                                        class="w-1/3 custom-select"
                                     />
-                                    <input
-                                        type="file"
-                                        accept=".pdf,.jpg,.jpeg,.png"
-                                        @change="
-                                            (e) =>
-                                                handleFileUpload(
-                                                    e,
-                                                    'proof_of_address'
-                                                )
+                                    <div
+                                        class="flex-1 dropzone-area"
+                                        @dragover.prevent="isDragging = true"
+                                        @dragleave.prevent="isDragging = false"
+                                        @drop.prevent="
+                                            onDrop($event, 'proof_of_address')
                                         "
-                                        class="flex-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100 placeholder-gray-400"
-                                        placeholder="Choose proof of address (PDF, JPG, PNG)"
-                                    />
+                                        :class="{
+                                            'dropzone-active': isDragging,
+                                        }"
+                                        @click="
+                                            triggerFileInput('proof_of_address')
+                                        "
+                                        style="cursor: pointer"
+                                    >
+                                        <input
+                                            ref="fileInputAddress"
+                                            type="file"
+                                            accept=".pdf,.jpg,.jpeg,.png"
+                                            @change="
+                                                (e) =>
+                                                    handleFileUpload(
+                                                        e,
+                                                        'proof_of_address'
+                                                    )
+                                            "
+                                            class="hidden"
+                                        />
+                                        <div class="text-center text-gray-400">
+                                            <i
+                                                class="fas fa-cloud-upload-alt text-2xl mb-1"
+                                            ></i>
+                                            <div>
+                                                Drag & drop or click to select
+                                                address document (PDF, JPG, PNG)
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                                 <!-- File Preview -->
                                 <div
