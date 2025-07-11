@@ -1502,7 +1502,7 @@ const toggleSection = (section) => {
                             <div class="flex items-center">
                                 <InputLabel
                                     for="ethnicity_id"
-                                    value="Ethnicity"
+                                    value="Tribe / Ethnicity"
                                 />
                                 <i
                                     class="fas fa-star text-red-500 text-xs ml-1"
@@ -1512,7 +1512,7 @@ const toggleSection = (section) => {
                             <VueSelect
                                 v-model="form.ethnicity_id"
                                 :options="ethnicityOptions"
-                                placeholder="Select your ethnicity"
+                                placeholder="Select your tribal ethnicity"
                                 label="label"
                                 :reduce="(option) => option.value"
                                 class="mt-1 block w-full"
@@ -1526,7 +1526,7 @@ const toggleSection = (section) => {
                             <div class="flex items-center">
                                 <InputLabel
                                     for="language_id"
-                                    value="Language"
+                                    value="Primary Language"
                                 />
                                 <i
                                     class="fas fa-star text-red-500 text-xs ml-1"
@@ -1536,7 +1536,7 @@ const toggleSection = (section) => {
                             <VueSelect
                                 v-model="form.language_id"
                                 :options="languageOptions"
-                                placeholder="Select your language"
+                                placeholder="Select your primary language"
                                 label="label"
                                 :reduce="(option) => option.value"
                                 class="mt-1 block w-full"
