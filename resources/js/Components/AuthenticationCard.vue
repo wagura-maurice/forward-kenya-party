@@ -10,7 +10,8 @@
         </div>
         <div class="flex-1 w-full flex flex-col items-center justify-center">
             <div
-                class="relative flex flex-col w-full max-w-2xl px-8 py-6 bg-white shadow-md overflow-y-auto sm:rounded-lg rounded-lg dark:border dark:bg-gray-800 dark:border-gray-700 h-[90vh]"
+                class="relative flex flex-col w-full max-w-2xl px-8 py-6 bg-white shadow-md overflow-y-auto sm:rounded-lg rounded-lg dark:border xl:p-0 dark:bg-gray-800 dark:border-gray-700"
+                style="min-height: 0; max-height: 90vh"
             >
                 <slot />
             </div>
