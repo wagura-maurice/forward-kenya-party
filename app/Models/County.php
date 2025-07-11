@@ -74,44 +74,44 @@ class County extends Model
         return $this->belongsTo(Region::class, 'region_id', 'id');
     }
 
-    public function sub_counties(): BelongsToMany
+    public function sub_counties()
     {
-        return $this->belongsToMany(SubCounty::class)->withTimestamps();
+        return $this->hasMany(SubCounty::class, 'county_id');
     }
 
-    public function constituencies(): BelongsToMany
+    public function constituencies()
     {
-        return $this->belongsToMany(Constituency::class)->withTimestamps();
+        return $this->hasMany(Constituency::class, 'county_id');
     }
     
-    public function wards(): BelongsToMany
+    public function wards()
     {
-        return $this->belongsToMany(Ward::class)->withTimestamps();
+        return $this->hasMany(Ward::class, 'county_id');
     }
 
-    public function locations(): BelongsToMany
+    public function locations()
     {
-        return $this->belongsToMany(Location::class)->withTimestamps();
+        return $this->hasMany(Location::class, 'county_id');
     }
 
-    public function villages(): BelongsToMany
+    public function villages()
     {
-        return $this->belongsToMany(Village::class)->withTimestamps();
+        return $this->hasMany(Village::class, 'county_id');
     }
 
-    public function polling_stations(): BelongsToMany
+    public function polling_stations()
     {
-        return $this->belongsToMany(PollingStation::class)->withTimestamps();
+        return $this->hasMany(PollingStation::class, 'county_id');
     }
 
-    public function consulates(): BelongsToMany
+    public function consulates()
     {
-        return $this->belongsToMany(Consulate::class)->withTimestamps();
+        return $this->hasMany(Consulate::class, 'county_id');
     }
 
-    public function refugee_centers(): BelongsToMany
+    public function refugee_centers()
     {
-        return $this->belongsToMany(RefugeeCenter::class)->withTimestamps();
+        return $this->hasMany(RefugeeCenter::class, 'county_id');
     }
     
 }
