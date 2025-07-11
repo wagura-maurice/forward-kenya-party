@@ -1258,74 +1258,88 @@ const toggleSection = (section) => {
 
                     <!-- Citizen: Polling Station (if applicable) -->
                     <div v-if="form.role === 'citizen'">
-                        <InputLabel for="county_id" value="County" />
-                        <VueSelect
-                            v-model="form.county_id"
-                            :options="counties"
-                            placeholder="Select your county"
-                            class="mt-1 block w-full"
-                            :class="{ 'border-red-500': form.errors.county_id }"
-                        />
-                        <InputError
-                            :message="form.errors.county_id"
-                            class="mt-2"
-                        />
-
-                        <InputLabel
-                            for="sub_county_id"
-                            value="Sub-County"
-                            class="mt-4"
-                        />
-                        <VueSelect
-                            v-model="form.sub_county_id"
-                            :options="subCounties"
-                            placeholder="Select your sub-county"
-                            class="mt-1 block w-full"
-                            :class="{
-                                'border-red-500': form.errors.sub_county_id,
-                            }"
-                            :disabled="!form.county_id"
-                        />
-                        <InputError
-                            :message="form.errors.sub_county_id"
-                            class="mt-2"
-                        />
-
-                        <InputLabel
-                            for="constituency_id"
-                            value="Constituency"
-                            class="mt-4"
-                        />
-                        <VueSelect
-                            v-model="form.constituency_id"
-                            :options="constituencies"
-                            placeholder="Select your constituency"
-                            class="mt-1 block w-full"
-                            :class="{
-                                'border-red-500': form.errors.constituency_id,
-                            }"
-                            :disabled="!form.county_id"
-                        />
-                        <InputError
-                            :message="form.errors.constituency_id"
-                            class="mt-2"
-                        />
-
-                        <InputLabel for="ward_id" value="Ward" class="mt-4" />
-                        <VueSelect
-                            v-model="form.ward_id"
-                            :options="wards"
-                            placeholder="Select your ward"
-                            class="mt-1 block w-full"
-                            :class="{ 'border-red-500': form.errors.ward_id }"
-                            :disabled="
-                                !form.constituency_id && !form.sub_county_id
-                            "
-                        />
-                        <InputError
-                            :message="form.errors.ward_id"
-                            class="mt-2"
-                        />
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <InputLabel for="county_id" value="County" />
+                                <VueSelect
+                                    v-model="form.county_id"
+                                    :options="counties"
+                                    placeholder="Select your county"
+                                    class="mt-1 block w-full"
+                                    :class="{
+                                        'border-red-500': form.errors.county_id,
+                                    }"
+                                />
+                                <InputError
+                                    :message="form.errors.county_id"
+                                    class="mt-2"
+                                />
+                            </div>
+                            <div>
+                                <InputLabel
+                                    for="sub_county_id"
+                                    value="Sub-County"
+                                />
+                                <VueSelect
+                                    v-model="form.sub_county_id"
+                                    :options="subCounties"
+                                    placeholder="Select your sub-county"
+                                    class="mt-1 block w-full"
+                                    :class="{
+                                        'border-red-500':
+                                            form.errors.sub_county_id,
+                                    }"
+                                    :disabled="!form.county_id"
+                                />
+                                <InputError
+                                    :message="form.errors.sub_county_id"
+                                    class="mt-2"
+                                />
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            <div>
+                                <InputLabel
+                                    for="constituency_id"
+                                    value="Constituency"
+                                />
+                                <VueSelect
+                                    v-model="form.constituency_id"
+                                    :options="constituencies"
+                                    placeholder="Select your constituency"
+                                    class="mt-1 block w-full"
+                                    :class="{
+                                        'border-red-500':
+                                            form.errors.constituency_id,
+                                    }"
+                                    :disabled="!form.county_id"
+                                />
+                                <InputError
+                                    :message="form.errors.constituency_id"
+                                    class="mt-2"
+                                />
+                            </div>
+                            <div>
+                                <InputLabel for="ward_id" value="Ward" />
+                                <VueSelect
+                                    v-model="form.ward_id"
+                                    :options="wards"
+                                    placeholder="Select your ward"
+                                    class="mt-1 block w-full"
+                                    :class="{
+                                        'border-red-500': form.errors.ward_id,
+                                    }"
+                                    :disabled="
+                                        !form.constituency_id &&
+                                        !form.sub_county_id
+                                    "
+                                />
+                                <InputError
+                                    :message="form.errors.ward_id"
+                                    class="mt-2"
+                                />
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -1434,169 +1448,154 @@ const toggleSection = (section) => {
                         </div>
                     </div>
 
-                    <div>
-                        <div class="flex items-center">
-                            <InputLabel
-                                for="date_of_birth"
-                                value="Date of Birth"
-                                >Date of Birth</InputLabel
-                            ><i
-                                class="fas fa-star text-red-500 text-xs ml-1"
-                                aria-hidden="true"
-                            ></i>
-                        </div>
-                        <TextInput
-                            id="date_of_birth"
-                            v-model="form.date_of_birth"
-                            type="date"
-                            class="mt-1 block w-full rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500 shadow-sm"
-                            required
-                        />
-                        <InputError
-                            :message="form.errors.date_of_birth"
-                            class="mt-2"
-                        />
-                    </div>
-                    <!-- Disability Status -->
-                    <div class="mt-4">
-                        <div class="flex items-center">
-                            <InputLabel
-                                for="disability_status"
-                                value="Disability Status"
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <div class="flex items-center">
+                                <InputLabel
+                                    for="date_of_birth"
+                                    value="Date of Birth"
+                                    >Date of Birth</InputLabel
+                                ><i
+                                    class="fas fa-star text-red-500 text-xs ml-1"
+                                    aria-hidden="true"
+                                ></i>
+                            </div>
+                            <TextInput
+                                id="date_of_birth"
+                                v-model="form.date_of_birth"
+                                type="date"
+                                class="mt-1 block w-full rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500 shadow-sm"
+                                required
                             />
-                            <i
-                                class="fas fa-star text-red-500 text-xs ml-1"
-                                aria-hidden="true"
-                            ></i>
-                        </div>
-                        <VueSelect
-                            v-model="form.disability_status"
-                            :options="disabilityStatusOptions"
-                            placeholder="Select your disability status"
-                            label="label"
-                            :reduce="(option) => option.value"
-                            class="mt-1 block w-full"
-                        />
-                        <InputError
-                            :message="form.errors.disability_status"
-                            class="mt-2"
-                        />
-                    </div>
-                    <!-- Ethnicity -->
-                    <div class="mt-4">
-                        <div class="flex items-center">
-                            <InputLabel for="ethnicity_id" value="Ethnicity" />
-                            <i
-                                class="fas fa-star text-red-500 text-xs ml-1"
-                                aria-hidden="true"
-                            ></i>
-                        </div>
-                        <VueSelect
-                            v-model="form.ethnicity_id"
-                            :options="ethnicityOptions"
-                            placeholder="Select your ethnicity"
-                            label="label"
-                            :reduce="(option) => option.value"
-                            class="mt-1 block w-full"
-                        />
-                        <InputError
-                            :message="form.errors.ethnicity_id"
-                            class="mt-2"
-                        />
-                    </div>
-                    <!-- Language -->
-                    <div class="mt-4">
-                        <div class="flex items-center">
-                            <InputLabel for="language_id" value="Language" />
-                            <i
-                                class="fas fa-star text-red-500 text-xs ml-1"
-                                aria-hidden="true"
-                            ></i>
-                        </div>
-                        <VueSelect
-                            v-model="form.language_id"
-                            :options="languageOptions"
-                            placeholder="Select your language"
-                            label="label"
-                            :reduce="(option) => option.value"
-                            class="mt-1 block w-full"
-                        />
-                        <InputError
-                            :message="form.errors.language_id"
-                            class="mt-2"
-                        />
-                    </div>
-                    <!-- Religion -->
-                    <div class="mt-4">
-                        <div class="flex items-center">
-                            <InputLabel for="religion_id" value="Religion" />
-                            <i
-                                class="fas fa-star text-red-500 text-xs ml-1"
-                                aria-hidden="true"
-                            ></i>
-                        </div>
-                        <VueSelect
-                            v-model="form.religion_id"
-                            :options="religionOptions"
-                            placeholder="Select your religion"
-                            label="label"
-                            :reduce="(option) => option.value"
-                            class="mt-1 block w-full"
-                        />
-                        <InputError
-                            :message="form.errors.religion_id"
-                            class="mt-2"
-                        />
-                    </div>
-                    <!-- Marital Status -->
-                    <div class="mt-4">
-                        <div class="flex items-center">
-                            <InputLabel
-                                for="marital_status"
-                                value="Marital Status"
+                            <InputError
+                                :message="form.errors.date_of_birth"
+                                class="mt-2"
                             />
-                            <i
-                                class="fas fa-star text-red-500 text-xs ml-1"
-                                aria-hidden="true"
-                            ></i>
                         </div>
-                        <VueSelect
-                            v-model="form.marital_status"
-                            :options="maritalStatusOptions"
-                            placeholder="Select your marital status"
-                            label="label"
-                            :reduce="(option) => option.value"
-                            class="mt-1 block w-full"
-                        />
-                        <InputError
-                            :message="form.errors.marital_status"
-                            class="mt-2"
-                        />
-                    </div>
-                    <!-- Highest Level of Education -->
-                    <div class="mt-4">
-                        <div class="flex items-center">
-                            <InputLabel
-                                for="highest_level_of_education"
-                                value="Highest Level of Education"
+                        <div>
+                            <div class="flex items-center">
+                                <InputLabel
+                                    for="disability_status"
+                                    value="Disability Status"
+                                />
+                                <i
+                                    class="fas fa-star text-red-500 text-xs ml-1"
+                                    aria-hidden="true"
+                                ></i>
+                            </div>
+                            <VueSelect
+                                v-model="form.disability_status"
+                                :options="disabilityStatusOptions"
+                                placeholder="Select your disability status"
+                                label="label"
+                                :reduce="(option) => option.value"
+                                class="mt-1 block w-full"
                             />
-                            <i
-                                class="fas fa-star text-red-500 text-xs ml-1"
-                                aria-hidden="true"
-                            ></i>
+                            <InputError
+                                :message="form.errors.disability_status"
+                                class="mt-2"
+                            />
                         </div>
-                        <VueSelect
-                            v-model="form.highest_level_of_education"
-                            :options="educationLevelOptions"
-                            placeholder="Select your highest education level"
-                            label="label"
-                            :reduce="(option) => option.value"
-                            class="mt-1 block w-full"
-                        />
-                        <InputError
-                            :message="form.errors.highest_level_of_education"
-                            class="mt-2"
-                        />
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <div class="flex items-center">
+                                <InputLabel
+                                    for="ethnicity_id"
+                                    value="Ethnicity"
+                                />
+                                <i
+                                    class="fas fa-star text-red-500 text-xs ml-1"
+                                    aria-hidden="true"
+                                ></i>
+                            </div>
+                            <VueSelect
+                                v-model="form.ethnicity_id"
+                                :options="ethnicityOptions"
+                                placeholder="Select your ethnicity"
+                                label="label"
+                                :reduce="(option) => option.value"
+                                class="mt-1 block w-full"
+                            />
+                            <InputError
+                                :message="form.errors.ethnicity_id"
+                                class="mt-2"
+                            />
+                        </div>
+                        <div>
+                            <div class="flex items-center">
+                                <InputLabel
+                                    for="language_id"
+                                    value="Language"
+                                />
+                                <i
+                                    class="fas fa-star text-red-500 text-xs ml-1"
+                                    aria-hidden="true"
+                                ></i>
+                            </div>
+                            <VueSelect
+                                v-model="form.language_id"
+                                :options="languageOptions"
+                                placeholder="Select your language"
+                                label="label"
+                                :reduce="(option) => option.value"
+                                class="mt-1 block w-full"
+                            />
+                            <InputError
+                                :message="form.errors.language_id"
+                                class="mt-2"
+                            />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <div class="flex items-center">
+                                <InputLabel
+                                    for="religion_id"
+                                    value="Religion"
+                                />
+                                <i
+                                    class="fas fa-star text-red-500 text-xs ml-1"
+                                    aria-hidden="true"
+                                ></i>
+                            </div>
+                            <VueSelect
+                                v-model="form.religion_id"
+                                :options="religionOptions"
+                                placeholder="Select your religion"
+                                label="label"
+                                :reduce="(option) => option.value"
+                                class="mt-1 block w-full"
+                            />
+                            <InputError
+                                :message="form.errors.religion_id"
+                                class="mt-2"
+                            />
+                        </div>
+                        <div>
+                            <div class="flex items-center">
+                                <InputLabel
+                                    for="marital_status"
+                                    value="Marital Status"
+                                />
+                                <i
+                                    class="fas fa-star text-red-500 text-xs ml-1"
+                                    aria-hidden="true"
+                                ></i>
+                            </div>
+                            <VueSelect
+                                v-model="form.marital_status"
+                                :options="maritalStatusOptions"
+                                placeholder="Select your marital status"
+                                label="label"
+                                :reduce="(option) => option.value"
+                                class="mt-1 block w-full"
+                            />
+                            <InputError
+                                :message="form.errors.marital_status"
+                                class="mt-2"
+                            />
+                        </div>
                     </div>
                 </div>
 
@@ -2721,48 +2720,6 @@ const toggleSection = (section) => {
                                     <p class="font-medium">
                                         {{ form.occupation || "Not specified" }}
                                     </p>
-                                </div>
-                                <div v-if="form.employer_details" class="md:col-span-2">
-                                    <p class="text-sm text-gray-500">Employer Details</p>
-                                    >
-                                        <div
-                                            class="flex items-center space-x-3"
-                                        >
-                                            <i
-                                                class="fas fa-file-alt text-2xl text-gray-400"
-                                            ></i>
-                                            <div>
-                                                <p
-                                                    class="text-sm font-medium text-gray-900 truncate max-w-xs"
-                                                >
-                                                    {{
-                                                        form.proof_of_identity
-                                                            .name
-                                                    }}
-                                                </p>
-                                                <p
-                                                    class="text-xs text-gray-500"
-                                                >
-                                                    {{
-                                                        formatFileSize(
-                                                            form
-                                                                .proof_of_identity
-                                                                .size
-                                                        )
-                                                    }}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <button
-                                            type="button"
-                                            @click="
-                                                form.proof_of_identity = null
-                                            "
-                                            class="text-red-600 hover:text-red-800"
-                                        >
-                                            <i class="fas fa-times"></i>
-                                        </button>
-                                    </div>
                                 </div>
                                 <InputError
                                     :message="form.errors.proof_of_identity"
