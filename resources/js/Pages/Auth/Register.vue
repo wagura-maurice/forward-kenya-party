@@ -8,7 +8,9 @@ import {
     nextTick,
     watch,
     getCurrentInstance,
+    reactive,
 } from "vue";
+import { usePage } from "@inertiajs/vue3";
 import AuthenticationCard from "@/Components/AuthenticationCard.vue";
 import AuthenticationCardLogo from "@/Components/AuthenticationCardLogo.vue";
 import Checkbox from "@/Components/Checkbox.vue";
@@ -25,6 +27,142 @@ const props = defineProps({
     countries: Array,
     genders: Object,
 });
+
+// Access locationMatrix from Inertia shared props
+const locationMatrix = computed(() => {
+    // Use usePage() if available, fallback to window
+    return (
+        usePage().props.locationMatrix ||
+        (window.$page && window.$page.props.locationMatrix) ||
+        []
+    );
+});
+
+// Initialize location handling with the useLocation composable
+const locationState = reactive({
+    selectedCounty: null,
+    selectedSubCounty: null,
+    selectedConstituency: null,
+    selectedWard: null,
+});
+
+// Initialize the location data
+const locationData = reactive({
+    counties: [],
+    subCounties: [],
+    constituencies: [],
+    wards: [],
+});
+
+// Initialize location data when component is mounted
+onMounted(() => {
+    console.log("Location Matrix:", locationMatrix.value);
+    locationData.counties = [...(locationMatrix.value || [])];
+    console.log("Location Data - Counties:", locationData.counties);
+    locationData.subCounties = locationData.counties.flatMap(
+        (county) => county.sub_counties || []
+    );
+    locationData.constituencies = locationData.counties.flatMap((county) =>
+        (county.sub_counties || []).flatMap(
+            (subCounty) => subCounty.constituencies || []
+        )
+    );
+    locationData.wards = locationData.counties.flatMap((county) =>
+        (county.sub_counties || []).flatMap((subCounty) =>
+            (subCounty.constituencies || []).flatMap(
+                (constituency) => constituency.wards || []
+            )
+        )
+    );
+
+    // Set initial values from form if they exist
+    if (form.county_id) locationState.selectedCounty = form.county_id;
+    if (form.sub_county_id)
+        locationState.selectedSubCounty = form.sub_county_id;
+    if (form.constituency_id)
+        locationState.selectedConstituency = form.constituency_id;
+    if (form.ward_id) locationState.selectedWard = form.ward_id;
+});
+
+// Filtered data for dropdowns
+const filteredSubCounties = computed(() => {
+    if (!locationState.selectedCounty) return [];
+    return locationData.subCounties.filter(
+        (subCounty) => subCounty.county_id == locationState.selectedCounty
+    );
+});
+
+const filteredConstituencies = computed(() => {
+    if (!locationState.selectedCounty) return [];
+    return locationData.constituencies.filter(
+        (constituency) => constituency.county_id == locationState.selectedCounty
+    );
+});
+
+const filteredWards = computed(() => {
+    if (!locationState.selectedConstituency) return [];
+    return locationData.wards.filter(
+        (ward) => ward.constituency_id == locationState.selectedConstituency
+    );
+});
+
+// Filter counties for the dropdown
+const filteredCounties = computed(() => {
+    return locationData.counties || [];
+});
+
+// Watch for changes in location state and update the form
+watch(
+    () => locationState.selectedCounty,
+    (newVal) => {
+        if (newVal !== null && newVal !== undefined) {
+            form.county_id = newVal;
+            form.sub_county_id = null;
+            form.constituency_id = null;
+            form.ward_id = null;
+        }
+    }
+);
+
+watch(
+    () => locationState.selectedSubCounty,
+    (newVal) => {
+        if (newVal !== null && newVal !== undefined) {
+            form.sub_county_id = newVal;
+            // No need to reset constituency and ward here as they'll be disabled
+        }
+    }
+);
+
+watch(
+    () => locationState.selectedConstituency,
+    (newVal) => {
+        if (newVal !== null && newVal !== undefined) {
+            form.constituency_id = newVal;
+            form.ward_id = null;
+        }
+    }
+);
+
+watch(
+    () => locationState.selectedWard,
+    (newVal) => {
+        if (newVal !== null && newVal !== undefined) {
+            form.ward_id = newVal;
+        }
+    }
+);
+
+// Reset dependent fields when county changes
+const resetDependentFields = (field) => {
+    if (field === "county") {
+        locationState.selectedSubCounty = null;
+        locationState.selectedConstituency = null;
+        locationState.selectedWard = null;
+    } else if (field === "constituency") {
+        locationState.selectedWard = null;
+    }
+};
 
 // Options for Step 3 enhanced fields
 const disabilityStatusOptions = [
@@ -334,19 +472,17 @@ watch(
         form.reason_for_refugee = "";
         if (newRole === "citizen") {
             form.nationality = "Kenya";
+            // Reset all location fields
+            form.county_id = null;
+            form.sub_county_id = null;
+            form.constituency_id = null;
+            form.ward_id = null;
+            // Reset location state
+            locationState.selectedCounty = null;
+            locationState.selectedSubCounty = null;
+            locationState.selectedConstituency = null;
+            locationState.selectedWard = null;
         }
-    }
-);
-watch(
-    () => form.country_id,
-    () => {
-        form.region_id = null;
-        form.county_id = null;
-        form.sub_county_id = null;
-        form.constituency_id = null;
-        form.ward_id = null;
-        form.location_id = null;
-        form.village_id = null;
     }
 );
 watch(
@@ -393,6 +529,7 @@ watch(
         form.village_id = null;
     }
 );
+// Location changes are now handled by the useLocation composable
 watch(
     () => form.location_id,
     () => {
@@ -1111,7 +1248,13 @@ const toggleSection = (section) => {
                     </div>
 
                     <div>
-                        <InputLabel for="nationality" value="Nationality" />
+                        <div class="flex items-center">
+                            <InputLabel for="nationality" value="Nationality" />
+                            <i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
                         <VueSelect
                             v-model="form.nationality"
                             :options="
@@ -1363,101 +1506,103 @@ const toggleSection = (section) => {
                     <!-- Citizen: Polling Station (if applicable) -->
                     <div v-if="form.role === 'citizen'">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- County Dropdown -->
                             <div>
-                                <InputLabel for="county_id" value="County" />
+                                <div class="flex items-center">
+                                    <InputLabel
+                                        for="county_id"
+                                        value="County"
+                                    />
+                                    <i
+                                        class="fas fa-star text-red-500 text-xs ml-1"
+                                    ></i>
+                                </div>
                                 <VueSelect
-                                    v-model="form.county_id"
-                                    :options="counties"
-                                    placeholder="Select your county"
-                                    class="mt-1 block w-full"
-                                    :class="{
-                                        'border-red-500': form.errors.county_id,
-                                    }"
+                                    v-model="locationState.selectedCounty"
+                                    :options="filteredCounties"
+                                    label="name"
+                                    :reduce="(county) => county.id"
+                                    placeholder="Select County"
+                                    :clearable="true"
+                                    @update:modelValue="
+                                        resetDependentFields('county')
+                                    "
                                 />
-                                <p class="text-xs text-gray-500 mt-1">
-                                    Select the county where you are registered
-                                    or reside.
-                                </p>
-                                <InputError
-                                    :message="form.errors.county_id"
-                                    class="mt-2"
-                                />
+                                <InputError :message="form.errors.county_id" />
                             </div>
+                            <!-- Sub-County Dropdown -->
                             <div>
-                                <InputLabel
-                                    for="sub_county_id"
-                                    value="Sub-County"
-                                />
+                                <div class="flex items-center">
+                                    <InputLabel
+                                        for="sub_county_id"
+                                        value="Sub-County"
+                                    />
+                                    <i
+                                        class="fas fa-star text-red-500 text-xs ml-1"
+                                    ></i>
+                                </div>
                                 <VueSelect
-                                    v-model="form.sub_county_id"
-                                    :options="subCounties"
-                                    placeholder="Select your sub-county"
-                                    class="mt-1 block w-full"
-                                    :class="{
-                                        'border-red-500':
-                                            form.errors.sub_county_id,
-                                    }"
-                                    :disabled="!form.county_id"
+                                    v-model="locationState.selectedSubCounty"
+                                    :options="filteredSubCounties"
+                                    label="name"
+                                    :reduce="(sc) => sc.id"
+                                    placeholder="Select Sub-County"
+                                    :clearable="true"
+                                    :disabled="!locationState.selectedCounty"
                                 />
-                                <p class="text-xs text-gray-500 mt-1">
-                                    Choose your sub-county within the selected
-                                    county.
-                                </p>
                                 <InputError
                                     :message="form.errors.sub_county_id"
-                                    class="mt-2"
                                 />
                             </div>
                         </div>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            <!-- Constituency Dropdown -->
                             <div>
-                                <InputLabel
-                                    for="constituency_id"
-                                    value="Constituency"
-                                />
+                                <div class="flex items-center">
+                                    <InputLabel
+                                        for="constituency_id"
+                                        value="Constituency"
+                                    />
+                                    <i
+                                        class="fas fa-star text-red-500 text-xs ml-1"
+                                    ></i>
+                                </div>
                                 <VueSelect
-                                    v-model="form.constituency_id"
-                                    :options="constituencies"
-                                    placeholder="Select your constituency"
-                                    class="mt-1 block w-full"
-                                    :class="{
-                                        'border-red-500':
-                                            form.errors.constituency_id,
-                                    }"
-                                    :disabled="!form.county_id"
-                                />
-                                <p class="text-xs text-gray-500 mt-1">
-                                    Specify your constituency for more accurate
-                                    location details.
-                                </p>
-                                <InputError
-                                    :message="form.errors.constituency_id"
-                                    class="mt-2"
-                                />
-                            </div>
-                            <div>
-                                <InputLabel for="ward_id" value="Ward" />
-                                <VueSelect
-                                    v-model="form.ward_id"
-                                    :options="wards"
-                                    placeholder="Select your ward"
-                                    class="mt-1 block w-full"
-                                    :class="{
-                                        'border-red-500': form.errors.ward_id,
-                                    }"
-                                    :disabled="
-                                        !form.constituency_id &&
-                                        !form.sub_county_id
+                                    v-model="locationState.selectedConstituency"
+                                    :options="filteredConstituencies"
+                                    label="name"
+                                    :reduce="(co) => co.id"
+                                    placeholder="Select Constituency"
+                                    :clearable="true"
+                                    :disabled="!locationState.selectedCounty"
+                                    @update:modelValue="
+                                        resetDependentFields('constituency')
                                     "
                                 />
-                                <p class="text-xs text-gray-500 mt-1">
-                                    Indicate your ward for the most specific
-                                    address information.
-                                </p>
                                 <InputError
-                                    :message="form.errors.ward_id"
-                                    class="mt-2"
+                                    :message="form.errors.constituency_id"
                                 />
+                            </div>
+                            <!-- Ward Dropdown -->
+                            <div>
+                                <div class="flex items-center">
+                                    <InputLabel for="ward_id" value="Ward" />
+                                    <i
+                                        class="fas fa-star text-red-500 text-xs ml-1"
+                                    ></i>
+                                </div>
+                                <VueSelect
+                                    v-model="locationState.selectedWard"
+                                    :options="filteredWards"
+                                    label="name"
+                                    :reduce="(ward) => ward.id"
+                                    placeholder="Select Ward"
+                                    :clearable="true"
+                                    :disabled="
+                                        !locationState.selectedConstituency
+                                    "
+                                />
+                                <InputError :message="form.errors.ward_id" />
                             </div>
                         </div>
                     </div>
