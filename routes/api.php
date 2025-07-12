@@ -40,13 +40,11 @@ use App\Http\Controllers\API\RefugeeCampController;
 use App\Http\Controllers\API\ServiceTypeController;
 use App\Http\Controllers\API\TransactionController;
 use App\Http\Controllers\API\ActivityTypeController;
-use App\Http\Controllers\API\AnnouncementController;
 use App\Http\Controllers\API\ConstituencyController;
 use App\Http\Controllers\API\CurrencyTypeController;
 use App\Http\Controllers\API\DocumentTypeController;
 use App\Http\Controllers\API\ExchangeRateController;
 use App\Http\Controllers\API\FeedbackTypeController;
-use App\Http\Controllers\API\ActivityNotificationController;
 use App\Http\Controllers\API\AdministratorController;
 use App\Http\Controllers\API\MediaCategoryController;
 use App\Http\Controllers\LipaNaMpesaOnlineController;
@@ -59,11 +57,9 @@ use App\Http\Controllers\API\ReceiptCategoryController;
 use App\Http\Controllers\API\ServiceCategoryController;
 use App\Http\Controllers\API\TransactionTypeController;
 use App\Http\Controllers\API\ActivityCategoryController;
-use App\Http\Controllers\API\AnnouncementTypeController;
 use App\Http\Controllers\API\CurrencyCategoryController;
 use App\Http\Controllers\API\DocumentCategoryController;
 use App\Http\Controllers\API\FeedbackCategoryController;
-use App\Http\Controllers\API\NotificationTypeController;
 use App\Http\Controllers\API\CommunicationTypeController;
 use App\Http\Controllers\API\DepartmentCategoryController;
 use App\Http\Controllers\API\InboundTextMessageController;
@@ -71,9 +67,7 @@ use App\Http\Controllers\API\InboundEmailMessageController;
 use App\Http\Controllers\API\InboundVoiceMessageController;
 use App\Http\Controllers\API\OutboundTextMessageController;
 use App\Http\Controllers\API\TransactionCategoryController;
-use App\Http\Controllers\API\AnnouncementCategoryController;
-use App\Http\Controllers\API\NotificationActivityController;
-use App\Http\Controllers\API\NotificationCategoryController;
+use App\Http\Controllers\API\ActivityNotificationController;
 use App\Http\Controllers\API\OutboundEmailMessageController;
 use App\Http\Controllers\API\OutboundVoiceMessageController;
 use App\Http\Controllers\API\CommunicationCategoryController;
@@ -86,6 +80,9 @@ use App\Http\Controllers\API\OutboundBulkVoiceMessageController;
 })->middleware('auth:sanctum'); */
 
 # (*) public access routes
+// dynamic locations api
+Route::get('/locations', [\App\Http\Controllers\Api\LocationController::class, 'getLocations']);
+
 // register & login authentication
 Route::group(['prefix' => 'auth'], function () {
     Route::post('/sign-up', [AuthenticationController::class, 'signUp'])->name('auth.sign-up');
@@ -229,10 +226,6 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::apiResource('/ticket/type', TicketTypeController::class, ['as' => 'ticket']);
     Route::apiResource('/ticket/category', TicketCategoryController::class, ['as' => 'ticket']);
     Route::apiResource('/ticket/catalog', TicketController::class, ['as' => 'ticket']);
-    // announcement management
-    Route::apiResource('/announcement/type', AnnouncementTypeController::class, ['as' => 'announcement']);
-    Route::apiResource('/announcement/category', AnnouncementCategoryController::class, ['as' => 'announcement']);
-    Route::apiResource('/announcement/catalog', AnnouncementController::class, ['as' => 'announcement']);
     // communication management
     Route::apiResource('/communication/type', CommunicationTypeController::class, ['as' => 'communication']);
     Route::apiResource('/communication/category', CommunicationCategoryController::class, ['as' => 'communication']);
