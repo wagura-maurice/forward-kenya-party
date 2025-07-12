@@ -1,4 +1,5 @@
 <!-- resources/js/Pages/Auth/Register.vue -->
+
 <script setup>
 import { Head, Link, useForm } from "@inertiajs/vue3";
 import {
@@ -28,15 +29,104 @@ const props = defineProps({
     genders: Object,
 });
 
-// Access locationMatrix from Inertia shared props
-const locationMatrix = computed(() => {
-    // Use usePage() if available, fallback to window
-    return (
+// Default location data
+/* const defaultLocationData = [
+    {
+        id: 1,
+        name: "Nairobi",
+        sub_counties: [
+            {
+                id: 1,
+                name: "Westlands",
+                county_id: 1,
+                constituencies: [
+                    {
+                        id: 1,
+                        name: "Westlands Constituency",
+                        county_id: 1,
+                        sub_county_id: 1,
+                        wards: [
+                            { id: 1, name: "Parklands", constituency_id: 1 },
+                            { id: 2, name: "Kitisuru", constituency_id: 1 },
+                            { id: 3, name: "Kangemi", constituency_id: 1 },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 2,
+                name: "Dagoretti",
+                county_id: 1,
+                constituencies: [
+                    {
+                        id: 2,
+                        name: "Dagoretti North",
+                        county_id: 1,
+                        sub_county_id: 2,
+                        wards: [
+                            { id: 4, name: "Kilimani", constituency_id: 2 },
+                            { id: 5, name: "Kawangware", constituency_id: 2 },
+                            { id: 6, name: "Mutuini", constituency_id: 2 },
+                        ],
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: 2,
+        name: "Mombasa",
+        sub_counties: [
+            {
+                id: 3,
+                name: "Mvita",
+                county_id: 2,
+                constituencies: [
+                    {
+                        id: 3,
+                        name: "Mvita",
+                        county_id: 2,
+                        sub_county_id: 3,
+                        wards: [
+                            { id: 7, name: "Tudor", constituency_id: 3 },
+                            { id: 8, name: "Tononoka", constituency_id: 3 },
+                            { id: 9, name: "Shimanzi", constituency_id: 3 },
+                        ],
+                    },
+                ],
+            },
+        ],
+    },
+]; */
+
+// Access locationMatrix from Inertia shared props with fallback to default data
+/* const locationMatrix = computed(() => {
+    // Try to get data from Inertia
+    const fromPage =
         usePage().props.locationMatrix ||
-        (window.$page && window.$page.props.locationMatrix) ||
-        []
-    );
-});
+        (window.$page && window.$page.props.locationMatrix);
+
+    // Return server data if available, otherwise use default data
+    return fromPage && fromPage.length > 0 ? fromPage : defaultLocationData;
+}); */
+
+const locationMatrix = ref([]);
+
+// Fetch locations from the server
+const fetchLocations = () => {
+    return new Promise((resolve, reject) => {
+        axios
+            .get("/api/locations")
+            .then((response) => {
+                locationMatrix.value = response.data;
+                resolve(response.data);
+            })
+            .catch((error) => {
+                console.error("Error fetching locations:", error);
+                reject(error);
+            });
+    });
+};
 
 // Initialize location handling with the useLocation composable
 const locationState = reactive({
@@ -55,25 +145,48 @@ const locationData = reactive({
 });
 
 // Initialize location data when component is mounted
-onMounted(() => {
-    console.log("Location Matrix:", locationMatrix.value);
-    locationData.counties = [...(locationMatrix.value || [])];
-    console.log("Location Data - Counties:", locationData.counties);
-    locationData.subCounties = locationData.counties.flatMap(
-        (county) => county.sub_counties || []
-    );
-    locationData.constituencies = locationData.counties.flatMap((county) =>
-        (county.sub_counties || []).flatMap(
-            (subCounty) => subCounty.constituencies || []
-        )
-    );
-    locationData.wards = locationData.counties.flatMap((county) =>
-        (county.sub_counties || []).flatMap((subCounty) =>
-            (subCounty.constituencies || []).flatMap(
-                (constituency) => constituency.wards || []
-            )
-        )
-    );
+const initializeLocations = async () => {
+    try {
+        await fetchLocations();
+        console.log("Location Matrix:", locationMatrix.value);
+
+        // Check if we have the expected data structure
+        if (locationMatrix.value && locationMatrix.value.data) {
+            const { counties, subCounties, constituencies, wards } =
+                locationMatrix.value.data;
+
+            // Map the API response to our expected format
+            locationData.counties = Array.isArray(counties)
+                ? counties.flat()
+                : [];
+            locationData.subCounties = Array.isArray(subCounties)
+                ? Object.values(subCounties).flat()
+                : [];
+            locationData.constituencies = Array.isArray(constituencies)
+                ? Object.values(constituencies).flat()
+                : [];
+            locationData.wards = Array.isArray(wards)
+                ? Object.values(wards).flat()
+                : [];
+
+            console.log("Location Data - Counties:", locationData.counties);
+            console.log("Subcounties:", locationData.subCounties);
+            console.log("Constituencies:", locationData.constituencies);
+            console.log("Wards:", locationData.wards);
+        } else {
+            console.error(
+                "Unexpected API response format:",
+                locationMatrix.value
+            );
+        }
+    } catch (error) {
+        console.error("Failed to initialize locations:", error);
+    }
+};
+
+// Call the initialization
+onMounted(async () => {
+    await initializeLocations();
 
     // Set initial values from form if they exist
     if (form.county_id) locationState.selectedCounty = form.county_id;
@@ -87,28 +200,28 @@ onMounted(() => {
 // Filtered data for dropdowns
 const filteredSubCounties = computed(() => {
     if (!locationState.selectedCounty) return [];
-    return locationData.subCounties.filter(
+    return (locationData.subCounties || []).filter(
         (subCounty) => subCounty.county_id == locationState.selectedCounty
     );
 });
 
 const filteredConstituencies = computed(() => {
     if (!locationState.selectedCounty) return [];
-    return locationData.constituencies.filter(
+    return (locationData.constituencies || []).filter(
         (constituency) => constituency.county_id == locationState.selectedCounty
     );
 });
 
 const filteredWards = computed(() => {
     if (!locationState.selectedConstituency) return [];
-    return locationData.wards.filter(
+    return (locationData.wards || []).filter(
         (ward) => ward.constituency_id == locationState.selectedConstituency
     );
 });
 
 // Filter counties for the dropdown
 const filteredCounties = computed(() => {
-    return locationData.counties || [];
+    return Array.isArray(locationData.counties) ? locationData.counties : [];
 });
 
 // Watch for changes in location state and update the form
@@ -798,6 +911,11 @@ const nextStep = () => {
                 "form",
                 "Please provide a security question and answer"
             );
+            window.Toast.fire({
+                icon: "warning",
+                title: "Security Information Required",
+                text: "Please provide both a security question and answer before proceeding.",
+            });
             isValid = false;
         }
     } else if (currentStep.value === 7) {
@@ -2179,62 +2297,132 @@ const toggleSection = (section) => {
                 </div>
 
                 <!-- Step 7: Document Uploads -->
-                <div v-if="currentStep === 7" class="space-y-4">
-                    <h2
-                        class="text-sm font-light text-gray-500 dark:text-gray-400"
-                    >
+                <div v-if="currentStep === 7" class="space-y-6 px-2 sm:px-0">
+                    <h2 class="text-base font-medium text-gray-700">
                         Step {{ currentStep }}: {{ stepDescription }}
                     </h2>
+
+                    <!-- Proof of Identity Section -->
                     <div
-                        class="border border-dashed border-gray-300 rounded-lg p-4"
+                        class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden"
                     >
-                        <div>
-                            <InputLabel
-                                for="proof_of_identity"
-                                value="Proof of Identity"
-                                class="block text-sm font-medium text-gray-700"
-                            />
-                            <div class="mt-4 space-y-2">
-                                <div class="flex space-x-2">
-                                    <VueSelect
-                                        v-model="form.proof_of_identity_type"
-                                        :options="[
-                                            {
-                                                value: 'national_id',
-                                                label: 'National ID',
-                                            },
-                                            {
-                                                value: 'passport',
-                                                label: 'Passport',
-                                            },
-                                            {
-                                                value: 'driving_license',
-                                                label: 'Driving License',
-                                            },
-                                            { value: 'other', label: 'Other' },
-                                        ]"
-                                        placeholder="Select document type"
-                                        label="label"
-                                        :reduce="(option) => option.value"
-                                        class="w-1/3 custom-select"
-                                    />
-                                    <div
-                                        class="flex-1 dropzone-area"
-                                        @dragover.prevent="isDragging = true"
-                                        @dragleave.prevent="isDragging = false"
-                                        @drop.prevent="
-                                            onDrop($event, 'proof_of_identity')
+                        <div class="p-4 border-b border-gray-200 bg-gray-50">
+                            <h3 class="text-sm font-medium text-gray-700">
+                                <i
+                                    class="fas fa-id-card text-blue-500 mr-2"
+                                ></i>
+                                Proof of Identity
+                            </h3>
+                        </div>
+                        <div class="p-4">
+                            <div class="space-y-4">
+                                <!-- Document Type Selection -->
+                                <div class="w-full">
+                                    <label
+                                        class="block text-sm font-medium text-gray-700 mb-1"
+                                    >
+                                        Document Type
+                                        <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <VueSelect
+                                            v-model="
+                                                form.proof_of_identity_type
+                                            "
+                                            :options="[
+                                                {
+                                                    value: 'national_id',
+                                                    label: 'National ID',
+                                                },
+                                                {
+                                                    value: 'passport',
+                                                    label: 'Passport',
+                                                },
+                                                {
+                                                    value: 'driving_license',
+                                                    label: 'Driving License',
+                                                },
+                                                {
+                                                    value: 'other',
+                                                    label: 'Other',
+                                                },
+                                            ]"
+                                            placeholder="Select document type"
+                                            :reduce="(option) => option.value"
+                                            class="v-select-sm w-full"
+                                            :clearable="false"
+                                            :searchable="false"
+                                            :class="{
+                                                'border-red-300':
+                                                    form.errors
+                                                        .proof_of_identity_type,
+                                            }"
+                                        />
+                                    </div>
+                                    <p class="mt-1 text-xs text-gray-500">
+                                        Select the type of identification
+                                        document
+                                    </p>
+                                    <InputError
+                                        :message="
+                                            form.errors.proof_of_identity_type
                                         "
+                                        class="mt-1"
+                                    />
+                                </div>
+
+                                <!-- File Upload Area -->
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium text-gray-700 mb-1"
+                                    >
+                                        Upload Document
+                                        <span class="text-red-500">*</span>
+                                    </label>
+                                    <div
+                                        class="mt-1 flex justify-center px-4 sm:px-6 pt-5 pb-6 border-2 border-dashed border-gray-300 rounded-lg transition-colors cursor-pointer hover:border-blue-500 hover:bg-blue-50"
                                         :class="{
-                                            'dropzone-active': isDragging,
+                                            'border-blue-500 bg-blue-50':
+                                                dragOverIdentity,
+                                            'border-red-300':
+                                                form.errors.proof_of_identity,
                                         }"
-                                        @click="
-                                            triggerFileInput(
+                                        @dragover.prevent="
+                                            dragOverIdentity = true
+                                        "
+                                        @dragleave.prevent="
+                                            dragOverIdentity = false
+                                        "
+                                        @drop.prevent="
+                                            handleFileDrop(
+                                                $event,
                                                 'proof_of_identity'
                                             )
                                         "
-                                        style="cursor: pointer"
+                                        @click="
+                                            $refs.fileInputIdentity?.click()
+                                        "
                                     >
+                                        <div class="space-y-2 text-center">
+                                            <i
+                                                class="fas fa-cloud-upload-alt text-3xl sm:text-4xl text-gray-400"
+                                            ></i>
+                                            <div class="text-sm text-gray-600">
+                                                <p
+                                                    class="font-medium text-blue-600 hover:text-blue-800"
+                                                >
+                                                    Click to upload
+                                                </p>
+                                                <p class="text-xs">
+                                                    or drag and drop
+                                                </p>
+                                            </div>
+                                            <p
+                                                class="text-xs text-gray-500 px-2"
+                                            >
+                                                PDF, JPG, or PNG (max 5MB)
+                                            </p>
+                                        </div>
                                         <input
                                             ref="fileInputIdentity"
                                             type="file"
@@ -2248,157 +2436,227 @@ const toggleSection = (section) => {
                                             "
                                             class="hidden"
                                         />
-                                        <div class="text-center text-gray-400">
-                                            <i
-                                                class="fas fa-cloud-upload-alt text-2xl mb-1"
-                                            ></i>
-                                            <div>
-                                                Drag & drop or click to select
-                                                ID document (PDF, JPG, PNG)
-                                            </div>
-                                        </div>
                                     </div>
+                                    <InputError
+                                        :message="form.errors.proof_of_identity"
+                                        class="mt-1"
+                                    />
                                 </div>
                                 <!-- File Preview -->
-                                <div
-                                    v-if="form.proof_of_identity"
-                                    class="mt-2 p-3 border rounded-md bg-gray-50"
-                                >
-                                    <div class="flex items-start space-x-3">
+                                <!-- File Preview -->
+                                <div v-if="form.proof_of_identity" class="mt-3">
+                                    <div
+                                        class="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg"
+                                    >
                                         <div
-                                            v-if="
-                                                form.proof_of_identity
-                                                    .preview &&
-                                                form.proof_of_identity.type.startsWith(
-                                                    'image/'
-                                                )
-                                            "
-                                            class="flex-shrink-0"
+                                            class="flex items-center space-x-3 min-w-0 flex-1"
                                         >
-                                            <img
-                                                :src="
+                                            <div
+                                                v-if="
                                                     form.proof_of_identity
-                                                        .preview
+                                                        .preview &&
+                                                    form.proof_of_identity.type.startsWith(
+                                                        'image/'
+                                                    )
                                                 "
-                                                class="h-16 w-16 object-cover rounded"
-                                                alt="ID Preview"
-                                            />
-                                        </div>
-                                        <div
-                                            v-else
-                                            class="flex-shrink-0 flex items-center justify-center h-16 w-16 bg-gray-200 rounded"
-                                        >
-                                            <i
-                                                class="fas fa-file-alt text-gray-500 text-2xl"
-                                            ></i>
-                                        </div>
-                                        <div class="flex-1 min-w-0">
-                                            <p
-                                                class="text-sm font-medium text-gray-900 truncate"
+                                                class="flex-shrink-0"
                                             >
-                                                {{
-                                                    form.proof_of_identity.name
-                                                }}
-                                            </p>
-                                            <p class="text-xs text-gray-500">
-                                                {{
-                                                    formatFileSize(
+                                                <img
+                                                    :src="
                                                         form.proof_of_identity
-                                                            .size
-                                                    )
-                                                }}
-                                                •
-                                                {{
-                                                    form.proof_of_identity.type
-                                                }}
-                                            </p>
-                                            <p class="text-xs text-gray-500">
-                                                {{
-                                                    formatDocumentType(
+                                                            .preview
+                                                    "
+                                                    class="h-12 w-12 object-cover rounded-md"
+                                                    alt="Document preview"
+                                                />
+                                            </div>
+                                            <div
+                                                v-else
+                                                class="flex-shrink-0 flex items-center justify-center h-12 w-12 bg-gray-100 rounded-md"
+                                            >
+                                                <i
+                                                    class="fas fa-file-alt text-gray-400 text-xl"
+                                                ></i>
+                                            </div>
+                                            <div
+                                                class="min-w-0 flex-1 overflow-hidden"
+                                            >
+                                                <p
+                                                    class="text-sm font-medium text-gray-900 truncate"
+                                                >
+                                                    {{
                                                         form.proof_of_identity
-                                                            .documentType
-                                                    )
-                                                }}
-                                            </p>
+                                                            .name
+                                                    }}
+                                                </p>
+                                                <div
+                                                    class="flex items-center space-x-2 text-xs text-gray-500"
+                                                >
+                                                    <span>{{
+                                                        formatFileSize(
+                                                            form
+                                                                .proof_of_identity
+                                                                .size
+                                                        )
+                                                    }}</span>
+                                                    <span>•</span>
+                                                    <span class="truncate">
+                                                        {{
+                                                            form.proof_of_identity.type
+                                                                .split("/")[1]
+                                                                ?.toUpperCase() ||
+                                                            "FILE"
+                                                        }}
+                                                    </span>
+                                                </div>
+                                            </div>
                                         </div>
                                         <button
                                             type="button"
-                                            @click="
+                                            @click.stop="
                                                 form.proof_of_identity = null
                                             "
-                                            class="text-red-600 hover:text-red-800"
+                                            class="text-gray-400 hover:text-red-500 p-2 -mr-2"
                                             aria-label="Remove file"
                                         >
                                             <i class="fas fa-times"></i>
                                         </button>
                                     </div>
                                 </div>
-                                <p v-else class="text-sm text-gray-500">
-                                    No file uploaded. Please upload a clear
-                                    photo of your ID.
-                                </p>
+
+                                <div v-else class="text-center py-3">
+                                    <p class="text-sm text-gray-500">
+                                        <i class="fas fa-info-circle mr-1"></i>
+                                        No file uploaded. Please upload a clear
+                                        photo of your ID.
+                                    </p>
+                                </div>
+
+                                <InputError
+                                    :message="form.errors.proof_of_identity"
+                                    class="mt-1"
+                                />
                             </div>
-                            <p
-                                v-if="form.errors.proof_of_identity"
-                                class="mt-1 text-sm text-red-600"
-                            >
-                                {{ form.errors.proof_of_identity }}
-                            </p>
                         </div>
                     </div>
                 </div>
-                <!-- End of Proof of Identity Section -->
 
                 <!-- Proof of Address Section -->
-                <div v-if="currentStep === 7" class="mt-6">
+                <div v-if="currentStep === 7" class="mt-6 px-2 sm:px-0">
                     <div
-                        class="border border-dashed border-gray-300 rounded-lg p-4"
+                        class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden"
                     >
-                        <div>
-                            <InputLabel
-                                for="proof_of_address"
-                                value="Proof of Address"
-                                class="block text-sm font-medium text-gray-700"
-                            />
-                            <div class="mt-4 space-y-2">
-                                <div class="flex space-x-2">
-                                    <VueSelect
-                                        v-model="form.proof_of_address_type"
-                                        :options="[
-                                            {
-                                                value: 'utility_bill',
-                                                label: 'Utility Bill',
-                                            },
-                                            {
-                                                value: 'bank_statement',
-                                                label: 'Bank Statement',
-                                            },
-                                            {
-                                                value: 'rental_agreement',
-                                                label: 'Rental Agreement',
-                                            },
-                                            { value: 'other', label: 'Other' },
-                                        ]"
-                                        placeholder="Select address document type"
-                                        label="label"
-                                        :reduce="(option) => option.value"
-                                        class="w-1/3 custom-select"
-                                    />
-                                    <div
-                                        class="flex-1 dropzone-area"
-                                        @dragover.prevent="isDragging = true"
-                                        @dragleave.prevent="isDragging = false"
-                                        @drop.prevent="
-                                            onDrop($event, 'proof_of_address')
-                                        "
-                                        :class="{
-                                            'dropzone-active': isDragging,
-                                        }"
-                                        @click="
-                                            triggerFileInput('proof_of_address')
-                                        "
-                                        style="cursor: pointer"
+                        <div class="p-4 border-b border-gray-200 bg-gray-50">
+                            <h3 class="text-sm font-medium text-gray-700">
+                                <i class="fas fa-home text-blue-500 mr-2"></i>
+                                Proof of Address
+                            </h3>
+                        </div>
+                        <div class="p-4">
+                            <div class="space-y-4">
+                                <!-- Document Type Selection -->
+                                <div class="w-full">
+                                    <label
+                                        class="block text-sm font-medium text-gray-700 mb-1"
                                     >
+                                        Document Type
+                                        <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <VueSelect
+                                            v-model="form.proof_of_address_type"
+                                            :options="[
+                                                {
+                                                    value: 'utility_bill',
+                                                    label: 'Utility Bill',
+                                                },
+                                                {
+                                                    value: 'bank_statement',
+                                                    label: 'Bank Statement',
+                                                },
+                                                {
+                                                    value: 'rental_agreement',
+                                                    label: 'Rental Agreement',
+                                                },
+                                                {
+                                                    value: 'other',
+                                                    label: 'Other',
+                                                },
+                                            ]"
+                                            placeholder="Select document type"
+                                            :reduce="(option) => option.value"
+                                            class="v-select-sm w-full"
+                                            :clearable="false"
+                                            :searchable="false"
+                                            :class="{
+                                                'border-red-300':
+                                                    form.errors
+                                                        .proof_of_address_type,
+                                            }"
+                                        />
+                                    </div>
+                                    <p class="mt-1 text-xs text-gray-500">
+                                        Select a document that verifies your
+                                        address
+                                    </p>
+                                    <InputError
+                                        :message="
+                                            form.errors.proof_of_address_type
+                                        "
+                                        class="mt-1"
+                                    />
+                                </div>
+
+                                <!-- File Upload Area -->
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium text-gray-700 mb-1"
+                                    >
+                                        Upload Document
+                                        <span class="text-red-500">*</span>
+                                    </label>
+                                    <div
+                                        class="mt-1 flex justify-center px-4 sm:px-6 pt-5 pb-6 border-2 border-dashed border-gray-300 rounded-lg transition-colors cursor-pointer hover:border-blue-500 hover:bg-blue-50"
+                                        :class="{
+                                            'border-blue-500 bg-blue-50':
+                                                dragOverAddress,
+                                            'border-red-300':
+                                                form.errors.proof_of_address,
+                                        }"
+                                        @dragover.prevent="
+                                            dragOverAddress = true
+                                        "
+                                        @dragleave.prevent="
+                                            dragOverAddress = false
+                                        "
+                                        @drop.prevent="
+                                            handleFileDrop(
+                                                $event,
+                                                'proof_of_address'
+                                            )
+                                        "
+                                        @click="$refs.fileInputAddress?.click()"
+                                    >
+                                        <div class="space-y-2 text-center">
+                                            <i
+                                                class="fas fa-cloud-upload-alt text-3xl sm:text-4xl text-gray-400"
+                                            ></i>
+                                            <div class="text-sm text-gray-600">
+                                                <p
+                                                    class="font-medium text-blue-600 hover:text-blue-800"
+                                                >
+                                                    Click to upload
+                                                </p>
+                                                <p class="text-xs">
+                                                    or drag and drop
+                                                </p>
+                                            </div>
+                                            <p
+                                                class="text-xs text-gray-500 px-2"
+                                            >
+                                                PDF, JPG, or PNG (max 5MB)
+                                            </p>
+                                        </div>
                                         <input
                                             ref="fileInputAddress"
                                             type="file"
@@ -2412,16 +2670,11 @@ const toggleSection = (section) => {
                                             "
                                             class="hidden"
                                         />
-                                        <div class="text-center text-gray-400">
-                                            <i
-                                                class="fas fa-cloud-upload-alt text-2xl mb-1"
-                                            ></i>
-                                            <div>
-                                                Drag & drop or click to select
-                                                address document (PDF, JPG, PNG)
-                                            </div>
-                                        </div>
                                     </div>
+                                    <InputError
+                                        :message="form.errors.proof_of_address"
+                                        class="mt-1"
+                                    />
                                 </div>
                                 <!-- File Preview -->
                                 <div
@@ -2813,7 +3066,7 @@ const toggleSection = (section) => {
                                                             'image/'
                                                         )
                                                     "
-                                                    class="flex flex-col items-center"
+                                                    class="flex flex-col items-center w-full"
                                                 >
                                                     <img
                                                         :src="
@@ -2851,367 +3104,993 @@ const toggleSection = (section) => {
                                             </div>
                                         </div>
 
-                                        <!-- Document Details -->
-                                        <div
-                                            class="mt-3 p-3 bg-gray-50 rounded-lg space-y-2"
-                                        >
-                                            <p
-                                                class="text-sm font-medium text-gray-900 text-center"
-                                            >
-                                                {{
-                                                    form.proof_of_identity_type ||
-                                                    "Identity Document"
-                                                }}
-                                            </p>
-                                            <div
-                                                class="flex items-center justify-between text-xs text-gray-600"
-                                            >
-                                                <div
-                                                    class="flex items-center space-x-2"
-                                                >
-                                                    <i
-                                                        class="fas fa-file text-gray-400"
-                                                    ></i>
-                                                    <span
-                                                        class="truncate max-w-[120px] sm:max-w-[180px]"
+                                        <div class="p-4">
+                                            <div class="space-y-4">
+                                                <!-- Document Type Selection -->
+                                                <div class="w-full">
+                                                    <label
+                                                        class="block text-sm font-medium text-gray-700 mb-1"
                                                     >
-                                                        {{
-                                                            form
-                                                                .proof_of_identity
-                                                                .name ||
-                                                            "No file name"
-                                                        }}
-                                                    </span>
-                                                </div>
-                                                <div
-                                                    class="flex items-center space-x-2"
-                                                >
-                                                    <i
-                                                        class="fas fa-save text-gray-400"
-                                                    ></i>
-                                                    <span>
-                                                        {{
-                                                            formatFileSize(
-                                                                form
-                                                                    .proof_of_identity
-                                                                    .size
-                                                            ) || "N/A"
-                                                        }}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <p
-                                        v-else
-                                        class="text-sm text-gray-500 italic"
-                                    >
-                                        No identity document uploaded
-                                    </p>
-                                </div>
-
-                                <!-- Proof of Address -->
-                                <div class="space-y-2 w-1/2 px-2">
-                                    <p
-                                        class="text-sm font-medium text-gray-500"
-                                    >
-                                        Proof of Address
-                                    </p>
-                                    <div
-                                        v-if="form.proof_of_address"
-                                        class="w-full"
-                                    >
-                                        <!-- Image Preview Container -->
-                                        <div
-                                            class="bg-white p-3 rounded-lg border border-gray-200"
-                                        >
-                                            <div class="flex justify-center">
-                                                <div
-                                                    v-if="
-                                                        form.proof_of_address
-                                                            .preview &&
-                                                        form.proof_of_address.type.startsWith(
-                                                            'image/'
-                                                        )
-                                                    "
-                                                    class="flex flex-col items-center"
-                                                >
-                                                    <img
-                                                        :src="
-                                                            form
-                                                                .proof_of_address
-                                                                .preview
+                                                        Document Type
+                                                        <span
+                                                            class="text-red-500"
+                                                            >*</span
+                                                        >
+                                                    </label>
+                                                    <VueSelect
+                                                        v-model="
+                                                            form.identity_document_type
                                                         "
-                                                        class="h-40 w-auto max-w-full object-contain rounded"
-                                                        alt="Address Proof Preview"
+                                                        :options="[
+                                                            'National ID',
+                                                            'Passport',
+                                                            'Driving License',
+                                                            'Alien ID',
+                                                            'Birth Certificate',
+                                                        ]"
+                                                        placeholder="Select document type"
+                                                        class="v-select-sm w-full"
+                                                        :class="{
+                                                            'border-red-500':
+                                                                form.errors
+                                                                    .identity_document_type,
+                                                        }"
+                                                        :reduce="
+                                                            (option) => option
+                                                        "
+                                                        :clearable="false"
+                                                        :searchable="false"
+                                                    />
+                                                    <InputError
+                                                        :message="
+                                                            form.errors
+                                                                .identity_document_type
+                                                        "
+                                                        class="mt-1"
                                                     />
                                                 </div>
-                                                <div
-                                                    v-else
-                                                    class="flex flex-col items-center justify-center p-6 bg-gray-50 rounded-lg border border-gray-200 text-center w-full"
-                                                >
-                                                    <i
-                                                        class="fas fa-file-alt text-4xl text-gray-400 mb-2"
-                                                    ></i>
-                                                    <p
-                                                        class="text-xs text-gray-500"
-                                                    >
-                                                        Document Preview
-                                                    </p>
-                                                    <p
-                                                        class="text-xs text-gray-400 mt-1"
-                                                    >
-                                                        {{
-                                                            form
-                                                                .proof_of_address
-                                                                .name ||
-                                                            "Document"
-                                                        }}
-                                                    </p>
-                                                </div>
-                                            </div>
-                                        </div>
 
-                                        <!-- Document Details -->
-                                        <div
-                                            class="mt-3 p-3 bg-gray-50 rounded-lg space-y-2"
-                                        >
-                                            <p
-                                                class="text-sm font-medium text-gray-900 text-center"
-                                            >
-                                                {{
-                                                    form.proof_of_address_type ||
-                                                    "Address Document"
-                                                }}
-                                            </p>
-                                            <div
-                                                class="flex items-center justify-between text-xs text-gray-600"
-                                            >
-                                                <div
-                                                    class="flex items-center space-x-2"
-                                                >
-                                                    <i
-                                                        class="fas fa-file text-gray-400"
-                                                    ></i>
-                                                    <span
-                                                        class="truncate max-w-[120px] sm:max-w-[180px]"
+                                                <!-- File Upload Dropzone -->
+                                                <div>
+                                                    <label
+                                                        class="block text-sm font-medium text-gray-700 mb-1"
                                                     >
-                                                        {{
-                                                            form
-                                                                .proof_of_address
-                                                                .name ||
-                                                            "No file name"
-                                                        }}
-                                                    </span>
+                                                        Upload Document
+                                                        <span
+                                                            class="text-red-500"
+                                                            >*</span
+                                                        >
+                                                    </label>
+                                                    <div
+                                                        @dragover.prevent="
+                                                            dragOver = true
+                                                        "
+                                                        @dragleave="
+                                                            dragOver = false
+                                                        "
+                                                        @drop.prevent="
+                                                            handleFileDrop(
+                                                                $event,
+                                                                'proof_of_identity'
+                                                            )
+                                                        "
+                                                        @click="
+                                                            $refs.identityFileInput?.click()
+                                                        "
+                                                        class="mt-1 flex justify-center px-4 py-6 border-2 border-dashed rounded-lg cursor-pointer transition-all duration-150"
+                                                        :class="{
+                                                            'border-blue-500 bg-blue-50':
+                                                                dragOver,
+                                                            'border-gray-300 hover:border-blue-400':
+                                                                !dragOver,
+                                                            'border-red-500':
+                                                                form.errors
+                                                                    .proof_of_identity,
+                                                        }"
+                                                    >
+                                                        <div
+                                                            class="space-y-2 text-center"
+                                                        >
+                                                            <i
+                                                                class="fas fa-cloud-upload-alt text-3xl mx-auto transition-colors duration-150"
+                                                                :class="{
+                                                                    'text-blue-500':
+                                                                        dragOver,
+                                                                    'text-gray-400':
+                                                                        !dragOver,
+                                                                }"
+                                                            ></i>
+                                                            <div
+                                                                class="text-sm text-gray-600"
+                                                            >
+                                                                <p>
+                                                                    <span
+                                                                        class="font-medium text-blue-600 hover:text-blue-500"
+                                                                    >
+                                                                        Click to
+                                                                        upload
+                                                                    </span>
+                                                                    or drag and
+                                                                    drop
+                                                                </p>
+                                                            </div>
+                                                            <p
+                                                                class="text-xs text-gray-500"
+                                                            >
+                                                                PDF, JPG, or PNG
+                                                                (max 5MB)
+                                                            </p>
+                                                        </div>
+                                                        <input
+                                                            ref="identityFileInput"
+                                                            type="file"
+                                                            class="hidden"
+                                                            accept=".pdf,.jpg,.jpeg,.png"
+                                                            @change="
+                                                                handleFileUpload(
+                                                                    $event,
+                                                                    'proof_of_identity'
+                                                                )
+                                                            "
+                                                        />
+                                                    </div>
+                                                    <InputError
+                                                        :message="
+                                                            form.errors
+                                                                .proof_of_identity
+                                                        "
+                                                        class="mt-1"
+                                                    />
                                                 </div>
+
+                                                <!-- File Preview -->
                                                 <div
-                                                    class="flex items-center space-x-2"
+                                                    v-if="
+                                                        form.proof_of_identity
+                                                    "
+                                                    class="mt-3 bg-gray-50 rounded-lg p-3 border border-gray-200"
                                                 >
-                                                    <i
-                                                        class="fas fa-save text-gray-400"
-                                                    ></i>
-                                                    <span>
-                                                        {{
-                                                            formatFileSize(
-                                                                form
-                                                                    .proof_of_address
-                                                                    .size
-                                                            ) || "N/A"
-                                                        }}
-                                                    </span>
+                                                    <div
+                                                        class="flex items-start justify-between"
+                                                    >
+                                                        <div
+                                                            class="flex items-start space-x-3 min-w-0"
+                                                        >
+                                                            <div
+                                                                v-if="
+                                                                    form
+                                                                        .proof_of_identity
+                                                                        .preview &&
+                                                                    form.proof_of_identity.type.startsWith(
+                                                                        'image/'
+                                                                    )
+                                                                "
+                                                                class="flex-shrink-0"
+                                                            >
+                                                                <img
+                                                                    :src="
+                                                                        form
+                                                                            .proof_of_identity
+                                                                            .preview
+                                                                    "
+                                                                    class="h-16 w-16 object-cover rounded border border-gray-200"
+                                                                    alt="Document preview"
+                                                                />
+                                                            </div>
+                                                            <div
+                                                                v-else
+                                                                class="flex-shrink-0 flex items-center justify-center h-16 w-16 bg-white border border-gray-200 rounded"
+                                                            >
+                                                                <i
+                                                                    class="fas fa-file-alt text-gray-400 text-2xl"
+                                                                ></i>
+                                                            </div>
+                                                            <div
+                                                                class="min-w-0"
+                                                            >
+                                                                <p
+                                                                    class="text-sm font-medium text-gray-900 truncate"
+                                                                >
+                                                                    {{
+                                                                        form
+                                                                            .proof_of_identity
+                                                                            .name
+                                                                    }}
+                                                                </p>
+                                                                <p
+                                                                    class="text-xs text-gray-500 mt-1"
+                                                                >
+                                                                    {{
+                                                                        formatFileSize(
+                                                                            form
+                                                                                .proof_of_identity
+                                                                                .size
+                                                                        )
+                                                                    }}
+                                                                    •
+                                                                    {{
+                                                                        form
+                                                                            .proof_of_identity
+                                                                            .type
+                                                                    }}
+                                                                </p>
+                                                                <p
+                                                                    v-if="
+                                                                        form.identity_document_type
+                                                                    "
+                                                                    class="text-xs text-gray-500 mt-1"
+                                                                >
+                                                                    {{
+                                                                        formatDocumentType(
+                                                                            form.identity_document_type
+                                                                        )
+                                                                    }}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <button
+                                                            type="button"
+                                                            @click="
+                                                                form.proof_of_identity =
+                                                                    null
+                                                            "
+                                                            class="text-gray-400 hover:text-red-600 transition-colors"
+                                                            aria-label="Remove file"
+                                                        >
+                                                            <i
+                                                                class="fas fa-times"
+                                                            ></i>
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <p v-else class="text-sm text-gray-500">
-                                        No file uploaded
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
 
-                    <!-- Contact Information Card -->
-                    <div
-                        class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden transition-all duration-300 ease-in-out"
-                        :class="
-                            expandedSections.contact
-                                ? 'min-h-[180px]'
-                                : 'h-[56px] overflow-hidden'
-                        "
-                    >
-                        <div
-                            @click="toggleSection('contact')"
-                            class="w-full px-4 py-3 text-left flex justify-between items-center bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-150 cursor-pointer"
-                            role="button"
-                            tabindex="0"
-                            @keydown.enter="toggleSection('contact')"
-                            @keydown.space.prevent="toggleSection('contact')"
-                        >
-                            <h3
-                                class="text-base sm:text-lg font-medium text-gray-900"
-                            >
-                                Contact Information
-                            </h3>
-                            <i
-                                class="fas fa-chevron-down text-gray-500 transition-transform duration-200"
-                                :class="{
-                                    'transform rotate-180':
-                                        expandedSections.contact,
-                                }"
-                            ></i>
-                        </div>
-                        <div
-                            v-show="expandedSections.contact"
-                            class="p-4 border-t border-gray-200 space-y-4"
-                        >
-                            <div class="space-y-1">
-                                <p class="text-sm text-gray-500">Email</p>
-                                <p class="font-medium text-gray-900">
-                                    {{ form.email }}
-                                </p>
-                            </div>
-                            <div class="space-y-1">
-                                <p class="text-sm text-gray-500">Phone</p>
-                                <p class="font-medium text-gray-900">
-                                    {{ form.telephone }}
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+                                    <!-- Proof of Address -->
+                                    <div class="space-y-2 w-1/2 px-2">
+                                        <div
+                                            class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden"
+                                        >
+                                            <div
+                                                class="p-4 border-b border-gray-200 bg-gray-50"
+                                            >
+                                                <h3
+                                                    class="text-sm font-medium text-gray-700"
+                                                >
+                                                    <i
+                                                        class="fas fa-home text-blue-500 mr-2"
+                                                    ></i>
+                                                    Proof of Address
+                                                    <span
+                                                        class="text-red-500 ml-1"
+                                                        >*</span
+                                                    >
+                                                </h3>
+                                            </div>
+                                            <div class="p-4">
+                                                <div class="space-y-4">
+                                                    <!-- Document Type Selection -->
+                                                    <div class="w-full">
+                                                        <label
+                                                            class="block text-sm font-medium text-gray-700 mb-1"
+                                                        >
+                                                            Document Type
+                                                            <span
+                                                                class="text-red-500"
+                                                                >*</span
+                                                            >
+                                                        </label>
+                                                        <VueSelect
+                                                            v-model="
+                                                                form.address_document_type
+                                                            "
+                                                            :options="[
+                                                                'Utility Bill',
+                                                                'Bank Statement',
+                                                                'Lease Agreement',
+                                                                'Government Letter',
+                                                                'Other',
+                                                            ]"
+                                                            placeholder="Select document type"
+                                                            class="v-select-sm w-full"
+                                                            :class="{
+                                                                'border-red-500':
+                                                                    form.errors
+                                                                        .address_document_type,
+                                                            }"
+                                                            :reduce="
+                                                                (option) =>
+                                                                    option
+                                                            "
+                                                            :clearable="false"
+                                                            :searchable="false"
+                                                        />
+                                                        <InputError
+                                                            :message="
+                                                                form.errors
+                                                                    .address_document_type
+                                                            "
+                                                            class="mt-1"
+                                                        />
+                                                    </div>
 
-                    <!-- Education & Employment Card -->
-                    <div
-                        class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden transition-all duration-300 ease-in-out"
-                        :class="
-                            expandedSections.education
-                                ? 'min-h-[180px]'
-                                : 'h-[56px] overflow-hidden'
-                        "
-                    >
-                        <div
-                            @click="toggleSection('education')"
-                            class="w-full px-4 py-3 text-left flex justify-between items-center bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-150 cursor-pointer"
-                            role="button"
-                            tabindex="0"
-                            @keydown.enter="toggleSection('education')"
-                            @keydown.space.prevent="toggleSection('education')"
-                        >
-                            <h3
-                                class="text-base sm:text-lg font-medium text-gray-900"
-                            >
-                                Education & Employment
-                            </h3>
-                            <i
-                                class="fas fa-chevron-down text-gray-500 transition-transform duration-200"
-                                :class="{
-                                    'transform rotate-180':
-                                        expandedSections.education,
-                                }"
-                            ></i>
+                                                    <!-- File Upload Dropzone -->
+                                                    <div>
+                                                        <label
+                                                            class="block text-sm font-medium text-gray-700 mb-1"
+                                                        >
+                                                            Upload Document
+                                                            <span
+                                                                class="text-red-500"
+                                                                >*</span
+                                                            >
+                                                        </label>
+                                                        <div
+                                                            @dragover.prevent="
+                                                                dragOverAddress = true
+                                                            "
+                                                            @dragleave="
+                                                                dragOverAddress = false
+                                                            "
+                                                            @drop.prevent="
+                                                                handleFileDrop(
+                                                                    $event,
+                                                                    'proof_of_address'
+                                                                )
+                                                            "
+                                                            @click="
+                                                                $refs.addressFileInput?.click()
+                                                            "
+                                                            class="mt-1 flex justify-center px-4 py-6 border-2 border-dashed rounded-lg cursor-pointer transition-all duration-150"
+                                                            :class="{
+                                                                'border-blue-500 bg-blue-50':
+                                                                    dragOverAddress,
+                                                                'border-gray-300 hover:border-blue-400':
+                                                                    !dragOverAddress,
+                                                                'border-red-500':
+                                                                    form.errors
+                                                                        .proof_of_address,
+                                                            }"
+                                                        >
+                                                            <div
+                                                                class="space-y-2 text-center"
+                                                            >
+                                                                <i
+                                                                    class="fas fa-cloud-upload-alt text-3xl mx-auto transition-colors duration-150"
+                                                                    :class="{
+                                                                        'text-blue-500':
+                                                                            dragOverAddress,
+                                                                        'text-gray-400':
+                                                                            !dragOverAddress,
+                                                                    }"
+                                                                ></i>
+                                                                <div
+                                                                    class="text-sm text-gray-600"
+                                                                >
+                                                                    <p>
+                                                                        <span
+                                                                            class="font-medium text-blue-600 hover:text-blue-500"
+                                                                        >
+                                                                            Click
+                                                                            to
+                                                                            upload
+                                                                        </span>
+                                                                        or drag
+                                                                        and drop
+                                                                    </p>
+                                                                </div>
+                                                                <p
+                                                                    class="text-xs text-gray-500"
+                                                                >
+                                                                    PDF, JPG, or
+                                                                    PNG (max
+                                                                    5MB)
+                                                                </p>
+                                                            </div>
+                                                            <input
+                                                                ref="addressFileInput"
+                                                                type="file"
+                                                                class="hidden"
+                                                                accept=".pdf,.jpg,.jpeg,.png"
+                                                                @change="
+                                                                    handleFileUpload(
+                                                                        $event,
+                                                                        'proof_of_address'
+                                                                    )
+                                                                "
+                                                            />
+                                                        </div>
+                                                        <InputError
+                                                            :message="
+                                                                form.errors
+                                                                    .proof_of_address
+                                                            "
+                                                            class="mt-1"
+                                                        />
+                                                    </div>
+
+                                                    <!-- File Preview -->
+                                                    <div
+                                                        v-if="
+                                                            form.proof_of_address
+                                                        "
+                                                        class="mt-3 bg-gray-50 rounded-lg p-3 border border-gray-200"
+                                                    >
+                                                        <div
+                                                            class="flex items-start justify-between"
+                                                        >
+                                                            <div
+                                                                class="flex items-start space-x-3 min-w-0"
+                                                            >
+                                                                <div
+                                                                    v-if="
+                                                                        form
+                                                                            .proof_of_address
+                                                                            .preview &&
+                                                                        form.proof_of_address.type.startsWith(
+                                                                            'image/'
+                                                                        )
+                                                                    "
+                                                                    class="flex-shrink-0"
+                                                                >
+                                                                    <img
+                                                                        :src="
+                                                                            form
+                                                                                .proof_of_address
+                                                                                .preview
+                                                                        "
+                                                                        class="h-16 w-16 object-cover rounded border border-gray-200"
+                                                                        alt="Document preview"
+                                                                    />
+                                                                </div>
+                                                                <div
+                                                                    v-else
+                                                                    class="flex-shrink-0 flex items-center justify-center h-16 w-16 bg-white border border-gray-200 rounded"
+                                                                >
+                                                                    <i
+                                                                        class="fas fa-file-alt text-gray-400 text-2xl"
+                                                                    ></i>
+                                                                </div>
+                                                                <div
+                                                                    class="min-w-0"
+                                                                >
+                                                                    <p
+                                                                        class="text-sm font-medium text-gray-900 truncate"
+                                                                    >
+                                                                        {{
+                                                                            form
+                                                                                .proof_of_address
+                                                                                .name
+                                                                        }}
+                                                                    </p>
+                                                                    <p
+                                                                        class="text-xs text-gray-500 mt-1"
+                                                                    >
+                                                                        {{
+                                                                            formatFileSize(
+                                                                                form
+                                                                                    .proof_of_address
+                                                                                    .size
+                                                                            )
+                                                                        }}
+                                                                        •
+                                                                        {{
+                                                                            form
+                                                                                .proof_of_address
+                                                                                .type
+                                                                        }}
+                                                                    </p>
+                                                                    <p
+                                                                        v-if="
+                                                                            form.address_document_type
+                                                                        "
+                                                                        class="text-xs text-gray-500 mt-1"
+                                                                    >
+                                                                        {{
+                                                                            formatDocumentType(
+                                                                                form.address_document_type
+                                                                            )
+                                                                        }}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                            <button
+                                                                type="button"
+                                                                @click="
+                                                                    form.proof_of_address =
+                                                                        null
+                                                                "
+                                                                class="text-gray-400 hover:text-red-600 transition-colors"
+                                                                aria-label="Remove file"
+                                                            >
+                                                                <i
+                                                                    class="fas fa-times"
+                                                                ></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
+
+                        <!-- Contact Information Card -->
                         <div
-                            v-show="expandedSections.education"
-                            class="p-4 border-t border-gray-200"
+                            class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden transition-all duration-300 ease-in-out"
+                            :class="
+                                expandedSections.contact
+                                    ? 'min-h-[180px]'
+                                    : 'h-[56px] overflow-hidden'
+                            "
                         >
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <p class="text-sm text-gray-500">
-                                        Education Level
-                                    </p>
-                                    <p class="font-medium">
-                                        {{
-                                            form.education_level ||
-                                            "Not specified"
-                                        }}
-                                    </p>
-                                </div>
-                                <div>
-                                    <p class="text-sm text-gray-500">
-                                        Occupation
-                                    </p>
-                                    <p class="font-medium">
-                                        {{ form.occupation || "Not specified" }}
-                                    </p>
-                                </div>
-                                <InputError
-                                    :message="form.errors.proof_of_identity"
-                                    class="mt-2"
-                                />
-                                <div
-                                    v-if="form.employer_details"
-                                    class="md:col-span-2"
+                            <div
+                                @click="toggleSection('contact')"
+                                class="w-full px-4 py-3 text-left flex justify-between items-center bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-150 cursor-pointer"
+                                role="button"
+                                tabindex="0"
+                                @keydown.enter="toggleSection('contact')"
+                                @keydown.space.prevent="
+                                    toggleSection('contact')
+                                "
+                            >
+                                <h3
+                                    class="text-base sm:text-lg font-medium text-gray-900"
                                 >
-                                    <p class="text-sm text-gray-500">
-                                        Employer Details
-                                    </p>
-                                    <p class="font-medium whitespace-pre-line">
-                                        {{ form.employer_details }}
-                                    </p>
-                                </div>
+                                    Contact Information
+                                </h3>
+                                <i
+                                    class="fas fa-chevron-down text-gray-500 transition-transform duration-200"
+                                    :class="{
+                                        'transform rotate-180':
+                                            expandedSections.contact,
+                                    }"
+                                ></i>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- Security Information Card -->
-                    <div
-                        class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden transition-all duration-300 ease-in-out mt-4"
-                        :class="
-                            expandedSections.security
-                                ? 'min-h-[200px]'
-                                : 'h-[56px] overflow-hidden'
-                        "
-                    >
-                        <div
-                            @click="toggleSection('security')"
-                            class="w-full px-4 py-3 text-left flex justify-between items-center bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-150 cursor-pointer"
-                            role="button"
-                            tabindex="0"
-                            @keydown.enter="toggleSection('security')"
-                            @keydown.space.prevent="toggleSection('security')"
-                        >
-                            <h3
-                                class="text-base sm:text-lg font-medium text-gray-900"
+                            <div
+                                v-show="expandedSections.contact"
+                                class="p-4 border-t border-gray-200 space-y-4"
                             >
-                                Security Information
-                            </h3>
-                            <i
-                                class="fas fa-chevron-down text-gray-500 transition-transform duration-200"
-                                :class="{
-                                    'transform rotate-180':
-                                        expandedSections.security,
-                                }"
-                            ></i>
-                        </div>
-                        <div
-                            v-show="expandedSections.security"
-                            class="p-4 border-t border-gray-200"
-                        >
-                            <div class="space-y-4">
-                                <div class="w-full">
-                                    <p class="text-sm text-gray-500">
-                                        Security Question
-                                    </p>
-                                    <p class="font-medium">
-                                        {{
-                                            form.security_question || "Not set"
-                                        }}
+                                <div class="space-y-1">
+                                    <p class="text-sm text-gray-500">Email</p>
+                                    <p class="font-medium text-gray-900">
+                                        {{ form.email }}
                                     </p>
                                 </div>
-                                <div v-if="form.security_answer" class="w-full">
-                                    <p class="text-sm text-gray-500">
-                                        Security Answer
-                                    </p>
-                                    <p class="font-medium">
-                                        {{ form.security_answer }}
+                                <div class="space-y-1">
+                                    <p class="text-sm text-gray-500">Phone</p>
+                                    <p class="font-medium text-gray-900">
+                                        {{ form.telephone }}
                                     </p>
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Education & Employment Card -->
+                        <div
+                            class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden transition-all duration-300 ease-in-out"
+                            :class="
+                                expandedSections.education
+                                    ? 'min-h-[180px]'
+                                    : 'h-[56px] overflow-hidden'
+                            "
+                        >
+                            <div
+                                @click="toggleSection('education')"
+                                class="w-full px-4 py-3 text-left flex justify-between items-center bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-150 cursor-pointer"
+                                role="button"
+                                tabindex="0"
+                                @keydown.enter="toggleSection('education')"
+                                @keydown.space.prevent="
+                                    toggleSection('education')
+                                "
+                            >
+                                <h3
+                                    class="text-base sm:text-lg font-medium text-gray-900"
+                                >
+                                    Education & Employment
+                                </h3>
+                                <i
+                                    class="fas fa-chevron-down text-gray-500 transition-transform duration-200"
+                                    :class="{
+                                        'transform rotate-180':
+                                            expandedSections.education,
+                                    }"
+                                ></i>
+                            </div>
+                            <div
+                                v-show="expandedSections.education"
+                                class="p-4 border-t border-gray-200"
+                            >
+                                <div
+                                    class="grid grid-cols-1 md:grid-cols-2 gap-4"
+                                >
+                                    <div>
+                                        <p class="text-sm text-gray-500">
+                                            Education Level
+                                        </p>
+                                        <p class="font-medium">
+                                            {{
+                                                form.education_level ||
+                                                "Not specified"
+                                            }}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500">
+                                            Occupation
+                                        </p>
+                                        <p class="font-medium">
+                                            {{
+                                                form.occupation ||
+                                                "Not specified"
+                                            }}
+                                        </p>
+                                    </div>
+                                    <InputError
+                                        :message="form.errors.proof_of_identity"
+                                        class="mt-2"
+                                    />
+                                    <div
+                                        v-if="form.employer_details"
+                                        class="md:col-span-2"
+                                    >
+                                        <p class="text-sm text-gray-500">
+                                            Employer Details
+                                        </p>
+                                        <p
+                                            class="font-medium whitespace-pre-line"
+                                        >
+                                            {{ form.employer_details }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Security Information Card -->
+                        <div
+                            class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden transition-all duration-300 ease-in-out mt-4"
+                            :class="
+                                expandedSections.security
+                                    ? 'min-h-[200px]'
+                                    : 'h-[56px] overflow-hidden'
+                            "
+                        >
+                            <div
+                                @click="toggleSection('security')"
+                                class="w-full px-4 py-3 text-left flex justify-between items-center bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-150 cursor-pointer"
+                                role="button"
+                                tabindex="0"
+                                @keydown.enter="toggleSection('security')"
+                                @keydown.space.prevent="
+                                    toggleSection('security')
+                                "
+                            >
+                                <h3
+                                    class="text-base sm:text-lg font-medium text-gray-900"
+                                >
+                                    Security Information
+                                </h3>
+                                <i
+                                    class="fas fa-chevron-down text-gray-500 transition-transform duration-200"
+                                    :class="{
+                                        'transform rotate-180':
+                                            expandedSections.security,
+                                    }"
+                                ></i>
+                            </div>
+                            <div
+                                v-show="expandedSections.security"
+                                class="p-4 border-t border-gray-200"
+                            >
+                                <div class="space-y-4">
+                                    <div class="w-full">
+                                        <p class="text-sm text-gray-500">
+                                            Security Question
+                                        </p>
+                                        <p class="font-medium">
+                                            {{
+                                                form.security_question ||
+                                                "Not set"
+                                            }}
+                                        </p>
+                                    </div>
+                                    <div
+                                        v-if="form.security_answer"
+                                        class="w-full"
+                                    >
+                                        <p class="text-sm text-gray-500">
+                                            Security Answer
+                                        </p>
+                                        <p class="font-medium">
+                                            {{ form.security_answer }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-sm text-gray-500 text-center">
+                            Scroll to view all sections
+                        </div>
+
+                        <!-- Navigation Buttons -->
+                        <div class="mt-8 pt-6">
+                            <div class="flex items-center justify-between">
+                                <button
+                                    v-if="currentStep > 1"
+                                    type="button"
+                                    @click="previousStep"
+                                    class="inline-flex items-center px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-400 transition-colors duration-200"
+                                >
+                                    <i
+                                        class="fas fa-arrow-left mr-2 text-emerald-600"
+                                    ></i>
+                                    <span class="hidden sm:inline"
+                                        >Previous</span
+                                    >
+                                </button>
+                                <div v-else class="w-24"></div>
+                                <!-- Spacer for alignment -->
+
+                                <div class="flex items-center space-x-4">
+                                    <button
+                                        v-if="currentStep < 8"
+                                        type="button"
+                                        @click="nextStep"
+                                        :disabled="form.processing"
+                                        :class="[
+                                            'inline-flex items-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200',
+                                            currentStep === 7
+                                                ? 'bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500 shadow-emerald-200'
+                                                : 'bg-teal-500 hover:bg-teal-600 focus:ring-teal-400 shadow-teal-200',
+                                            form.processing
+                                                ? 'opacity-75 cursor-not-allowed'
+                                                : '',
+                                        ]"
+                                    >
+                                        <i
+                                            v-if="form.processing"
+                                            class="fas fa-spinner fa-spin mr-2"
+                                        ></i>
+                                        <span class="hidden sm:inline">
+                                            Next: {{ stepNames[currentStep] }}
+                                        </span>
+                                        <span class="sm:hidden">
+                                            {{
+                                                currentStep === 7
+                                                    ? "Review"
+                                                    : "Next: " +
+                                                      stepNames[currentStep]
+                                            }}
+                                        </span>
+                                        <i
+                                            v-if="!form.processing"
+                                            class="fas fa-arrow-right ml-2"
+                                        ></i>
+                                    </button>
+
+                                    <button
+                                        v-else
+                                        type="submit"
+                                        :disabled="form.processing"
+                                        class="inline-flex items-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors duration-200 shadow-emerald-200"
+                                        :class="{
+                                            'opacity-75 cursor-not-allowed':
+                                                form.processing,
+                                        }"
+                                    >
+                                        <i
+                                            v-if="form.processing"
+                                            class="fas fa-spinner fa-spin mr-2"
+                                        ></i>
+                                        <span class="hidden sm:inline">
+                                            Submit Application
+                                        </span>
+                                        <span class="sm:hidden">Submit</span>
+                                        <i
+                                            v-if="!form.processing"
+                                            class="fas fa-check ml-2"
+                                        ></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Progress Bar -->
+                            <div class="mt-6">
+                                <div
+                                    class="flex items-center justify-between mb-1"
+                                >
+                                    <span
+                                        class="text-xs font-medium text-gray-700"
+                                        >Step {{ currentStep }} of
+                                        {{ totalSteps }}</span
+                                    >
+                                    <span
+                                        class="text-xs font-medium text-gray-500"
+                                        >{{
+                                            Math.round(
+                                                (currentStep / totalSteps) * 100
+                                            )
+                                        }}%</span
+                                    >
+                                </div>
+                                <div
+                                    class="w-full bg-gray-200 rounded-full h-2"
+                                >
+                                    <div
+                                        class="bg-teal-500 h-2 rounded-full transition-all duration-300 ease-in-out"
+                                        :style="{
+                                            width: `${
+                                                (currentStep / totalSteps) * 100
+                                            }%`,
+                                        }"
+                                    ></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Terms and Privacy Policy -->
+                        <div
+                            v-if="currentStep === 8"
+                            class="mt-4 flex items-center justify-center"
+                        >
+                            <div class="w-full">
+                                <div class="mb-4">
+                                    <label class="flex items-start">
+                                        <Checkbox
+                                            v-model:checked="form.terms"
+                                            name="terms"
+                                            class="mt-1"
+                                            required
+                                        />
+                                        <span
+                                            class="ms-2 text-sm text-gray-600"
+                                        >
+                                            I certify that all the information
+                                            provided is accurate and complete. I
+                                            understand that providing false
+                                            information may result in the
+                                            rejection of my application or
+                                            termination of my account. By
+                                            signing up, I agree to the
+                                            <a
+                                                :href="
+                                                    route(
+                                                        'frontend.terms-and-conditions'
+                                                    )
+                                                "
+                                                target="_blank"
+                                                class="text-sm text-green-600 hover:text-green-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 font-medium hover:underline hover:decoration-green-600 hover:dark:decoration-green-500 underline-offset-4 dark:text-green-500"
+                                                >Terms of Service</a
+                                            >
+                                            and
+                                            <a
+                                                :href="
+                                                    route(
+                                                        'frontend.privacy-policy'
+                                                    )
+                                                "
+                                                target="_blank"
+                                                class="text-sm text-green-600 hover:text-green-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 font-medium hover:underline hover:decoration-green-600 hover:dark:decoration-green-500 underline-offset-4 dark:text-green-500"
+                                                >Privacy Policy</a
+                                            >.
+                                        </span>
+                                    </label>
+                                    <InputError
+                                        :message="form.errors.terms"
+                                        class="mt-2"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <button
+                                v-if="currentStep > 1"
+                                type="button"
+                                @click="previousStep"
+                                class="inline-flex items-center px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-400 transition-colors duration-200"
+                            >
+                                <i
+                                    class="fas fa-arrow-left mr-2 text-emerald-600"
+                                ></i>
+                                <span class="hidden sm:inline">Previous</span>
+                            </button>
+                            <div v-else class="w-24"></div>
+                            <!-- Spacer for alignment -->
+
+                            <div class="flex items-center space-x-4">
+                                <button
+                                    v-if="currentStep < 8"
+                                    type="button"
+                                    @click="nextStep"
+                                    :disabled="form.processing"
+                                    :class="[
+                                        'inline-flex items-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200',
+                                        currentStep === 7
+                                            ? 'bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500 shadow-emerald-200'
+                                            : 'bg-teal-500 hover:bg-teal-600 focus:ring-teal-400 shadow-teal-200',
+                                        form.processing
+                                            ? 'opacity-75 cursor-not-allowed'
+                                            : '',
+                                    ]"
+                                >
+                                    <i
+                                        v-if="form.processing"
+                                        class="fas fa-spinner fa-spin mr-2"
+                                    ></i>
+                                    <span class="hidden sm:inline">
+                                        Next: {{ stepNames[currentStep] }}
+                                    </span>
+                                    <span class="sm:hidden">
+                                        {{
+                                            currentStep === 7
+                                                ? "Review"
+                                                : "Next: " +
+                                                  stepNames[currentStep]
+                                        }}
+                                    </span>
+                                    <i
+                                        v-if="!form.processing"
+                                        class="fas fa-arrow-right ml-2"
+                                    ></i>
+                                </button>
+
+                                <button
+                                    v-else
+                                    type="submit"
+                                    :disabled="form.processing"
+                                    class="inline-flex items-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors duration-200 shadow-emerald-200"
+                                    :class="{
+                                        'opacity-75 cursor-not-allowed':
+                                            form.processing,
+                                    }"
+                                >
+                                    <i
+                                        v-if="form.processing"
+                                        class="fas fa-spinner fa-spin mr-2"
+                                    ></i>
+                                    <span class="hidden sm:inline">
+                                        Submit Application
+                                    </span>
+                                    <span class="sm:hidden">Submit</span>
+                                    <i
+                                        v-if="!form.processing"
+                                        class="fas fa-check ml-2"
+                                    ></i>
+                                </button>
+                            </div>
+                        </div>
                     </div>
 
-                    <div class="mt-4 text-sm text-gray-500 text-center">
-                        Scroll to view all sections
+                    <!-- Progress Bar -->
+                    <div class="mt-6">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs font-medium text-gray-700"
+                                >Step {{ currentStep }} of
+                                {{ totalSteps }}</span
+                            >
+                            <span class="text-xs font-medium text-gray-500"
+                                >{{
+                                    Math.round(
+                                        (currentStep / totalSteps) * 100
+                                    )
+                                }}%</span
+                            >
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div
+                                class="bg-teal-500 h-2 rounded-full transition-all duration-300 ease-in-out"
+                                :style="{
+                                    width: `${
+                                        (currentStep / totalSteps) * 100
+                                    }%`,
+                                }"
+                            ></div>
+                        </div>
                     </div>
                 </div>
 
@@ -3282,9 +4161,9 @@ const toggleSection = (section) => {
                                     v-if="form.processing"
                                     class="fas fa-spinner fa-spin mr-2"
                                 ></i>
-                                <span class="hidden sm:inline"
-                                    >Submit Application</span
-                                >
+                                <span class="hidden sm:inline">
+                                    Submit Application
+                                </span>
                                 <span class="sm:hidden">Submit</span>
                                 <i
                                     v-if="!form.processing"
@@ -3294,21 +4173,31 @@ const toggleSection = (section) => {
                         </div>
                     </div>
 
-                    <!-- Progress Indicator -->
-                    <div class="mt-4">
-                        <div
-                            class="w-full bg-gray-200 rounded-full h-2 overflow-hidden"
-                        >
+                    <!-- Progress Bar -->
+                    <div class="mt-6">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs font-medium text-gray-700"
+                                >Step {{ currentStep }} of
+                                {{ totalSteps }}</span
+                            >
+                            <span class="text-xs font-medium text-gray-500"
+                                >{{
+                                    Math.round(
+                                        (currentStep / totalSteps) * 100
+                                    )
+                                }}%</span
+                            >
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
                             <div
-                                class="bg-gradient-to-r from-teal-400 via-emerald-500 to-green-600 h-2 rounded-full transition-all duration-500 ease-out"
+                                class="bg-teal-500 h-2 rounded-full transition-all duration-300 ease-in-out"
                                 :style="{
-                                    width: `${(currentStep / 8) * 100}%`,
+                                    width: `${
+                                        (currentStep / totalSteps) * 100
+                                    }%`,
                                 }"
                             ></div>
                         </div>
-                        <p class="text-xs text-gray-500 text-right mt-1">
-                            Step {{ currentStep }} of 8
-                        </p>
                     </div>
                 </div>
 
