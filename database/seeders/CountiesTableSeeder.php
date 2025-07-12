@@ -29,70 +29,64 @@ class CountiesTableSeeder extends Seeder
             return;
         }
 
-        // List of all 47 counties with their region mappings
+        // List of all 47 counties with their official codes and regions
         $counties = [
-            // Central Region
-            ['code' => 1, 'name' => 'Nairobi', 'region' => 'Nairobi'],
-            ['code' => 2, 'name' => 'Kiambu', 'region' => 'Central'],
-            ['code' => 3, 'name' => 'Murang\'a', 'region' => 'Central'],
-            ['code' => 4, 'name' => 'Nyandarua', 'region' => 'Central'],
-            ['code' => 5, 'name' => 'Nyeri', 'region' => 'Central'],
-            ['code' => 6, 'name' => 'Kirinyaga', 'region' => 'Central'],
+            // Code 1-10
+            ['code' => 1, 'name' => 'Mombasa', 'region' => 'Coast'],
+            ['code' => 2, 'name' => 'Kwale', 'region' => 'Coast'],
+            ['code' => 3, 'name' => 'Kilifi', 'region' => 'Coast'],
+            ['code' => 4, 'name' => 'Tana River', 'region' => 'Coast'],
+            ['code' => 5, 'name' => 'Lamu', 'region' => 'Coast'],
+            ['code' => 6, 'name' => 'Taita/Taveta', 'region' => 'Coast'],
+            ['code' => 7, 'name' => 'Garissa', 'region' => 'North Eastern'],
+            ['code' => 8, 'name' => 'Wajir', 'region' => 'North Eastern'],
+            ['code' => 9, 'name' => 'Mandera', 'region' => 'North Eastern'],
+            ['code' => 10, 'name' => 'Marsabit', 'region' => 'Eastern'],
             
-            // Coast Region
-            ['code' => 7, 'name' => 'Mombasa', 'region' => 'Coast'],
-            ['code' => 8, 'name' => 'Kwale', 'region' => 'Coast'],
-            ['code' => 9, 'name' => 'Kilifi', 'region' => 'Coast'],
-            ['code' => 10, 'name' => 'Tana River', 'region' => 'Coast'],
-            ['code' => 11, 'name' => 'Lamu', 'region' => 'Coast'],
-            ['code' => 12, 'name' => 'Taita-Taveta', 'region' => 'Coast'],
+            // Code 11-20
+            ['code' => 11, 'name' => 'Isiolo', 'region' => 'Eastern'],
+            ['code' => 12, 'name' => 'Meru', 'region' => 'Eastern'],
+            ['code' => 13, 'name' => 'Tharaka-Nithi', 'region' => 'Eastern'],
+            ['code' => 14, 'name' => 'Embu', 'region' => 'Eastern'],
+            ['code' => 15, 'name' => 'Kitui', 'region' => 'Eastern'],
+            ['code' => 16, 'name' => 'Machakos', 'region' => 'Eastern'],
+            ['code' => 17, 'name' => 'Makueni', 'region' => 'Eastern'],
+            ['code' => 18, 'name' => 'Nyandarua', 'region' => 'Central'],
+            ['code' => 19, 'name' => 'Nyeri', 'region' => 'Central'],
+            ['code' => 20, 'name' => 'Kirinyaga', 'region' => 'Central'],
             
-            // Eastern Region
-            ['code' => 13, 'name' => 'Embu', 'region' => 'Eastern'],
-            ['code' => 14, 'name' => 'Kitui', 'region' => 'Eastern'],
-            ['code' => 15, 'name' => 'Machakos', 'region' => 'Eastern'],
-            ['code' => 16, 'name' => 'Makueni', 'region' => 'Eastern'],
-            ['code' => 17, 'name' => 'Marsabit', 'region' => 'Eastern'],
+            // Code 21-30
+            ['code' => 21, 'name' => 'Murang\'a', 'region' => 'Central'],
+            ['code' => 22, 'name' => 'Kiambu', 'region' => 'Central'],
+            ['code' => 23, 'name' => 'Turkana', 'region' => 'Rift Valley'],
+            ['code' => 24, 'name' => 'West Pokot', 'region' => 'Rift Valley'],
+            ['code' => 25, 'name' => 'Samburu', 'region' => 'Rift Valley'],
+            ['code' => 26, 'name' => 'Trans Nzoia', 'region' => 'Rift Valley'],
+            ['code' => 27, 'name' => 'Uasin Gishu', 'region' => 'Rift Valley'],
+            ['code' => 28, 'name' => 'Elgeyo/Marakwet', 'region' => 'Rift Valley'],
+            ['code' => 29, 'name' => 'Nandi', 'region' => 'Rift Valley'],
+            ['code' => 30, 'name' => 'Baringo', 'region' => 'Rift Valley'],
             
-            // North Eastern Region
-            ['code' => 18, 'name' => 'Garissa', 'region' => 'North Eastern'],
-            ['code' => 19, 'name' => 'Wajir', 'region' => 'North Eastern'],
-            ['code' => 20, 'name' => 'Mandera', 'region' => 'North Eastern'],
+            // Code 31-40
+            ['code' => 31, 'name' => 'Laikipia', 'region' => 'Rift Valley'],
+            ['code' => 32, 'name' => 'Nakuru', 'region' => 'Rift Valley'],
+            ['code' => 33, 'name' => 'Narok', 'region' => 'Rift Valley'],
+            ['code' => 34, 'name' => 'Kajiado', 'region' => 'Rift Valley'],
+            ['code' => 35, 'name' => 'Kericho', 'region' => 'Rift Valley'],
+            ['code' => 36, 'name' => 'Bomet', 'region' => 'Rift Valley'],
+            ['code' => 37, 'name' => 'Kakamega', 'region' => 'Western'],
+            ['code' => 38, 'name' => 'Vihiga', 'region' => 'Western'],
+            ['code' => 39, 'name' => 'Bungoma', 'region' => 'Western'],
+            ['code' => 40, 'name' => 'Busia', 'region' => 'Western'],
             
-            // Nyanza Region
-            ['code' => 21, 'name' => 'Kisumu', 'region' => 'Nyanza'],
-            ['code' => 22, 'name' => 'Homa Bay', 'region' => 'Nyanza'],
-            ['code' => 23, 'name' => 'Kisii', 'region' => 'Nyanza'],
-            ['code' => 24, 'name' => 'Migori', 'region' => 'Nyanza'],
-            ['code' => 25, 'name' => 'Nyamira', 'region' => 'Nyanza'],
-            ['code' => 26, 'name' => 'Siaya', 'region' => 'Nyanza'],
-            
-            // Rift Valley Region
-            ['code' => 27, 'name' => 'Nakuru', 'region' => 'Rift Valley'],
-            ['code' => 28, 'name' => 'Baringo', 'region' => 'Rift Valley'],
-            ['code' => 29, 'name' => 'Bomet', 'region' => 'Rift Valley'],
-            ['code' => 30, 'name' => 'Elgeyo-Marakwet', 'region' => 'Rift Valley'],
-            ['code' => 31, 'name' => 'Kajiado', 'region' => 'Rift Valley'],
-            ['code' => 32, 'name' => 'Kericho', 'region' => 'Rift Valley'],
-            ['code' => 33, 'name' => 'Laikipia', 'region' => 'Rift Valley'],
-            ['code' => 34, 'name' => 'Nandi', 'region' => 'Rift Valley'],
-            ['code' => 35, 'name' => 'Narok', 'region' => 'Rift Valley'],
-            ['code' => 36, 'name' => 'Samburu', 'region' => 'Rift Valley'],
-            ['code' => 37, 'name' => 'Trans Nzoia', 'region' => 'Rift Valley'],
-            ['code' => 38, 'name' => 'Turkana', 'region' => 'Rift Valley'],
-            ['code' => 39, 'name' => 'Uasin Gishu', 'region' => 'Rift Valley'],
-            ['code' => 40, 'name' => 'West Pokot', 'region' => 'Rift Valley'],
-            
-            // Western Region
-            ['code' => 41, 'name' => 'Kakamega', 'region' => 'Western'],
-            ['code' => 42, 'name' => 'Bungoma', 'region' => 'Western'],
-            ['code' => 43, 'name' => 'Busia', 'region' => 'Western'],
-            ['code' => 44, 'name' => 'Vihiga', 'region' => 'Western'],
-            
-            // Additional counties that might not fit neatly into the old provinces
-            ['code' => 45, 'name' => 'Tharaka-Nithi', 'region' => 'Eastern'],
-            ['code' => 46, 'name' => 'Isiolo', 'region' => 'Eastern'],
-            ['code' => 47, 'name' => 'Meru', 'region' => 'Eastern']
+            // Code 41-47
+            ['code' => 41, 'name' => 'Siaya', 'region' => 'Nyanza'],
+            ['code' => 42, 'name' => 'Kisumu', 'region' => 'Nyanza'],
+            ['code' => 43, 'name' => 'Homa Bay', 'region' => 'Nyanza'],
+            ['code' => 44, 'name' => 'Migori', 'region' => 'Nyanza'],
+            ['code' => 45, 'name' => 'Kisii', 'region' => 'Nyanza'],
+            ['code' => 46, 'name' => 'Nyamira', 'region' => 'Nyanza'],
+            ['code' => 47, 'name' => 'Nairobi', 'region' => 'Nairobi']
         ];
 
         $data = [];
