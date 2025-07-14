@@ -346,7 +346,7 @@ class Profile extends Model
         ];
     }
 
-    public function users(): BelongsTo
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
@@ -364,5 +364,10 @@ class Profile extends Model
     public function religion(): BelongsTo
     {
         return $this->belongsTo(Religion::class, 'religion_id');
+    }
+
+    public function citizen(): BelongsTo
+    {
+        return $this->belongsTo(Citizen::class, 'user_id', 'user_id');
     }
 }
