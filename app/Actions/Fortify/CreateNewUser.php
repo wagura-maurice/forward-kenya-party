@@ -3,6 +3,7 @@
 namespace App\Actions\Fortify;
 
 use App\Models\User;
+use App\Models\Citizen;
 use App\Models\Profile;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\DB;
@@ -14,37 +15,6 @@ use Laravel\Fortify\Contracts\CreatesNewUsers;
 class CreateNewUser implements CreatesNewUsers
 {
     use PasswordValidationRules;
-
-    /**
-     * Validate and create a newly registered user.
-     *
-     * @param  array<string, string>  $input
-     * @return \App\Models\User
-     * @throws \Illuminate\Validation\ValidationException
-     * @throws \Exception
-     */
-    /**
-     * Format a telephone number to E.164 format
-     *
-     * @param string $telephone
-     * @param string $defaultCountryCode
-     * @return string
-     */
-    protected function formatTelephone($telephone, $defaultCountryCode = '254')
-    {
-        // If the number already starts with +, return as is
-        if (strpos($telephone, '+') === 0) {
-            return $telephone;
-        }
-
-        // If the number starts with 0, replace with country code
-        if (strpos($telephone, '0') === 0) {
-            return '+' . $defaultCountryCode . substr($telephone, 1);
-        }
-
-        // If the number doesn't start with + or 0, assume it's a local number
-        return '+' . $defaultCountryCode . $telephone;
-    }
 
     /**
      * Validate location hierarchy for county, sub_county, constituency, and ward.
@@ -92,8 +62,6 @@ class CreateNewUser implements CreatesNewUsers
      */
     public function create(array $input)
     {
-        // dd($input);
-
         // Validate the input
         $validated = Validator::make($input, [
             'name' => ['required', 'string', 'max:255'],
@@ -137,11 +105,8 @@ class CreateNewUser implements CreatesNewUsers
         // Validate location hierarchy
         $this->validateLocationHierarchy($input);
 
-        // Format telephone number
-        $telephone = $this->formatTelephone($input['telephone']);
-
         // Start database transaction
-        return DB::transaction(function () use ($input, $telephone) {
+        return DB::transaction(function () use ($input) {
             // Create the user
             $user = User::create([
                 'name' => $input['name'],
@@ -153,8 +118,10 @@ class CreateNewUser implements CreatesNewUsers
                 'last_login_ip' => request()->ip(),
             ]);
 
+            $user->assignRole('citizen');
+
             // Create the user's profile
-            $profileData = [
+            Profile::create([
                 'uuid' => Str::uuid()->toString(),
                 'user_id' => $user->id,
                 'first_name' => $input['first_name'],
@@ -166,21 +133,22 @@ class CreateNewUser implements CreatesNewUsers
                 'plwd_number' => $input['disability_status'] !== 'none' ? $input['plwd_number'] : null,
                 'ethnicity_id' => $input['ethnicity_id'],
                 'religion_id' => $input['religion_id'],
-                'national_id' => $input['national_id'],
-                'telephone' => $telephone,
+                'telephone' => phoneNumberPrefix($input['telephone']),
                 'address_line_1' => $input['address_line_1'],
                 'address_line_2' => $input['address_line_2'] ?? null,
                 'city' => $input['city'],
                 'state' => $input['state'],
+            ]);
+
+            Citizen::create([
+                'uuid' => Str::uuid()->toString(),
+                'user_id' => $user->id,
                 'county_id' => $input['county_id'],
                 'sub_county_id' => $input['sub_county_id'],
                 'constituency_id' => $input['constituency_id'],
                 'ward_id' => $input['ward_id'],
-                'security_question' => $input['security_question'],
-                'security_answer' => Hash::make($input['security_answer']),
-            ];
-
-            Profile::create($profileData);
+                'national_identification_number' => $input['national_id'],
+            ]);
 
             return $user;
         });
