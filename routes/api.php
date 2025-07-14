@@ -2,6 +2,9 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\REST\LocationController;
+use App\Http\Controllers\REST\EthnicityController;
+use App\Http\Controllers\REST\ReligionController;
 use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\WardController;
 use App\Http\Controllers\API\GuestController;
@@ -80,8 +83,53 @@ use App\Http\Controllers\API\OutboundBulkVoiceMessageController;
 })->middleware('auth:sanctum'); */
 
 # (*) public access routes
-// dynamic locations api
-Route::get('/locations', [\App\Http\Controllers\Api\LocationController::class, 'getLocations']);
+// Location-based API endpoints
+Route::prefix('locations')->group(function () {
+    // Get all counties
+    Route::get('/counties', [LocationController::class, 'getCounties']);
+    
+    // Get sub-counties by county
+    Route::get('/counties/{county}/sub-counties', [LocationController::class, 'getSubCounties']);
+    
+    // Get constituencies by sub-county
+    Route::get('/sub-counties/{subCounty}/constituencies', [LocationController::class, 'getConstituenciesBySubCounty']);
+    
+    // Get constituencies by county
+    Route::get('/counties/{county}/constituencies', [LocationController::class, 'getConstituenciesByCounty']);
+    
+    // Get wards by constituency
+    Route::get('/constituencies/{constituency}/wards', [LocationController::class, 'getWards']);
+});
+
+// Ethnicity API endpoints
+Route::prefix('ethnicities')->group(function () {
+    // Get all ethnicities
+    Route::get('/', [EthnicityController::class, 'index']);
+    
+    // Get ethnicities by category
+    Route::get('/categories/{category}', [EthnicityController::class, 'getByCategory']);
+    
+    // Get ethnicities by type
+    Route::get('/types/{type}', [EthnicityController::class, 'getByType']);
+    
+    // Get a single ethnicity
+    Route::get('/{ethnicity}', [EthnicityController::class, 'show']);
+});
+
+// Religion API endpoints
+Route::prefix('religions')->group(function () {
+    // Get all religions
+    Route::get('/', [ReligionController::class, 'index']);
+    
+    // Get religions by category
+    Route::get('/categories/{category}', [ReligionController::class, 'getByCategory']);
+    
+    // Get religions by type
+    Route::get('/types/{type}', [ReligionController::class, 'getByType']);
+    
+    // Get a single religion
+    Route::get('/{religion}', [ReligionController::class, 'show']);
+});
 
 // register & login authentication
 Route::group(['prefix' => 'auth'], function () {
