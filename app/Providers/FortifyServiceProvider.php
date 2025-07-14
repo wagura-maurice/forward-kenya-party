@@ -35,10 +35,14 @@ class FortifyServiceProvider extends ServiceProvider
         Fortify::registerView(function () {
             $countries = Country::all(); // Fetch countries from the database
             $genders = Gender::getGenderOptions(); // Fetch gender options
+            $counties = \App\Models\County::select('id', 'name', 'iso_code as code')
+                ->orderBy('name')
+                ->get();
 
             return Inertia::render('Auth/Register', [
                 'countries' => $countries,
                 'genders' => $genders,
+                'counties' => $counties,
             ]);
         });
         
