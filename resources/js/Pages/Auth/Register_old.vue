@@ -1,0 +1,4254 @@
+<!-- resources/js/Pages/Auth/Register.vue -->
+
+<script setup>
+import { Head, Link, useForm } from "@inertiajs/vue3";
+import {
+    ref,
+    computed,
+    onMounted,
+    nextTick,
+    watch,
+    getCurrentInstance,
+    reactive,
+} from "vue";
+import { usePage } from "@inertiajs/vue3";
+import AuthenticationCard from "@/Components/AuthenticationCard.vue";
+import AuthenticationCardLogo from "@/Components/AuthenticationCardLogo.vue";
+import Checkbox from "@/Components/Checkbox.vue";
+import InputError from "@/Components/InputError.vue";
+import InputLabel from "@/Components/InputLabel.vue";
+import PrimaryButton from "@/Components/PrimaryButton.vue";
+import TextInput from "@/Components/TextInput.vue";
+import VueSelect from "vue-select";
+import "vue-select/dist/vue-select.css";
+import "@/Components/VueSelectCustom.css";
+
+// Define the countries prop
+const props = defineProps({
+    countries: Array,
+    genders: Object,
+});
+
+// Default location data
+/* const defaultLocationData = [
+    {
+        id: 1,
+        name: "Nairobi",
+        sub_counties: [
+            {
+                id: 1,
+                name: "Westlands",
+                county_id: 1,
+                constituencies: [
+                    {
+                        id: 1,
+                        name: "Westlands Constituency",
+                        county_id: 1,
+                        sub_county_id: 1,
+                        wards: [
+                            { id: 1, name: "Parklands", constituency_id: 1 },
+                            { id: 2, name: "Kitisuru", constituency_id: 1 },
+                            { id: 3, name: "Kangemi", constituency_id: 1 },
+                        ],
+                    },
+                ],
+            },
+            {
+                id: 2,
+                name: "Dagoretti",
+                county_id: 1,
+                constituencies: [
+                    {
+                        id: 2,
+                        name: "Dagoretti North",
+                        county_id: 1,
+                        sub_county_id: 2,
+                        wards: [
+                            { id: 4, name: "Kilimani", constituency_id: 2 },
+                            { id: 5, name: "Kawangware", constituency_id: 2 },
+                            { id: 6, name: "Mutuini", constituency_id: 2 },
+                        ],
+                    },
+                ],
+            },
+        ],
+    },
+    {
+        id: 2,
+        name: "Mombasa",
+        sub_counties: [
+            {
+                id: 3,
+                name: "Mvita",
+                county_id: 2,
+                constituencies: [
+                    {
+                        id: 3,
+                        name: "Mvita",
+                        county_id: 2,
+                        sub_county_id: 3,
+                        wards: [
+                            { id: 7, name: "Tudor", constituency_id: 3 },
+                            { id: 8, name: "Tononoka", constituency_id: 3 },
+                            { id: 9, name: "Shimanzi", constituency_id: 3 },
+                        ],
+                    },
+                ],
+            },
+        ],
+    },
+]; */
+
+// Access locationMatrix from Inertia shared props with fallback to default data
+/* const locationMatrix = computed(() => {
+    // Try to get data from Inertia
+    const fromPage =
+        usePage().props.locationMatrix ||
+        (window.$page && window.$page.props.locationMatrix);
+
+    // Return server data if available, otherwise use default data
+    return fromPage && fromPage.length > 0 ? fromPage : defaultLocationData;
+}); */
+
+const locationMatrix = ref([]);
+
+// Fetch locations from the server
+const fetchLocations = () => {
+    return new Promise((resolve, reject) => {
+        axios
+            .get("/api/locations")
+            .then((response) => {
+                locationMatrix.value = response.data;
+                resolve(response.data);
+            })
+            .catch((error) => {
+                console.error("Error fetching locations:", error);
+                reject(error);
+            });
+    });
+};
+
+// Initialize location handling with the useLocation composable
+const locationState = reactive({
+    selectedCounty: null,
+    selectedSubCounty: null,
+    selectedConstituency: null,
+    selectedWard: null,
+});
+
+// Initialize the location data
+const locationData = reactive({
+    counties: [],
+    subCounties: [],
+    constituencies: [],
+    wards: [],
+});
+
+// Initialize location data when component is mounted
+const initializeLocations = async () => {
+    try {
+        await fetchLocations();
+        console.log("Location Matrix:", locationMatrix.value);
+
+        // Check if we have the expected data structure
+        if (locationMatrix.value && locationMatrix.value.data) {
+            const { counties, subCounties, constituencies, wards } =
+                locationMatrix.value.data;
+
+            // Map the API response to our expected format
+            locationData.counties = Array.isArray(counties)
+                ? counties.flat()
+                : [];
+            locationData.subCounties = Array.isArray(subCounties)
+                ? Object.values(subCounties).flat()
+                : [];
+            locationData.constituencies = Array.isArray(constituencies)
+                ? Object.values(constituencies).flat()
+                : [];
+            locationData.wards = Array.isArray(wards)
+                ? Object.values(wards).flat()
+                : [];
+
+            console.log("Location Data - Counties:", locationData.counties);
+            console.log("Subcounties:", locationData.subCounties);
+            console.log("Constituencies:", locationData.constituencies);
+            console.log("Wards:", locationData.wards);
+        } else {
+            console.error(
+                "Unexpected API response format:",
+                locationMatrix.value
+            );
+        }
+    } catch (error) {
+        console.error("Failed to initialize locations:", error);
+    }
+};
+
+// Call the initialization
+onMounted(async () => {
+    await initializeLocations();
+
+    // Set initial values from form if they exist
+    if (form.county_id) locationState.selectedCounty = form.county_id;
+    if (form.sub_county_id)
+        locationState.selectedSubCounty = form.sub_county_id;
+    if (form.constituency_id)
+        locationState.selectedConstituency = form.constituency_id;
+    if (form.ward_id) locationState.selectedWard = form.ward_id;
+});
+
+// Filtered data for dropdowns
+const filteredSubCounties = computed(() => {
+    if (!locationState.selectedCounty) return [];
+    return (locationData.subCounties || []).filter(
+        (subCounty) => subCounty.county_id == locationState.selectedCounty
+    );
+});
+
+const filteredConstituencies = computed(() => {
+    if (!locationState.selectedCounty) return [];
+    return (locationData.constituencies || []).filter(
+        (constituency) => constituency.county_id == locationState.selectedCounty
+    );
+});
+
+const filteredWards = computed(() => {
+    if (!locationState.selectedConstituency) return [];
+    return (locationData.wards || []).filter(
+        (ward) => ward.constituency_id == locationState.selectedConstituency
+    );
+});
+
+// Filter counties for the dropdown
+const filteredCounties = computed(() => {
+    return Array.isArray(locationData.counties) ? locationData.counties : [];
+});
+
+// Watch for changes in location state and update the form
+watch(
+    () => locationState.selectedCounty,
+    (newVal) => {
+        if (newVal !== null && newVal !== undefined) {
+            form.county_id = newVal;
+            form.sub_county_id = null;
+            form.constituency_id = null;
+            form.ward_id = null;
+        }
+    }
+);
+
+watch(
+    () => locationState.selectedSubCounty,
+    (newVal) => {
+        if (newVal !== null && newVal !== undefined) {
+            form.sub_county_id = newVal;
+            // No need to reset constituency and ward here as they'll be disabled
+        }
+    }
+);
+
+watch(
+    () => locationState.selectedConstituency,
+    (newVal) => {
+        if (newVal !== null && newVal !== undefined) {
+            form.constituency_id = newVal;
+            form.ward_id = null;
+        }
+    }
+);
+
+watch(
+    () => locationState.selectedWard,
+    (newVal) => {
+        if (newVal !== null && newVal !== undefined) {
+            form.ward_id = newVal;
+        }
+    }
+);
+
+// Reset dependent fields when county changes
+const resetDependentFields = (field) => {
+    if (field === "county") {
+        locationState.selectedSubCounty = null;
+        locationState.selectedConstituency = null;
+        locationState.selectedWard = null;
+    } else if (field === "constituency") {
+        locationState.selectedWard = null;
+    }
+};
+
+// Options for Step 3 enhanced fields
+const disabilityStatusOptions = [
+    { value: "", label: "None" },
+    { value: "physical", label: "Physical" },
+    { value: "visual", label: "Visual" },
+    { value: "hearing", label: "Hearing" },
+    { value: "mental", label: "Mental" },
+    { value: "other", label: "Other" },
+];
+const maritalStatusOptions = [
+    { value: 0, label: "Single" },
+    { value: 1, label: "Married" },
+    { value: 2, label: "Divorced" },
+    { value: 3, label: "Separated" },
+    { value: 4, label: "Widowed" },
+];
+const educationLevelOptions = [
+    { value: 0, label: "Primary" },
+    { value: 1, label: "Secondary" },
+    { value: 2, label: "High School" },
+    { value: 3, label: "University" },
+    { value: 4, label: "Other" },
+];
+const ethnicityOptions = [
+    { value: 1, label: "Ethnicity 1" },
+    { value: 2, label: "Ethnicity 2" },
+    { value: 3, label: "Ethnicity 3" },
+];
+const languageOptions = [
+    { value: 1, label: "Language 1" },
+    { value: 2, label: "Language 2" },
+    { value: 3, label: "Language 3" },
+];
+const religionOptions = [
+    { value: 1, label: "Religion 1" },
+    { value: 2, label: "Religion 2" },
+    { value: 3, label: "Religion 3" },
+];
+
+// Step name mapping for navigation buttons
+const stepNames = [
+    "Basic Details", // 1
+    "Role Selection", // 2
+    "Personal Info", // 3
+    "Address Info", // 4
+    "Location Details", // 5
+    "Education & Employment", // 6
+    "Document Uploads", // 7
+    "Review & Submit", // 8
+];
+
+// Residence reasons for residents
+const residenceReasons = ref([
+    "Work",
+    "Family",
+    "Education",
+    "Business",
+    "Retirement",
+    "Other",
+]);
+
+// Refugee reasons for demonstration (replace with real data as needed)
+const refugeeReasons = ref([
+    "Conflict/War",
+    "Persecution",
+    "Natural Disaster",
+    "Economic Hardship",
+    "Other",
+]);
+
+// Static location options for demonstration (replace with dynamic data/API later)
+const purposeOfVisitOptions = [
+    { value: "Tourism", label: "Tourism" },
+    { value: "Business", label: "Business" },
+    { value: "Study", label: "Study" },
+    { value: "Work", label: "Work" },
+    { value: "Visiting Family", label: "Visiting Family" },
+    { value: "Transit", label: "Transit" },
+    { value: "Medical", label: "Medical" },
+    { value: "Other", label: "Other" },
+];
+
+const counties = [
+    { value: 1, label: "Nairobi" },
+    { value: 2, label: "Mombasa" },
+    { value: 3, label: "Kisumu" },
+];
+
+const subCounties = [
+    { value: 11, label: "Westlands" },
+    { value: 12, label: "Lang'ata" },
+    { value: 13, label: "Kisauni" },
+];
+
+const constituencies = [
+    { value: 21, label: "Westlands Constituency" },
+    { value: 22, label: "Lang'ata Constituency" },
+    { value: 23, label: "Kisauni Constituency" },
+];
+
+const wards = [
+    { value: 31, label: "Kangemi" },
+    { value: 32, label: "Karen" },
+    { value: 33, label: "Mkomani" },
+];
+
+// State for collapsible sections
+const expandedSections = ref({
+    personal: true, // Personal Information
+    contact: false, // Contact Information
+    education: false, // Education & Employment
+    security: false, // Security Information
+    documents: false, // Document Uploads
+});
+
+const activeSection = ref("personal"); // Track the currently active section
+
+/**
+ * Form State
+ */
+// Access the global Toast instance
+const { proxy } = getCurrentInstance();
+const passwordStrength = ref("");
+const uploadProgress = ref(0);
+const dragOver = ref(false);
+
+const checkPasswordStrength = () => {
+    const password = form.password;
+    if (!password) {
+        passwordStrength.value = "";
+        return;
+    }
+
+    const hasLetters = /[a-zA-Z]/.test(password);
+    const hasNumbers = /\d/.test(password);
+    const hasSpecial = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+    const isLongEnough = password.length >= 8;
+
+    if (isLongEnough && hasLetters && hasNumbers && hasSpecial) {
+        passwordStrength.value = "strong";
+    } else if (
+        isLongEnough &&
+        ((hasLetters && hasNumbers) ||
+            (hasLetters && hasSpecial) ||
+            (hasNumbers && hasSpecial))
+    ) {
+        passwordStrength.value = "medium";
+    } else {
+        passwordStrength.value = "weak";
+    }
+};
+
+const form = useForm({
+    // Basic Details
+    name: "",
+    email: "",
+    telephone: "",
+    phoneNumber: "",
+    phoneCountryCode: "254",
+    password: "",
+    password_confirmation: "",
+
+    // Role and Identification
+    role: "citizen",
+    nationality: "Kenya",
+    idNumber: "",
+    idType: "national_id",
+    purpose_of_visit: "", // Only for foreigner role
+
+    // Personal Details
+    first_name: "",
+    middle_name: "",
+    last_name: "",
+    gender: "male",
+    marital_status: "",
+    disability: "",
+    plwd_number: "",
+    disability_status: "",
+    ethnicity_id: null,
+    language_id: null,
+    religion_id: null,
+    highest_level_of_education: null,
+    date_of_birth: "",
+
+    // Contact Information
+    address_line_1: "",
+    address_line_2: "",
+    city: "",
+    state: "",
+
+    // Location Details
+    country_id: null,
+    region_id: null,
+    county_id: null,
+    sub_county_id: null,
+    constituency_id: null,
+    ward_id: null,
+    location_id: null,
+    village_id: null,
+
+    // Refugee-specific (for role: 'refugee')
+    reason_for_refugee: "",
+    reason_for_refugee_other: "", // If 'Other' is selected, this holds the custom value
+    refugee_center_id: null,
+
+    // Resident-specific (for role: 'resident')
+    reason_for_residence: "",
+    reason_for_residence_other: "", // If 'Other' is selected, this holds the custom value
+
+    // Role-specific
+    consulate_id: null,
+    polling_station_id: null,
+
+    // Education and Employment
+    education_level: "",
+    occupation: "",
+    employer_details: "",
+
+    // Document Uploads
+    proof_of_identity: null,
+    proof_of_identity_type: "national_id",
+    proof_of_address: null,
+    proof_of_address_type: "utility_bill",
+    documents: {},
+
+    // Security
+    security_question: "",
+    security_answer: "",
+
+    // Documents
+    documents: {
+        identity: {
+            file: null,
+            type: "national_id",
+            preview: null,
+            name: "",
+            size: 0,
+        },
+        address: {
+            file: null,
+            type: "utility_bill",
+            preview: null,
+            name: "",
+            size: 0,
+        },
+        education: [], // Array to store education documents
+    },
+
+    // Terms
+    terms: false,
+});
+
+/**
+ * Step Navigation State
+ */
+const currentStep = ref(1);
+
+/**
+ * Computed Properties
+ */
+const stepDescription = computed(() => {
+    const descriptions = [
+        "Enter profile details to proceed",
+        "Select your role and provide identification details",
+        "Provide additional personal details",
+        "Add your contact information",
+        "Education and employment details",
+        "Security information",
+        "Upload required documents",
+        "Review your details and confirm",
+    ];
+    return descriptions[currentStep.value - 1] || "";
+});
+
+const idField = computed(() => {
+    const roleToField = {
+        citizen: "national_id",
+        resident: "alien_id",
+        refugee: "refugee_id",
+        diplomat: "diplomat_id",
+        foreigner: "passport_number",
+    };
+    return roleToField[form.role] || "id_number";
+});
+
+const idLabel = computed(() => {
+    const roleToLabel = {
+        citizen: "National ID Number",
+        resident: "Alien ID Number",
+        refugee: "Refugee ID Number",
+        diplomat: "Diplomat ID Number",
+        foreigner: "Passport Number",
+    };
+    return roleToLabel[form.role] || "ID Number";
+});
+
+// Watchers for role and location fields
+watch(
+    () => form.role,
+    (newRole, oldRole) => {
+        // Reset role-specific fields
+        form.idNumber = "";
+        form.consulate_id = null;
+        form.polling_station_id = null;
+        form.refugee_center_id = null;
+        form.reason_for_refugee = "";
+        if (newRole === "citizen") {
+            form.nationality = "Kenya";
+            // Reset all location fields
+            form.county_id = null;
+            form.sub_county_id = null;
+            form.constituency_id = null;
+            form.ward_id = null;
+            // Reset location state
+            locationState.selectedCounty = null;
+            locationState.selectedSubCounty = null;
+            locationState.selectedConstituency = null;
+            locationState.selectedWard = null;
+        }
+    }
+);
+watch(
+    () => form.region_id,
+    () => {
+        form.county_id = null;
+        form.sub_county_id = null;
+        form.constituency_id = null;
+        form.ward_id = null;
+        form.location_id = null;
+        form.village_id = null;
+    }
+);
+watch(
+    () => form.county_id,
+    () => {
+        form.sub_county_id = null;
+        form.constituency_id = null;
+        form.ward_id = null;
+        form.location_id = null;
+        form.village_id = null;
+    }
+);
+watch(
+    () => form.sub_county_id,
+    () => {
+        form.ward_id = null;
+        form.location_id = null;
+        form.village_id = null;
+    }
+);
+watch(
+    () => form.constituency_id,
+    () => {
+        form.ward_id = null;
+        form.location_id = null;
+        form.village_id = null;
+    }
+);
+watch(
+    () => form.ward_id,
+    () => {
+        form.location_id = null;
+        form.village_id = null;
+    }
+);
+// Location changes are now handled by the useLocation composable
+watch(
+    () => form.location_id,
+    () => {
+        form.village_id = null;
+    }
+);
+
+const educationLevels = [
+    "Primary School",
+    "Secondary School",
+    "High School",
+    "Certificate",
+    "Diploma",
+    "Bachelor's Degree",
+    "Master's Degree",
+    "Doctorate",
+    "Other",
+];
+
+const securityQuestions = [
+    "What was your first pet's name?",
+    "What was the name of your first school?",
+    "What is your mother's maiden name?",
+    "What city were you born in?",
+    "What is your favorite book?",
+    "What was the make of your first car?",
+];
+
+const handleFileDrop = (event, field) => {
+    dragOver.value = false;
+    const file = event.dataTransfer.files[0];
+    if (file) {
+        processFile(file, field);
+    }
+};
+
+const processFile = (file, field) => {
+    // Check file type
+    const validTypes = ["application/pdf", "image/jpeg", "image/png"];
+    if (!validTypes.includes(file.type)) {
+        form.setError(
+            field,
+            "Invalid file type. Please upload a PDF, JPG, or PNG file."
+        );
+        window.Toast.fire({
+            icon: "error",
+            title: "Invalid file",
+            text: "Please upload a valid document.",
+        });
+        return false;
+    }
+
+    // Check file size (5MB max)
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+        form.setError(field, "File size must be less than 5MB");
+        window.Toast.fire({
+            icon: "error",
+            title: "File too large",
+            text: "File size exceeds the maximum limit of 5MB.",
+        });
+        return false;
+    }
+
+    // Handle document uploads
+    const fileInfo = {
+        file,
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        preview: null,
+    };
+
+    // Create preview for images
+    if (file.type.startsWith("image/")) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            fileInfo.preview = e.target.result;
+            // Update both the specific field and the documents object
+            form[field] = { ...fileInfo };
+            form.documents[field] = { ...fileInfo };
+        };
+        reader.readAsDataURL(file);
+    } else {
+        // For non-image files, update both the field and documents object
+        form[field] = { ...fileInfo };
+        form.documents[field] = { ...fileInfo };
+    }
+
+    return true;
+};
+
+const handleFileUpload = (event, field) => {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Reset file input to allow re-uploading the same file
+    event.target.value = "";
+
+    // Clear any previous errors for this field
+    form.clearErrors(field);
+
+    // Clear any previous file data for this field
+    form[field] = null;
+    form.documents[field] = null;
+
+    // Process the file
+    processFile(file, field);
+};
+
+const selectedCountry = computed(() => {
+    return props.countries.find((country) => country.name === form.nationality);
+});
+
+const selectedGender = computed(() => {
+    return props.genders[form.gender] || "N/A";
+});
+
+/**
+ * Methods
+ */
+const nextStep = () => {
+    // Basic validation before proceeding to next step
+    let isValid = true;
+
+    // Step-specific validation
+    if (currentStep.value === 1) {
+        if (
+            !form.name ||
+            !form.email ||
+            !form.telephone ||
+            !form.password ||
+            !form.password_confirmation
+        ) {
+            form.setError("form", "Please fill in all required fields");
+            window.Toast.fire({
+                icon: "warning",
+                title: "Incomplete Form",
+                text: "Please complete all required fields before proceeding.",
+            });
+            isValid = false;
+        } else if (form.password !== form.password_confirmation) {
+            form.setError("password_confirmation", "Passwords do not match");
+            window.Toast.fire({
+                icon: "error",
+                title: "Password Mismatch",
+                text: "The passwords you entered do not match.",
+            });
+            isValid = false;
+        }
+    } else if (currentStep.value === 2) {
+        let missing = [];
+        // Role-specific validation
+        switch (form.role) {
+            case "citizen":
+                if (!form.nationality) missing.push("Nationality");
+                if (!form.idNumber) missing.push("National ID Number");
+                if (!form.county_id) missing.push("County");
+                if (!form.sub_county_id) missing.push("Sub-County");
+                if (!form.constituency_id) missing.push("Constituency");
+                if (!form.ward_id) missing.push("Ward");
+                break;
+            case "resident":
+                if (!form.nationality) missing.push("Nationality");
+                if (!form.idNumber) missing.push("Alien ID Number");
+                if (!form.reason_for_residence) {
+                    missing.push("Reason for Residence");
+                } else if (
+                    form.reason_for_residence === "Other" &&
+                    !form.reason_for_residence_other
+                ) {
+                    missing.push("Custom Reason for Residence");
+                }
+                break;
+            case "refugee":
+                if (!form.nationality) missing.push("Nationality");
+                if (!form.idNumber) missing.push("Refugee ID Number");
+                if (!form.reason_for_refugee) {
+                    missing.push("Reason for Refugee Status");
+                } else if (
+                    form.reason_for_refugee === "Other" &&
+                    !form.reason_for_refugee_other
+                ) {
+                    missing.push("Custom Reason for Refugee Status");
+                }
+                if (!form.refugee_center_id) missing.push("Refugee Center");
+                break;
+            case "diplomat":
+                if (!form.nationality) missing.push("Nationality");
+                if (!form.idNumber) missing.push("Diplomat ID Number");
+                if (!form.consulate_id) missing.push("Consulate");
+                break;
+            case "foreigner":
+                if (!form.nationality) missing.push("Nationality");
+                if (!form.idNumber) missing.push("Passport Number");
+                if (!form.purpose_of_visit) missing.push("Purpose of Visit");
+                break;
+        }
+        if (missing.length > 0) {
+            form.setError("form", `Please fill in: ${missing.join(", ")}`);
+            window.Toast.fire({
+                icon: "warning",
+                title: "Incomplete Form",
+                text: `Please complete: ${missing.join(
+                    ", "
+                )} before proceeding.`,
+            });
+            isValid = false;
+        }
+    } else if (currentStep.value === 3) {
+        let missing = [];
+        if (!form.first_name) missing.push("First Name");
+        if (!form.last_name) missing.push("Last Name");
+        if (!form.gender) missing.push("Gender");
+        if (!form.date_of_birth) missing.push("Date of Birth");
+        if (!form.disability_status) missing.push("Disability Status");
+        if (!form.ethnicity_id) missing.push("Ethnicity");
+        if (!form.language_id) missing.push("Language");
+        if (!form.religion_id) missing.push("Religion");
+        if (!form.marital_status) missing.push("Marital Status");
+        if (missing.length > 0) {
+            form.setError("form", `Please fill in: ${missing.join(", ")}`);
+            window.Toast.fire({
+                icon: "warning",
+                title: "Incomplete Form",
+                text: `Please complete: ${missing.join(
+                    ", "
+                )} before proceeding.`,
+            });
+            isValid = false;
+        }
+    } else if (currentStep.value === 4) {
+        let missing = [];
+        if (!form.address_line_1) missing.push("Address Line 1");
+        if (!form.city) missing.push("City/Town");
+        if (!form.state) missing.push("State/County");
+        if (missing.length > 0) {
+            form.setError("form", `Please fill in: ${missing.join(", ")}`);
+            window.Toast.fire({
+                icon: "warning",
+                title: "Incomplete Address",
+                text: `Please complete: ${missing.join(", ")}
+                before proceeding.`,
+            });
+            isValid = false;
+        }
+    } else if (currentStep.value === 5) {
+        let missing = [];
+        if (!form.education_level) missing.push("Education Level");
+        if (!form.occupation) missing.push("Occupation");
+        if (!form.employer_details) missing.push("Employer Details");
+        if (missing.length > 0) {
+            form.setError("form", `Please fill in: ${missing.join(", ")}`);
+            window.Toast.fire({
+                icon: "warning",
+                title: "Incomplete Form",
+                text: `Please complete: ${missing.join(
+                    ", "
+                )} before proceeding.`,
+            });
+            isValid = false;
+        }
+    } else if (currentStep.value === 6) {
+        if (!form.security_question || !form.security_answer) {
+            form.setError(
+                "form",
+                "Please provide a security question and answer"
+            );
+            window.Toast.fire({
+                icon: "warning",
+                title: "Security Information Required",
+                text: "Please provide both a security question and answer before proceeding.",
+            });
+            isValid = false;
+        }
+    } else if (currentStep.value === 7) {
+        if (!form.proof_of_identity || !form.proof_of_address) {
+            form.setError("form", "Please upload all required documents");
+            window.Toast.fire({
+                icon: "warning",
+                title: "Documents Required",
+                text: "Please upload all required documents.",
+            });
+            isValid = false;
+        }
+    }
+
+    if (isValid && currentStep.value < 8) {
+        currentStep.value++;
+    }
+};
+
+const previousStep = () => {
+    if (currentStep.value > 1) currentStep.value--;
+};
+
+const resetForm = () => {
+    form.reset();
+    currentStep.value = 1;
+};
+
+const submit = () => {
+    // If 'Other' is selected, use the custom value for submission
+    if (form.reason_for_residence === "Other") {
+        form.reason_for_residence = form.reason_for_residence_other;
+    }
+    if (form.reason_for_refugee === "Other") {
+        form.reason_for_refugee = form.reason_for_refugee_other;
+    }
+
+    // Create FormData for file uploads
+    const formData = new FormData();
+
+    // Add all form fields to FormData
+    Object.keys(form).forEach((key) => {
+        // Skip private properties and methods
+        if (
+            typeof form[key] !== "function" &&
+            !key.startsWith("_") &&
+            ![
+                "proof_of_identity",
+                "proof_of_address",
+                "errors",
+                "hasErrors",
+                "processing",
+                "recentlySuccessful",
+                // Do not send _other fields
+                "reason_for_residence_other",
+                "reason_for_refugee_other",
+            ].includes(key)
+        ) {
+            formData.append(key, form[key]);
+        }
+    });
+
+    // Handle file uploads
+    if (form.proof_of_identity) {
+        if (form.proof_of_identity instanceof File) {
+            formData.append("proof_of_identity", form.proof_of_identity);
+        } else if (form.proof_of_identity.file) {
+            formData.append("proof_of_identity", form.proof_of_identity.file);
+        }
+    }
+
+    if (form.proof_of_address) {
+        if (form.proof_of_address instanceof File) {
+            formData.append("proof_of_address", form.proof_of_address);
+        } else if (form.proof_of_address.file) {
+            formData.append("proof_of_address", form.proof_of_address.file);
+        }
+    }
+
+    form.post(route("register"), {
+        _method: "post",
+        forceFormData: true,
+        preserveState: true,
+        onSuccess: () => {
+            window.Toast.fire({
+                icon: "success",
+                title: "Registration successful!",
+                text: "Please check your email for verification.",
+            });
+            form.reset("password", "password_confirmation");
+            // Redirect to dashboard or verification page
+            window.location.href = route("dashboard");
+        },
+        onError: (errors) => {
+            // Handle errors
+            console.error("Registration failed:", errors);
+
+            if (errors.server) {
+                window.Toast.fire({
+                    icon: "error",
+                    title: "Server error",
+                    text: "Please try again later.",
+                });
+            } else {
+                // Show all error messages as toast notifications, one after another
+                Object.values(errors).forEach((msg, idx) => {
+                    const messages = Array.isArray(msg) ? msg : [msg];
+                    messages.forEach((message, j) => {
+                        setTimeout(() => {
+                            window.Toast.fire({
+                                icon: "error",
+                                title: "Error",
+                                text: message,
+                            });
+                        }, (idx + j) * 700); // 700ms apart, adjust as needed
+                    });
+                });
+
+                // Focus on first error field
+                const firstErrorField = Object.keys(errors)[0];
+                if (firstErrorField) {
+                    const element = document.getElementById(firstErrorField);
+                    if (element) {
+                        element.scrollIntoView({
+                            behavior: "smooth",
+                            block: "center",
+                        });
+                        element.focus();
+                    }
+                }
+            }
+        },
+        onFinish: () => {
+            form.processing = false;
+        },
+    });
+};
+
+// Update phone number when country code or number changes
+const updatePhoneNumber = () => {
+    // Combine country code and phone number
+    if (form.phoneNumber) {
+        form.telephone = `+${form.phoneCountryCode}${form.phoneNumber.replace(
+            /^0+/,
+            ""
+        )}`;
+    } else {
+        form.telephone = "";
+    }
+};
+
+// Country codes for the dropdown
+const countryCodes = [
+    { code: "KE", name: "Kenya (+254)" },
+    { code: "US", name: "USA (+1)" },
+    { code: "GB", name: "UK (+44)" },
+    { code: "CA", name: "Canada (+1)" },
+    { code: "AU", name: "Australia (+61)" },
+    // Add more countries as needed
+];
+
+// Set default country code to Kenya
+form.phoneCountryCode = "254";
+
+// Watch for changes in phone number or country code
+watch([() => form.phoneNumber, () => form.phoneCountryCode], () => {
+    updatePhoneNumber();
+});
+
+// Initialize phone number on mount
+onMounted(() => {
+    // If we have a telephone number, parse it
+    if (form.telephone) {
+        const match = form.telephone.match(/^\+(\d+)(\d+)$/);
+        if (match) {
+            form.phoneCountryCode = match[1];
+            form.phoneNumber = match[2];
+        }
+    }
+});
+
+// Format file size to human readable format
+const formatFileSize = (bytes) => {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+};
+
+// Format document type for display
+const formatDocumentType = (type) => {
+    const types = {
+        national_id: "National ID",
+        passport: "Passport",
+        driving_license: "Driving License",
+        utility_bill: "Utility Bill",
+        bank_statement: "Bank Statement",
+        rental_agreement: "Rental Agreement",
+        other: "Other Document",
+    };
+    return types[type] || type;
+};
+
+// Watch for step changes to handle any step-specific logic
+watch(
+    () => currentStep,
+    (newStep) => {
+        // Add any step-specific logic here if needed
+    }
+);
+
+// Toggle accordion sections
+const toggleSection = (section) => {
+    // Close all sections first
+    Object.keys(expandedSections.value).forEach((key) => {
+        expandedSections.value[key] = false;
+    });
+    // Toggle the clicked section if it's different from the active one
+    if (activeSection.value !== section) {
+        expandedSections.value[section] = true;
+        activeSection.value = section;
+    } else {
+        activeSection.value = null;
+    }
+};
+</script>
+
+<template>
+    <Head title="Register" />
+
+    <AuthenticationCard>
+        <template #logo>
+            <AuthenticationCardLogo />
+        </template>
+
+        <div class="p-2 space-y-4 sm:p-8">
+            <h1
+                class="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white"
+            >
+                Sign Up for an account
+            </h1>
+
+            <!-- Multi-Step Form -->
+            <form
+                @submit.prevent="submit"
+                class="space-y-2"
+                enctype="multipart/form-data"
+            >
+                <!-- Step 1: Basic Details -->
+                <div v-if="currentStep === 1" class="space-y-4">
+                    <h2
+                        class="text-sm font-light text-gray-500 dark:text-gray-400"
+                    >
+                        Step {{ currentStep }}: {{ stepDescription }}
+                    </h2>
+                    <div>
+                        <div class="flex items-center">
+                            <InputLabel for="name" value="Username"
+                                >Username</InputLabel
+                            ><i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
+                        <TextInput
+                            id="name"
+                            v-model="form.name"
+                            type="text"
+                            placeholder="Enter your username"
+                            class="mt-1 block w-full rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500 shadow-sm"
+                            required
+                            autofocus
+                        />
+                        <p class="text-xs text-gray-500 mt-1">
+                            Your username will be used for login and display
+                            purposes.
+                        </p>
+                        <InputError :message="form.errors.name" class="mt-2" />
+                    </div>
+
+                    <div>
+                        <div class="flex items-center">
+                            <InputLabel for="email" value="Email"
+                                >Email</InputLabel
+                            ><i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
+                        <TextInput
+                            id="email"
+                            v-model="form.email"
+                            type="email"
+                            placeholder="your.email@example.com"
+                            class="mt-1 block w-full rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500 shadow-sm"
+                            required
+                        />
+                        <p class="text-xs text-gray-500 mt-1">
+                            Enter a valid email address. This will be used for
+                            account verification and notifications.
+                        </p>
+                        <InputError :message="form.errors.email" class="mt-2" />
+                    </div>
+
+                    <div>
+                        <div class="flex items-center">
+                            <InputLabel for="telephone" value="Telephone" />
+                            <i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
+                        <div class="flex space-x-2">
+                            <div class="w-1/3">
+                                <VueSelect
+                                    v-model="form.phoneCountryCode"
+                                    :options="
+                                        countryCodes.map((country) => ({
+                                            value: country.code,
+                                            label: country.name,
+                                        }))
+                                    "
+                                    placeholder="Select country code"
+                                    label="label"
+                                    :reduce="(option) => option.value"
+                                    class="mt-1 block w-full"
+                                />
+                            </div>
+                            <div class="flex-1">
+                                <input
+                                    id="phoneNumber"
+                                    v-model="form.phoneNumber"
+                                    type="tel"
+                                    class="mt-1 block w-full rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500 shadow-sm"
+                                    placeholder="e.g. 712345678"
+                                    required
+                                    autocomplete="tel"
+                                />
+                                <input
+                                    type="hidden"
+                                    name="telephone"
+                                    v-model="form.telephone"
+                                />
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-1">
+                            Enter your complete phone number, starting with the
+                            country code and followed by your mobile number
+                            (e.g., +254712345678). This number will be used for
+                            account verification, important notifications, and
+                            password recovery. Your phone number will remain
+                            private and will not be shared without your consent.
+                        </p>
+                    </div>
+
+                    <div>
+                        <div class="flex items-center">
+                            <InputLabel for="password" value="Password"
+                                >Password</InputLabel
+                            ><i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
+                        <TextInput
+                            id="password"
+                            v-model="form.password"
+                            type="password"
+                            placeholder="Create a strong password"
+                            class="mt-1 block w-full rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500 shadow-sm"
+                            required
+                        />
+                        <p class="mt-1 text-xs text-gray-500">
+                            Use at least 8 characters with a mix of letters,
+                            numbers, and symbols
+                        </p>
+                        <InputError
+                            :message="form.errors.password"
+                            class="mt-2"
+                        />
+                    </div>
+
+                    <div>
+                        <div class="flex items-center">
+                            <InputLabel
+                                for="password_confirmation"
+                                value="Confirm Password"
+                                >Confirm Password</InputLabel
+                            ><i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
+                        <TextInput
+                            id="password_confirmation"
+                            v-model="form.password_confirmation"
+                            type="password"
+                            placeholder="Re-enter your password"
+                            class="mt-1 block w-full rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500 shadow-sm"
+                            required
+                        />
+                        <p class="text-xs text-gray-500 mt-1">
+                            Please re-enter your password to confirm it matches.
+                        </p>
+                        <InputError
+                            :message="form.errors.password_confirmation"
+                            class="mt-2"
+                        />
+                    </div>
+                </div>
+
+                <!-- Step 2: Role Selection -->
+                <div v-if="currentStep === 2" class="space-y-4">
+                    <h2
+                        class="text-sm font-light text-gray-500 dark:text-gray-400"
+                    >
+                        Step {{ currentStep }}: {{ stepDescription }}
+                    </h2>
+                    <div>
+                        <div class="flex items-center">
+                            <InputLabel for="role" value="Role" />
+                            <i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
+                        <VueSelect
+                            v-model="form.role"
+                            :options="[
+                                { value: 'citizen', label: 'Citizen' },
+                                { value: 'resident', label: 'Resident' },
+                                { value: 'refugee', label: 'Refugee' },
+                                { value: 'diplomat', label: 'Diplomat' },
+                                { value: 'foreigner', label: 'Foreigner' },
+                            ]"
+                            placeholder="Select your role"
+                            label="label"
+                            :reduce="(option) => option.value"
+                            required
+                            class="mt-1 block w-full"
+                        />
+                        <p class="text-xs text-gray-500 mt-1">
+                            Select your role in the country. This determines
+                            your application path.
+                        </p>
+                        <InputError :message="form.errors.role" class="mt-2" />
+                    </div>
+
+                    <div>
+                        <div class="flex items-center">
+                            <InputLabel for="nationality" value="Nationality" />
+                            <i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
+                        <VueSelect
+                            v-model="form.nationality"
+                            :options="
+                                form.role === 'citizen'
+                                    ? ['Kenya']
+                                    : countries.map((country) => country.name)
+                            "
+                            placeholder="Select your nationality"
+                            class="mt-1 block w-full"
+                            :class="{
+                                'border-red-500': form.errors.nationality,
+                                'bg-gray-100 cursor-not-allowed':
+                                    form.role === 'citizen',
+                            }"
+                            :disabled="form.role === 'citizen'"
+                        />
+                        <p class="text-xs text-gray-500 mt-1">
+                            Choose your nationality. Citizens are defaulted to
+                            Kenya.
+                        </p>
+                        <InputError
+                            class="mt-2"
+                            :message="form.errors.nationality"
+                        />
+                    </div>
+
+                    <div>
+                        <div class="flex items-center">
+                            <InputLabel :for="idField" :value="idLabel" />
+                            <i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
+                        <TextInput
+                            :id="idField"
+                            v-model="form.idNumber"
+                            type="text"
+                            :placeholder="
+                                form.role === 'citizen'
+                                    ? 'e.g. 12345678'
+                                    : 'Enter your ID or passport number'
+                            "
+                            class="mt-1 block w-full rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500 shadow-sm"
+                            required
+                        />
+                        <p class="text-xs text-gray-500 mt-1">
+                            {{
+                                form.role === "citizen"
+                                    ? "Enter your Kenyan National ID Number."
+                                    : form.role === "resident"
+                                    ? "Enter your Alien ID Number as provided by immigration authorities."
+                                    : form.role === "refugee"
+                                    ? "Enter your official Refugee ID Number."
+                                    : form.role === "diplomat"
+                                    ? "Enter your Diplomat ID Number as assigned by your embassy."
+                                    : form.role === "foreigner"
+                                    ? "Enter your Passport Number as shown in your travel document."
+                                    : "Enter your identification number."
+                            }}
+                        </p>
+                        <InputError
+                            :message="form.errors.idNumber"
+                            class="mt-2"
+                        />
+                    </div>
+
+                    <!-- Foreigner: Purpose of Visit -->
+                    <div v-if="form.role === 'foreigner'">
+                        <div class="flex items-center">
+                            <InputLabel
+                                for="purpose_of_visit"
+                                value="Purpose of Visit"
+                            />
+                            <i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
+                        <VueSelect
+                            id="purpose_of_visit"
+                            v-model="form.purpose_of_visit"
+                            :options="purposeOfVisitOptions"
+                            placeholder="Select purpose of visit"
+                            class="mt-1 block w-full"
+                            :reduce="(option) => option.value"
+                            required
+                        />
+                        <p class="text-xs text-gray-500 mt-1">
+                            Indicate the main reason for your visit to the
+                            country.
+                        </p>
+                        <InputError
+                            :message="form.errors.purpose_of_visit"
+                            class="mt-2"
+                        />
+                    </div>
+
+                    <!-- Diplomat: Consulate -->
+                    <div v-if="form.role === 'diplomat'">
+                        <div class="flex items-center">
+                            <InputLabel for="consulate_id" value="Consulate" />
+                            <i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
+                        <VueSelect
+                            v-model="form.consulate_id"
+                            :options="consulates"
+                            placeholder="Select consulate"
+                            class="mt-1 block w-full"
+                            :class="{
+                                'border-red-500': form.errors.consulate_id,
+                            }"
+                            required
+                        />
+                        <p class="text-xs text-gray-500 mt-1">
+                            Select the consulate you are attached to as a
+                            diplomat.
+                        </p>
+                        <InputError
+                            :message="form.errors.consulate_id"
+                            class="mt-2"
+                        />
+                    </div>
+
+                    <!-- Refugee: Reason & Center -->
+                    <div v-if="form.role === 'refugee'">
+                        <div class="flex items-center">
+                            <InputLabel
+                                for="reason_for_refugee"
+                                value="Reason for Refugee Status"
+                            />
+                            <i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
+                        <VueSelect
+                            v-model="form.reason_for_refugee"
+                            :options="[...refugeeReasons, 'Other']"
+                            placeholder="Select reason for refugee status"
+                            class="mt-1 block w-full"
+                            :class="{
+                                'border-red-500':
+                                    form.errors.reason_for_refugee,
+                            }"
+                            required
+                        />
+                        <p class="text-xs text-gray-500 mt-1">
+                            Select the reason for your refugee status. If
+                            'Other', please specify.
+                        </p>
+                        <!-- Show text input if 'Other' is selected -->
+                        <div v-if="form.reason_for_refugee === 'Other'">
+                            <TextInput
+                                v-model="form.reason_for_refugee_other"
+                                placeholder="Please specify your reason"
+                                class="mt-2 block w-full rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500 shadow-sm"
+                            />
+                            <InputError
+                                :message="form.errors.reason_for_refugee_other"
+                                class="mt-2"
+                            />
+                        </div>
+                        <InputError
+                            :message="form.errors.reason_for_refugee"
+                            class="mt-2"
+                        />
+                        <div class="flex items-center mt-4">
+                            <InputLabel
+                                for="refugee_center_id"
+                                value="Refugee Center"
+                            />
+                            <i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
+                        <VueSelect
+                            v-model="form.refugee_center_id"
+                            :options="refugeeCenters"
+                            placeholder="Select refugee center"
+                            class="mt-1 block w-full"
+                            :class="{
+                                'border-red-500': form.errors.refugee_center_id,
+                            }"
+                            required
+                        />
+                        <p class="text-xs text-gray-500 mt-1">
+                            Choose the refugee center where you are registered.
+                        </p>
+                        <InputError
+                            :message="form.errors.refugee_center_id"
+                            class="mt-2"
+                        />
+                    </div>
+
+                    <!-- Resident: Reason for Residence -->
+                    <div v-if="form.role === 'resident'">
+                        <div class="flex items-center">
+                            <InputLabel
+                                for="reason_for_residence"
+                                value="Reason for Residence"
+                            />
+                            <i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
+                        <VueSelect
+                            v-model="form.reason_for_residence"
+                            :options="[
+                                ...(residenceReasons.value || []),
+                                'Other',
+                            ]"
+                            placeholder="Select reason for residence"
+                            class="mt-1 block w-full"
+                            :class="{
+                                'border-red-500':
+                                    form.errors.reason_for_residence,
+                            }"
+                            required
+                        />
+                        <p class="text-xs text-gray-500 mt-1">
+                            Select the reason for your residence in the country.
+                        </p>
+                        <!-- Show text input if 'Other' is selected -->
+                        <div v-if="form.reason_for_residence === 'Other'">
+                            <TextInput
+                                v-model="form.reason_for_residence_other"
+                                placeholder="Please specify your reason"
+                                class="mt-2 block w-full rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500 shadow-sm"
+                            />
+                            <InputError
+                                :message="
+                                    form.errors.reason_for_residence_other
+                                "
+                                class="mt-2"
+                            />
+                        </div>
+                        <InputError
+                            :message="form.errors.reason_for_residence"
+                            class="mt-2"
+                        />
+                    </div>
+
+                    <!-- Citizen: Polling Station (if applicable) -->
+                    <div v-if="form.role === 'citizen'">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <!-- County Dropdown -->
+                            <div>
+                                <div class="flex items-center">
+                                    <InputLabel
+                                        for="county_id"
+                                        value="County"
+                                    />
+                                    <i
+                                        class="fas fa-star text-red-500 text-xs ml-1"
+                                    ></i>
+                                </div>
+                                <VueSelect
+                                    v-model="locationState.selectedCounty"
+                                    :options="filteredCounties"
+                                    label="name"
+                                    :reduce="(county) => county.id"
+                                    placeholder="Select County"
+                                    :clearable="true"
+                                    @update:modelValue="
+                                        resetDependentFields('county')
+                                    "
+                                />
+                                <InputError :message="form.errors.county_id" />
+                            </div>
+                            <!-- Sub-County Dropdown -->
+                            <div>
+                                <div class="flex items-center">
+                                    <InputLabel
+                                        for="sub_county_id"
+                                        value="Sub-County"
+                                    />
+                                    <i
+                                        class="fas fa-star text-red-500 text-xs ml-1"
+                                    ></i>
+                                </div>
+                                <VueSelect
+                                    v-model="locationState.selectedSubCounty"
+                                    :options="filteredSubCounties"
+                                    label="name"
+                                    :reduce="(sc) => sc.id"
+                                    placeholder="Select Sub-County"
+                                    :clearable="true"
+                                    :disabled="!locationState.selectedCounty"
+                                />
+                                <InputError
+                                    :message="form.errors.sub_county_id"
+                                />
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                            <!-- Constituency Dropdown -->
+                            <div>
+                                <div class="flex items-center">
+                                    <InputLabel
+                                        for="constituency_id"
+                                        value="Constituency"
+                                    />
+                                    <i
+                                        class="fas fa-star text-red-500 text-xs ml-1"
+                                    ></i>
+                                </div>
+                                <VueSelect
+                                    v-model="locationState.selectedConstituency"
+                                    :options="filteredConstituencies"
+                                    label="name"
+                                    :reduce="(co) => co.id"
+                                    placeholder="Select Constituency"
+                                    :clearable="true"
+                                    :disabled="!locationState.selectedCounty"
+                                    @update:modelValue="
+                                        resetDependentFields('constituency')
+                                    "
+                                />
+                                <InputError
+                                    :message="form.errors.constituency_id"
+                                />
+                            </div>
+                            <!-- Ward Dropdown -->
+                            <div>
+                                <div class="flex items-center">
+                                    <InputLabel for="ward_id" value="Ward" />
+                                    <i
+                                        class="fas fa-star text-red-500 text-xs ml-1"
+                                    ></i>
+                                </div>
+                                <VueSelect
+                                    v-model="locationState.selectedWard"
+                                    :options="filteredWards"
+                                    label="name"
+                                    :reduce="(ward) => ward.id"
+                                    placeholder="Select Ward"
+                                    :clearable="true"
+                                    :disabled="
+                                        !locationState.selectedConstituency
+                                    "
+                                />
+                                <InputError :message="form.errors.ward_id" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Personal Information -->
+                <div v-if="currentStep === 3" class="space-y-4">
+                    <h2
+                        class="text-sm font-light text-gray-500 dark:text-gray-400"
+                    >
+                        Step {{ currentStep }}: {{ stepDescription }}
+                    </h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <div class="flex items-center">
+                                <InputLabel for="first_name" value="First Name"
+                                    >First Name</InputLabel
+                                ><i
+                                    class="fas fa-star text-red-500 text-xs ml-1"
+                                    aria-hidden="true"
+                                ></i>
+                            </div>
+                            <TextInput
+                                id="first_name"
+                                v-model="form.first_name"
+                                type="text"
+                                placeholder="Enter your first name"
+                                class="mt-1 block w-full rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500 shadow-sm"
+                                required
+                            />
+                            <p class="text-xs text-gray-500 mt-1">
+                                Enter your legal first name as shown on your
+                                official documents.
+                            </p>
+                            <InputError
+                                :message="form.errors.first_name"
+                                class="mt-2"
+                            />
+                        </div>
+                        <div>
+                            <InputLabel
+                                for="middle_name"
+                                value="Middle Name (Optional)"
+                            />
+                            <TextInput
+                                id="middle_name"
+                                v-model="form.middle_name"
+                                type="text"
+                                placeholder="Enter your middle name (if any)"
+                                class="mt-1 block w-full rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500 shadow-sm"
+                            />
+                            <InputError
+                                :message="form.errors.middle_name"
+                                class="mt-2"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <div class="flex items-center">
+                                <InputLabel for="last_name" value="Last Name"
+                                    >Last Name</InputLabel
+                                ><i
+                                    class="fas fa-star text-red-500 text-xs ml-1"
+                                    aria-hidden="true"
+                                ></i>
+                            </div>
+                            <TextInput
+                                id="last_name"
+                                v-model="form.last_name"
+                                type="text"
+                                placeholder="Enter your last name"
+                                class="mt-1 block w-full rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500 shadow-sm"
+                                required
+                            />
+                            <p class="text-xs text-gray-500 mt-1">
+                                Enter your legal surname/family name as shown on
+                                your official documents.
+                            </p>
+                            <InputError
+                                :message="form.errors.last_name"
+                                class="mt-2"
+                            />
+                        </div>
+                        <div>
+                            <div class="flex items-center">
+                                <InputLabel for="gender" value="Gender"
+                                    >Gender</InputLabel
+                                ><i
+                                    class="fas fa-star text-red-500 text-xs ml-1"
+                                    aria-hidden="true"
+                                ></i>
+                            </div>
+                            <VueSelect
+                                v-model="form.gender"
+                                :options="[
+                                    { value: 'male', label: 'Male' },
+                                    { value: 'female', label: 'Female' },
+                                    { value: 'other', label: 'Other' },
+                                    {
+                                        value: 'prefer_not_to_say',
+                                        label: 'Prefer not to say',
+                                    },
+                                ]"
+                                placeholder="Select your gender"
+                                label="label"
+                                :reduce="(option) => option.value"
+                                required
+                                class="mt-1 block w-full"
+                            />
+                            <p class="text-xs text-gray-500 mt-1">
+                                Select your gender identity.
+                            </p>
+                            <InputError
+                                :message="form.errors.gender"
+                                class="mt-2"
+                            />
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <div class="flex items-center">
+                                <InputLabel
+                                    for="date_of_birth"
+                                    value="Date of Birth"
+                                    >Date of Birth</InputLabel
+                                ><i
+                                    class="fas fa-star text-red-500 text-xs ml-1"
+                                    aria-hidden="true"
+                                ></i>
+                            </div>
+                            <TextInput
+                                id="date_of_birth"
+                                v-model="form.date_of_birth"
+                                type="date"
+                                class="mt-1 block w-full rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500 shadow-sm"
+                                required
+                            />
+                            <p class="text-xs text-gray-500 mt-1">
+                                Provide your date of birth. You must be at least
+                                18 years old to register.
+                            </p>
+                            <InputError
+                                :message="form.errors.date_of_birth"
+                                class="mt-2"
+                            />
+                        </div>
+                        <div>
+                            <div class="flex items-center">
+                                <InputLabel
+                                    for="disability_status"
+                                    value="Disability Status"
+                                />
+                                <i
+                                    class="fas fa-star text-red-500 text-xs ml-1"
+                                    aria-hidden="true"
+                                ></i>
+                            </div>
+                            <VueSelect
+                                v-model="form.disability_status"
+                                :options="disabilityStatusOptions"
+                                placeholder="Select your disability status"
+                                label="label"
+                                :reduce="(option) => option.value"
+                                class="mt-1 block w-full"
+                            />
+                            <p class="text-xs text-gray-500 mt-1">
+                                Indicate if you have any form of disability.
+                                This information helps us provide better
+                                services.
+                            </p>
+                            <InputError
+                                :message="form.errors.disability_status"
+                                class="mt-2"
+                            />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <div class="flex items-center">
+                                <InputLabel
+                                    for="ethnicity_id"
+                                    value="Tribe / Ethnicity"
+                                />
+                                <i
+                                    class="fas fa-star text-red-500 text-xs ml-1"
+                                    aria-hidden="true"
+                                ></i>
+                            </div>
+                            <VueSelect
+                                v-model="form.ethnicity_id"
+                                :options="ethnicityOptions"
+                                placeholder="Select your tribal ethnicity"
+                                label="label"
+                                :reduce="(option) => option.value"
+                                class="mt-1 block w-full"
+                            />
+                            <p class="text-xs text-gray-500 mt-1">
+                                Select your tribe or ethnic group for
+                                demographic purposes.
+                            </p>
+                            <InputError
+                                :message="form.errors.ethnicity_id"
+                                class="mt-2"
+                            />
+                        </div>
+                        <div>
+                            <div class="flex items-center">
+                                <InputLabel
+                                    for="language_id"
+                                    value="Primary Language"
+                                />
+                                <i
+                                    class="fas fa-star text-red-500 text-xs ml-1"
+                                    aria-hidden="true"
+                                ></i>
+                            </div>
+                            <VueSelect
+                                v-model="form.language_id"
+                                :options="languageOptions"
+                                placeholder="Select your primary language"
+                                label="label"
+                                :reduce="(option) => option.value"
+                                class="mt-1 block w-full"
+                            />
+                            <p class="text-xs text-gray-500 mt-1">
+                                Choose the language you speak most often at
+                                home.
+                            </p>
+                            <InputError
+                                :message="form.errors.language_id"
+                                class="mt-2"
+                            />
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <div>
+                            <div class="flex items-center">
+                                <InputLabel
+                                    for="religion_id"
+                                    value="Religion"
+                                />
+                                <i
+                                    class="fas fa-star text-red-500 text-xs ml-1"
+                                    aria-hidden="true"
+                                ></i>
+                            </div>
+                            <VueSelect
+                                v-model="form.religion_id"
+                                :options="religionOptions"
+                                placeholder="Select your religion"
+                                label="label"
+                                :reduce="(option) => option.value"
+                                class="mt-1 block w-full"
+                            />
+                            <p class="text-xs text-gray-500 mt-1">
+                                Indicate your religion for demographic purposes.
+                                This is optional for some services.
+                            </p>
+                            <InputError
+                                :message="form.errors.religion_id"
+                                class="mt-2"
+                            />
+                        </div>
+                        <div>
+                            <div class="flex items-center">
+                                <InputLabel
+                                    for="marital_status"
+                                    value="Marital Status"
+                                />
+                                <i
+                                    class="fas fa-star text-red-500 text-xs ml-1"
+                                    aria-hidden="true"
+                                ></i>
+                            </div>
+                            <VueSelect
+                                v-model="form.marital_status"
+                                :options="maritalStatusOptions"
+                                placeholder="Select your marital status"
+                                label="label"
+                                :reduce="(option) => option.value"
+                                class="mt-1 block w-full"
+                            />
+                            <p class="text-xs text-gray-500 mt-1">
+                                Select your current marital status.
+                            </p>
+                            <InputError
+                                :message="form.errors.marital_status"
+                                class="mt-2"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Address Information -->
+                <div v-if="currentStep === 4" class="space-y-4">
+                    <h2
+                        class="text-sm font-light text-gray-500 dark:text-gray-400"
+                    >
+                        Step {{ currentStep }}: {{ stepDescription }}
+                    </h2>
+                    <div>
+                        <div class="flex items-center">
+                            <InputLabel
+                                for="address_line_1"
+                                value="Address Line 1"
+                            />
+                            <i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
+                        <TextInput
+                            id="address_line_1"
+                            v-model="form.address_line_1"
+                            type="text"
+                            class="mt-1 block w-full rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500 shadow-sm placeholder-gray-400"
+                            placeholder="Enter your address line 1"
+                            required
+                        />
+                        <p class="text-xs text-gray-500 mt-1">
+                            Enter the main address where you currently reside.
+                        </p>
+                        <InputError
+                            :message="form.errors.address_line_1"
+                            class="mt-2"
+                        />
+                    </div>
+
+                    <div>
+                        <InputLabel
+                            for="address_line_2"
+                            value="Address Line 2 (Optional)"
+                        />
+                        <TextInput
+                            id="address_line_2"
+                            v-model="form.address_line_2"
+                            type="text"
+                            class="mt-1 block w-full rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500 shadow-sm placeholder-gray-400"
+                            placeholder="Enter your address line 2"
+                        />
+                        <InputError
+                            :message="form.errors.address_line_2"
+                            class="mt-2"
+                        />
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <div class="flex items-center">
+                                <InputLabel for="city" value="City/Town" />
+                                <i
+                                    class="fas fa-star text-red-500 text-xs ml-1"
+                                    aria-hidden="true"
+                                ></i>
+                            </div>
+                            <TextInput
+                                id="city"
+                                v-model="form.city"
+                                type="text"
+                                class="mt-1 block w-full rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500 shadow-sm placeholder-gray-400"
+                                placeholder="Enter your city"
+                                required
+                            />
+                            <p class="text-xs text-gray-500 mt-1">
+                                Specify your city or town of residence.
+                            </p>
+                            <InputError
+                                :message="form.errors.city"
+                                class="mt-2"
+                            />
+                        </div>
+                        <div>
+                            <div class="flex items-center">
+                                <InputLabel for="state" value="State/County" />
+                                <i
+                                    class="fas fa-star text-red-500 text-xs ml-1"
+                                    aria-hidden="true"
+                                ></i>
+                            </div>
+                            <TextInput
+                                id="state"
+                                v-model="form.state"
+                                type="text"
+                                class="mt-1 block w-full rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500 shadow-sm placeholder-gray-400"
+                                placeholder="Enter your state"
+                                required
+                            />
+                            <p class="text-xs text-gray-500 mt-1">
+                                Enter your state or county as shown in your
+                                address.
+                            </p>
+                            <InputError
+                                :message="form.errors.state"
+                                class="mt-2"
+                            />
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 5: Education & Employment -->
+                <div v-if="currentStep === 5" class="space-y-4">
+                    <h2
+                        class="text-sm font-light text-gray-500 dark:text-gray-400"
+                    >
+                        Step {{ currentStep }}: {{ stepDescription }}
+                    </h2>
+                    <div>
+                        <div class="flex items-center">
+                            <InputLabel
+                                for="education_level"
+                                value="Highest Education Level"
+                            />
+                            <i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
+                        <VueSelect
+                            v-model="form.education_level"
+                            :options="
+                                educationLevels.map((level) => ({
+                                    value: level,
+                                    label: level,
+                                }))
+                            "
+                            placeholder="Select your education level"
+                            label="label"
+                            :reduce="(option) => option.value"
+                            required
+                            class="mt-1 block w-full"
+                        />
+                        <p class="text-xs text-gray-500 mt-1">
+                            Select your highest completed level of education.
+                        </p>
+                        <InputError
+                            :message="form.errors.education_level"
+                            class="mt-2"
+                        />
+                    </div>
+
+                    <div>
+                        <div class="flex items-center">
+                            <InputLabel
+                                for="occupation"
+                                value="Current Occupation"
+                            />
+                            <i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
+                        <TextInput
+                            id="occupation"
+                            v-model="form.occupation"
+                            type="text"
+                            placeholder="e.g. Software Developer, Teacher, Business Owner"
+                            class="mt-1 block w-full rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500 shadow-sm"
+                            required
+                        />
+                        <p class="text-xs text-gray-500 mt-1">
+                            Enter your current job or profession.
+                        </p>
+                        <p class="mt-1 text-xs text-gray-500">
+                            Please enter your current job title or occupation
+                        </p>
+                        <InputError
+                            :message="form.errors.occupation"
+                            class="mt-2"
+                        />
+                    </div>
+
+                    <div>
+                        <div class="flex items-center">
+                            <InputLabel
+                                for="employer_details"
+                                value="Employer Details"
+                            />
+                            <i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
+                        <textarea
+                            id="employer_details"
+                            v-model="form.employer_details"
+                            rows="3"
+                            class="mt-1 block w-full rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500 shadow-sm"
+                            placeholder="Current employer name, position, and address"
+                        ></textarea>
+                        <p class="text-xs text-gray-500 mt-1">
+                            Provide details of your current employer, including
+                            name, position, and address.
+                        </p>
+                        <InputError
+                            :message="form.errors.employer_details"
+                            class="mt-2"
+                        />
+                    </div>
+                </div>
+
+                <!-- Step 6: Security Information -->
+                <div v-if="currentStep === 6" class="space-y-4">
+                    <h2
+                        class="text-sm font-light text-gray-500 dark:text-gray-400"
+                    >
+                        Step {{ currentStep }}: {{ stepDescription }}
+                    </h2>
+                    <div>
+                        <div class="flex items-center">
+                            <InputLabel
+                                for="security_question"
+                                value="Security Question"
+                            />
+                            <i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
+                        <VueSelect
+                            v-model="form.security_question"
+                            :options="
+                                securityQuestions.map((q) => ({
+                                    value: q,
+                                    label: q,
+                                }))
+                            "
+                            placeholder="Select a security question"
+                            label="label"
+                            :reduce="(option) => option.value"
+                            required
+                            class="mt-1 block w-full"
+                        />
+                        <p class="text-xs text-gray-500 mt-1">
+                            Choose a question only you can answer. This helps
+                            recover your account if you forget your password.
+                        </p>
+                        <InputError
+                            :message="form.errors.security_question"
+                            class="mt-2"
+                        />
+                    </div>
+
+                    <div>
+                        <div class="flex items-center">
+                            <InputLabel
+                                for="security_answer"
+                                value="Your Answer"
+                            />
+                            <i
+                                class="fas fa-star text-red-500 text-xs ml-1"
+                                aria-hidden="true"
+                            ></i>
+                        </div>
+                        <TextInput
+                            id="security_answer"
+                            v-model="form.security_answer"
+                            type="text"
+                            placeholder="e.g. 12345678"
+                            class="mt-1 block w-full rounded-md border-gray-300 focus:border-green-500 focus:ring-green-500 shadow-sm"
+                            required
+                        />
+                        <p class="text-xs text-gray-500 mt-1">
+                            Enter your answer. Remember it for future account
+                            recovery.
+                        </p>
+                        <InputError
+                            :message="form.errors.security_answer"
+                            class="mt-2"
+                        />
+                    </div>
+                </div>
+
+                <!-- Step 7: Document Uploads -->
+                <div v-if="currentStep === 7" class="space-y-6 px-2 sm:px-0">
+                    <h2 class="text-base font-medium text-gray-700">
+                        Step {{ currentStep }}: {{ stepDescription }}
+                    </h2>
+
+                    <!-- Proof of Identity Section -->
+                    <div
+                        class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden"
+                    >
+                        <div class="p-4 border-b border-gray-200 bg-gray-50">
+                            <h3 class="text-sm font-medium text-gray-700">
+                                <i
+                                    class="fas fa-id-card text-blue-500 mr-2"
+                                ></i>
+                                Proof of Identity
+                            </h3>
+                        </div>
+                        <div class="p-4">
+                            <div class="space-y-4">
+                                <!-- Document Type Selection -->
+                                <div class="w-full">
+                                    <label
+                                        class="block text-sm font-medium text-gray-700 mb-1"
+                                    >
+                                        Document Type
+                                        <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <VueSelect
+                                            v-model="
+                                                form.proof_of_identity_type
+                                            "
+                                            :options="[
+                                                {
+                                                    value: 'national_id',
+                                                    label: 'National ID',
+                                                },
+                                                {
+                                                    value: 'passport',
+                                                    label: 'Passport',
+                                                },
+                                                {
+                                                    value: 'driving_license',
+                                                    label: 'Driving License',
+                                                },
+                                                {
+                                                    value: 'other',
+                                                    label: 'Other',
+                                                },
+                                            ]"
+                                            placeholder="Select document type"
+                                            :reduce="(option) => option.value"
+                                            class="v-select-sm w-full"
+                                            :clearable="false"
+                                            :searchable="false"
+                                            :class="{
+                                                'border-red-300':
+                                                    form.errors
+                                                        .proof_of_identity_type,
+                                            }"
+                                        />
+                                    </div>
+                                    <p class="mt-1 text-xs text-gray-500">
+                                        Select the type of identification
+                                        document
+                                    </p>
+                                    <InputError
+                                        :message="
+                                            form.errors.proof_of_identity_type
+                                        "
+                                        class="mt-1"
+                                    />
+                                </div>
+
+                                <!-- File Upload Area -->
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium text-gray-700 mb-1"
+                                    >
+                                        Upload Document
+                                        <span class="text-red-500">*</span>
+                                    </label>
+                                    <div
+                                        class="mt-1 flex justify-center px-4 sm:px-6 pt-5 pb-6 border-2 border-dashed border-gray-300 rounded-lg transition-colors cursor-pointer hover:border-blue-500 hover:bg-blue-50"
+                                        :class="{
+                                            'border-blue-500 bg-blue-50':
+                                                dragOverIdentity,
+                                            'border-red-300':
+                                                form.errors.proof_of_identity,
+                                        }"
+                                        @dragover.prevent="
+                                            dragOverIdentity = true
+                                        "
+                                        @dragleave.prevent="
+                                            dragOverIdentity = false
+                                        "
+                                        @drop.prevent="
+                                            handleFileDrop(
+                                                $event,
+                                                'proof_of_identity'
+                                            )
+                                        "
+                                        @click="
+                                            $refs.fileInputIdentity?.click()
+                                        "
+                                    >
+                                        <div class="space-y-2 text-center">
+                                            <i
+                                                class="fas fa-cloud-upload-alt text-3xl sm:text-4xl text-gray-400"
+                                            ></i>
+                                            <div class="text-sm text-gray-600">
+                                                <p
+                                                    class="font-medium text-blue-600 hover:text-blue-800"
+                                                >
+                                                    Click to upload
+                                                </p>
+                                                <p class="text-xs">
+                                                    or drag and drop
+                                                </p>
+                                            </div>
+                                            <p
+                                                class="text-xs text-gray-500 px-2"
+                                            >
+                                                PDF, JPG, or PNG (max 5MB)
+                                            </p>
+                                        </div>
+                                        <input
+                                            ref="fileInputIdentity"
+                                            type="file"
+                                            accept=".pdf,.jpg,.jpeg,.png"
+                                            @change="
+                                                (e) =>
+                                                    handleFileUpload(
+                                                        e,
+                                                        'proof_of_identity'
+                                                    )
+                                            "
+                                            class="hidden"
+                                        />
+                                    </div>
+                                    <InputError
+                                        :message="form.errors.proof_of_identity"
+                                        class="mt-1"
+                                    />
+                                </div>
+                                <!-- File Preview -->
+                                <!-- File Preview -->
+                                <div v-if="form.proof_of_identity" class="mt-3">
+                                    <div
+                                        class="flex items-center justify-between p-3 bg-white border border-gray-200 rounded-lg"
+                                    >
+                                        <div
+                                            class="flex items-center space-x-3 min-w-0 flex-1"
+                                        >
+                                            <div
+                                                v-if="
+                                                    form.proof_of_identity
+                                                        .preview &&
+                                                    form.proof_of_identity.type.startsWith(
+                                                        'image/'
+                                                    )
+                                                "
+                                                class="flex-shrink-0"
+                                            >
+                                                <img
+                                                    :src="
+                                                        form.proof_of_identity
+                                                            .preview
+                                                    "
+                                                    class="h-12 w-12 object-cover rounded-md"
+                                                    alt="Document preview"
+                                                />
+                                            </div>
+                                            <div
+                                                v-else
+                                                class="flex-shrink-0 flex items-center justify-center h-12 w-12 bg-gray-100 rounded-md"
+                                            >
+                                                <i
+                                                    class="fas fa-file-alt text-gray-400 text-xl"
+                                                ></i>
+                                            </div>
+                                            <div
+                                                class="min-w-0 flex-1 overflow-hidden"
+                                            >
+                                                <p
+                                                    class="text-sm font-medium text-gray-900 truncate"
+                                                >
+                                                    {{
+                                                        form.proof_of_identity
+                                                            .name
+                                                    }}
+                                                </p>
+                                                <div
+                                                    class="flex items-center space-x-2 text-xs text-gray-500"
+                                                >
+                                                    <span>{{
+                                                        formatFileSize(
+                                                            form
+                                                                .proof_of_identity
+                                                                .size
+                                                        )
+                                                    }}</span>
+                                                    <span>•</span>
+                                                    <span class="truncate">
+                                                        {{
+                                                            form.proof_of_identity.type
+                                                                .split("/")[1]
+                                                                ?.toUpperCase() ||
+                                                            "FILE"
+                                                        }}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            @click.stop="
+                                                form.proof_of_identity = null
+                                            "
+                                            class="text-gray-400 hover:text-red-500 p-2 -mr-2"
+                                            aria-label="Remove file"
+                                        >
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div v-else class="text-center py-3">
+                                    <p class="text-sm text-gray-500">
+                                        <i class="fas fa-info-circle mr-1"></i>
+                                        No file uploaded. Please upload a clear
+                                        photo of your ID.
+                                    </p>
+                                </div>
+
+                                <InputError
+                                    :message="form.errors.proof_of_identity"
+                                    class="mt-1"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Proof of Address Section -->
+                <div v-if="currentStep === 7" class="mt-6 px-2 sm:px-0">
+                    <div
+                        class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden"
+                    >
+                        <div class="p-4 border-b border-gray-200 bg-gray-50">
+                            <h3 class="text-sm font-medium text-gray-700">
+                                <i class="fas fa-home text-blue-500 mr-2"></i>
+                                Proof of Address
+                            </h3>
+                        </div>
+                        <div class="p-4">
+                            <div class="space-y-4">
+                                <!-- Document Type Selection -->
+                                <div class="w-full">
+                                    <label
+                                        class="block text-sm font-medium text-gray-700 mb-1"
+                                    >
+                                        Document Type
+                                        <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="relative">
+                                        <VueSelect
+                                            v-model="form.proof_of_address_type"
+                                            :options="[
+                                                {
+                                                    value: 'utility_bill',
+                                                    label: 'Utility Bill',
+                                                },
+                                                {
+                                                    value: 'bank_statement',
+                                                    label: 'Bank Statement',
+                                                },
+                                                {
+                                                    value: 'rental_agreement',
+                                                    label: 'Rental Agreement',
+                                                },
+                                                {
+                                                    value: 'other',
+                                                    label: 'Other',
+                                                },
+                                            ]"
+                                            placeholder="Select document type"
+                                            :reduce="(option) => option.value"
+                                            class="v-select-sm w-full"
+                                            :clearable="false"
+                                            :searchable="false"
+                                            :class="{
+                                                'border-red-300':
+                                                    form.errors
+                                                        .proof_of_address_type,
+                                            }"
+                                        />
+                                    </div>
+                                    <p class="mt-1 text-xs text-gray-500">
+                                        Select a document that verifies your
+                                        address
+                                    </p>
+                                    <InputError
+                                        :message="
+                                            form.errors.proof_of_address_type
+                                        "
+                                        class="mt-1"
+                                    />
+                                </div>
+
+                                <!-- File Upload Area -->
+                                <div>
+                                    <label
+                                        class="block text-sm font-medium text-gray-700 mb-1"
+                                    >
+                                        Upload Document
+                                        <span class="text-red-500">*</span>
+                                    </label>
+                                    <div
+                                        class="mt-1 flex justify-center px-4 sm:px-6 pt-5 pb-6 border-2 border-dashed border-gray-300 rounded-lg transition-colors cursor-pointer hover:border-blue-500 hover:bg-blue-50"
+                                        :class="{
+                                            'border-blue-500 bg-blue-50':
+                                                dragOverAddress,
+                                            'border-red-300':
+                                                form.errors.proof_of_address,
+                                        }"
+                                        @dragover.prevent="
+                                            dragOverAddress = true
+                                        "
+                                        @dragleave.prevent="
+                                            dragOverAddress = false
+                                        "
+                                        @drop.prevent="
+                                            handleFileDrop(
+                                                $event,
+                                                'proof_of_address'
+                                            )
+                                        "
+                                        @click="$refs.fileInputAddress?.click()"
+                                    >
+                                        <div class="space-y-2 text-center">
+                                            <i
+                                                class="fas fa-cloud-upload-alt text-3xl sm:text-4xl text-gray-400"
+                                            ></i>
+                                            <div class="text-sm text-gray-600">
+                                                <p
+                                                    class="font-medium text-blue-600 hover:text-blue-800"
+                                                >
+                                                    Click to upload
+                                                </p>
+                                                <p class="text-xs">
+                                                    or drag and drop
+                                                </p>
+                                            </div>
+                                            <p
+                                                class="text-xs text-gray-500 px-2"
+                                            >
+                                                PDF, JPG, or PNG (max 5MB)
+                                            </p>
+                                        </div>
+                                        <input
+                                            ref="fileInputAddress"
+                                            type="file"
+                                            accept=".pdf,.jpg,.jpeg,.png"
+                                            @change="
+                                                (e) =>
+                                                    handleFileUpload(
+                                                        e,
+                                                        'proof_of_address'
+                                                    )
+                                            "
+                                            class="hidden"
+                                        />
+                                    </div>
+                                    <InputError
+                                        :message="form.errors.proof_of_address"
+                                        class="mt-1"
+                                    />
+                                </div>
+                                <!-- File Preview -->
+                                <div
+                                    v-if="form.proof_of_address"
+                                    class="mt-2 p-3 border rounded-md bg-gray-50"
+                                >
+                                    <div class="flex items-start space-x-3">
+                                        <div
+                                            v-if="
+                                                form.proof_of_address.preview &&
+                                                form.proof_of_address.type.startsWith(
+                                                    'image/'
+                                                )
+                                            "
+                                            class="flex-shrink-0"
+                                        >
+                                            <img
+                                                :src="
+                                                    form.proof_of_address
+                                                        .preview
+                                                "
+                                                class="h-16 w-16 object-cover rounded"
+                                                alt="Address Proof Preview"
+                                            />
+                                        </div>
+                                        <div
+                                            v-else
+                                            class="flex-shrink-0 flex items-center justify-center h-16 w-16 bg-gray-200 rounded"
+                                        >
+                                            <i
+                                                class="fas fa-file-alt text-gray-500 text-2xl"
+                                            ></i>
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <p
+                                                class="text-sm font-medium text-gray-900 truncate"
+                                            >
+                                                {{ form.proof_of_address.name }}
+                                            </p>
+                                            <p class="text-xs text-gray-500">
+                                                {{
+                                                    formatFileSize(
+                                                        form.proof_of_address
+                                                            .size
+                                                    )
+                                                }}
+                                                •
+                                                {{ form.proof_of_address.type }}
+                                            </p>
+                                            <p class="text-xs text-gray-500">
+                                                {{
+                                                    formatDocumentType(
+                                                        form.proof_of_address
+                                                            .documentType
+                                                    )
+                                                }}
+                                            </p>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            @click="
+                                                form.proof_of_address = null
+                                            "
+                                            class="text-red-600 hover:text-red-800"
+                                            aria-label="Remove file"
+                                        >
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <p v-else class="text-sm text-gray-500">
+                                    No file uploaded. Please upload a clear
+                                    document showing your current address.
+                                </p>
+                            </div>
+                            <p
+                                v-if="form.errors.proof_of_address"
+                                class="mt-1 text-sm text-red-600"
+                            >
+                                {{ form.errors.proof_of_address }}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <!-- End of Proof of Address Section -->
+
+                <!-- Confirmation Step -->
+                <div v-if="currentStep === 8" class="space-y-4">
+                    <h2
+                        class="text-sm font-light text-gray-500 dark:text-gray-400"
+                    >
+                        Step {{ currentStep }}: {{ stepDescription }}
+                    </h2>
+
+                    <!-- Personal Information Card -->
+                    <div
+                        class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden transition-all duration-300 ease-in-out mb-4"
+                        :class="
+                            expandedSections.personal
+                                ? 'min-h-[120px]'
+                                : 'h-[56px] overflow-hidden'
+                        "
+                    >
+                        <div
+                            @click="toggleSection('personal')"
+                            class="w-full px-4 py-3 text-left flex justify-between items-center bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-150 cursor-pointer"
+                            role="button"
+                            tabindex="0"
+                            @keydown.enter="toggleSection('personal')"
+                            @keydown.space.prevent="toggleSection('personal')"
+                        >
+                            <h3
+                                class="text-base sm:text-lg font-medium text-gray-900"
+                            >
+                                Personal Information
+                            </h3>
+                            <i
+                                class="fas fa-chevron-down text-gray-500 transition-transform duration-200"
+                                :class="{
+                                    'transform rotate-180':
+                                        expandedSections.personal,
+                                }"
+                            ></i>
+                        </div>
+                        <div
+                            v-show="expandedSections.personal"
+                            class="p-4 border-t border-gray-200"
+                        >
+                            <div class="space-y-4">
+                                <div class="w-full">
+                                    <p class="text-sm text-gray-500">
+                                        Full Name
+                                    </p>
+                                    <p class="font-medium text-gray-900">
+                                        {{ form.first_name }}
+                                        {{ form.middle_name }}
+                                        {{ form.last_name }}
+                                    </p>
+                                </div>
+                                <div
+                                    class="grid grid-cols-1 md:grid-cols-2 gap-4"
+                                >
+                                    <div
+                                        v-if="form.date_of_birth"
+                                        class="space-y-1"
+                                    >
+                                        <p class="text-sm text-gray-500">
+                                            Date of Birth
+                                        </p>
+                                        <p class="font-medium text-gray-900">
+                                            {{ form.date_of_birth }}
+                                        </p>
+                                    </div>
+                                    <div v-if="form.gender" class="space-y-1">
+                                        <p class="text-sm text-gray-500">
+                                            Gender
+                                        </p>
+                                        <p class="font-medium text-gray-900">
+                                            {{ form.gender }}
+                                        </p>
+                                    </div>
+                                    <template v-if="form.role === 'citizen'">
+                                        <div class="space-y-1">
+                                            <p class="text-sm text-gray-500">
+                                                County
+                                            </p>
+                                            <p
+                                                class="font-medium text-gray-900"
+                                            >
+                                                {{
+                                                    counties.find(
+                                                        (c) =>
+                                                            c.value ===
+                                                            form.county_id
+                                                    )?.label || "Not specified"
+                                                }}
+                                            </p>
+                                        </div>
+                                        <div class="space-y-1">
+                                            <p class="text-sm text-gray-500">
+                                                Sub-County
+                                            </p>
+                                            <p
+                                                class="font-medium text-gray-900"
+                                            >
+                                                {{
+                                                    subCounties.find(
+                                                        (s) =>
+                                                            s.value ===
+                                                            form.sub_county_id
+                                                    )?.label || "Not specified"
+                                                }}
+                                            </p>
+                                        </div>
+                                        <div class="space-y-1">
+                                            <p class="text-sm text-gray-500">
+                                                Constituency
+                                            </p>
+                                            <p
+                                                class="font-medium text-gray-900"
+                                            >
+                                                {{
+                                                    constituencies.find(
+                                                        (c) =>
+                                                            c.value ===
+                                                            form.constituency_id
+                                                    )?.label || "Not specified"
+                                                }}
+                                            </p>
+                                        </div>
+                                        <div class="space-y-1">
+                                            <p class="text-sm text-gray-500">
+                                                Ward
+                                            </p>
+                                            <p
+                                                class="font-medium text-gray-900"
+                                            >
+                                                {{
+                                                    wards.find(
+                                                        (w) =>
+                                                            w.value ===
+                                                            form.ward_id
+                                                    )?.label || "Not specified"
+                                                }}
+                                            </p>
+                                        </div>
+                                    </template>
+                                    <template
+                                        v-else-if="form.role === 'resident'"
+                                    >
+                                        <div class="space-y-1">
+                                            <p class="text-sm text-gray-500">
+                                                Reason for Residence
+                                            </p>
+                                            <p
+                                                class="font-medium text-gray-900"
+                                            >
+                                                {{
+                                                    form.reason_for_residence ===
+                                                    "Other"
+                                                        ? form.reason_for_residence_other
+                                                        : form.reason_for_residence ||
+                                                          "Not specified"
+                                                }}
+                                            </p>
+                                        </div>
+                                    </template>
+                                    <template
+                                        v-else-if="form.role === 'refugee'"
+                                    >
+                                        <div class="space-y-1">
+                                            <p class="text-sm text-gray-500">
+                                                Reason for Refugee Status
+                                            </p>
+                                            <p
+                                                class="font-medium text-gray-900"
+                                            >
+                                                {{
+                                                    form.reason_for_refugee ===
+                                                    "Other"
+                                                        ? form.reason_for_refugee_other
+                                                        : form.reason_for_refugee ||
+                                                          "Not specified"
+                                                }}
+                                            </p>
+                                        </div>
+                                        <div class="space-y-1">
+                                            <p class="text-sm text-gray-500">
+                                                Refugee Center
+                                            </p>
+                                            <p
+                                                class="font-medium text-gray-900"
+                                            >
+                                                {{
+                                                    (refugeeCenters &&
+                                                        refugeeCenters.find(
+                                                            (rc) =>
+                                                                rc.value ===
+                                                                form.refugee_center_id
+                                                        )?.label) ||
+                                                    "Not specified"
+                                                }}
+                                            </p>
+                                        </div>
+                                    </template>
+                                    <template
+                                        v-else-if="form.role === 'diplomat'"
+                                    >
+                                        <div class="space-y-1">
+                                            <p class="text-sm text-gray-500">
+                                                Consulate
+                                            </p>
+                                            <p
+                                                class="font-medium text-gray-900"
+                                            >
+                                                {{
+                                                    (consulates &&
+                                                        consulates.find(
+                                                            (c) =>
+                                                                c.value ===
+                                                                form.consulate_id
+                                                        )?.label) ||
+                                                    "Not specified"
+                                                }}
+                                            </p>
+                                        </div>
+                                    </template>
+                                    <template
+                                        v-else-if="form.role === 'foreigner'"
+                                    >
+                                        <div class="space-y-1">
+                                            <p class="text-sm text-gray-500">
+                                                Purpose of Visit
+                                            </p>
+                                            <p
+                                                class="font-medium text-gray-900"
+                                            >
+                                                {{
+                                                    purposeOfVisitOptions.find(
+                                                        (opt) =>
+                                                            opt.value ===
+                                                            form.purpose_of_visit
+                                                    )?.label || "Not specified"
+                                                }}
+                                            </p>
+                                        </div>
+                                    </template>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Document Uploads Card -->
+                    <div
+                        class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden transition-all duration-300 ease-in-out mb-4"
+                        :class="
+                            expandedSections.documents
+                                ? 'min-h-[180px]'
+                                : 'h-[56px] overflow-hidden'
+                        "
+                    >
+                        <div
+                            @click="toggleSection('documents')"
+                            class="w-full px-4 py-3 text-left flex justify-between items-center bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-150 cursor-pointer"
+                            role="button"
+                            tabindex="0"
+                            @keydown.enter="toggleSection('documents')"
+                            @keydown.space.prevent="toggleSection('documents')"
+                        >
+                            <h3
+                                class="text-base sm:text-lg font-medium text-gray-900"
+                            >
+                                Document Uploads
+                            </h3>
+                            <i
+                                class="fas fa-chevron-down text-gray-500 transition-transform duration-200"
+                                :class="{
+                                    'transform rotate-180':
+                                        expandedSections.documents,
+                                }"
+                            ></i>
+                        </div>
+                        <div
+                            v-show="expandedSections.documents"
+                            class="p-4 border-t border-gray-200 space-y-6"
+                        >
+                            <div class="flex space-x-4 px-2">
+                                <!-- Proof of Identity -->
+                                <div class="space-y-2 w-1/2 px-2">
+                                    <p
+                                        class="text-sm font-medium text-gray-500"
+                                    >
+                                        Proof of Identity
+                                    </p>
+                                    <div
+                                        v-if="form.proof_of_identity"
+                                        class="w-full"
+                                    >
+                                        <!-- Image Preview Container -->
+                                        <div
+                                            class="bg-white p-3 rounded-lg border border-gray-200"
+                                        >
+                                            <div class="flex justify-center">
+                                                <div
+                                                    v-if="
+                                                        form.proof_of_identity
+                                                            .preview &&
+                                                        form.proof_of_identity.type.startsWith(
+                                                            'image/'
+                                                        )
+                                                    "
+                                                    class="flex flex-col items-center w-full"
+                                                >
+                                                    <img
+                                                        :src="
+                                                            form
+                                                                .proof_of_identity
+                                                                .preview
+                                                        "
+                                                        class="h-40 w-auto max-w-full object-contain rounded"
+                                                        alt="ID Proof Preview"
+                                                    />
+                                                </div>
+                                                <div
+                                                    v-else
+                                                    class="flex flex-col items-center justify-center p-6 bg-gray-50 rounded-lg border border-gray-200 text-center w-full"
+                                                >
+                                                    <i
+                                                        class="fas fa-file-alt text-4xl text-gray-400 mb-2"
+                                                    ></i>
+                                                    <p
+                                                        class="text-xs text-gray-500"
+                                                    >
+                                                        Document Preview
+                                                    </p>
+                                                    <p
+                                                        class="text-xs text-gray-400 mt-1"
+                                                    >
+                                                        {{
+                                                            form
+                                                                .proof_of_identity
+                                                                .name ||
+                                                            "Document"
+                                                        }}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="p-4">
+                                            <div class="space-y-4">
+                                                <!-- Document Type Selection -->
+                                                <div class="w-full">
+                                                    <label
+                                                        class="block text-sm font-medium text-gray-700 mb-1"
+                                                    >
+                                                        Document Type
+                                                        <span
+                                                            class="text-red-500"
+                                                            >*</span
+                                                        >
+                                                    </label>
+                                                    <VueSelect
+                                                        v-model="
+                                                            form.identity_document_type
+                                                        "
+                                                        :options="[
+                                                            'National ID',
+                                                            'Passport',
+                                                            'Driving License',
+                                                            'Alien ID',
+                                                            'Birth Certificate',
+                                                        ]"
+                                                        placeholder="Select document type"
+                                                        class="v-select-sm w-full"
+                                                        :class="{
+                                                            'border-red-500':
+                                                                form.errors
+                                                                    .identity_document_type,
+                                                        }"
+                                                        :reduce="
+                                                            (option) => option
+                                                        "
+                                                        :clearable="false"
+                                                        :searchable="false"
+                                                    />
+                                                    <InputError
+                                                        :message="
+                                                            form.errors
+                                                                .identity_document_type
+                                                        "
+                                                        class="mt-1"
+                                                    />
+                                                </div>
+
+                                                <!-- File Upload Dropzone -->
+                                                <div>
+                                                    <label
+                                                        class="block text-sm font-medium text-gray-700 mb-1"
+                                                    >
+                                                        Upload Document
+                                                        <span
+                                                            class="text-red-500"
+                                                            >*</span
+                                                        >
+                                                    </label>
+                                                    <div
+                                                        @dragover.prevent="
+                                                            dragOver = true
+                                                        "
+                                                        @dragleave="
+                                                            dragOver = false
+                                                        "
+                                                        @drop.prevent="
+                                                            handleFileDrop(
+                                                                $event,
+                                                                'proof_of_identity'
+                                                            )
+                                                        "
+                                                        @click="
+                                                            $refs.identityFileInput?.click()
+                                                        "
+                                                        class="mt-1 flex justify-center px-4 py-6 border-2 border-dashed rounded-lg cursor-pointer transition-all duration-150"
+                                                        :class="{
+                                                            'border-blue-500 bg-blue-50':
+                                                                dragOver,
+                                                            'border-gray-300 hover:border-blue-400':
+                                                                !dragOver,
+                                                            'border-red-500':
+                                                                form.errors
+                                                                    .proof_of_identity,
+                                                        }"
+                                                    >
+                                                        <div
+                                                            class="space-y-2 text-center"
+                                                        >
+                                                            <i
+                                                                class="fas fa-cloud-upload-alt text-3xl mx-auto transition-colors duration-150"
+                                                                :class="{
+                                                                    'text-blue-500':
+                                                                        dragOver,
+                                                                    'text-gray-400':
+                                                                        !dragOver,
+                                                                }"
+                                                            ></i>
+                                                            <div
+                                                                class="text-sm text-gray-600"
+                                                            >
+                                                                <p>
+                                                                    <span
+                                                                        class="font-medium text-blue-600 hover:text-blue-500"
+                                                                    >
+                                                                        Click to
+                                                                        upload
+                                                                    </span>
+                                                                    or drag and
+                                                                    drop
+                                                                </p>
+                                                            </div>
+                                                            <p
+                                                                class="text-xs text-gray-500"
+                                                            >
+                                                                PDF, JPG, or PNG
+                                                                (max 5MB)
+                                                            </p>
+                                                        </div>
+                                                        <input
+                                                            ref="identityFileInput"
+                                                            type="file"
+                                                            class="hidden"
+                                                            accept=".pdf,.jpg,.jpeg,.png"
+                                                            @change="
+                                                                handleFileUpload(
+                                                                    $event,
+                                                                    'proof_of_identity'
+                                                                )
+                                                            "
+                                                        />
+                                                    </div>
+                                                    <InputError
+                                                        :message="
+                                                            form.errors
+                                                                .proof_of_identity
+                                                        "
+                                                        class="mt-1"
+                                                    />
+                                                </div>
+
+                                                <!-- File Preview -->
+                                                <div
+                                                    v-if="
+                                                        form.proof_of_identity
+                                                    "
+                                                    class="mt-3 bg-gray-50 rounded-lg p-3 border border-gray-200"
+                                                >
+                                                    <div
+                                                        class="flex items-start justify-between"
+                                                    >
+                                                        <div
+                                                            class="flex items-start space-x-3 min-w-0"
+                                                        >
+                                                            <div
+                                                                v-if="
+                                                                    form
+                                                                        .proof_of_identity
+                                                                        .preview &&
+                                                                    form.proof_of_identity.type.startsWith(
+                                                                        'image/'
+                                                                    )
+                                                                "
+                                                                class="flex-shrink-0"
+                                                            >
+                                                                <img
+                                                                    :src="
+                                                                        form
+                                                                            .proof_of_identity
+                                                                            .preview
+                                                                    "
+                                                                    class="h-16 w-16 object-cover rounded border border-gray-200"
+                                                                    alt="Document preview"
+                                                                />
+                                                            </div>
+                                                            <div
+                                                                v-else
+                                                                class="flex-shrink-0 flex items-center justify-center h-16 w-16 bg-white border border-gray-200 rounded"
+                                                            >
+                                                                <i
+                                                                    class="fas fa-file-alt text-gray-400 text-2xl"
+                                                                ></i>
+                                                            </div>
+                                                            <div
+                                                                class="min-w-0"
+                                                            >
+                                                                <p
+                                                                    class="text-sm font-medium text-gray-900 truncate"
+                                                                >
+                                                                    {{
+                                                                        form
+                                                                            .proof_of_identity
+                                                                            .name
+                                                                    }}
+                                                                </p>
+                                                                <p
+                                                                    class="text-xs text-gray-500 mt-1"
+                                                                >
+                                                                    {{
+                                                                        formatFileSize(
+                                                                            form
+                                                                                .proof_of_identity
+                                                                                .size
+                                                                        )
+                                                                    }}
+                                                                    •
+                                                                    {{
+                                                                        form
+                                                                            .proof_of_identity
+                                                                            .type
+                                                                    }}
+                                                                </p>
+                                                                <p
+                                                                    v-if="
+                                                                        form.identity_document_type
+                                                                    "
+                                                                    class="text-xs text-gray-500 mt-1"
+                                                                >
+                                                                    {{
+                                                                        formatDocumentType(
+                                                                            form.identity_document_type
+                                                                        )
+                                                                    }}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <button
+                                                            type="button"
+                                                            @click="
+                                                                form.proof_of_identity =
+                                                                    null
+                                                            "
+                                                            class="text-gray-400 hover:text-red-600 transition-colors"
+                                                            aria-label="Remove file"
+                                                        >
+                                                            <i
+                                                                class="fas fa-times"
+                                                            ></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Proof of Address -->
+                                    <div class="space-y-2 w-1/2 px-2">
+                                        <div
+                                            class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden"
+                                        >
+                                            <div
+                                                class="p-4 border-b border-gray-200 bg-gray-50"
+                                            >
+                                                <h3
+                                                    class="text-sm font-medium text-gray-700"
+                                                >
+                                                    <i
+                                                        class="fas fa-home text-blue-500 mr-2"
+                                                    ></i>
+                                                    Proof of Address
+                                                    <span
+                                                        class="text-red-500 ml-1"
+                                                        >*</span
+                                                    >
+                                                </h3>
+                                            </div>
+                                            <div class="p-4">
+                                                <div class="space-y-4">
+                                                    <!-- Document Type Selection -->
+                                                    <div class="w-full">
+                                                        <label
+                                                            class="block text-sm font-medium text-gray-700 mb-1"
+                                                        >
+                                                            Document Type
+                                                            <span
+                                                                class="text-red-500"
+                                                                >*</span
+                                                            >
+                                                        </label>
+                                                        <VueSelect
+                                                            v-model="
+                                                                form.address_document_type
+                                                            "
+                                                            :options="[
+                                                                'Utility Bill',
+                                                                'Bank Statement',
+                                                                'Lease Agreement',
+                                                                'Government Letter',
+                                                                'Other',
+                                                            ]"
+                                                            placeholder="Select document type"
+                                                            class="v-select-sm w-full"
+                                                            :class="{
+                                                                'border-red-500':
+                                                                    form.errors
+                                                                        .address_document_type,
+                                                            }"
+                                                            :reduce="
+                                                                (option) =>
+                                                                    option
+                                                            "
+                                                            :clearable="false"
+                                                            :searchable="false"
+                                                        />
+                                                        <InputError
+                                                            :message="
+                                                                form.errors
+                                                                    .address_document_type
+                                                            "
+                                                            class="mt-1"
+                                                        />
+                                                    </div>
+
+                                                    <!-- File Upload Dropzone -->
+                                                    <div>
+                                                        <label
+                                                            class="block text-sm font-medium text-gray-700 mb-1"
+                                                        >
+                                                            Upload Document
+                                                            <span
+                                                                class="text-red-500"
+                                                                >*</span
+                                                            >
+                                                        </label>
+                                                        <div
+                                                            @dragover.prevent="
+                                                                dragOverAddress = true
+                                                            "
+                                                            @dragleave="
+                                                                dragOverAddress = false
+                                                            "
+                                                            @drop.prevent="
+                                                                handleFileDrop(
+                                                                    $event,
+                                                                    'proof_of_address'
+                                                                )
+                                                            "
+                                                            @click="
+                                                                $refs.addressFileInput?.click()
+                                                            "
+                                                            class="mt-1 flex justify-center px-4 py-6 border-2 border-dashed rounded-lg cursor-pointer transition-all duration-150"
+                                                            :class="{
+                                                                'border-blue-500 bg-blue-50':
+                                                                    dragOverAddress,
+                                                                'border-gray-300 hover:border-blue-400':
+                                                                    !dragOverAddress,
+                                                                'border-red-500':
+                                                                    form.errors
+                                                                        .proof_of_address,
+                                                            }"
+                                                        >
+                                                            <div
+                                                                class="space-y-2 text-center"
+                                                            >
+                                                                <i
+                                                                    class="fas fa-cloud-upload-alt text-3xl mx-auto transition-colors duration-150"
+                                                                    :class="{
+                                                                        'text-blue-500':
+                                                                            dragOverAddress,
+                                                                        'text-gray-400':
+                                                                            !dragOverAddress,
+                                                                    }"
+                                                                ></i>
+                                                                <div
+                                                                    class="text-sm text-gray-600"
+                                                                >
+                                                                    <p>
+                                                                        <span
+                                                                            class="font-medium text-blue-600 hover:text-blue-500"
+                                                                        >
+                                                                            Click
+                                                                            to
+                                                                            upload
+                                                                        </span>
+                                                                        or drag
+                                                                        and drop
+                                                                    </p>
+                                                                </div>
+                                                                <p
+                                                                    class="text-xs text-gray-500"
+                                                                >
+                                                                    PDF, JPG, or
+                                                                    PNG (max
+                                                                    5MB)
+                                                                </p>
+                                                            </div>
+                                                            <input
+                                                                ref="addressFileInput"
+                                                                type="file"
+                                                                class="hidden"
+                                                                accept=".pdf,.jpg,.jpeg,.png"
+                                                                @change="
+                                                                    handleFileUpload(
+                                                                        $event,
+                                                                        'proof_of_address'
+                                                                    )
+                                                                "
+                                                            />
+                                                        </div>
+                                                        <InputError
+                                                            :message="
+                                                                form.errors
+                                                                    .proof_of_address
+                                                            "
+                                                            class="mt-1"
+                                                        />
+                                                    </div>
+
+                                                    <!-- File Preview -->
+                                                    <div
+                                                        v-if="
+                                                            form.proof_of_address
+                                                        "
+                                                        class="mt-3 bg-gray-50 rounded-lg p-3 border border-gray-200"
+                                                    >
+                                                        <div
+                                                            class="flex items-start justify-between"
+                                                        >
+                                                            <div
+                                                                class="flex items-start space-x-3 min-w-0"
+                                                            >
+                                                                <div
+                                                                    v-if="
+                                                                        form
+                                                                            .proof_of_address
+                                                                            .preview &&
+                                                                        form.proof_of_address.type.startsWith(
+                                                                            'image/'
+                                                                        )
+                                                                    "
+                                                                    class="flex-shrink-0"
+                                                                >
+                                                                    <img
+                                                                        :src="
+                                                                            form
+                                                                                .proof_of_address
+                                                                                .preview
+                                                                        "
+                                                                        class="h-16 w-16 object-cover rounded border border-gray-200"
+                                                                        alt="Document preview"
+                                                                    />
+                                                                </div>
+                                                                <div
+                                                                    v-else
+                                                                    class="flex-shrink-0 flex items-center justify-center h-16 w-16 bg-white border border-gray-200 rounded"
+                                                                >
+                                                                    <i
+                                                                        class="fas fa-file-alt text-gray-400 text-2xl"
+                                                                    ></i>
+                                                                </div>
+                                                                <div
+                                                                    class="min-w-0"
+                                                                >
+                                                                    <p
+                                                                        class="text-sm font-medium text-gray-900 truncate"
+                                                                    >
+                                                                        {{
+                                                                            form
+                                                                                .proof_of_address
+                                                                                .name
+                                                                        }}
+                                                                    </p>
+                                                                    <p
+                                                                        class="text-xs text-gray-500 mt-1"
+                                                                    >
+                                                                        {{
+                                                                            formatFileSize(
+                                                                                form
+                                                                                    .proof_of_address
+                                                                                    .size
+                                                                            )
+                                                                        }}
+                                                                        •
+                                                                        {{
+                                                                            form
+                                                                                .proof_of_address
+                                                                                .type
+                                                                        }}
+                                                                    </p>
+                                                                    <p
+                                                                        v-if="
+                                                                            form.address_document_type
+                                                                        "
+                                                                        class="text-xs text-gray-500 mt-1"
+                                                                    >
+                                                                        {{
+                                                                            formatDocumentType(
+                                                                                form.address_document_type
+                                                                            )
+                                                                        }}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                            <button
+                                                                type="button"
+                                                                @click="
+                                                                    form.proof_of_address =
+                                                                        null
+                                                                "
+                                                                class="text-gray-400 hover:text-red-600 transition-colors"
+                                                                aria-label="Remove file"
+                                                            >
+                                                                <i
+                                                                    class="fas fa-times"
+                                                                ></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contact Information Card -->
+                        <div
+                            class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden transition-all duration-300 ease-in-out"
+                            :class="
+                                expandedSections.contact
+                                    ? 'min-h-[180px]'
+                                    : 'h-[56px] overflow-hidden'
+                            "
+                        >
+                            <div
+                                @click="toggleSection('contact')"
+                                class="w-full px-4 py-3 text-left flex justify-between items-center bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-150 cursor-pointer"
+                                role="button"
+                                tabindex="0"
+                                @keydown.enter="toggleSection('contact')"
+                                @keydown.space.prevent="
+                                    toggleSection('contact')
+                                "
+                            >
+                                <h3
+                                    class="text-base sm:text-lg font-medium text-gray-900"
+                                >
+                                    Contact Information
+                                </h3>
+                                <i
+                                    class="fas fa-chevron-down text-gray-500 transition-transform duration-200"
+                                    :class="{
+                                        'transform rotate-180':
+                                            expandedSections.contact,
+                                    }"
+                                ></i>
+                            </div>
+                            <div
+                                v-show="expandedSections.contact"
+                                class="p-4 border-t border-gray-200 space-y-4"
+                            >
+                                <div class="space-y-1">
+                                    <p class="text-sm text-gray-500">Email</p>
+                                    <p class="font-medium text-gray-900">
+                                        {{ form.email }}
+                                    </p>
+                                </div>
+                                <div class="space-y-1">
+                                    <p class="text-sm text-gray-500">Phone</p>
+                                    <p class="font-medium text-gray-900">
+                                        {{ form.telephone }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Education & Employment Card -->
+                        <div
+                            class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden transition-all duration-300 ease-in-out"
+                            :class="
+                                expandedSections.education
+                                    ? 'min-h-[180px]'
+                                    : 'h-[56px] overflow-hidden'
+                            "
+                        >
+                            <div
+                                @click="toggleSection('education')"
+                                class="w-full px-4 py-3 text-left flex justify-between items-center bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-150 cursor-pointer"
+                                role="button"
+                                tabindex="0"
+                                @keydown.enter="toggleSection('education')"
+                                @keydown.space.prevent="
+                                    toggleSection('education')
+                                "
+                            >
+                                <h3
+                                    class="text-base sm:text-lg font-medium text-gray-900"
+                                >
+                                    Education & Employment
+                                </h3>
+                                <i
+                                    class="fas fa-chevron-down text-gray-500 transition-transform duration-200"
+                                    :class="{
+                                        'transform rotate-180':
+                                            expandedSections.education,
+                                    }"
+                                ></i>
+                            </div>
+                            <div
+                                v-show="expandedSections.education"
+                                class="p-4 border-t border-gray-200"
+                            >
+                                <div
+                                    class="grid grid-cols-1 md:grid-cols-2 gap-4"
+                                >
+                                    <div>
+                                        <p class="text-sm text-gray-500">
+                                            Education Level
+                                        </p>
+                                        <p class="font-medium">
+                                            {{
+                                                form.education_level ||
+                                                "Not specified"
+                                            }}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm text-gray-500">
+                                            Occupation
+                                        </p>
+                                        <p class="font-medium">
+                                            {{
+                                                form.occupation ||
+                                                "Not specified"
+                                            }}
+                                        </p>
+                                    </div>
+                                    <InputError
+                                        :message="form.errors.proof_of_identity"
+                                        class="mt-2"
+                                    />
+                                    <div
+                                        v-if="form.employer_details"
+                                        class="md:col-span-2"
+                                    >
+                                        <p class="text-sm text-gray-500">
+                                            Employer Details
+                                        </p>
+                                        <p
+                                            class="font-medium whitespace-pre-line"
+                                        >
+                                            {{ form.employer_details }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Security Information Card -->
+                        <div
+                            class="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden transition-all duration-300 ease-in-out mt-4"
+                            :class="
+                                expandedSections.security
+                                    ? 'min-h-[200px]'
+                                    : 'h-[56px] overflow-hidden'
+                            "
+                        >
+                            <div
+                                @click="toggleSection('security')"
+                                class="w-full px-4 py-3 text-left flex justify-between items-center bg-gray-50 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition-colors duration-150 cursor-pointer"
+                                role="button"
+                                tabindex="0"
+                                @keydown.enter="toggleSection('security')"
+                                @keydown.space.prevent="
+                                    toggleSection('security')
+                                "
+                            >
+                                <h3
+                                    class="text-base sm:text-lg font-medium text-gray-900"
+                                >
+                                    Security Information
+                                </h3>
+                                <i
+                                    class="fas fa-chevron-down text-gray-500 transition-transform duration-200"
+                                    :class="{
+                                        'transform rotate-180':
+                                            expandedSections.security,
+                                    }"
+                                ></i>
+                            </div>
+                            <div
+                                v-show="expandedSections.security"
+                                class="p-4 border-t border-gray-200"
+                            >
+                                <div class="space-y-4">
+                                    <div class="w-full">
+                                        <p class="text-sm text-gray-500">
+                                            Security Question
+                                        </p>
+                                        <p class="font-medium">
+                                            {{
+                                                form.security_question ||
+                                                "Not set"
+                                            }}
+                                        </p>
+                                    </div>
+                                    <div
+                                        v-if="form.security_answer"
+                                        class="w-full"
+                                    >
+                                        <p class="text-sm text-gray-500">
+                                            Security Answer
+                                        </p>
+                                        <p class="font-medium">
+                                            {{ form.security_answer }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-sm text-gray-500 text-center">
+                            Scroll to view all sections
+                        </div>
+
+                        <!-- Navigation Buttons -->
+                        <div class="mt-8 pt-6">
+                            <div class="flex items-center justify-between">
+                                <button
+                                    v-if="currentStep > 1"
+                                    type="button"
+                                    @click="previousStep"
+                                    class="inline-flex items-center px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-400 transition-colors duration-200"
+                                >
+                                    <i
+                                        class="fas fa-arrow-left mr-2 text-emerald-600"
+                                    ></i>
+                                    <span class="hidden sm:inline"
+                                        >Previous</span
+                                    >
+                                </button>
+                                <div v-else class="w-24"></div>
+                                <!-- Spacer for alignment -->
+
+                                <div class="flex items-center space-x-4">
+                                    <button
+                                        v-if="currentStep < 8"
+                                        type="button"
+                                        @click="nextStep"
+                                        :disabled="form.processing"
+                                        :class="[
+                                            'inline-flex items-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200',
+                                            currentStep === 7
+                                                ? 'bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500 shadow-emerald-200'
+                                                : 'bg-teal-500 hover:bg-teal-600 focus:ring-teal-400 shadow-teal-200',
+                                            form.processing
+                                                ? 'opacity-75 cursor-not-allowed'
+                                                : '',
+                                        ]"
+                                    >
+                                        <i
+                                            v-if="form.processing"
+                                            class="fas fa-spinner fa-spin mr-2"
+                                        ></i>
+                                        <span class="hidden sm:inline">
+                                            Next: {{ stepNames[currentStep] }}
+                                        </span>
+                                        <span class="sm:hidden">
+                                            {{
+                                                currentStep === 7
+                                                    ? "Review"
+                                                    : "Next: " +
+                                                      stepNames[currentStep]
+                                            }}
+                                        </span>
+                                        <i
+                                            v-if="!form.processing"
+                                            class="fas fa-arrow-right ml-2"
+                                        ></i>
+                                    </button>
+
+                                    <button
+                                        v-else
+                                        type="submit"
+                                        :disabled="form.processing"
+                                        class="inline-flex items-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors duration-200 shadow-emerald-200"
+                                        :class="{
+                                            'opacity-75 cursor-not-allowed':
+                                                form.processing,
+                                        }"
+                                    >
+                                        <i
+                                            v-if="form.processing"
+                                            class="fas fa-spinner fa-spin mr-2"
+                                        ></i>
+                                        <span class="hidden sm:inline">
+                                            Submit Application
+                                        </span>
+                                        <span class="sm:hidden">Submit</span>
+                                        <i
+                                            v-if="!form.processing"
+                                            class="fas fa-check ml-2"
+                                        ></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- Progress Bar -->
+                            <div class="mt-6">
+                                <div
+                                    class="flex items-center justify-between mb-1"
+                                >
+                                    <span
+                                        class="text-xs font-medium text-gray-700"
+                                        >Step {{ currentStep }} of
+                                        {{ totalSteps }}</span
+                                    >
+                                    <span
+                                        class="text-xs font-medium text-gray-500"
+                                        >{{
+                                            Math.round(
+                                                (currentStep / totalSteps) * 100
+                                            )
+                                        }}%</span
+                                    >
+                                </div>
+                                <div
+                                    class="w-full bg-gray-200 rounded-full h-2"
+                                >
+                                    <div
+                                        class="bg-teal-500 h-2 rounded-full transition-all duration-300 ease-in-out"
+                                        :style="{
+                                            width: `${
+                                                (currentStep / totalSteps) * 100
+                                            }%`,
+                                        }"
+                                    ></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Terms and Privacy Policy -->
+                        <div
+                            v-if="currentStep === 8"
+                            class="mt-4 flex items-center justify-center"
+                        >
+                            <div class="w-full">
+                                <div class="mb-4">
+                                    <label class="flex items-start">
+                                        <Checkbox
+                                            v-model:checked="form.terms"
+                                            name="terms"
+                                            class="mt-1"
+                                            required
+                                        />
+                                        <span
+                                            class="ms-2 text-sm text-gray-600"
+                                        >
+                                            I certify that all the information
+                                            provided is accurate and complete. I
+                                            understand that providing false
+                                            information may result in the
+                                            rejection of my application or
+                                            termination of my account. By
+                                            signing up, I agree to the
+                                            <a
+                                                :href="
+                                                    route(
+                                                        'frontend.terms-and-conditions'
+                                                    )
+                                                "
+                                                target="_blank"
+                                                class="text-sm text-green-600 hover:text-green-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 font-medium hover:underline hover:decoration-green-600 hover:dark:decoration-green-500 underline-offset-4 dark:text-green-500"
+                                                >Terms of Service</a
+                                            >
+                                            and
+                                            <a
+                                                :href="
+                                                    route(
+                                                        'frontend.privacy-policy'
+                                                    )
+                                                "
+                                                target="_blank"
+                                                class="text-sm text-green-600 hover:text-green-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 font-medium hover:underline hover:decoration-green-600 hover:dark:decoration-green-500 underline-offset-4 dark:text-green-500"
+                                                >Privacy Policy</a
+                                            >.
+                                        </span>
+                                    </label>
+                                    <InputError
+                                        :message="form.errors.terms"
+                                        class="mt-2"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <button
+                                v-if="currentStep > 1"
+                                type="button"
+                                @click="previousStep"
+                                class="inline-flex items-center px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-400 transition-colors duration-200"
+                            >
+                                <i
+                                    class="fas fa-arrow-left mr-2 text-emerald-600"
+                                ></i>
+                                <span class="hidden sm:inline">Previous</span>
+                            </button>
+                            <div v-else class="w-24"></div>
+                            <!-- Spacer for alignment -->
+
+                            <div class="flex items-center space-x-4">
+                                <button
+                                    v-if="currentStep < 8"
+                                    type="button"
+                                    @click="nextStep"
+                                    :disabled="form.processing"
+                                    :class="[
+                                        'inline-flex items-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200',
+                                        currentStep === 7
+                                            ? 'bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500 shadow-emerald-200'
+                                            : 'bg-teal-500 hover:bg-teal-600 focus:ring-teal-400 shadow-teal-200',
+                                        form.processing
+                                            ? 'opacity-75 cursor-not-allowed'
+                                            : '',
+                                    ]"
+                                >
+                                    <i
+                                        v-if="form.processing"
+                                        class="fas fa-spinner fa-spin mr-2"
+                                    ></i>
+                                    <span class="hidden sm:inline">
+                                        Next: {{ stepNames[currentStep] }}
+                                    </span>
+                                    <span class="sm:hidden">
+                                        {{
+                                            currentStep === 7
+                                                ? "Review"
+                                                : "Next: " +
+                                                  stepNames[currentStep]
+                                        }}
+                                    </span>
+                                    <i
+                                        v-if="!form.processing"
+                                        class="fas fa-arrow-right ml-2"
+                                    ></i>
+                                </button>
+
+                                <button
+                                    v-else
+                                    type="submit"
+                                    :disabled="form.processing"
+                                    class="inline-flex items-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors duration-200 shadow-emerald-200"
+                                    :class="{
+                                        'opacity-75 cursor-not-allowed':
+                                            form.processing,
+                                    }"
+                                >
+                                    <i
+                                        v-if="form.processing"
+                                        class="fas fa-spinner fa-spin mr-2"
+                                    ></i>
+                                    <span class="hidden sm:inline">
+                                        Submit Application
+                                    </span>
+                                    <span class="sm:hidden">Submit</span>
+                                    <i
+                                        v-if="!form.processing"
+                                        class="fas fa-check ml-2"
+                                    ></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="mt-6">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs font-medium text-gray-700"
+                                >Step {{ currentStep }} of
+                                {{ totalSteps }}</span
+                            >
+                            <span class="text-xs font-medium text-gray-500"
+                                >{{
+                                    Math.round(
+                                        (currentStep / totalSteps) * 100
+                                    )
+                                }}%</span
+                            >
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div
+                                class="bg-teal-500 h-2 rounded-full transition-all duration-300 ease-in-out"
+                                :style="{
+                                    width: `${
+                                        (currentStep / totalSteps) * 100
+                                    }%`,
+                                }"
+                            ></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Navigation Buttons -->
+                <div class="mt-8 pt-6">
+                    <div class="flex items-center justify-between">
+                        <button
+                            v-if="currentStep > 1"
+                            type="button"
+                            @click="previousStep"
+                            class="inline-flex items-center px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-400 transition-colors duration-200"
+                        >
+                            <i
+                                class="fas fa-arrow-left mr-2 text-emerald-600"
+                            ></i>
+                            <span class="hidden sm:inline">Previous</span>
+                        </button>
+                        <div v-else class="w-24"></div>
+                        <!-- Spacer for alignment -->
+
+                        <div class="flex items-center space-x-4">
+                            <button
+                                v-if="currentStep < 8"
+                                type="button"
+                                @click="nextStep"
+                                :disabled="form.processing"
+                                :class="[
+                                    'inline-flex items-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-offset-2 transition-colors duration-200',
+                                    currentStep === 7
+                                        ? 'bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500 shadow-emerald-200'
+                                        : 'bg-teal-500 hover:bg-teal-600 focus:ring-teal-400 shadow-teal-200',
+                                    form.processing
+                                        ? 'opacity-75 cursor-not-allowed'
+                                        : '',
+                                ]"
+                            >
+                                <i
+                                    v-if="form.processing"
+                                    class="fas fa-spinner fa-spin mr-2"
+                                ></i>
+                                <span class="hidden sm:inline">
+                                    Next: {{ stepNames[currentStep] }}
+                                </span>
+                                <span class="sm:hidden">
+                                    {{
+                                        currentStep === 7
+                                            ? "Review"
+                                            : "Next: " + stepNames[currentStep]
+                                    }}
+                                </span>
+                                <i
+                                    v-if="!form.processing"
+                                    class="fas fa-arrow-right ml-2"
+                                ></i>
+                            </button>
+
+                            <button
+                                v-else
+                                type="submit"
+                                :disabled="form.processing"
+                                class="inline-flex items-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors duration-200 shadow-emerald-200"
+                                :class="{
+                                    'opacity-75 cursor-not-allowed':
+                                        form.processing,
+                                }"
+                            >
+                                <i
+                                    v-if="form.processing"
+                                    class="fas fa-spinner fa-spin mr-2"
+                                ></i>
+                                <span class="hidden sm:inline">
+                                    Submit Application
+                                </span>
+                                <span class="sm:hidden">Submit</span>
+                                <i
+                                    v-if="!form.processing"
+                                    class="fas fa-check ml-2"
+                                ></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Progress Bar -->
+                    <div class="mt-6">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-xs font-medium text-gray-700"
+                                >Step {{ currentStep }} of
+                                {{ totalSteps }}</span
+                            >
+                            <span class="text-xs font-medium text-gray-500"
+                                >{{
+                                    Math.round(
+                                        (currentStep / totalSteps) * 100
+                                    )
+                                }}%</span
+                            >
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div
+                                class="bg-teal-500 h-2 rounded-full transition-all duration-300 ease-in-out"
+                                :style="{
+                                    width: `${
+                                        (currentStep / totalSteps) * 100
+                                    }%`,
+                                }"
+                            ></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Terms and Privacy Policy -->
+                <div v-if="currentStep === 8" class="mt-4">
+                    <div class="mb-4">
+                        <label class="flex items-start">
+                            <Checkbox
+                                v-model:checked="form.terms"
+                                name="terms"
+                                class="mt-1"
+                                required
+                            />
+                            <span class="ms-2 text-sm text-gray-600">
+                                I certify that all the information provided is
+                                accurate and complete. I understand that
+                                providing false information may result in the
+                                rejection of my application or termination of my
+                                account. By signing up, I agree to the
+                                <a
+                                    :href="
+                                        route('frontend.terms-and-conditions')
+                                    "
+                                    target="_blank"
+                                    class="text-sm text-green-600 hover:text-green-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 font-medium hover:underline hover:decoration-green-600 hover:dark:decoration-green-500 underline-offset-4 dark:text-green-500"
+                                    >Terms of Service</a
+                                >
+                                and
+                                <a
+                                    :href="route('frontend.privacy-policy')"
+                                    target="_blank"
+                                    class="text-sm text-green-600 hover:text-green-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 font-medium hover:underline hover:decoration-green-600 hover:dark:decoration-green-500 underline-offset-4 dark:text-green-500"
+                                    >Privacy Policy</a
+                                >.
+                            </span>
+                        </label>
+                        <InputError :message="form.errors.terms" class="mt-2" />
+                    </div>
+                </div>
+
+                <!-- Sign In Link (shown on all steps) -->
+                <p class="text-sm font-light text-gray-500 dark:text-gray-400">
+                    Already have an account?
+                    <a
+                        :href="route('login')"
+                        class="font-medium text-green-600 hover:underline hover:decoration-green-600 hover:dark:decoration-green-500 underline-offset-4 dark:text-green-500"
+                    >
+                        Sign In
+                    </a>
+                </p>
+            </form>
+        </div>
+    </AuthenticationCard>
+</template>
