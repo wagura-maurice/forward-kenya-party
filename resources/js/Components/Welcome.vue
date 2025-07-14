@@ -1,21 +1,39 @@
 <script setup>
 import { Head, Link, usePage } from "@inertiajs/vue3";
-import { computed } from "vue";
+import { computed, onMounted } from "vue";
 import ApplicationLogo from "@/Components/ApplicationLogo.vue";
 
-const page = usePage();
-const user = computed(() => page.props.auth.user);
+const { props } = usePage();
 
-const fullName = computed(() => {
-    if (!user.value) return "Not available";
-    const profile = user.value.profile || {};
-    return (
-        [profile.first_name, profile.middle_name, profile.last_name]
-            .filter(Boolean)
-            .join(" ") || "Not provided"
-    );
+// Access the authenticated user data
+const user = computed(() => props.auth?.user || null);
+
+// Access the profile data with all relationships
+const profile = computed(() => user.value?.profile || {});
+
+// Debugging
+onMounted(() => {
+    console.log("Page props:", props);
+    console.log("User data:", user.value);
+    console.log("Profile data:", profile.value);
 });
 
+// Format user's full name
+const fullName = computed(() => {
+    if (!user.value) return "Not available";
+
+    const nameParts = [
+        profile.value?.first_name,
+        profile.value?.middle_name,
+        profile.value?.last_name,
+    ].filter(Boolean);
+
+    return nameParts.length > 0
+        ? nameParts.join(" ")
+        : user.value.name || "Not provided";
+});
+
+// Format date to a readable string
 const formatDate = (dateString) => {
     if (!dateString) return "Not specified";
     try {
@@ -26,20 +44,46 @@ const formatDate = (dateString) => {
     }
 };
 
+// Format user's address
 const getAddress = computed(() => {
     if (!user.value) return "Not provided";
-    const profile = user.value.profile || {};
+
     const address = [
-        profile.address_line_1,
-        profile.address_line_2,
-        profile.city,
-        profile.county?.name || profile.county,
-        profile.sub_county?.name || profile.sub_county,
-        profile.constituency?.name || profile.constituency,
-        profile.ward?.name || profile.ward,
+        profile.value?.address_line_1,
+        profile.value?.address_line_2,
+        profile.value?.city,
+        profile.value?.state,
+        profile.value?.county?.name,
+        profile.value?.sub_county?.name,
+        profile.value?.constituency?.name,
+        profile.value?.ward?.name,
     ].filter(Boolean);
 
     return address.length > 0 ? address.join(", ") : "Not provided";
+});
+
+// Get religion from profile
+const religion = computed(() => {
+    return profile.value?.religion?.name || "Not specified";
+});
+
+// Get ethnicity from profile
+const ethnicity = computed(() => {
+    return profile.value?.ethnicity?.name || "Not specified";
+});
+
+// Format disability status
+const disabilityStatus = computed(() => {
+    if (
+        !profile.value?.disability_status ||
+        profile.value.disability_status === "none"
+    ) {
+        return "None";
+    }
+    return (
+        profile.value.disability_status.charAt(0).toUpperCase() +
+        profile.value.disability_status.slice(1)
+    );
 });
 </script>
 
@@ -176,6 +220,18 @@ const getAddress = computed(() => {
                                         <p
                                             class="text-sm text-gray-500 dark:text-gray-400"
                                         >
+                                            Member Number
+                                        </p>
+                                        <p
+                                            class="font-medium text-gray-900 dark:text-white uppercase"
+                                        >
+                                            # {{ profile.uuid }}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p
+                                            class="text-sm text-gray-500 dark:text-gray-400"
+                                        >
                                             Full Name
                                         </p>
                                         <p
@@ -218,20 +274,11 @@ const getAddress = computed(() => {
                                             class="font-medium text-gray-900 dark:text-white capitalize"
                                         >
                                             {{
-                                                user?.profile?.gender ||
-                                                user?.gender
-                                                    ? String(
-                                                          user.profile
-                                                              ?.gender ||
-                                                              user.gender
-                                                      )
+                                                profile.gender
+                                                    ? profile.gender
                                                           .charAt(0)
                                                           .toUpperCase() +
-                                                      String(
-                                                          user.profile
-                                                              ?.gender ||
-                                                              user.gender
-                                                      ).slice(1)
+                                                      profile.gender.slice(1)
                                                     : "Not specified"
                                             }}
                                         </p>
@@ -246,15 +293,67 @@ const getAddress = computed(() => {
                                             class="font-medium text-gray-900 dark:text-white"
                                         >
                                             {{
-                                                user?.profile?.date_of_birth ||
-                                                user?.date_of_birth
-                                                    ? formatDate(
-                                                          user.profile
-                                                              ?.date_of_birth ||
-                                                              user.date_of_birth
-                                                      )
-                                                    : "Not specified"
+                                                formatDate(
+                                                    profile.date_of_birth
+                                                )
                                             }}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p
+                                            class="text-sm text-gray-500 dark:text-gray-400"
+                                        >
+                                            National ID
+                                        </p>
+                                        <p
+                                            class="font-medium text-gray-900 dark:text-white"
+                                        >
+                                            {{
+                                                profile?.national_identification_number ||
+                                                "Not provided"
+                                            }}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p
+                                            class="text-sm text-gray-500 dark:text-gray-400"
+                                        >
+                                            Disability Status
+                                        </p>
+                                        <p
+                                            class="font-medium text-gray-900 dark:text-white"
+                                        >
+                                            {{ disabilityStatus }}
+                                            <span
+                                                v-if="profile.plwd_number"
+                                                class="text-sm text-gray-500"
+                                            >
+                                                ({{ profile.plwd_number }})
+                                            </span>
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p
+                                            class="text-sm text-gray-500 dark:text-gray-400"
+                                        >
+                                            Religion
+                                        </p>
+                                        <p
+                                            class="font-medium text-gray-900 dark:text-white"
+                                        >
+                                            {{ religion }}
+                                        </p>
+                                    </div>
+                                    <div>
+                                        <p
+                                            class="text-sm text-gray-500 dark:text-gray-400"
+                                        >
+                                            Ethnicity
+                                        </p>
+                                        <p
+                                            class="font-medium text-gray-900 dark:text-white"
+                                        >
+                                            {{ ethnicity }}
                                         </p>
                                     </div>
                                 </div>
@@ -284,17 +383,239 @@ const getAddress = computed(() => {
                                             }}
                                         </p>
                                     </div>
+                                    <!-- Street Address -->
                                     <div>
                                         <p
                                             class="text-sm text-gray-500 dark:text-gray-400"
                                         >
-                                            Address
+                                            Street Address
                                         </p>
                                         <p
                                             class="font-medium text-gray-900 dark:text-white"
                                         >
-                                            {{ getAddress }}
+                                            <template
+                                                v-if="profile.address_line_1"
+                                            >
+                                                {{ profile.address_line_1 }}
+                                                <span
+                                                    v-if="
+                                                        profile.address_line_2
+                                                    "
+                                                    >,
+                                                    {{
+                                                        profile.address_line_2
+                                                    }}</span
+                                                >
+                                            </template>
+                                            <span v-else>Not provided</span>
                                         </p>
+                                    </div>
+
+                                    <!-- City -->
+                                    <div>
+                                        <p
+                                            class="text-sm text-gray-500 dark:text-gray-400"
+                                        >
+                                            City/Town
+                                        </p>
+                                        <p
+                                            class="font-medium text-gray-900 dark:text-white"
+                                        >
+                                            {{ profile.city || "Not provided" }}
+                                        </p>
+                                    </div>
+
+                                    <!-- Location Details -->
+                                    <div class="col-span-2">
+                                        <h4
+                                            class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2"
+                                        >
+                                            Location Details
+                                        </h4>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <p
+                                                    class="text-sm text-gray-500 dark:text-gray-400"
+                                                >
+                                                    County
+                                                </p>
+                                                <p
+                                                    class="font-medium text-gray-900 dark:text-white"
+                                                >
+                                                    {{
+                                                        profile.county?.name ||
+                                                        "Not provided"
+                                                    }}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p
+                                                    class="text-sm text-gray-500 dark:text-gray-400"
+                                                >
+                                                    Sub-County
+                                                </p>
+                                                <p
+                                                    class="font-medium text-gray-900 dark:text-white"
+                                                >
+                                                    {{
+                                                        profile.sub_county
+                                                            ?.name ||
+                                                        "Not provided"
+                                                    }}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p
+                                                    class="text-sm text-gray-500 dark:text-gray-400"
+                                                >
+                                                    Constituency
+                                                </p>
+                                                <p
+                                                    class="font-medium text-gray-900 dark:text-white"
+                                                >
+                                                    {{
+                                                        profile.constituency
+                                                            ?.name ||
+                                                        "Not provided"
+                                                    }}
+                                                </p>
+                                            </div>
+                                            <div>
+                                                <p
+                                                    class="text-sm text-gray-500 dark:text-gray-400"
+                                                >
+                                                    Ward
+                                                </p>
+                                                <p
+                                                    class="font-medium text-gray-900 dark:text-white"
+                                                >
+                                                    {{
+                                                        profile.ward?.name ||
+                                                        "Not provided"
+                                                    }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- FKP Documents -->
+                                    <div
+                                        class="col-span-2 pt-6 border-t border-gray-200 dark:border-gray-700"
+                                    >
+                                        <h4
+                                            class="text-sm font-medium text-gray-500 dark:text-gray-400 mb-4"
+                                        >
+                                            Party Documents
+                                        </h4>
+                                        <div
+                                            class="grid grid-cols-1 md:grid-cols-2 gap-4"
+                                        >
+                                            <a
+                                                href="/assets/FKP_Ideology_and_Manifesto/FKP IDEOLOGY.pdf"
+                                                download
+                                                class="flex items-center p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                                            >
+                                                <div
+                                                    class="p-2 mr-3 rounded-full bg-blue-100 dark:bg-blue-900/30"
+                                                >
+                                                    <svg
+                                                        class="w-5 h-5 text-blue-600 dark:text-blue-400"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        viewBox="0 0 24 24"
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                    >
+                                                        <path
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                                        ></path>
+                                                    </svg>
+                                                </div>
+                                                <div>
+                                                    <p
+                                                        class="font-medium text-gray-900 dark:text-white"
+                                                    >
+                                                        FKP Ideology
+                                                    </p>
+                                                    <p
+                                                        class="text-xs text-gray-500 dark:text-gray-400"
+                                                    >
+                                                        Download PDF
+                                                    </p>
+                                                </div>
+                                                <div class="ml-auto">
+                                                    <svg
+                                                        class="w-5 h-5 text-gray-400"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        viewBox="0 0 24 24"
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                    >
+                                                        <path
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                                                        ></path>
+                                                    </svg>
+                                                </div>
+                                            </a>
+
+                                            <a
+                                                href="/assets/FKP_Ideology_and_Manifesto/FKP MANIFESTO (1).pdf"
+                                                download
+                                                class="flex items-center p-3 bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                                            >
+                                                <div
+                                                    class="p-2 mr-3 rounded-full bg-green-100 dark:bg-green-900/30"
+                                                >
+                                                    <svg
+                                                        class="w-5 h-5 text-green-600 dark:text-green-400"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        viewBox="0 0 24 24"
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                    >
+                                                        <path
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                                                        ></path>
+                                                    </svg>
+                                                </div>
+                                                <div>
+                                                    <p
+                                                        class="font-medium text-gray-900 dark:text-white"
+                                                    >
+                                                        FKP Manifesto
+                                                    </p>
+                                                    <p
+                                                        class="text-xs text-gray-500 dark:text-gray-400"
+                                                    >
+                                                        Download PDF
+                                                    </p>
+                                                </div>
+                                                <div class="ml-auto">
+                                                    <svg
+                                                        class="w-5 h-5 text-gray-400"
+                                                        fill="none"
+                                                        stroke="currentColor"
+                                                        viewBox="0 0 24 24"
+                                                        xmlns="http://www.w3.org/2000/svg"
+                                                    >
+                                                        <path
+                                                            stroke-linecap="round"
+                                                            stroke-linejoin="round"
+                                                            stroke-width="2"
+                                                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                                                        ></path>
+                                                    </svg>
+                                                </div>
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
 
