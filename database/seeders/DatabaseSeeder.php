@@ -28,6 +28,9 @@ class DatabaseSeeder extends Seeder
         $this->call(RolesTableSeeder::class);
         $this->call(AbilitiesTableSeeder::class);
         $this->call(CountriesTableSeeder::class);
+        $this->call(EthnicityCategoryTableSeeder::class);
+        $this->call(EthnicityTypeSeeder::class);
+        $this->call(EthnicityTableSeeder::class);
         $this->call(RegionsTableSeeder::class);
         $this->call(CountiesTableSeeder::class);
         $this->call(SubCountiesTableSeeder::class);
@@ -39,7 +42,15 @@ class DatabaseSeeder extends Seeder
         $this->call(PollingStationsTableSeeder::class);
         // $this->call(PollingStreamsTableSeeder::class);
         $this->call(ConsulatesTableSeeder::class);
+        $this->call(RefugeeCenterTypeSeeder::class);
+        $this->call(RefugeeCenterCategorySeeder::class);
         $this->call(RefugeeCentersTableSeeder::class);
+        
+        // Religion seeders
+        $this->call(ReligionTypeTableSeeder::class);
+        $this->call(ReligionCategoryTableSeeder::class);
+        $this->call(ReligionTableSeeder::class);
+        
         // $this->call(BankTypesTableSeeder::class);
         // $this->call(BankCategoriesTableSeeder::class);
         // $this->call(BanksTableSeeder::class);
