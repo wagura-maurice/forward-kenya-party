@@ -88,13 +88,7 @@ const submitForm = () => {
             <p
                 class="mb-8 lg:mb-16 font-light text-gray-500 dark:text-gray-400 sm:text-xl"
             >
-                Are you an aspirant looking for a party to join? Do you have
-                suggestions on how we can improve our party? Are you seeking
-                information about our party manifesto? Do you have any
-                recommendations for our party candidates? Are you looking for
-                information about our party structures? Do you want to report an
-                issue with our party website or social media channels? Let us
-                know.
+                Join us in shaping the future of Kenya through our shared values of unity, equity, and sustainable development. Whether you're interested in party membership, want to learn about our vision for Kenya, seek information about our candidates, or wish to contribute your ideas, we welcome your engagement. Your voice matters in our collective journey towards building a more inclusive and prosperous nation. Together, we can make a difference.
             </p>
 
             <!-- Contact Information Grid -->
@@ -122,7 +116,7 @@ const submitForm = () => {
                         href="tel:+254000000000"
                         class="ml-16 text-green-600 dark:text-green-400 font-semibold"
                     >
-                        +254 000 000 000
+                        +254 700 000 000
                     </a>
                 </div>
 
@@ -144,10 +138,10 @@ const submitForm = () => {
                     </div>
                     <p class="ml-16 text-gray-600 dark:text-gray-400">Email:</p>
                     <a
-                        href="mailto:info@forwardkenyaparty.com"
+                        href="mailto:forwardkenyaparty@gmail.com"
                         class="ml-16 text-green-600 dark:text-green-400 font-semibold"
                     >
-                        info@forwardkenyaparty.com
+                        forwardkenyaparty@gmail.com
                     </a>
                 </div>
 
@@ -174,7 +168,7 @@ const submitForm = () => {
                         href="/contact-us"
                         class="ml-16 text-green-600 dark:text-green-400 font-semibold"
                     >
-                        Any Huduma Center nationwide
+                        View Park Towers, Nairobi, Kenya
                     </a>
                 </div>
             </div>
@@ -360,7 +354,7 @@ const submitForm = () => {
                                 >
                                     <!-- Google Maps Embed -->
                                     <iframe
-                                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.841413166703!2d36.82110971475379!3d-1.273120999080841!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f173c0a1f9de7%3A0xec2aef948d2b9f00!2sHuduma%20Centre!5e0!3m2!1sen!2ske!4v1620000000000!5m2!1sen!2ske"
+                                        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.800778530791!2d36.81814931475399!3d-1.284638999999982!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f10d7b2f1e9f3%3A0x1d5e6c1c9b6b1f1f!2sView%20Park%20Towers%2C%20Nairobi!5e0!3m2!1sen!2ske!4v1620000000000!5m2!1sen!2ske"
                                         width="100%"
                                         height="100%"
                                         style="border: 0"
@@ -405,11 +399,13 @@ const submitForm = () => {
                                             <p
                                                 class="text-sm font-medium text-gray-700 dark:text-gray-300"
                                             >
-                                                Huduma Centre
+                                                Forward Kenya Party
                                             </p>
                                             <p
                                                 class="text-xs text-gray-600 dark:text-gray-400"
                                             >
+                                                View Park Towers<br>
+                                                P.O. Box 27999-00100<br>
                                                 Nairobi, Kenya
                                             </p>
                                         </div>

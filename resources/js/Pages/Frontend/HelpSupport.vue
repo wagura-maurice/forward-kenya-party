@@ -27,8 +27,7 @@ defineProps({
             <p
                 class="mb-8 lg:mb-16 font-light text-gray-500 dark:text-gray-400 sm:text-xl"
             >
-                add content to have in this section of that is for welcome
-                viewer to the Help and Support page
+                The Forward Kenya Party is committed to serving all Kenyans with dedication and transparency. Our support team is here to assist you with any inquiries, whether you're looking to join our movement, volunteer, or learn more about our policies and initiatives for a better Kenya. Your voice matters to us.
             </p>
 
             <!-- Showcase Section -->

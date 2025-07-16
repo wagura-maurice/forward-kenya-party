@@ -153,7 +153,7 @@ onUnmounted(() => {
                         <div class="flex">
                             <!-- Logo -->
                             <div class="shrink-0 flex items-center">
-                                <Link :href="route('dashboard')">
+                                <Link :href="route('frontend.welcome')">
                                     <ApplicationMark class="block h-9 w-auto" />
                                 </Link>
                             </div>
@@ -168,6 +168,12 @@ onUnmounted(() => {
                                 >
                                     Dashboard
                                 </NavLink>
+                                <NavLink
+                                    :href="route('frontend.about-us')"
+                                    :active="route().current('frontend.about-us')"
+                                >
+                                    About Us
+                                </NavLink>
                                 <!-- Platform Dropdown - Desktop -->
                                 <div
                                     class="hidden sm:flex sm:items-center sm:ml-4 relative"
@@ -178,7 +184,7 @@ onUnmounted(() => {
                                     <button
                                         class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition"
                                     >
-                                        Platform
+                                        Our Work
                                         <i
                                             class="fas fa-chevron-down ml-2 -mr-0.5 h-4 w-4"
                                         ></i>
@@ -316,14 +322,14 @@ onUnmounted(() => {
 
                                     <template #content>
                                         <div class="w-60">
-                                            <!-- Team Management -->
+                                            <!-- Wing Management -->
                                             <div
                                                 class="block px-4 py-2 text-xs text-gray-400"
                                             >
-                                                Manage Team
+                                                Manage Wing
                                             </div>
 
-                                            <!-- Team Settings -->
+                                            <!-- Wing Settings -->
                                             <DropdownLink
                                                 :href="
                                                     route(
@@ -333,7 +339,7 @@ onUnmounted(() => {
                                                     )
                                                 "
                                             >
-                                                Team Settings
+                                                Wing Settings
                                             </DropdownLink>
 
                                             <DropdownLink
@@ -343,10 +349,10 @@ onUnmounted(() => {
                                                 "
                                                 :href="route('teams.create')"
                                             >
-                                                Create New Team
+                                                New Party Wing
                                             </DropdownLink>
 
-                                            <!-- Team Switcher -->
+                                            <!-- Wing Switcher -->
                                             <template
                                                 v-if="
                                                     $page.props.auth.user
@@ -360,7 +366,7 @@ onUnmounted(() => {
                                                 <div
                                                     class="block px-4 py-2 text-xs text-gray-400"
                                                 >
-                                                    Switch Teams
+                                                    Switch Wings
                                                 </div>
 
                                                 <template
@@ -473,13 +479,13 @@ onUnmounted(() => {
                                         <div
                                             class="block px-4 py-2 text-xs text-gray-400"
                                         >
-                                            Manage Account
+                                            My Account
                                         </div>
 
                                         <DropdownLink
                                             :href="route('profile.show')"
                                         >
-                                            Profile
+                                            My Profile
                                         </DropdownLink>
 
                                         <DropdownLink
@@ -489,7 +495,7 @@ onUnmounted(() => {
                                             "
                                             :href="route('api-tokens.index')"
                                         >
-                                            API Tokens
+                                            Developer Access
                                         </DropdownLink>
 
                                         <div class="border-t border-gray-200" />
@@ -497,7 +503,7 @@ onUnmounted(() => {
                                         <!-- Authentication -->
                                         <form @submit.prevent="logout">
                                             <DropdownLink as="button">
-                                                Log Out
+                                                Sign Out
                                             </DropdownLink>
                                         </form>
                                     </template>
@@ -564,6 +570,13 @@ onUnmounted(() => {
                             Dashboard
                         </ResponsiveNavLink>
 
+                        <ResponsiveNavLink
+                            :href="route('frontend.about-us')"
+                            :active="route().current('frontend.about-us')"
+                        >
+                            About Us
+                        </ResponsiveNavLink>
+
                         <!-- Mobile Platform Dropdown -->
                         <div class="pt-2 pb-3 space-y-1">
                             <button
@@ -573,7 +586,7 @@ onUnmounted(() => {
                                 "
                                 class="w-full flex items-center justify-between px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
                             >
-                                <span>Platform</span>
+                                <span>Our Work</span>
                                 <i
                                     class="fas transition-transform duration-200"
                                     :class="
@@ -590,7 +603,7 @@ onUnmounted(() => {
                             >
                                 <div class="mb-2">
                                     <div class="text-green-600">
-                                        Departments ({{
+                                        Party Departments ({{
                                             navigationData.departments
                                                 ?.length || 0
                                         }})
@@ -727,13 +740,13 @@ onUnmounted(() => {
                                 :href="route('api-tokens.index')"
                                 :active="route().current('api-tokens.index')"
                             >
-                                API Tokens
+                                Developer Access
                             </ResponsiveNavLink>
 
                             <!-- Authentication -->
                             <form method="POST" @submit.prevent="logout">
                                 <ResponsiveNavLink as="button">
-                                    Log Out
+                                    Sign Out
                                 </ResponsiveNavLink>
                             </form>
 
@@ -746,7 +759,7 @@ onUnmounted(() => {
                                 <div
                                     class="block px-4 py-2 text-xs text-gray-400"
                                 >
-                                    Manage Team
+                                    Manage Party Wing
                                 </div>
 
                                 <!-- Team Settings -->
@@ -759,7 +772,7 @@ onUnmounted(() => {
                                     "
                                     :active="route().current('teams.show')"
                                 >
-                                    Team Settings
+                                    Wing Settings
                                 </ResponsiveNavLink>
 
                                 <ResponsiveNavLink
@@ -767,7 +780,7 @@ onUnmounted(() => {
                                     :href="route('teams.create')"
                                     :active="route().current('teams.create')"
                                 >
-                                    Create New Team
+                                    Create New Wing
                                 </ResponsiveNavLink>
 
                                 <!-- Team Switcher -->
@@ -782,7 +795,7 @@ onUnmounted(() => {
                                     <div
                                         class="block px-4 py-2 text-xs text-gray-400"
                                     >
-                                        Switch Teams
+                                        Switch Wings
                                     </div>
 
                                     <template

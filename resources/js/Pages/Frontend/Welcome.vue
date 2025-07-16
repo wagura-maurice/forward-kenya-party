@@ -30,7 +30,7 @@
                                     <span
                                         class="bg-clip-text text-transparent bg-gradient-to-r from-green-300 to-blue-400"
                                     >
-                                        {{ slide.name }}
+                                            {{ slide.name }}
                                     </span>
                                 </h1>
                                 <p
@@ -46,13 +46,13 @@
                                     :href="route('frontend.services')"
                                     class="inline-block bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white font-semibold px-8 py-4 rounded-full shadow-lg transform hover:-translate-y-1 transition-all duration-300"
                                 >
-                                    Explore Party Services
+                                    Our Services
                                 </Link>
                                 <Link
                                     :href="route('frontend.departments')"
                                     class="inline-block bg-white/10 hover:bg-white/20 text-white font-semibold px-8 py-4 rounded-full backdrop-blur-sm border border-white/20 shadow-lg transform hover:-translate-y-1 transition-all duration-300"
                                 >
-                                    Party Departments
+                                    Our Departments
                                 </Link>
                             </div>
                         </div>
@@ -80,7 +80,7 @@
                     <h2
                         class="text-3xl font-bold text-gray-800 dark:text-white mb-3"
                     >
-                        Your Gateway to Forward Kenya Party
+                        Unity in Diversity for a Better Kenya
                     </h2>
                     <div
                         class="w-20 h-1 bg-gradient-to-r from-green-500 to-blue-500 mx-auto mb-4"
@@ -88,10 +88,9 @@
                     <p
                         class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto"
                     >
-                        Welcome to Forward Kenya Party's digital platform—your
-                        home for participation, engagement, and empowerment.
-                        Access member resources, join events, and help shape our
-                        party's future.
+                        Welcome to the Forward Kenya Party—a movement built on the principles of Unity in Diversity.
+                        We're committed to creating a prosperous, inclusive Kenya where every voice matters and every
+                        citizen has the opportunity to thrive.
                     </p>
                 </div>
 
@@ -104,19 +103,17 @@
                             class="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-6 mx-auto"
                         >
                             <i
-                                class="fas fa-sign-in-alt text-2xl text-green-600 dark:text-green-400"
+                                class="fas fa-hands-helping text-2xl text-green-600 dark:text-green-400"
                             ></i>
                         </div>
                         <h3
                             class="text-xl font-bold text-center text-gray-900 dark:text-white mb-3"
                         >
-                            One Log-in, All Party Activities
+                            United We Stand
                         </h3>
                         <p class="text-gray-600 dark:text-gray-300 text-center">
-                            All you need is one account. Members and supporters
-                            can register to access exclusive Forward Kenya Party
-                            content, participate in decision-making, and stay
-                            informed.
+                            Our strength lies in our diversity. Join a movement that celebrates Kenya's rich cultural
+                            heritage while building bridges across communities for a more united and prosperous nation.
                         </p>
                     </div>
 
@@ -151,18 +148,17 @@
                             class="w-16 h-16 bg-purple-100 dark:bg-purple-900/30 rounded-full flex items-center justify-center mb-6 mx-auto"
                         >
                             <i
-                                class="fas fa-search text-2xl text-purple-600 dark:text-purple-400"
+                                class="fas fa-seedling text-2xl text-purple-600 dark:text-purple-400"
                             ></i>
                         </div>
                         <h3
                             class="text-xl font-bold text-center text-gray-900 dark:text-white mb-3"
                         >
-                            Engage with Forward Kenya Party
+                            Sustainable Development
                         </h3>
                         <p class="text-gray-600 dark:text-gray-300 text-center">
-                            Join party events, participate in discussions, and
-                            access important Forward Kenya Party documents and
-                            updates—all in one place.
+                            We champion policies that balance economic growth with environmental protection,
+                            ensuring Kenya's prosperity today doesn't compromise our children's future.
                         </p>
                     </div>
                 </div>
@@ -179,7 +175,7 @@
                     <h2
                         class="text-3xl font-bold text-gray-800 dark:text-white mb-3"
                     >
-                        Our Party's Impact
+                        Building Kenya's Future Together
                     </h2>
                     <div
                         class="w-20 h-1 bg-gradient-to-r from-green-500 to-blue-500 mx-auto mb-4"
@@ -187,12 +183,9 @@
                     <p
                         class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto"
                     >
-                        Forward Kenya Party is dedicated to building a more
-                        inclusive, just, and prosperous nation. Our impact is
-                        measured by the positive change we bring to communities,
-                        the empowerment of our members, and our advocacy for
-                        transparent, accountable leadership. Join us as we drive
-                        meaningful progress across Kenya.
+                        The Forward Kenya Party is driving transformative change across our nation. Our impact is seen in
+                        the communities we uplift, the policies we champion, and the inclusive future we're building.
+                        Together, we're creating a Kenya where every citizen can thrive in dignity and prosperity.
                     </p>
                 </div>
                 <div
@@ -263,7 +256,7 @@
                     <h2
                         class="text-3xl font-bold text-gray-800 dark:text-white mb-3"
                     >
-                        Party Services
+                        Our Pillars of Progress
                     </h2>
                     <div
                         class="w-20 h-1 bg-gradient-to-r from-green-500 to-blue-500 mx-auto mb-4"
@@ -271,9 +264,8 @@
                     <p
                         class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto"
                     >
-                        Explore Forward Kenya Party's services designed to
-                        empower members, support communities, and advance our
-                        mission for a better Kenya.
+                        The Forward Kenya Party is built on strong foundations that drive our mission forward.
+                        Explore how we're working to create a better future for all Kenyans through these key focus areas.
                     </p>
                 </div>
                 <div class="relative">
@@ -310,9 +302,7 @@
                                                 :href="
                                                     route(
                                                         'frontend.show.service',
-                                                        {
-                                                            id: service.id,
-                                                        }
+                                                        { id: service.id }
                                                     )
                                                 "
                                                 class="hover:text-blue-600 dark:hover:text-blue-400"
@@ -445,7 +435,7 @@
                     <h2
                         class="text-3xl font-bold text-gray-800 dark:text-white mb-3"
                     >
-                        Party Departments
+                        Our Leadership Structure
                     </h2>
                     <div
                         class="w-20 h-1 bg-gradient-to-r from-green-500 to-blue-500 mx-auto mb-4"
@@ -453,9 +443,8 @@
                     <p
                         class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto"
                     >
-                        Connect with Forward Kenya Party's departments to learn
-                        more about our leadership, initiatives, and how you can
-                        get involved.
+                        Meet the dedicated teams driving Forward Kenya Party's vision across key sectors.
+                        Our leadership structure ensures accountability, transparency, and effective governance at all levels.
                     </p>
                 </div>
                 <div class="relative">
@@ -492,9 +481,7 @@
                                                 :href="
                                                     route(
                                                         'frontend.show.department',
-                                                        {
-                                                            id: department.id,
-                                                        }
+                                                        { id: department.id }
                                                     )
                                                 "
                                                 class="hover:text-blue-600 dark:hover:text-blue-400"
@@ -608,7 +595,7 @@
                     <h2
                         class="text-3xl font-bold text-gray-800 dark:text-white mb-3"
                     >
-                        Our Partners
+                        Our Strategic Alliances
                     </h2>
                     <div
                         class="w-20 h-1 bg-gradient-to-r from-green-500 to-blue-500 mx-auto mb-4"
@@ -616,12 +603,8 @@
                     <p
                         class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto"
                     >
-                        Forward Kenya Party collaborates with civic
-                        organizations, grassroots groups, and progressive allies
-                        to advance our shared vision for Kenya. Our partners
-                        help us amplify our impact, empower communities, and
-                        create sustainable change. Together, we are building a
-                        stronger, more united nation.
+                        We collaborate with organizations and institutions that share our vision for a united, prosperous Kenya.
+                        Together, we're building bridges and creating opportunities for all Kenyans.
                     </p>
                 </div>
 
@@ -728,51 +711,51 @@ const currentPartnerSlide = ref(0);
 const autoSlideInterval = ref(null);
 const isHovering = ref(false);
 const partners = [
-    {
-        name: "Vision 2030",
-        logo: "https://vision2030.go.ke/wp-content/uploads/2020/02/v2030logo.jpg",
-        url: "https://vision2030.go.ke/",
-    },
-    {
-        name: "Government Delivery Unit",
-        logo: "https://www.delivery.go.ke/img/gduLogo.png",
-        url: "https://www.delivery.go.ke/",
-    },
-    {
-        name: "Forward Kenya Party",
-        logo: "https://www.egpkenya.go.ke/assets/images/kenya-logo.png",
-        url: "https://www.egpkenya.go.ke/",
-    },
-    {
-        name: "Public Procurement Regulatory Authority",
-        logo: "https://ppra.go.ke/wp-content/uploads/2017/05/logo-site.png",
-        url: "https://ppra.go.ke/",
-    },
-    {
-        name: "Business Registration Service",
-        logo: "https://brs.go.ke/wp-content/uploads/2022/10/BRS-Logo-Edited.png",
-        url: "https://brs.go.ke/",
-    },
-    {
-        name: "AGPO",
-        logo: "https://agpo.go.ke/assets/2.0/images/agpo_logo.png",
-        url: "https://agpo.go.ke/",
-    },
-    {
-        name: "KRA",
-        logo: "https://www.kra.go.ke/templates/kra/images/kra/logoKRA.webp",
-        url: "https://www.kra.go.ke/",
-    },
-    {
-        name: "eCitizen",
-        logo: "https://accounts.ecitizen.go.ke/en/images/logo.svg",
-        url: "https://www.ecitizen.go.ke/",
-    },
-    {
-        name: "Safaricom",
-        logo: "https://www.safaricom.co.ke/images/safaricom-logo-green.png",
-        url: "https://www.safaricom.co.ke/",
-    },
+    // {
+    //     name: "Vision 2030",
+    //     logo: "https://vision2030.go.ke/wp-content/uploads/2020/02/v2030logo.jpg",
+    //     url: "https://vision2030.go.ke/",
+    // },
+    // {
+    //     name: "Government Delivery Unit",
+    //     logo: "https://www.delivery.go.ke/img/gduLogo.png",
+    //     url: "https://www.delivery.go.ke/",
+    // },
+    // {
+    //     name: "Forward Kenya Party",
+    //     logo: "https://www.egpkenya.go.ke/assets/images/kenya-logo.png",
+    //     url: "https://www.egpkenya.go.ke/",
+    // },
+    // {
+    //     name: "Public Procurement Regulatory Authority",
+    //     logo: "https://ppra.go.ke/wp-content/uploads/2017/05/logo-site.png",
+    //     url: "https://ppra.go.ke/",
+    // },
+    // {
+    //     name: "Business Registration Service",
+    //     logo: "https://brs.go.ke/wp-content/uploads/2022/10/BRS-Logo-Edited.png",
+    //     url: "https://brs.go.ke/",
+    // },
+    // {
+    //     name: "AGPO",
+    //     logo: "https://agpo.go.ke/assets/2.0/images/agpo_logo.png",
+    //     url: "https://agpo.go.ke/",
+    // },
+    // {
+    //     name: "KRA",
+    //     logo: "https://www.kra.go.ke/templates/kra/images/kra/logoKRA.webp",
+    //     url: "https://www.kra.go.ke/",
+    // },
+    // {
+    //     name: "eCitizen",
+    //     logo: "https://accounts.ecitizen.go.ke/en/images/logo.svg",
+    //     url: "https://www.ecitizen.go.ke/",
+    // },
+    // {
+    //     name: "Safaricom",
+    //     logo: "https://www.safaricom.co.ke/images/safaricom-logo-green.png",
+    //     url: "https://www.safaricom.co.ke/",
+    // },
 ];
 
 const animatedStats = reactive({

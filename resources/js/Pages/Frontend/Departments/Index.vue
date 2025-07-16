@@ -218,10 +218,8 @@ const paginationRange = computed(() => {
             <p
                 class="mb-8 lg:mb-16 font-light text-gray-500 dark:text-gray-400 sm:text-xl"
             >
-                Connect with Forward Kenya Party departments, discover our leadership, and get involved in our party's mission.
+                At Forward Kenya Party, our specialized departments work in harmony to implement our vision for a better Kenya. Each department focuses on key areas of national development, ensuring comprehensive progress that benefits every citizen while upholding our core values of transparency, accountability, and service to the people.
             </p>
-
-            <!-- Search and Filter -->
             <div class="mb-8 bg-white dark:bg-gray-800 rounded-lg shadow p-6">
                 <label for="search" class="sr-only">Search party departments</label>
                 <div class="relative">

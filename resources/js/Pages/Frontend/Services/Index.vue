@@ -235,7 +235,7 @@ const paginationRange = computed(() => {
             <p
                 class="mb-8 lg:mb-16 font-light text-gray-500 dark:text-gray-400 sm:text-xl"
             >
-                Discover a wide range of Forward Kenya Party services designed to empower members, support communities, and advance our mission.
+                Forward Kenya Party is dedicated to delivering efficient, accessible public services that empower every Kenyan. Our comprehensive range of initiatives reflects our commitment to equitable development, social justice, and sustainable progress across all communities in our nation.
             </p>
 
             <!-- Search and Filter -->

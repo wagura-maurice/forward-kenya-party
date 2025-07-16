@@ -27,8 +27,7 @@ defineProps({
             <p
                 class="mb-8 lg:mb-16 font-light text-gray-500 dark:text-gray-400 sm:text-xl"
             >
-                add content to have in this section of that is for welcome
-                viewer to the Terms and Conditions page
+                Welcome to the Forward Kenya Party's official platform. These terms and conditions outline our commitment to transparency and accountability in all our digital interactions. By engaging with our platform, you're joining our movement towards a more inclusive and progressive Kenya, built on the principles of integrity and public service.
             </p>
 
             <!-- Showcase Section -->

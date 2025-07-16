@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from "vue";
-import { Head, Link, usePage } from "@inertiajs/vue3";
+import { Head, Link, usePage, router } from "@inertiajs/vue3";
 
 // Props for dynamic logo, title, and navigation links
 defineProps({
@@ -54,6 +54,16 @@ const scrollToTop = () => {
 // Handle scroll event
 const handleScroll = () => {
     isScrolled.value = window.scrollY > 100; // Show button after scrolling 100px
+};
+
+// Logout function
+const logout = () => {
+    router.post(route('logout'), {}, {
+        onSuccess: () => {
+            // Force a hard reload after logout to ensure all state is reset
+            window.location.href = route('frontend.welcome');
+        }
+    });
 };
 
 onMounted(() => {
@@ -148,28 +158,26 @@ onUnmounted(() => {
                                             />
                                         </svg>
                                     </a>
-                                    <form method="POST" action="/logout">
-                                        <button
-                                            type="submit"
-                                            class="flex items-center justify-center text-white bg-gradient-to-r from-red-500 to-pink-500 hover:bg-gradient-to-l hover:from-red-600 hover:to-pink-600 focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-red-700 font-medium text-sm px-5 py-2.5 text-center rounded-r-full rounded-l-none"
-                                            aria-label="Sign Out"
+                                    <button
+                                        @click="logout"
+                                        class="flex items-center justify-center text-white bg-gradient-to-r from-red-500 to-pink-500 hover:bg-gradient-to-l hover:from-red-600 hover:to-pink-600 focus:ring-4 focus:outline-none focus:ring-pink-200 dark:focus:ring-red-700 font-medium text-sm px-5 py-2.5 text-center rounded-r-full rounded-l-none"
+                                        aria-label="Sign Out"
+                                    >
+                                        <svg
+                                            xmlns="http://www.w3.org/2000/svg"
+                                            class="h-5 w-5"
+                                            fill="none"
+                                            viewBox="0 0 24 24"
+                                            stroke="currentColor"
                                         >
-                                            <svg
-                                                xmlns="http://www.w3.org/2000/svg"
-                                                class="h-5 w-5"
-                                                fill="none"
-                                                viewBox="0 0 24 24"
-                                                stroke="currentColor"
-                                            >
-                                                <path
-                                                    stroke-linecap="round"
-                                                    stroke-linejoin="round"
-                                                    stroke-width="2"
-                                                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1"
-                                                />
-                                            </svg>
-                                        </button>
-                                    </form>
+                                            <path
+                                                stroke-linecap="round"
+                                                stroke-linejoin="round"
+                                                stroke-width="2"
+                                                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1"
+                                            />
+                                        </svg>
+                                    </button>
                                 </div>
                             </template>
                             <template v-else>
@@ -511,10 +519,10 @@ onUnmounted(() => {
                                         Email Us
                                     </h4>
                                     <a
-                                        href="mailto:info@forwardkenyaparty.com"
+                                        href="mailto:forwardkenyaparty@gmail.com"
                                         class="text-gray-700 dark:text-gray-200 text-sm hover:text-green-600 dark:hover:text-green-400"
                                     >
-                                        info@forwardkenyaparty.com
+                                        forwardkenyaparty@gmail.com
                                     </a>
                                 </div>
                             </li>

@@ -27,14 +27,14 @@ defineProps({
             <p
                 class="mb-8 lg:mb-16 font-light text-gray-500 dark:text-gray-400 sm:text-xl"
             >
-                add content to have in this section of that is for welcome
-                viewer to the Privacy and Policy page
+                At Forward Kenya Party, we uphold the highest standards of data protection and privacy. This policy reflects our unwavering commitment to transparency and trust, ensuring that your personal information is handled with the utmost care and in accordance with both Kenyan law and our party's principles of integrity and accountability.
             </p>
 
             <!-- Showcase Section -->
             <div class="bg-white dark:bg-gray-900 mt-8">
                 <div class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
-                    here add the content and html resource etc relevant to
+                here add the content and html resource etc relevant to
+                achiving a practical a Privacy and Policy page
                     achiving a practical a Privacy and Policy page
                 </div>
             </div>

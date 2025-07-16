@@ -27,8 +27,7 @@ defineProps({
             <p
                 class="mb-8 lg:mb-16 font-light text-gray-500 dark:text-gray-400 sm:text-xl"
             >
-                add content to have in this section of that is for welcome
-                viewer to the Frequently Asked Questions page
+                Discover how Forward Kenya Party is working towards a more united and prosperous Kenya. Here, we address your most pressing questions about our policies, initiatives, and how you can join us in building a better future for all Kenyans, guided by our core values of unity, justice, and sustainable development.
             </p>
 
             <!-- Showcase Section -->
