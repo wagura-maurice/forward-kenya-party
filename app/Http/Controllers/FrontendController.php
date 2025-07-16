@@ -180,19 +180,19 @@ class FrontendController extends Controller
             'phpVersion' => PHP_VERSION,
             'heroSlides' => [
                 [
-                    'file_path' => 'https://accounts.ecitizen.go.ke/en/images/hero-home-1.jpg',
-                    'name' => 'Welcome to Forward Kenya Party',
-                    'description' => 'Your gateway to government services.',
+                    'file_path' => asset('assets/img/hero-home-1.jpg'),
+                    'name' => 'Forward Kenya Party',
+                    'description' => 'Championing progressive leadership and sustainable development for all Kenyans.',
                 ],
                 [
-                    'file_path' => 'https://demoadmin.ecitizen.pesaflow.com/assets/uploads/eCitizen-hero-banner-3.jpg',
-                    'name' => 'Seamless Kenyan Interaction',
-                    'description' => 'Access services anytime, anywhere.',
+                    'file_path' => asset('assets/img/eCitizen-hero-banner-3.jpg'),
+                    'name' => 'Our Lives, Our Heritage',
+                    'description' => 'Safeguarding our collective future while honoring our rich heritage.',
                 ],
                 [
-                    'file_path' => 'https://demoadmin.ecitizen.pesaflow.com/assets/uploads/eCitizen-hero-banner-8.jpg',
-                    'name' => 'Empowering Kenyans',
-                    'description' => 'Transforming service delivery.',
+                    'file_path' => asset('assets/img/eCitizen-hero-banner-8.jpg'),
+                    'name' => 'Inclusive Governance',
+                    'description' => 'Empowering communities through transparent and accountable leadership.',
                 ],
             ],
             'stats' => [
