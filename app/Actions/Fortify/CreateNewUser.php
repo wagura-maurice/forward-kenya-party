@@ -72,7 +72,7 @@ class CreateNewUser implements CreatesNewUsers
             'last_name' => ['required', 'string', 'max:255'],
             'gender' => ['required', 'string', 'in:male,female,other'],
             'date_of_birth' => ['required', 'date'],
-            'disability_status' => ['nullable', 'string', 'in:none,physical,sensory,mental,intellectual,other'],
+            'disability_status' => ['nullable', 'string', 'in:none,physical,visual,hearing,mental,other'],
             'plwd_number' => [
                 'nullable', 
                 'string', 
