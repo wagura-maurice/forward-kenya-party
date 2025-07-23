@@ -67,15 +67,16 @@ const loadingWards = ref(false);
 
 const form = useForm({
     name: "",
-    email: "",
+    
+    id_type: "national_id", // 'national_id' or 'passport'
+    national_id: "",
+    telephone: "",
     gender: "",
     date_of_birth: "",
     disability_status: "",
     plwd_number: "",
     ethnicity_id: null,
     religion_id: null,
-    national_id: "",
-    telephone: "",
     county_id: null,
     sub_county_id: null,
     constituency_id: null,
@@ -125,12 +126,6 @@ const disabilityStatusOptions = [
     { value: "other", label: "Other" },
 ];
 
-const securityQuestions = [
-    "What was your first pet's name?",
-    "What was the name of your first school?",
-    "What is your mother's maiden name?",
-    "What city were you born in?",
-];
 
 const showPlwdNumber = computed(
     () => form.disability_status && form.disability_status !== ""
@@ -211,20 +206,26 @@ watch(
 
 const validateStep = (step) => {
     if (step === 1) {
-        if (!form.name)
-            return { isValid: false, message: "Full name is required" };
-        if (!form.email)
-            return { isValid: false, message: "Email is required" };
-        if (!form.telephone)
-            return { isValid: false, message: "Phone number is required" };
+        if (!form.name) return { isValid: false, message: "Name is required" };
+        if (!form.telephone) return { isValid: false, message: "Telephone is required" };
+        if (!form.id_type) return { isValid: false, message: "ID type is required" };
+        if (!form.national_id) {
+            return { 
+                isValid: false, 
+                message: form.id_type === 'national_id' ? "National ID is required" : "Passport number is required" 
+            };
+        }
+        // Validate ID format based on type
+        if (form.id_type === 'national_id' && !/^\d{8}$/.test(form.national_id)) {
+            return { isValid: false, message: "Please enter a valid 8-digit National ID" };
+        }
+        if (form.id_type === 'passport' && !/^[A-Z]\d{6,8}$/i.test(form.national_id)) {
+            return { isValid: false, message: "Please enter a valid Passport number" };
+        }
         return { isValid: true };
     } else if (step === 2) {
-        if (!form.gender)
-            return { isValid: false, message: "Gender is required" };
-        if (!form.date_of_birth)
-            return { isValid: false, message: "Date of birth is required" };
-        if (!form.national_id)
-            return { isValid: false, message: "ID number is required" };
+        if (!form.gender) return { isValid: false, message: "Gender is required" };
+        if (!form.date_of_birth) return { isValid: false, message: "Date of birth is required" };
         if (!form.ethnicity_id)
             return { isValid: false, message: "Ethnicity is required" };
         if (!form.religion_id)
@@ -371,7 +372,7 @@ const cleanFormData = (formData) => {
     // List of fields that should be in the final submission
     const allowedFields = [
         "name",
-        "email",
+        
         "gender",
         "date_of_birth",
         "disability_status",
@@ -470,42 +471,57 @@ const cleanFormData = (formData) => {
                                     class="mt-1 text-sm text-red-600"
                                 />
                             </div>
-                            <div class="space-y-2">
-                                <div class="flex items-center">
-                                    <InputLabel
-                                        for="email"
-                                        value="Email"
-                                        class="block text-sm font-medium text-gray-700"
-                                    />
-
-                                    <div class="ml-1 group relative">
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="space-y-2">
+                                    <div class="flex items-center">
+                                        <InputLabel
+                                            for="id_type"
+                                            value="ID Type"
+                                            class="block text-sm font-medium text-gray-700"
+                                        />
                                         <i
-                                            class="fas fa-info-circle text-gray-400 hover:text-gray-500 cursor-pointer"
+                                            class="fas fa-star text-red-500 text-xs ml-1"
                                         ></i>
-                                        <div
-                                            class="hidden group-hover:block absolute z-10 mt-1 w-64 p-2 text-xs text-gray-600 bg-white border border-gray-200 rounded shadow-lg"
-                                        >
-                                            This is the email address that will
-                                            be used to send you notifications.
-                                        </div>
                                     </div>
-
-                                    <i
-                                        class="fas fa-star text-red-500 text-xs ml-1"
-                                    ></i>
+                                    <select
+                                        id="id_type"
+                                        v-model="form.id_type"
+                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
+                                        required
+                                    >
+                                        <option value="national_id">National ID</option>
+                                        <option value="passport">Passport</option>
+                                    </select>
+                                    <InputError
+                                        :message="form.errors.id_type"
+                                        class="mt-1 text-sm text-red-600"
+                                    />
                                 </div>
-                                <TextInput
-                                    id="email"
-                                    v-model="form.email"
-                                    type="email"
-                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
-                                    placeholder="your.email@example.com"
-                                    required
-                                />
-                                <InputError
-                                    :message="form.errors.email"
-                                    class="mt-1 text-sm text-red-600"
-                                />
+                                <div class="space-y-2">
+                                    <div class="flex items-center">
+                                        <InputLabel
+                                            :for="form.id_type"
+                                            :value="form.id_type === 'national_id' ? 'National ID' : 'Passport Number'"
+                                            class="block text-sm font-medium text-gray-700"
+                                        />
+                                        <i
+                                            class="fas fa-star text-red-500 text-xs ml-1"
+                                        ></i>
+                                    </div>
+                                    <TextInput
+                                        :id="form.id_type"
+                                        v-model="form.national_id"
+                                        type="text"
+                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
+                                        :placeholder="form.id_type === 'national_id' ? 'Enter National ID' : 'Enter Passport Number'"
+                                        required
+                                    />
+                                    <InputError
+                                        :message="form.errors.national_id"
+                                        class="mt-1 text-sm text-red-600"
+                                    />
+                                </div>
                             </div>
                             <div class="space-y-2">
                                 <div class="flex items-center">
@@ -521,12 +537,10 @@ const cleanFormData = (formData) => {
                                         <div
                                             class="hidden group-hover:block absolute z-10 mt-1 w-64 p-2 text-xs text-gray-600 bg-white border border-gray-200 rounded shadow-lg"
                                         >
-                                            This is the telephone number that
-                                            will be used to send you
+                                            Enter your phone number for
                                             notifications.
                                         </div>
                                     </div>
-
                                     <i
                                         class="fas fa-star text-red-500 text-xs ml-1"
                                     ></i>
@@ -1285,23 +1299,7 @@ const cleanFormData = (formData) => {
                                     class="p-6"
                                 >
                                     <dl class="space-y-4">
-                                        <div
-                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
-                                        >
-                                            <dt
-                                                class="text-sm font-medium text-gray-500"
-                                            >
-                                                Email
-                                            </dt>
-                                            <dd
-                                                class="mt-1 text-sm text-gray-900 sm:col-span-2"
-                                            >
-                                                {{
-                                                    form.email ||
-                                                    "Not specified"
-                                                }}
-                                            </dd>
-                                        </div>
+                                        
                                         <div
                                             class="sm:grid sm:grid-cols-3 sm:gap-4"
                                         >
