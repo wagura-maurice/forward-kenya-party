@@ -15,22 +15,24 @@ import axios from "axios";
 
 const props = defineProps({
     counties: Array,
-    genders: Object,
 });
 
+const totalSteps = 3; // Updated to 3 steps to include confirmation
 const currentStep = ref(1);
-const totalSteps = 4;
 const activeAccordion = ref("personal");
-const uploadProgress = ref(0);
 
-const stepNames = [
-    "Account Information",
-    "Personal Details",
-    "Contact & Location",
-    "Review & Submit",
-];
-
-const stepDescription = computed(() => stepNames[currentStep.value - 1]);
+const stepDescription = computed(() => {
+    switch (currentStep.value) {
+        case 1:
+            return "Account and Personal Information";
+        case 2:
+            return "Contact, Location, and Signatures";
+        case 3:
+            return "Confirmation";
+        default:
+            return "";
+    }
+});
 
 const toggleAccordion = (section) => {
     activeAccordion.value = activeAccordion.value === section ? null : section;
@@ -53,36 +55,50 @@ const showToast = (type, title, message) => {
     });
 };
 
-const subCounties = ref([]);
 const constituencies = ref([]);
 const wards = ref([]);
 const ethnicities = ref([]);
 const religions = ref([]);
 
-const loadingEthnicities = ref(false);
-const loadingReligions = ref(false);
-const loadingSubCounties = ref(false);
 const loadingConstituencies = ref(false);
 const loadingWards = ref(false);
+const loadingEthnicities = ref(false);
+const loadingReligions = ref(false);
 
 const form = useForm({
+    // Step 1: Account and Personal Information
     name: "",
-    
-    id_type: "national_id", // 'national_id' or 'passport'
-    national_id: "",
     telephone: "",
-    gender: "",
+    id_type: "national_identification_number", // 'national_identification_number' or 'passport_number'
+    id_number: "",
+    party_membership_number: "", // Read-only, mirrors id_number
     date_of_birth: "",
-    disability_status: "",
-    plwd_number: "",
+    gender: "",
     ethnicity_id: null,
     religion_id: null,
+    disability_status: "no", // 'no', 'yes'
+    ncpwd_number: "",
+
+    // Step 2: Contact, Location, and Signatures
+    postal_address: "",
     county_id: null,
-    sub_county_id: null,
     constituency_id: null,
     ward_id: null,
+    enlisting_date: new Date().toISOString().split("T")[0], // Set to today (July 24, 2025), read-only
+    signature_member: null,
+    recruiting_person_name: "",
+    recruiting_person_signature: null,
+
+    // Step 3: Review & Submit
     terms: false,
 });
+
+watch(
+    () => form.id_number,
+    (newIdNumber) => {
+        form.party_membership_number = newIdNumber; // Sync with id_number, read-only
+    }
+);
 
 const fetchEthnicities = async () => {
     try {
@@ -112,145 +128,150 @@ const fetchReligions = async () => {
     }
 };
 
+const fetchConstituencies = async (countyId) => {
+    if (!countyId) {
+        constituencies.value = [];
+        form.constituency_id = null;
+        return;
+    }
+    try {
+        loadingConstituencies.value = true;
+        const response = await axios.get(
+            `/api/locations/counties/${countyId}/constituencies`
+        );
+        constituencies.value = response.data?.success ? response.data.data : [];
+    } catch (error) {
+        console.error("Error fetching constituencies:", error);
+        constituencies.value = [];
+        showToast("error", "Error", "Failed to load constituencies");
+    } finally {
+        loadingConstituencies.value = false;
+    }
+};
+
+const fetchWards = async (constituencyId) => {
+    if (!constituencyId) {
+        wards.value = [];
+        form.ward_id = null;
+        return;
+    }
+    try {
+        loadingWards.value = true;
+        const response = await axios.get(
+            `/api/locations/constituencies/${constituencyId}/wards`
+        );
+        wards.value = response.data?.success ? response.data.data : [];
+    } catch (error) {
+        console.error("Error fetching wards:", error);
+        wards.value = [];
+        showToast("error", "Error", "Failed to load wards");
+    } finally {
+        loadingWards.value = false;
+    }
+};
+
 onMounted(() => {
     fetchEthnicities();
     fetchReligions();
 });
 
-const disabilityStatusOptions = [
-    { value: "", label: "None" },
-    { value: "physical", label: "Physical" },
-    { value: "visual", label: "Visual" },
-    { value: "hearing", label: "Hearing" },
-    { value: "mental", label: "Mental" },
-    { value: "other", label: "Other" },
-];
-
-
-const showPlwdNumber = computed(
-    () => form.disability_status && form.disability_status !== ""
-);
-
 watch(
     () => form.county_id,
     async (newCountyId) => {
-        if (newCountyId) {
-            try {
-                form.constituency_id = null;
-                form.ward_id = null;
-                subCounties.value = [];
-                constituencies.value = [];
-                wards.value = [];
-                loadingSubCounties.value = true;
-                loadingConstituencies.value = true;
-
-                const [subCountiesResponse, constituenciesResponse] =
-                    await Promise.all([
-                        axios.get(
-                            `/api/locations/counties/${newCountyId}/sub-counties`
-                        ),
-                        axios.get(
-                            `/api/locations/counties/${newCountyId}/constituencies`
-                        ),
-                    ]);
-
-                subCounties.value = subCountiesResponse.data?.success
-                    ? subCountiesResponse.data.data
-                    : [];
-                constituencies.value = constituenciesResponse.data?.success
-                    ? constituenciesResponse.data.data
-                    : [];
-            } catch (error) {
-                console.error("Error fetching location data:", error);
-                subCounties.value = [];
-                constituencies.value = [];
-                showToast("error", "Error", "Failed to load location data");
-            } finally {
-                loadingSubCounties.value = false;
-                loadingConstituencies.value = false;
-            }
-        } else {
-            subCounties.value = [];
-            constituencies.value = [];
-            wards.value = [];
-            form.sub_county_id = null;
-            form.constituency_id = null;
-            form.ward_id = null;
-        }
+        form.constituency_id = null;
+        form.ward_id = null;
+        constituencies.value = [];
+        wards.value = [];
+        await fetchConstituencies(newCountyId);
     }
 );
 
 watch(
     () => form.constituency_id,
     async (newConstituencyId) => {
-        if (newConstituencyId) {
-            try {
-                form.ward_id = null;
-                wards.value = [];
-                loadingWards.value = true;
-
-                const { data } = await axios.get(
-                    `/api/locations/constituencies/${newConstituencyId}/wards`
-                );
-                wards.value = data?.success ? data.data : [];
-            } catch (error) {
-                console.error("Error fetching wards:", error);
-                wards.value = [];
-                showToast("error", "Error", "Failed to load wards");
-            } finally {
-                loadingWards.value = false;
-            }
-        }
+        form.ward_id = null;
+        wards.value = [];
+        await fetchWards(newConstituencyId);
     }
 );
 
 const validateStep = (step) => {
     if (step === 1) {
-        if (!form.name) return { isValid: false, message: "Name is required" };
-        if (!form.telephone) return { isValid: false, message: "Telephone is required" };
-        if (!form.id_type) return { isValid: false, message: "ID type is required" };
-        if (!form.national_id) {
-            return { 
-                isValid: false, 
-                message: form.id_type === 'national_id' ? "National ID is required" : "Passport number is required" 
+        // Step 1: Account and Personal Information
+        if (!form.name?.trim())
+            return { isValid: false, message: "Name of member is required" };
+        if (!form.telephone?.trim())
+            return {
+                isValid: false,
+                message: "Member's mobile no. is required",
             };
-        }
-        // Validate ID format based on type
-        if (form.id_type === 'national_id' && !/^\d{8}$/.test(form.national_id)) {
-            return { isValid: false, message: "Please enter a valid 8-digit National ID" };
-        }
-        if (form.id_type === 'passport' && !/^[A-Z]\d{6,8}$/i.test(form.national_id)) {
-            return { isValid: false, message: "Please enter a valid Passport number" };
-        }
-        return { isValid: true };
-    } else if (step === 2) {
-        if (!form.gender) return { isValid: false, message: "Gender is required" };
-        if (!form.date_of_birth) return { isValid: false, message: "Date of birth is required" };
+        if (!form.id_type)
+            return {
+                isValid: false,
+                message: "Identification type is required",
+            };
+        if (!form.id_number?.trim())
+            return {
+                isValid: false,
+                message: `${
+                    form.id_type === "national_identification_number"
+                        ? "National Identification Number"
+                        : "Passport Number"
+                } is required`,
+            };
+        if (!form.date_of_birth)
+            return { isValid: false, message: "Date of birth is required" };
+        if (!form.gender) return { isValid: false, message: "Sex is required" };
         if (!form.ethnicity_id)
             return { isValid: false, message: "Ethnicity is required" };
         if (!form.religion_id)
             return { isValid: false, message: "Religion is required" };
-        /* if (!form.disability_status)
-            return { isValid: false, message: "Disability status is required" }; */
-        if (form.disability_status === "yes" && !form.plwd_number) {
+        if (form.disability_status === "yes" && !form.ncpwd_number?.trim())
             return {
                 isValid: false,
                 message:
-                    "PLWD number is required for persons with disabilities",
+                    "NCPWD number is required when a disability is selected",
             };
-        }
-        return { isValid: true };
-    } else if (step === 3) {
-        if (!form.county_id)
-            return { isValid: false, message: "County is required" };
-        if (!form.sub_county_id)
-            return { isValid: false, message: "Sub-county is required" };
-        if (!form.constituency_id)
-            return { isValid: false, message: "Constituency is required" };
-        if (!form.ward_id)
-            return { isValid: false, message: "Ward is required" };
         return { isValid: true };
     }
+
+    if (step === 2) {
+        // Step 2: Contact, Location, and Signatures
+        if (!form.postal_address?.trim())
+            return { isValid: false, message: "Postal Address is required" };
+        if (!form.county_id)
+            return {
+                isValid: false,
+                message: "County of voter registration is required",
+            };
+        if (!form.constituency_id)
+            return {
+                isValid: false,
+                message: "Constituency of voter registration is required",
+            };
+        if (!form.ward_id)
+            return {
+                isValid: false,
+                message: "Ward of voter registration is required",
+            };
+        if (!form.signature_member)
+            return {
+                isValid: false,
+                message: "Signature of member is required",
+            };
+        if (!form.recruiting_person_signature)
+            return {
+                isValid: false,
+                message: "Signature of recruiting person is required",
+            };
+        if (!form.recruiting_person_name?.trim())
+            return {
+                isValid: false,
+                message: "Name of recruiting person is required",
+            };
+        return { isValid: true };
+    }
+
     return { isValid: true };
 };
 
@@ -275,19 +296,34 @@ const prevStep = () => {
     }
 };
 
+const handleFileUpload = (event, field) => {
+    const file = event.target.files[0];
+    if (file) {
+        if (file.type !== "image/png") {
+            form.errors[field] = "Only PNG files are allowed";
+            event.target.value = "";
+            return;
+        }
+        const maxSize = 2 * 1024 * 1024; // 2MB
+        if (file.size > maxSize) {
+            form.errors[field] = "File size must be less than 2MB";
+            event.target.value = "";
+            return;
+        }
+        form[field] = file;
+        form.errors[field] = "";
+    }
+};
+
 const handleSubmit = async () => {
     if (currentStep.value < totalSteps) {
-        const success = await nextStep();
-        if (success) {
-            window.scrollTo({ top: 0, behavior: "smooth" });
-        }
+        await nextStep();
     } else {
         await submit();
     }
 };
 
 const submit = async () => {
-    // Final validation before submission
     for (let i = 1; i <= totalSteps; i++) {
         const { isValid, message } = validateStep(i);
         if (!isValid) {
@@ -298,58 +334,45 @@ const submit = async () => {
         }
     }
 
+    // Additional validation for terms in Step 3
     if (!form.terms) {
         showToast(
             "error",
-            "Terms Required",
-            "You must agree to the terms and conditions"
+            "Validation Error",
+            "You must agree to the terms and affirmation"
         );
         return;
     }
 
-    try {
-        form.processing = true;
-        const cleanData = cleanFormData(form);
+    // Use Inertia's form helper to submit the form
+    form.post(route("register"), {
+        forceFormData: true,
+        onSuccess: () => {
+            // Handle successful registration
+            showToast(
+                "success",
+                "Registration Successful",
+                "Your registration was successful! Redirecting..."
+            );
+            // The server should handle the redirect in the response
+        },
+        onError: (errors) => {
+            // Handle form errors
+            console.error("Registration errors:", errors);
+            let errorMessage = "An error occurred during registration.";
 
-        const response = await axios.post(route("register"), cleanData, {
-            headers: { "Content-Type": "multipart/form-data" },
-            onUploadProgress: (progressEvent) => {
-                uploadProgress.value = Math.round(
-                    (progressEvent.loaded * 100) / progressEvent.total
-                );
-            },
-        });
+            if (errors && typeof errors === "object") {
+                errorMessage = Object.values(errors).flat().join(" ");
+            } else if (typeof errors === "string") {
+                errorMessage = errors;
+            }
 
-        showToast(
-            "success",
-            "Success",
-            "Registration successful! Redirecting..."
-        );
-        setTimeout(() => {
-            window.location.href = route("dashboard");
-        }, 2000);
-    } catch (error) {
-        let errorMessage = "An error occurred during registration";
-        if (error.response?.data?.errors) {
-            errorMessage =
-                Object.values(error.response.data.errors)[0]?.[0] ||
-                errorMessage;
-        } else if (error.response?.data?.message) {
-            errorMessage = error.response.data.message;
-        } else if (!error.response) {
-            errorMessage =
-                "No response from server. Please check your connection.";
-        }
-        showToast("error", "Registration Failed", errorMessage);
-        console.error("Submission error:", errorMessage, error);
-    } finally {
-        form.processing = false;
-    }
-};
-
-const getSelectedLabel = (value, options) => {
-    const option = options.find((opt) => opt.value === value);
-    return option ? option.label : "Not specified";
+            showToast("error", "Registration Failed", errorMessage);
+        },
+        onFinish: () => {
+            form.processing = false;
+        },
+    });
 };
 
 const getLocationName = (id, locations) => {
@@ -364,42 +387,6 @@ const getItemName = (id, items) => {
 
 const toTitleCase = (str) => {
     return str.replace(/\b\w/g, (match) => match.toUpperCase());
-};
-
-const cleanFormData = (formData) => {
-    const cleanData = { ...formData };
-
-    // List of fields that should be in the final submission
-    const allowedFields = [
-        "name",
-        
-        "gender",
-        "date_of_birth",
-        "disability_status",
-        "plwd_number",
-        "ethnicity_id",
-        "religion_id",
-        "national_id",
-        "telephone",
-        "county_id",
-        "sub_county_id",
-        "constituency_id",
-        "ward_id",
-        "terms",
-    ];
-
-    // Remove any fields not in the allowed list
-    Object.keys(cleanData).forEach((key) => {
-        if (!allowedFields.includes(key)) {
-            delete cleanData[key];
-        }
-    });
-
-    // Ensure boolean values are properly formatted
-    if (cleanData.terms === "true") cleanData.terms = true;
-    if (cleanData.terms === "false") cleanData.terms = false;
-
-    return cleanData;
 };
 </script>
 
@@ -429,30 +416,19 @@ const cleanFormData = (formData) => {
                     </div>
 
                     <form @submit.prevent="handleSubmit" class="space-y-4">
-                        <!-- Step 1: Basic Details -->
+                        <!-- Step 1: Account and Personal Information -->
                         <div v-if="currentStep === 1" class="space-y-4">
                             <h2 class="text-base font-medium text-gray-700">
-                                Step 1: Basic account information
+                                Step 1: Account and Personal Information
                             </h2>
+                            <!-- Name of Member (Full Width) -->
                             <div class="space-y-2">
                                 <div class="flex items-center">
                                     <InputLabel
                                         for="name"
-                                        value="Full name"
+                                        value="Name of Member"
                                         class="block text-sm font-medium text-gray-700"
                                     />
-                                    <div class="ml-1 group relative">
-                                        <i
-                                            class="fas fa-info-circle text-gray-400 hover:text-gray-500 cursor-pointer"
-                                        ></i>
-                                        <div
-                                            class="hidden group-hover:block absolute z-10 mt-1 w-64 p-2 text-xs text-gray-600 bg-white border border-gray-200 rounded shadow-lg"
-                                        >
-                                            This is the name that will be
-                                            displayed on your profile.
-                                        </div>
-                                    </div>
-
                                     <i
                                         class="fas fa-star text-red-500 text-xs ml-1"
                                     ></i>
@@ -462,8 +438,8 @@ const cleanFormData = (formData) => {
                                     v-model="form.name"
                                     type="text"
                                     class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
-                                    placeholder="Enter your Full name"
                                     required
+                                    autocomplete="name"
                                     autofocus
                                 />
                                 <InputError
@@ -471,13 +447,38 @@ const cleanFormData = (formData) => {
                                     class="mt-1 text-sm text-red-600"
                                 />
                             </div>
-                            
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                            <!-- Member's Mobile No. and Identification Type (Half Width) -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="space-y-2">
+                                    <div class="flex items-center">
+                                        <InputLabel
+                                            for="telephone"
+                                            value="Member's Mobile No."
+                                            class="block text-sm font-medium text-gray-700"
+                                        />
+                                        <i
+                                            class="fas fa-star text-red-500 text-xs ml-1"
+                                        ></i>
+                                    </div>
+                                    <TextInput
+                                        id="telephone"
+                                        v-model="form.telephone"
+                                        type="tel"
+                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
+                                        placeholder="e.g. 0712345678"
+                                        required
+                                    />
+                                    <InputError
+                                        :message="form.errors.telephone"
+                                        class="mt-1 text-sm text-red-600"
+                                    />
+                                </div>
                                 <div class="space-y-2">
                                     <div class="flex items-center">
                                         <InputLabel
                                             for="id_type"
-                                            value="ID Type"
+                                            value="Identification Type"
                                             class="block text-sm font-medium text-gray-700"
                                         />
                                         <i
@@ -489,20 +490,44 @@ const cleanFormData = (formData) => {
                                         v-model="form.id_type"
                                         class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
                                         required
+                                        @change="form.id_number = ''"
                                     >
-                                        <option value="national_id">National ID</option>
-                                        <option value="passport">Passport</option>
+                                        <option value="">
+                                            Select Identification Type
+                                        </option>
+                                        <option
+                                            value="national_identification_number"
+                                        >
+                                            National Identification Number
+                                        </option>
+                                        <option value="passport_number">
+                                            Passport Number
+                                        </option>
                                     </select>
                                     <InputError
                                         :message="form.errors.id_type"
                                         class="mt-1 text-sm text-red-600"
                                     />
                                 </div>
+                            </div>
+
+                            <!-- National ID and Party Membership No. (Half Width, Party Read-Only) -->
+                            <div class="grid grid-cols-2 gap-4">
                                 <div class="space-y-2">
                                     <div class="flex items-center">
                                         <InputLabel
-                                            :for="form.id_type"
-                                            :value="form.id_type === 'national_id' ? 'National ID' : 'Passport Number'"
+                                            :for="
+                                                form.id_type ===
+                                                'national_identification_number'
+                                                    ? 'national_identification_number'
+                                                    : 'passport_number'
+                                            "
+                                            :value="
+                                                form.id_type ===
+                                                'national_identification_number'
+                                                    ? 'National Identification Number'
+                                                    : 'Passport Number'
+                                            "
                                             class="block text-sm font-medium text-gray-700"
                                         />
                                         <i
@@ -510,128 +535,68 @@ const cleanFormData = (formData) => {
                                         ></i>
                                     </div>
                                     <TextInput
-                                        :id="form.id_type"
-                                        v-model="form.national_id"
+                                        :id="
+                                            form.id_type ===
+                                            'national_identification_number'
+                                                ? 'national_identification_number'
+                                                : 'passport_number'
+                                        "
+                                        v-model="form.id_number"
                                         type="text"
                                         class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
-                                        :placeholder="form.id_type === 'national_id' ? 'Enter National ID' : 'Enter Passport Number'"
+                                        :placeholder="
+                                            form.id_type ===
+                                            'national_identification_number'
+                                                ? 'Enter National Identification Number'
+                                                : 'Enter Passport Number'
+                                        "
                                         required
                                     />
                                     <InputError
-                                        :message="form.errors.national_id"
+                                        :message="
+                                            form.errors
+                                                .national_identification_number
+                                        "
                                         class="mt-1 text-sm text-red-600"
                                     />
                                 </div>
-                            </div>
-                            <div class="space-y-2">
-                                <div class="flex items-center">
-                                    <InputLabel
-                                        for="telephone"
-                                        value="Telephone"
-                                        class="block text-sm font-medium text-gray-700"
-                                    />
-                                    <div class="ml-1 group relative">
-                                        <i
-                                            class="fas fa-info-circle text-gray-400 hover:text-gray-500 cursor-pointer"
-                                        ></i>
-                                        <div
-                                            class="hidden group-hover:block absolute z-10 mt-1 w-64 p-2 text-xs text-gray-600 bg-white border border-gray-200 rounded shadow-lg"
-                                        >
-                                            Enter your phone number for
-                                            notifications.
-                                        </div>
-                                    </div>
-                                    <i
-                                        class="fas fa-star text-red-500 text-xs ml-1"
-                                    ></i>
-                                </div>
-                                <TextInput
-                                    id="telephone"
-                                    v-model="form.telephone"
-                                    type="tel"
-                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
-                                    placeholder="e.g. +254712345678"
-                                    required
-                                />
-                                <InputError
-                                    :message="form.errors.telephone"
-                                    class="mt-1 text-sm text-red-600"
-                                />
-                            </div>
-                        </div>
-
-                        <!-- Step 2: Personal Information -->
-                        <div v-if="currentStep === 2" class="space-y-4">
-                            <h2 class="text-base font-medium text-gray-700">
-                                Step 2: Personal details
-                            </h2>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div class="space-y-2">
                                     <div class="flex items-center">
                                         <InputLabel
-                                            for="gender"
-                                            value="Gender"
+                                            for="party_membership_number"
+                                            value="Party Membership Number"
                                             class="block text-sm font-medium text-gray-700"
                                         />
-                                        <div class="ml-1 group relative">
-                                            <i
-                                                class="fas fa-info-circle text-gray-400 hover:text-gray-500 cursor-pointer"
-                                            ></i>
-                                            <div
-                                                class="hidden group-hover:block absolute z-10 mt-1 w-64 p-2 text-xs text-gray-600 bg-white border border-gray-200 rounded shadow-lg"
-                                            >
-                                                Select your gender as it appears
-                                                on official documents.
-                                            </div>
-                                        </div>
-
                                         <i
                                             class="fas fa-star text-red-500 text-xs ml-1"
                                         ></i>
                                     </div>
-                                    <VueSelect
-                                        v-model="form.gender"
-                                        :options="[
-                                            { value: 'male', label: 'Male' },
-                                            {
-                                                value: 'female',
-                                                label: 'Female',
-                                            },
-                                            { value: 'other', label: 'Other' },
-                                        ]"
-                                        placeholder="Select gender"
-                                        label="label"
-                                        :reduce="(option) => option.value"
-                                        class="block w-full text-sm border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
-                                        :class="{
-                                            'opacity-50': form.processing,
-                                        }"
+                                    <TextInput
+                                        id="party_membership_number"
+                                        v-model="form.party_membership_number"
+                                        type="text"
+                                        class="block w-full rounded-md border-gray-300 bg-gray-200 text-gray-500 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
                                         required
+                                        readonly
                                     />
                                     <InputError
-                                        :message="form.errors.gender"
+                                        :message="
+                                            form.errors.party_membership_number
+                                        "
                                         class="mt-1 text-sm text-red-600"
                                     />
                                 </div>
+                            </div>
+
+                            <!-- Date of Birth and Sex (Half Width) -->
+                            <div class="grid grid-cols-2 gap-4">
                                 <div class="space-y-2">
                                     <div class="flex items-center">
                                         <InputLabel
                                             for="date_of_birth"
-                                            value="Date of Birth"
+                                            value="Date of Birth (dd-mm-yyyy)"
                                             class="block text-sm font-medium text-gray-700"
                                         />
-                                        <div class="ml-1 group relative">
-                                            <i
-                                                class="fas fa-info-circle text-gray-400 hover:text-gray-500 cursor-pointer"
-                                            ></i>
-                                            <div
-                                                class="hidden group-hover:block absolute z-10 mt-1 w-64 p-2 text-xs text-gray-600 bg-white border border-gray-200 rounded shadow-lg"
-                                            >
-                                                Enter your date of birth as it
-                                                appears on official documents.
-                                            </div>
-                                        </div>
-
                                         <i
                                             class="fas fa-star text-red-500 text-xs ml-1"
                                         ></i>
@@ -641,8 +606,12 @@ const cleanFormData = (formData) => {
                                         v-model="form.date_of_birth"
                                         type="date"
                                         class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
-                                        placeholder="YYYY-MM-DD"
                                         required
+                                        :max="
+                                            new Date()
+                                                .toISOString()
+                                                .split('T')[0]
+                                        "
                                     />
                                     <InputError
                                         :message="form.errors.date_of_birth"
@@ -652,40 +621,49 @@ const cleanFormData = (formData) => {
                                 <div class="space-y-2">
                                     <div class="flex items-center">
                                         <InputLabel
-                                            for="national_id"
-                                            value="National ID Number"
+                                            value="Sex"
                                             class="block text-sm font-medium text-gray-700"
                                         />
-                                        <div class="ml-1 group relative">
-                                            <i
-                                                class="fas fa-info-circle text-gray-400 hover:text-gray-500 cursor-pointer"
-                                            ></i>
-                                            <div
-                                                class="hidden group-hover:block absolute z-10 mt-1 w-64 p-2 text-xs text-gray-600 bg-white border border-gray-200 rounded shadow-lg"
-                                            >
-                                                Enter your national
-                                                identification number as it
-                                                appears on official documents.
-                                            </div>
-                                        </div>
-
                                         <i
                                             class="fas fa-star text-red-500 text-xs ml-1"
                                         ></i>
                                     </div>
-                                    <TextInput
-                                        id="national_id"
-                                        v-model="form.national_id"
-                                        type="text"
-                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
-                                        placeholder="Enter your National ID number"
-                                        required
-                                    />
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <label class="inline-flex items-center">
+                                            <input
+                                                type="radio"
+                                                v-model="form.gender"
+                                                value="male"
+                                                class="text-green-600 border-gray-300 focus:ring-green-500"
+                                                required
+                                            />
+                                            <span
+                                                class="ml-1 text-sm text-gray-700"
+                                                >Male</span
+                                            >
+                                        </label>
+                                        <label class="inline-flex items-center">
+                                            <input
+                                                type="radio"
+                                                v-model="form.gender"
+                                                value="female"
+                                                class="text-green-600 border-gray-300 focus:ring-green-500"
+                                            />
+                                            <span
+                                                class="ml-1 text-sm text-gray-700"
+                                                >Female</span
+                                            >
+                                        </label>
+                                    </div>
                                     <InputError
-                                        :message="form.errors.national_id"
+                                        :message="form.errors.gender"
                                         class="mt-1 text-sm text-red-600"
                                     />
                                 </div>
+                            </div>
+
+                            <!-- Ethnicity and Religion (Half Width) -->
+                            <div class="grid grid-cols-2 gap-4">
                                 <div class="space-y-2">
                                     <div class="flex items-center">
                                         <InputLabel
@@ -693,58 +671,33 @@ const cleanFormData = (formData) => {
                                             value="Ethnicity"
                                             class="block text-sm font-medium text-gray-700"
                                         />
-                                        <div class="ml-1 group relative">
-                                            <i
-                                                class="fas fa-info-circle text-gray-400 hover:text-gray-500 cursor-pointer"
-                                            ></i>
-                                            <div
-                                                class="hidden group-hover:block absolute z-10 mt-1 w-64 p-2 text-xs text-gray-600 bg-white border border-gray-200 rounded shadow-lg"
-                                            >
-                                                Select your ethnicity as it
-                                                appears on official documents.
-                                            </div>
-                                        </div>
-
                                         <i
                                             class="fas fa-star text-red-500 text-xs ml-1"
                                         ></i>
                                     </div>
                                     <VueSelect
+                                        id="ethnicity_id"
                                         v-model="form.ethnicity_id"
                                         :options="ethnicities"
-                                        placeholder="Select ethnicity"
                                         label="name"
                                         :reduce="(option) => option.id"
-                                        class="block w-full text-sm border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+                                        placeholder="Select ethnicity"
+                                        class="w-full"
                                         :class="{
-                                            'opacity-50': loadingEthnicities,
+                                            'border-red-300':
+                                                form.errors.ethnicity_id,
                                         }"
-                                        :loading="loadingEthnicities"
-                                        :disabled="loadingEthnicities"
-                                        loading-text="Loading..."
-                                        :clearable="true"
-                                        :searchable="true"
                                         required
                                     >
                                         <template #no-options>
-                                            {{
-                                                loadingEthnicities
-                                                    ? "Loading..."
-                                                    : "No ethnicities found"
-                                            }}
-                                        </template>
-                                        <template
-                                            #option="{ name, description }"
-                                        >
-                                            <div class="flex flex-col">
-                                                <span class="font-medium">{{
-                                                    name
-                                                }}</span>
-                                                <span
-                                                    v-if="description"
-                                                    class="text-xs text-gray-500"
-                                                    >{{ description }}</span
-                                                >
+                                            <div
+                                                class="text-sm text-gray-500 py-2 px-3"
+                                            >
+                                                {{
+                                                    loadingEthnicities
+                                                        ? "Loading ethnicities..."
+                                                        : "No ethnicities found"
+                                                }}
                                             </div>
                                         </template>
                                     </VueSelect>
@@ -760,58 +713,33 @@ const cleanFormData = (formData) => {
                                             value="Religion"
                                             class="block text-sm font-medium text-gray-700"
                                         />
-                                        <div class="ml-1 group relative">
-                                            <i
-                                                class="fas fa-info-circle text-gray-400 hover:text-gray-500 cursor-pointer"
-                                            ></i>
-                                            <div
-                                                class="hidden group-hover:block absolute z-10 mt-1 w-64 p-2 text-xs text-gray-600 bg-white border border-gray-200 rounded shadow-lg"
-                                            >
-                                                Select your religion as it
-                                                appears on official documents.
-                                            </div>
-                                        </div>
-
                                         <i
                                             class="fas fa-star text-red-500 text-xs ml-1"
                                         ></i>
                                     </div>
                                     <VueSelect
+                                        id="religion_id"
                                         v-model="form.religion_id"
                                         :options="religions"
-                                        placeholder="Select religion"
                                         label="name"
                                         :reduce="(option) => option.id"
-                                        class="block w-full text-sm border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+                                        placeholder="Select religion"
+                                        class="w-full"
                                         :class="{
-                                            'opacity-50': loadingReligions,
+                                            'border-red-300':
+                                                form.errors.religion_id,
                                         }"
-                                        :loading="loadingReligions"
-                                        :disabled="loadingReligions"
-                                        loading-text="Loading..."
-                                        :clearable="true"
-                                        :searchable="true"
                                         required
                                     >
                                         <template #no-options>
-                                            {{
-                                                loadingReligions
-                                                    ? "Loading..."
-                                                    : "No religions found"
-                                            }}
-                                        </template>
-                                        <template
-                                            #option="{ name, description }"
-                                        >
-                                            <div class="flex flex-col">
-                                                <span class="font-medium">{{
-                                                    name
-                                                }}</span>
-                                                <span
-                                                    v-if="description"
-                                                    class="text-xs text-gray-500"
-                                                    >{{ description }}</span
-                                                >
+                                            <div
+                                                class="text-sm text-gray-500 py-2 px-3"
+                                            >
+                                                {{
+                                                    loadingReligions
+                                                        ? "Loading religions..."
+                                                        : "No religions found"
+                                                }}
                                             </div>
                                         </template>
                                     </VueSelect>
@@ -820,133 +748,149 @@ const cleanFormData = (formData) => {
                                         class="mt-1 text-sm text-red-600"
                                     />
                                 </div>
+                            </div>
+
+                            <!-- Are you a PWD and NCPWD Number (Half Width, Conditional) -->
+                            <div class="grid grid-cols-2 gap-4">
                                 <div class="space-y-2">
                                     <div class="flex items-center">
                                         <InputLabel
-                                            for="disability_status"
-                                            value="Disability Status"
+                                            value="Are you a PWD"
                                             class="block text-sm font-medium text-gray-700"
                                         />
-                                        <div class="ml-1 group relative">
-                                            <i
-                                                class="fas fa-info-circle text-gray-400 hover:text-gray-500 cursor-pointer"
-                                            ></i>
-                                            <div
-                                                class="hidden group-hover:block absolute z-10 mt-1 w-64 p-2 text-xs text-gray-600 bg-white border border-gray-200 rounded shadow-lg"
-                                            >
-                                                Select your disability status as
-                                                it appears on official
-                                                documents.
-                                            </div>
-                                        </div>
+                                        <i
+                                            class="fas fa-star text-red-500 text-xs ml-1"
+                                        ></i>
                                     </div>
-                                    <VueSelect
-                                        v-model="form.disability_status"
-                                        :options="disabilityStatusOptions"
-                                        placeholder="Select disability status"
-                                        label="label"
-                                        :reduce="(option) => option.value"
-                                        class="block w-full text-sm border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
-                                        :class="{
-                                            'opacity-50': form.processing,
-                                        }"
-                                        @update:modelValue="
-                                            (val) =>
-                                                (form.disability_status = val)
-                                        "
+                                    <div class="grid grid-cols-2 gap-2">
+                                        <label class="inline-flex items-center">
+                                            <input
+                                                type="radio"
+                                                v-model="form.disability_status"
+                                                value="no"
+                                                class="text-green-600 border-gray-300 focus:ring-green-500"
+                                                required
+                                            />
+                                            <span
+                                                class="ml-1 text-sm text-gray-700"
+                                                >No</span
+                                            >
+                                        </label>
+                                        <label class="inline-flex items-center">
+                                            <input
+                                                type="radio"
+                                                v-model="form.disability_status"
+                                                value="yes"
+                                                class="text-green-600 border-gray-300 focus:ring-green-500"
+                                            />
+                                            <span
+                                                class="ml-1 text-sm text-gray-700"
+                                                >Yes</span
+                                            >
+                                        </label>
+                                    </div>
+                                    <InputError
+                                        :message="form.errors.disability_status"
+                                        class="mt-1 text-sm text-red-600"
                                     />
                                 </div>
-                                <div v-if="showPlwdNumber" class="space-y-2">
+                                <div
+                                    v-if="form.disability_status === 'yes'"
+                                    class="space-y-2"
+                                >
                                     <div class="flex items-center">
                                         <InputLabel
-                                            for="plwd_number"
-                                            value="PLWD Registration Number"
+                                            for="ncpwd_number"
+                                            value="NCPWD Number"
                                             class="block text-sm font-medium text-gray-700"
                                         />
-                                        <div class="ml-1 group relative">
-                                            <i
-                                                class="fas fa-info-circle text-gray-400 hover:text-gray-500 cursor-pointer"
-                                            ></i>
-                                            <div
-                                                class="hidden group-hover:block absolute z-10 mt-1 w-64 p-2 text-xs text-gray-600 bg-white border border-gray-200 rounded shadow-lg"
-                                            >
-                                                Enter your PLWD registration
-                                                number as it appears on official
-                                                documents.
-                                            </div>
-                                        </div>
-
                                         <i
                                             class="fas fa-star text-red-500 text-xs ml-1"
                                         ></i>
                                     </div>
                                     <TextInput
-                                        id="plwd_number"
-                                        v-model="form.plwd_number"
+                                        id="ncpwd_number"
+                                        v-model="form.ncpwd_number"
                                         type="text"
                                         class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
-                                        placeholder="Enter your Persons Living with Disability registration number"
+                                        placeholder="Enter NCPWD number"
+                                        required
                                     />
                                     <InputError
-                                        :message="form.errors.plwd_number"
+                                        :message="form.errors.ncpwd_number"
                                         class="mt-1 text-sm text-red-600"
                                     />
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Step 3: Contact & Location -->
-                        <div v-if="currentStep === 3" class="space-y-4">
+                        <!-- Step 2: Contact, Location, and Signatures -->
+                        <div v-if="currentStep === 2" class="space-y-4">
                             <h2 class="text-base font-medium text-gray-700">
-                                Step 3: Contact and location information
+                                Step 2: Contact, Location, and Signatures
                             </h2>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                            <!-- Postal Address (Full Width Textarea) -->
+                            <div class="space-y-2">
+                                <div class="flex items-center">
+                                    <InputLabel
+                                        for="postal_address"
+                                        value="Postal Address"
+                                        class="block text-sm font-medium text-gray-700"
+                                    />
+                                    <i
+                                        class="fas fa-star text-red-500 text-xs ml-1"
+                                    ></i>
+                                </div>
+                                <textarea
+                                    id="postal_address"
+                                    v-model="form.postal_address"
+                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
+                                    rows="4"
+                                    required
+                                ></textarea>
+                                <InputError
+                                    :message="form.errors.postal_address"
+                                    class="mt-1 text-sm text-red-600"
+                                />
+                            </div>
+
+                            <!-- County, Constituency (Half Width Pairs) -->
+                            <div class="grid grid-cols-2 gap-4">
                                 <div class="space-y-2">
                                     <div class="flex items-center">
                                         <InputLabel
                                             for="county_id"
-                                            value="County"
+                                            value="County of Voter Registration"
                                             class="block text-sm font-medium text-gray-700"
                                         />
-                                        <div class="ml-1 group relative">
-                                            <i
-                                                class="fas fa-info-circle text-gray-400 hover:text-gray-500 cursor-pointer"
-                                            ></i>
-                                            <div
-                                                class="hidden group-hover:block absolute z-10 mt-1 w-64 p-2 text-xs text-gray-600 bg-white border border-gray-200 rounded shadow-lg"
-                                            >
-                                                Select your county of residence.
-                                                This helps us provide
-                                                location-specific services.
-                                            </div>
-                                        </div>
-
                                         <i
                                             class="fas fa-star text-red-500 text-xs ml-1"
                                         ></i>
                                     </div>
                                     <VueSelect
+                                        id="county_id"
                                         v-model="form.county_id"
                                         :options="counties"
-                                        placeholder="Select county"
                                         label="name"
                                         :reduce="(option) => option.id"
-                                        class="block w-full text-sm border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+                                        placeholder="Select county"
+                                        class="w-full"
                                         :class="{
-                                            'opacity-50': loadingSubCounties,
+                                            'border-red-300':
+                                                form.errors.county_id,
                                         }"
-                                        :loading="loadingSubCounties"
-                                        :disabled="loadingSubCounties"
-                                        loading-text="Loading..."
-                                        :clearable="true"
                                         required
+                                        @change="
+                                            fetchConstituencies(form.county_id)
+                                        "
                                     >
                                         <template #no-options>
-                                            {{
-                                                loadingSubCounties
-                                                    ? "Loading..."
-                                                    : "No counties found"
-                                            }}
+                                            <div
+                                                class="text-sm text-gray-500 py-2 px-3"
+                                            >
+                                                No counties found
+                                            </div>
                                         </template>
                                     </VueSelect>
                                     <InputError
@@ -957,118 +901,47 @@ const cleanFormData = (formData) => {
                                 <div class="space-y-2">
                                     <div class="flex items-center">
                                         <InputLabel
-                                            for="sub_county_id"
-                                            value="Sub-County"
-                                            class="block text-sm font-medium text-gray-700"
-                                        />
-                                        <div class="ml-1 group relative">
-                                            <i
-                                                class="fas fa-info-circle text-gray-400 hover:text-gray-500 cursor-pointer"
-                                            ></i>
-                                            <div
-                                                class="hidden group-hover:block absolute z-10 mt-1 w-64 p-2 text-xs text-gray-600 bg-white border border-gray-200 rounded shadow-lg"
-                                            >
-                                                Select your sub-county of
-                                                residence. This helps us provide
-                                                location-specific services.
-                                            </div>
-                                        </div>
-
-                                        <i
-                                            class="fas fa-star text-red-500 text-xs ml-1"
-                                        ></i>
-                                    </div>
-                                    <VueSelect
-                                        v-model="form.sub_county_id"
-                                        :options="subCounties"
-                                        placeholder="Select sub-county"
-                                        label="name"
-                                        :reduce="(option) => option.id"
-                                        class="block w-full text-sm border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
-                                        :class="{
-                                            'opacity-50':
-                                                loadingSubCounties ||
-                                                !form.county_id,
-                                        }"
-                                        :loading="loadingSubCounties"
-                                        :disabled="
-                                            !form.county_id ||
-                                            loadingSubCounties
-                                        "
-                                        loading-text="Loading..."
-                                        :clearable="true"
-                                        required
-                                    >
-                                        <template #no-options>
-                                            {{
-                                                loadingSubCounties
-                                                    ? "Loading..."
-                                                    : !form.county_id
-                                                    ? "Please select a county first"
-                                                    : "No sub-counties found"
-                                            }}
-                                        </template>
-                                    </VueSelect>
-                                    <InputError
-                                        :message="form.errors.sub_county_id"
-                                        class="mt-1 text-sm text-red-600"
-                                    />
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="space-y-2">
-                                    <div class="flex items-center">
-                                        <InputLabel
                                             for="constituency_id"
-                                            value="Constituency"
+                                            value="Constituency of Voter Registration"
                                             class="block text-sm font-medium text-gray-700"
                                         />
-                                        <div class="ml-1 group relative">
-                                            <i
-                                                class="fas fa-info-circle text-gray-400 hover:text-gray-500 cursor-pointer"
-                                            ></i>
-                                            <div
-                                                class="hidden group-hover:block absolute z-10 mt-1 w-64 p-2 text-xs text-gray-600 bg-white border border-gray-200 rounded shadow-lg"
-                                            >
-                                                Select your constituency. This
-                                                helps us direct you to the right
-                                                local services.
-                                            </div>
-                                        </div>
-
                                         <i
                                             class="fas fa-star text-red-500 text-xs ml-1"
                                         ></i>
                                     </div>
                                     <VueSelect
+                                        id="constituency_id"
                                         v-model="form.constituency_id"
                                         :options="constituencies"
-                                        placeholder="Select constituency"
                                         label="name"
                                         :reduce="(option) => option.id"
-                                        class="block w-full text-sm border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+                                        placeholder="Select constituency"
+                                        class="w-full"
                                         :class="{
-                                            'opacity-50':
-                                                loadingConstituencies ||
-                                                !form.county_id,
+                                            'border-red-300':
+                                                form.errors.constituency_id,
                                         }"
-                                        :loading="loadingConstituencies"
                                         :disabled="
                                             !form.county_id ||
                                             loadingConstituencies
                                         "
-                                        loading-text="Loading..."
-                                        :clearable="true"
                                         required
+                                        @change="
+                                            fetchWards(form.constituency_id)
+                                        "
                                     >
                                         <template #no-options>
-                                            {{
-                                                loadingConstituencies
-                                                    ? "Loading..."
-                                                    : !form.county_id
-                                                    ? "Please select a county first"
-                                                    : "No constituencies found"
-                                            }}
+                                            <div
+                                                class="text-sm text-gray-500 py-2 px-3"
+                                            >
+                                                {{
+                                                    loadingConstituencies
+                                                        ? "Loading constituencies..."
+                                                        : !form.county_id
+                                                        ? "Please select a county first"
+                                                        : "No constituencies found"
+                                                }}
+                                            </div>
                                         </template>
                                     </VueSelect>
                                     <InputError
@@ -1076,58 +949,51 @@ const cleanFormData = (formData) => {
                                         class="mt-1 text-sm text-red-600"
                                     />
                                 </div>
+                            </div>
+
+                            <!-- Ward and Enlisting Date (Half Width) -->
+                            <div class="grid grid-cols-2 gap-4">
                                 <div class="space-y-2">
                                     <div class="flex items-center">
                                         <InputLabel
                                             for="ward_id"
-                                            value="Ward"
+                                            value="Ward of Voter Registration"
                                             class="block text-sm font-medium text-gray-700"
                                         />
-                                        <div class="ml-1 group relative">
-                                            <i
-                                                class="fas fa-info-circle text-gray-400 hover:text-gray-500 cursor-pointer"
-                                            ></i>
-                                            <div
-                                                class="hidden group-hover:block absolute z-10 mt-1 w-64 p-2 text-xs text-gray-600 bg-white border border-gray-200 rounded shadow-lg"
-                                            >
-                                                Select your ward for more
-                                                precise service delivery and
-                                                information.
-                                            </div>
-                                        </div>
-
                                         <i
                                             class="fas fa-star text-red-500 text-xs ml-1"
                                         ></i>
                                     </div>
                                     <VueSelect
+                                        id="ward_id"
                                         v-model="form.ward_id"
                                         :options="wards"
-                                        placeholder="Select ward"
                                         label="name"
                                         :reduce="(option) => option.id"
-                                        class="block w-full text-sm border-gray-300 focus:border-indigo-500 focus:ring-indigo-500"
+                                        placeholder="Select ward"
+                                        class="w-full"
                                         :class="{
-                                            'opacity-50':
-                                                loadingWards ||
-                                                !form.sub_county_id,
+                                            'border-red-300':
+                                                form.errors.ward_id,
                                         }"
-                                        :loading="loadingWards"
                                         :disabled="
-                                            !form.sub_county_id || loadingWards
+                                            !form.constituency_id ||
+                                            loadingWards
                                         "
-                                        loading-text="Loading..."
-                                        :clearable="true"
                                         required
                                     >
                                         <template #no-options>
-                                            {{
-                                                loadingWards
-                                                    ? "Loading..."
-                                                    : !form.sub_county_id
-                                                    ? "Please select a sub-county first"
-                                                    : "No wards found"
-                                            }}
+                                            <div
+                                                class="text-sm text-gray-500 py-2 px-3"
+                                            >
+                                                {{
+                                                    loadingWards
+                                                        ? "Loading wards..."
+                                                        : !form.constituency_id
+                                                        ? "Please select a constituency first"
+                                                        : "No wards found"
+                                                }}
+                                            </div>
                                         </template>
                                     </VueSelect>
                                     <InputError
@@ -1135,47 +1001,233 @@ const cleanFormData = (formData) => {
                                         class="mt-1 text-sm text-red-600"
                                     />
                                 </div>
+                                <div class="space-y-2">
+                                    <div class="flex items-center">
+                                        <InputLabel
+                                            for="enlisting_date"
+                                            value="Enlisting Date (dd-mm-yyyy)"
+                                            class="block text-sm font-medium text-gray-700"
+                                        />
+                                        <i
+                                            class="fas fa-star text-red-500 text-xs ml-1"
+                                        ></i>
+                                    </div>
+                                    <TextInput
+                                        id="enlisting_date"
+                                        v-model="form.enlisting_date"
+                                        type="date"
+                                        class="block w-full rounded-md border-gray-300 bg-gray-200 text-gray-500 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
+                                        required
+                                        readonly
+                                    />
+                                    <InputError
+                                        :message="form.errors.enlisting_date"
+                                        class="mt-1 text-sm text-red-600"
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- Signature of Member and Signature of Recruiting Person (Half Width) -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="space-y-2">
+                                    <div class="flex items-center">
+                                        <InputLabel
+                                            for="signature_member"
+                                            value="Signature of Member"
+                                            class="block text-sm font-medium text-gray-700"
+                                        />
+                                        <i
+                                            class="fas fa-star text-red-500 text-xs ml-1"
+                                        ></i>
+                                    </div>
+                                    <div
+                                        class="flex items-center justify-center w-full"
+                                    >
+                                        <label
+                                            for="signature_member"
+                                            class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
+                                        >
+                                            <div
+                                                class="flex flex-col items-center justify-center pt-5 pb-6"
+                                            >
+                                                <i
+                                                    class="fas fa-signature text-3xl text-gray-400 mb-2"
+                                                ></i>
+                                                <p
+                                                    class="mb-2 text-sm text-gray-500"
+                                                >
+                                                    <span class="font-semibold"
+                                                        >Click to upload</span
+                                                    >
+                                                    or drag and drop
+                                                </p>
+                                                <p
+                                                    class="text-xs text-gray-500"
+                                                >
+                                                    PNG (MAX. 2MB)
+                                                </p>
+                                            </div>
+                                            <input
+                                                id="signature_member"
+                                                type="file"
+                                                class="hidden"
+                                                accept="image/png"
+                                                @change="
+                                                    (e) =>
+                                                        handleFileUpload(
+                                                            e,
+                                                            'signature_member'
+                                                        )
+                                                "
+                                            />
+                                        </label>
+                                    </div>
+                                    <div
+                                        v-if="form.signature_member"
+                                        class="mt-2 text-sm text-green-600"
+                                    >
+                                        <i class="fas fa-check-circle mr-1"></i>
+                                        Signature uploaded successfully
+                                    </div>
+                                    <InputError
+                                        :message="form.errors.signature_member"
+                                        class="mt-1 text-sm text-red-600"
+                                    />
+                                </div>
+                                <div class="space-y-2">
+                                    <div class="flex items-center">
+                                        <InputLabel
+                                            for="recruiting_person_signature"
+                                            value="Signature of Recruiting Person"
+                                            class="block text-sm font-medium text-gray-700"
+                                        />
+                                        <i
+                                            class="fas fa-star text-red-500 text-xs ml-1"
+                                        ></i>
+                                    </div>
+                                    <div
+                                        class="flex items-center justify-center w-full"
+                                    >
+                                        <label
+                                            for="recruiting_person_signature"
+                                            class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
+                                        >
+                                            <div
+                                                class="flex flex-col items-center justify-center pt-5 pb-6"
+                                            >
+                                                <i
+                                                    class="fas fa-signature text-3xl text-gray-400 mb-2"
+                                                ></i>
+                                                <p
+                                                    class="mb-2 text-sm text-gray-500"
+                                                >
+                                                    <span class="font-semibold"
+                                                        >Click to upload</span
+                                                    >
+                                                    or drag and drop
+                                                </p>
+                                                <p
+                                                    class="text-xs text-gray-500"
+                                                >
+                                                    PNG (MAX. 2MB)
+                                                </p>
+                                            </div>
+                                            <input
+                                                id="recruiting_person_signature"
+                                                type="file"
+                                                class="hidden"
+                                                accept="image/png"
+                                                @change="
+                                                    (e) =>
+                                                        handleFileUpload(
+                                                            e,
+                                                            'recruiting_person_signature'
+                                                        )
+                                                "
+                                            />
+                                        </label>
+                                    </div>
+                                    <div
+                                        v-if="form.recruiting_person_signature"
+                                        class="mt-2 text-sm text-green-600"
+                                    >
+                                        <i class="fas fa-check-circle mr-1"></i>
+                                        Signature uploaded successfully
+                                    </div>
+                                    <InputError
+                                        :message="
+                                            form.errors
+                                                .recruiting_person_signature
+                                        "
+                                        class="mt-1 text-sm text-red-600"
+                                    />
+                                </div>
+                            </div>
+
+                            <!-- Name of Recruiting Person (Full Width) -->
+                            <div class="space-y-2">
+                                <div class="flex items-center">
+                                    <InputLabel
+                                        for="recruiting_person_name"
+                                        value="Name of Recruiting Person"
+                                        class="block text-sm font-medium text-gray-700"
+                                    />
+                                    <i
+                                        class="fas fa-star text-red-500 text-xs ml-1"
+                                    ></i>
+                                </div>
+                                <TextInput
+                                    id="recruiting_person_name"
+                                    v-model="form.recruiting_person_name"
+                                    type="text"
+                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
+                                    placeholder="Enter the name of the recruiting person"
+                                    required
+                                />
+                                <InputError
+                                    :message="
+                                        form.errors.recruiting_person_name
+                                    "
+                                    class="mt-1 text-sm text-red-600"
+                                />
                             </div>
                         </div>
 
-                        <!-- Step 4: Confirmation -->
-                        <div v-if="currentStep === 4" class="space-y-6">
+                        <!-- Step 3: Confirmation -->
+                        <div v-if="currentStep === 3" class="space-y-6">
                             <h2 class="text-base font-medium text-gray-700">
-                                Step 4: Please verify all the information before
-                                submitting
+                                Step 3: Confirmation
                             </h2>
+
+                            <!-- Account Information Card -->
                             <div
                                 class="bg-white rounded-lg shadow overflow-hidden border border-gray-200"
                             >
                                 <div
                                     class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center cursor-pointer"
-                                    @click="toggleAccordion('personal')"
+                                    @click="
+                                        toggleAccordion('account information')
+                                    "
                                 >
                                     <h3
                                         class="text-lg font-medium text-gray-900"
                                     >
-                                        Personal Details
+                                        Account Information
                                     </h3>
-                                    <svg
-                                        class="w-5 h-5 text-gray-500 transform transition-transform duration-200"
+                                    <i
+                                        class="fas fa-chevron-down w-5 h-5 text-gray-500 transform transition-transform duration-200"
                                         :class="{
                                             'rotate-180':
-                                                activeAccordion === 'personal',
+                                                activeAccordion ===
+                                                'account information',
                                         }"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M19 9l-7 7-7-7"
-                                        />
-                                    </svg>
+                                    ></i>
                                 </div>
                                 <div
-                                    v-if="activeAccordion === 'personal'"
+                                    v-if="
+                                        activeAccordion ===
+                                        'account information'
+                                    "
                                     class="p-6"
                                 >
                                     <dl class="space-y-4">
@@ -1185,12 +1237,14 @@ const cleanFormData = (formData) => {
                                             <dt
                                                 class="text-sm font-medium text-gray-500"
                                             >
-                                                Full Name
+                                                Name of Member
                                             </dt>
                                             <dd
                                                 class="mt-1 text-sm text-gray-900 sm:col-span-2"
                                             >
-                                                {{ form.name }}
+                                                {{
+                                                    form.name || "Not specified"
+                                                }}
                                             </dd>
                                         </div>
                                         <div
@@ -1199,31 +1253,37 @@ const cleanFormData = (formData) => {
                                             <dt
                                                 class="text-sm font-medium text-gray-500"
                                             >
-                                                Gender
+                                                ID/Passport No.
                                             </dt>
                                             <dd
                                                 class="mt-1 text-sm text-gray-900 sm:col-span-2"
                                             >
                                                 {{
-                                                    form.gender
-                                                        ? getSelectedLabel(
-                                                              form.gender,
-                                                              [
-                                                                  {
-                                                                      value: "male",
-                                                                      label: "Male",
-                                                                  },
-                                                                  {
-                                                                      value: "female",
-                                                                      label: "Female",
-                                                                  },
-                                                                  {
-                                                                      value: "other",
-                                                                      label: "Other",
-                                                                  },
-                                                              ]
-                                                          )
-                                                        : "Not specified"
+                                                    form.id_number ||
+                                                    "Not specified"
+                                                }}
+                                                - ({{
+                                                    form.id_type ===
+                                                    "national_identification_number"
+                                                        ? "National Identification Number"
+                                                        : "Passport Number"
+                                                }})
+                                            </dd>
+                                        </div>
+                                        <div
+                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
+                                        >
+                                            <dt
+                                                class="text-sm font-medium text-gray-500"
+                                            >
+                                                Party Membership Number
+                                            </dt>
+                                            <dd
+                                                class="mt-1 text-sm text-gray-900 sm:col-span-2"
+                                            >
+                                                {{
+                                                    form.party_membership_number ||
+                                                    "Not specified"
                                                 }}
                                             </dd>
                                         </div>
@@ -1244,249 +1304,59 @@ const cleanFormData = (formData) => {
                                                 }}
                                             </dd>
                                         </div>
-                                        <div
-                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
-                                        >
-                                            <dt
-                                                class="text-sm font-medium text-gray-500"
-                                            >
-                                                ID Number
-                                            </dt>
-                                            <dd
-                                                class="mt-1 text-sm text-gray-900 sm:col-span-2"
-                                            >
-                                                {{
-                                                    form.national_id ||
-                                                    "Not specified"
-                                                }}
-                                            </dd>
-                                        </div>
                                     </dl>
                                 </div>
                             </div>
+
+                            <!-- Personal Information Card -->
                             <div
                                 class="bg-white rounded-lg shadow overflow-hidden border border-gray-200"
                             >
                                 <div
                                     class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center cursor-pointer"
-                                    @click="toggleAccordion('contact')"
+                                    @click="
+                                        toggleAccordion('personal information')
+                                    "
                                 >
                                     <h3
                                         class="text-lg font-medium text-gray-900"
                                     >
-                                        Contact Information
+                                        Personal Information
                                     </h3>
-                                    <svg
-                                        class="w-5 h-5 text-gray-500 transform transition-transform duration-200"
-                                        :class="{
-                                            'rotate-180':
-                                                activeAccordion === 'contact',
-                                        }"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M19 9l-7 7-7-7"
-                                        />
-                                    </svg>
-                                </div>
-                                <div
-                                    v-if="activeAccordion === 'contact'"
-                                    class="p-6"
-                                >
-                                    <dl class="space-y-4">
-                                        
-                                        <div
-                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
-                                        >
-                                            <dt
-                                                class="text-sm font-medium text-gray-500"
-                                            >
-                                                Phone Number
-                                            </dt>
-                                            <dd
-                                                class="mt-1 text-sm text-gray-900 sm:col-span-2"
-                                            >
-                                                {{
-                                                    form.telephone ||
-                                                    "Not specified"
-                                                }}
-                                            </dd>
-                                        </div>
-                                        <div
-                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
-                                        >
-                                            <dt
-                                                class="text-sm font-medium text-gray-500"
-                                            >
-                                                Address
-                                            </dt>
-                                            <dd
-                                                class="mt-1 text-sm text-gray-900 sm:col-span-2"
-                                            >
-                                                {{
-                                                    form.postal_address ||
-                                                    "Not specified"
-                                                }}
-                                            </dd>
-                                        </div>
-                                    </dl>
-                                </div>
-                            </div>
-                            <div
-                                class="bg-white rounded-lg shadow overflow-hidden border border-gray-200"
-                            >
-                                <div
-                                    class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center cursor-pointer"
-                                    @click="toggleAccordion('location')"
-                                >
-                                    <h3
-                                        class="text-lg font-medium text-gray-900"
-                                    >
-                                        Location Information
-                                    </h3>
-                                    <svg
-                                        class="w-5 h-5 text-gray-500 transform transition-transform duration-200"
-                                        :class="{
-                                            'rotate-180':
-                                                activeAccordion === 'location',
-                                        }"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M19 9l-7 7-7-7"
-                                        />
-                                    </svg>
-                                </div>
-                                <div
-                                    v-if="activeAccordion === 'location'"
-                                    class="p-6"
-                                >
-                                    <dl class="space-y-4">
-                                        <div
-                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
-                                        >
-                                            <dt
-                                                class="text-sm font-medium text-gray-500"
-                                            >
-                                                County
-                                            </dt>
-                                            <dd
-                                                class="mt-1 text-sm text-gray-900 sm:col-span-2"
-                                            >
-                                                {{
-                                                    getLocationName(
-                                                        form.county_id,
-                                                        counties
-                                                    )
-                                                }}
-                                            </dd>
-                                        </div>
-                                        <div
-                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
-                                        >
-                                            <dt
-                                                class="text-sm font-medium text-gray-500"
-                                            >
-                                                Sub-County
-                                            </dt>
-                                            <dd
-                                                class="mt-1 text-sm text-gray-900 sm:col-span-2"
-                                            >
-                                                {{
-                                                    getLocationName(
-                                                        form.sub_county_id,
-                                                        subCounties
-                                                    )
-                                                }}
-                                            </dd>
-                                        </div>
-                                        <div
-                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
-                                        >
-                                            <dt
-                                                class="text-sm font-medium text-gray-500"
-                                            >
-                                                Constituency
-                                            </dt>
-                                            <dd
-                                                class="mt-1 text-sm text-gray-900 sm:col-span-2"
-                                            >
-                                                {{
-                                                    getLocationName(
-                                                        form.constituency_id,
-                                                        constituencies
-                                                    )
-                                                }}
-                                            </dd>
-                                        </div>
-                                        <div
-                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
-                                        >
-                                            <dt
-                                                class="text-sm font-medium text-gray-500"
-                                            >
-                                                Ward
-                                            </dt>
-                                            <dd
-                                                class="mt-1 text-sm text-gray-900 sm:col-span-2"
-                                            >
-                                                {{
-                                                    getLocationName(
-                                                        form.ward_id,
-                                                        wards
-                                                    )
-                                                }}
-                                            </dd>
-                                        </div>
-                                    </dl>
-                                </div>
-                            </div>
-                            <div
-                                class="bg-white rounded-lg shadow overflow-hidden border border-gray-200"
-                            >
-                                <div
-                                    class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center cursor-pointer"
-                                    @click="toggleAccordion('additional')"
-                                >
-                                    <h3
-                                        class="text-lg font-medium text-gray-900"
-                                    >
-                                        Additional Information
-                                    </h3>
-                                    <svg
-                                        class="w-5 h-5 text-gray-500 transform transition-transform duration-200"
+                                    <i
+                                        class="fas fa-chevron-down w-5 h-5 text-gray-500 transform transition-transform duration-200"
                                         :class="{
                                             'rotate-180':
                                                 activeAccordion ===
-                                                'additional',
+                                                'personal information',
                                         }"
-                                        fill="none"
-                                        viewBox="0 0 24 24"
-                                        stroke="currentColor"
-                                    >
-                                        <path
-                                            stroke-linecap="round"
-                                            stroke-linejoin="round"
-                                            stroke-width="2"
-                                            d="M19 9l-7 7-7-7"
-                                        />
-                                    </svg>
+                                    ></i>
                                 </div>
                                 <div
-                                    v-if="activeAccordion === 'additional'"
+                                    v-if="
+                                        activeAccordion ===
+                                        'personal information'
+                                    "
                                     class="p-6"
                                 >
                                     <dl class="space-y-4">
+                                        <div
+                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
+                                        >
+                                            <dt
+                                                class="text-sm font-medium text-gray-500"
+                                            >
+                                                Sex
+                                            </dt>
+                                            <dd
+                                                class="mt-1 text-sm text-gray-900 sm:col-span-2"
+                                            >
+                                                {{
+                                                    form.gender ||
+                                                    "Not specified"
+                                                }}
+                                            </dd>
+                                        </div>
                                         <div
                                             class="sm:grid sm:grid-cols-3 sm:gap-4"
                                         >
@@ -1531,42 +1401,273 @@ const cleanFormData = (formData) => {
                                             <dt
                                                 class="text-sm font-medium text-gray-500"
                                             >
-                                                Disability Status
+                                                Are you a PWD
                                             </dt>
                                             <dd
                                                 class="mt-1 text-sm text-gray-900 sm:col-span-2"
                                             >
                                                 {{
-                                                    form.disability_status
-                                                        ? getSelectedLabel(
-                                                              form.disability_status,
-                                                              disabilityStatusOptions
-                                                          )
-                                                        : "None"
+                                                    form.disability_status ===
+                                                    "yes"
+                                                        ? "Yes"
+                                                        : "No"
                                                 }}
                                             </dd>
                                         </div>
                                         <div
-                                            v-if="form.disability_status"
+                                            v-if="
+                                                form.disability_status === 'yes'
+                                            "
                                             class="sm:grid sm:grid-cols-3 sm:gap-4"
                                         >
                                             <dt
                                                 class="text-sm font-medium text-gray-500"
                                             >
-                                                PLWD Number
+                                                NCPWD Number
                                             </dt>
                                             <dd
                                                 class="mt-1 text-sm text-gray-900 sm:col-span-2"
                                             >
                                                 {{
-                                                    form.plwd_number ||
-                                                    "Not provided"
+                                                    form.ncpwd_number ||
+                                                    "Not specified"
+                                                }}
+                                            </dd>
+                                        </div>
+                                        <div
+                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
+                                        >
+                                            <dt
+                                                class="text-sm font-medium text-gray-500"
+                                            >
+                                                Member's Mobile No.
+                                            </dt>
+                                            <dd
+                                                class="mt-1 text-sm text-gray-900 sm:col-span-2"
+                                            >
+                                                {{
+                                                    form.telephone ||
+                                                    "Not specified"
                                                 }}
                                             </dd>
                                         </div>
                                     </dl>
                                 </div>
                             </div>
+
+                            <div
+                                class="bg-white rounded-lg shadow overflow-hidden border border-gray-200"
+                            >
+                                <div
+                                    class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center cursor-pointer"
+                                    @click="
+                                        toggleAccordion(
+                                            'address location information'
+                                        )
+                                    "
+                                >
+                                    <h3
+                                        class="text-lg font-medium text-gray-900"
+                                    >
+                                        Address Location Information
+                                    </h3>
+                                    <i
+                                        class="fas fa-chevron-down w-5 h-5 text-gray-500 transform transition-transform duration-200"
+                                        :class="{
+                                            'rotate-180':
+                                                activeAccordion ===
+                                                'address location information',
+                                        }"
+                                    ></i>
+                                </div>
+                                <div
+                                    v-if="
+                                        activeAccordion ===
+                                        'address location information'
+                                    "
+                                    class="p-6"
+                                >
+                                    <dl class="space-y-4">
+                                        <div
+                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
+                                        >
+                                            <dt
+                                                class="text-sm font-medium text-gray-500"
+                                            >
+                                                Postal Address
+                                            </dt>
+                                            <dd
+                                                class="mt-1 text-sm text-gray-900 sm:col-span-2"
+                                            >
+                                                {{
+                                                    form.postal_address ||
+                                                    "Not specified"
+                                                }}
+                                            </dd>
+                                        </div>
+                                        <div
+                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
+                                        >
+                                            <dt
+                                                class="text-sm font-medium text-gray-500"
+                                            >
+                                                County of Voter Registration
+                                            </dt>
+                                            <dd
+                                                class="mt-1 text-sm text-gray-900 sm:col-span-2"
+                                            >
+                                                {{
+                                                    getLocationName(
+                                                        form.county_id,
+                                                        counties
+                                                    )
+                                                }}
+                                            </dd>
+                                        </div>
+                                        <div
+                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
+                                        >
+                                            <dt
+                                                class="text-sm font-medium text-gray-500"
+                                            >
+                                                Constituency of Voter
+                                                Registration
+                                            </dt>
+                                            <dd
+                                                class="mt-1 text-sm text-gray-900 sm:col-span-2"
+                                            >
+                                                {{
+                                                    getLocationName(
+                                                        form.constituency_id,
+                                                        constituencies
+                                                    )
+                                                }}
+                                            </dd>
+                                        </div>
+                                        <div
+                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
+                                        >
+                                            <dt
+                                                class="text-sm font-medium text-gray-500"
+                                            >
+                                                Ward of Voter Registration
+                                            </dt>
+                                            <dd
+                                                class="mt-1 text-sm text-gray-900 sm:col-span-2"
+                                            >
+                                                {{
+                                                    getLocationName(
+                                                        form.ward_id,
+                                                        wards
+                                                    )
+                                                }}
+                                            </dd>
+                                        </div>
+                                    </dl>
+                                </div>
+                            </div>
+
+                            <div
+                                class="bg-white rounded-lg shadow overflow-hidden border border-gray-200"
+                            >
+                                <div
+                                    class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center cursor-pointer"
+                                    @click="toggleAccordion('signatures')"
+                                >
+                                    <h3
+                                        class="text-lg font-medium text-gray-900"
+                                    >
+                                        Signatures and Enlisting Information
+                                    </h3>
+                                    <i
+                                        class="fas fa-chevron-down w-5 h-5 text-gray-500 transform transition-transform duration-200"
+                                        :class="{
+                                            'rotate-180':
+                                                activeAccordion ===
+                                                'signatures',
+                                        }"
+                                    ></i>
+                                </div>
+                                <div
+                                    v-if="activeAccordion === 'signatures'"
+                                    class="p-6"
+                                >
+                                    <dl class="space-y-4">
+                                        <div
+                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
+                                        >
+                                            <dt
+                                                class="text-sm font-medium text-gray-500"
+                                            >
+                                                Enlisting Date
+                                            </dt>
+                                            <dd
+                                                class="mt-1 text-sm text-gray-900 sm:col-span-2"
+                                            >
+                                                {{
+                                                    form.enlisting_date ||
+                                                    "Not specified"
+                                                }}
+                                            </dd>
+                                        </div>
+                                        <div
+                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
+                                        >
+                                            <dt
+                                                class="text-sm font-medium text-gray-500"
+                                            >
+                                                Signature of Member
+                                            </dt>
+                                            <dd
+                                                class="mt-1 text-sm text-gray-900 sm:col-span-2"
+                                            >
+                                                {{
+                                                    form.signature_member
+                                                        ? "Uploaded"
+                                                        : "Not uploaded"
+                                                }}
+                                            </dd>
+                                        </div>
+                                        <div
+                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
+                                        >
+                                            <dt
+                                                class="text-sm font-medium text-gray-500"
+                                            >
+                                                Signature of Recruiting Person
+                                            </dt>
+                                            <dd
+                                                class="mt-1 text-sm text-gray-900 sm:col-span-2"
+                                            >
+                                                {{
+                                                    form.recruiting_person_signature
+                                                        ? "Uploaded"
+                                                        : "Not uploaded"
+                                                }}
+                                            </dd>
+                                        </div>
+                                        <div
+                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
+                                        >
+                                            <dt
+                                                class="text-sm font-medium text-gray-500"
+                                            >
+                                                Name of Recruiting Person
+                                            </dt>
+                                            <dd
+                                                class="mt-1 text-sm text-gray-900 sm:col-span-2"
+                                            >
+                                                {{
+                                                    form.recruiting_person_name ||
+                                                    "Not specified"
+                                                }}
+                                            </dd>
+                                        </div>
+                                    </dl>
+                                </div>
+                            </div>
+
+                            <!-- Terms and Affirmation -->
                             <div
                                 class="p-4 sm:p-6 bg-white rounded-lg shadow border border-gray-200"
                             >
@@ -1588,15 +1689,14 @@ const cleanFormData = (formData) => {
                                         >
                                             <div class="flex flex-wrap">
                                                 <span class="mr-1 w-full">
-                                                    I certify that all the
-                                                    information provided is
-                                                    accurate and complete. I
-                                                    understand that providing
-                                                    false information may result
-                                                    in the rejection of my
-                                                    application or termination
-                                                    of my account. By signing
-                                                    up, I agree to the
+                                                    I, the undersigned, do
+                                                    hereby
+                                                    affirm/declare/confirm/verify
+                                                    that I am not a registered
+                                                    member of any other
+                                                    registered political party
+                                                    in Kenya. By signing up, I
+                                                    agree to the
                                                     <a
                                                         href="#"
                                                         target="_blank"
@@ -1614,17 +1714,25 @@ const cleanFormData = (formData) => {
                                                     >
                                                         Privacy Policy
                                                     </a>
+                                                    and affirm that all
+                                                    information provided is true
+                                                    and accurate.
                                                 </span>
                                             </div>
                                         </InputLabel>
                                         <p
                                             class="text-xs text-gray-500 mt-2 sm:mt-1"
                                         >
-                                            You must agree to the terms and
-                                            conditions to create an account.
+                                            You must agree to the terms of
+                                            service and our privacy policy to
+                                            create an account.
                                         </p>
                                     </div>
                                 </div>
+                                <InputError
+                                    :message="form.errors.terms"
+                                    class="mt-1 text-sm text-red-600"
+                                />
                             </div>
                         </div>
 
@@ -1642,24 +1750,21 @@ const cleanFormData = (formData) => {
                                 <span class="hidden sm:inline">Previous</span>
                             </button>
                             <div v-else class="w-24"></div>
-                            <!-- Spacer for alignment -->
 
                             <button
                                 type="submit"
                                 :disabled="
                                     form.processing ||
-                                    (currentStep === totalSteps && !form.terms)
+                                    (currentStep === 3 && !form.terms)
                                 "
                                 class="inline-flex items-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors duration-200"
                                 :class="{
                                     'opacity-75 cursor-not-allowed':
                                         form.processing ||
-                                        (currentStep === totalSteps &&
-                                            !form.terms),
+                                        (currentStep === 3 && !form.terms),
                                     'shadow-emerald-200':
                                         !form.processing &&
-                                        (currentStep !== totalSteps ||
-                                            form.terms),
+                                        (currentStep !== 3 || form.terms),
                                 }"
                             >
                                 <i
@@ -1669,20 +1774,17 @@ const cleanFormData = (formData) => {
                                 <template v-else>
                                     <span class="hidden sm:inline">
                                         {{
-                                            currentStep === totalSteps
+                                            currentStep === 3
                                                 ? "Submit Application"
-                                                : "Next: " +
-                                                  stepNames[currentStep]
+                                                : "Next: " + stepDescription
                                         }}
                                     </span>
                                     <span class="sm:hidden">{{
-                                        currentStep === totalSteps
-                                            ? "Submit"
-                                            : "Next"
+                                        currentStep === 3 ? "Submit" : "Next"
                                     }}</span>
                                     <i
                                         :class="
-                                            currentStep === totalSteps
+                                            currentStep === 3
                                                 ? 'fas fa-check ml-2'
                                                 : 'fas fa-arrow-right ml-2'
                                         "
@@ -1695,24 +1797,19 @@ const cleanFormData = (formData) => {
                         <div class="mt-6">
                             <div class="flex items-center justify-between mb-1">
                                 <span class="text-sm font-medium text-gray-700">
-                                    Step {{ currentStep }} of {{ totalSteps }}:
+                                    Step {{ currentStep }} of 3:
                                     {{ stepDescription }}
                                 </span>
                                 <span class="text-sm font-medium text-gray-700">
-                                    {{
-                                        Math.round(
-                                            (currentStep / totalSteps) * 100
-                                        )
-                                    }}% Complete
+                                    {{ Math.round((currentStep / 3) * 100) }}%
+                                    Complete
                                 </span>
                             </div>
                             <div class="w-full bg-gray-200 rounded-full h-2.5">
                                 <div
                                     class="bg-emerald-600 h-2.5 rounded-full transition-all duration-300"
                                     :style="{
-                                        width: `${
-                                            (currentStep / totalSteps) * 100
-                                        }%`,
+                                        width: `${(currentStep / 3) * 100}%`,
                                     }"
                                 ></div>
                             </div>
