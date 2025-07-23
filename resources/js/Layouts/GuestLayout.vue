@@ -641,14 +641,14 @@ onUnmounted(() => {
                                 href="/"
                                 class="text-gray-400 hover:text-green-500 dark:hover:text-green-400 transition-colors relative inline-block after:content-[''] after:absolute after:w-0 after:h-px after:bg-green-400 after:left-0 after:-bottom-0.5 after:transition-all hover:after:w-full"
                                 >{{ app?.name }}</a
-                            >. All rights reserved. Developed and Maintained by
+                            >. All rights reserved. <s>Developed and Maintained by
                             <a
                                 href="https://www.waguramaurice.com"
                                 target="_blank"
                                 class="text-gray-400 hover:text-green-500 dark:hover:text-green-400 transition-colors relative inline-block after:content-[''] after:absolute after:w-0 after:h-px after:bg-green-400 after:left-0 after:-bottom-0.5 after:transition-all hover:after:w-full"
                                 >Wagura Maurice</a
-                            >
-                        </p>
+                            ></s>
+                        </p>    
                         <div class="flex flex-wrap justify-center gap-4">
                             <a
                                 v-for="(link, index) in otherLinks"

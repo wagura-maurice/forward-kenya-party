@@ -97,36 +97,32 @@ defineProps({
 <template>
     <Head :title="title" />
     <GuestLayout :title="title" :menuLogo="logoUrl" :footerLogo="logoUrl">
-        <section class="container mx-auto px-4 py-8 pt-36 flex-1">
+        <section class="container mx-auto px-4 py-8 pt-32 md:pt-36 flex-1 max-w-7xl">
             <!-- Introduction -->
-            <h2
-                class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white"
-            >
-                {{ title }}
-            </h2>
-            <div
-                class="w-20 h-1 bg-gradient-to-r from-green-500 to-blue-500 mb-4"
-            ></div>
-            <p
-                class="mb-8 lg:mb-16 font-light text-gray-500 dark:text-gray-400 sm:text-xl"
-            >
+            <div class="max-w-4xl mx-auto text-center mb-16">
+                <h1 class="mb-4 text-4xl md:text-5xl font-bold text-gray-900 dark:text-white">
+                    {{ title }}
+                </h1>
+                <div class="w-32 h-1.5 bg-gradient-to-r from-green-500 to-blue-500 mx-auto mb-6 rounded-full"></div>
+                <p class="text-lg md:text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
 The Forward Kenya Party is a national political movement established to transform Kenya's governance through progressive policies and ethical leadership. As a beacon of hope and change, we unite Kenyans across all communities with a shared commitment to national development, social equity, and economic transformation. Our foundation is built on the principles of social democracy, ensuring that every policy decision prioritizes the welfare of ordinary citizens while fostering sustainable growth and national unity.
-            </p>
+                </p>
+            </div>
 
             <!-- Ideology Section -->
-            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-8 mb-16">
-                <div class="flex flex-col md:flex-row gap-8 items-center">
-                    <div class="md:w-1/2">
-                        <h2 class="text-3xl font-bold text-gray-900 dark:text-white mb-4">Our Ideology</h2>
-                        <div class="w-20 bg-gradient-to-r from-green-500 to-blue-500 mb-6"></div>
-                        <blockquote class="text-2xl font-semibold italic text-gray-700 dark:text-gray-200 mb-6 border-l-4 border-green-500 pl-4">
+            <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-xl p-8 md:p-12 mb-24 hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-700">
+                <div class="flex flex-col lg:flex-row gap-12 items-center">
+                    <div class="lg:w-1/2">
+                        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Our Ideology</h2>
+                        <div class="w-24 h-1.5 bg-gradient-to-r from-green-500 to-blue-500 mb-8 rounded-full"></div>
+                        <blockquote class="text-2xl font-semibold italic text-gray-700 dark:text-gray-200 mb-8 border-l-4 border-green-500 pl-6 py-2 bg-gray-50/50 dark:bg-gray-700/30 rounded-r-lg">
                             "OUR LIVES, OUR HERITAGE"
                             <p class="text-base font-normal mt-2 italic">— Forward Kenya Party Slogan</p>
                         </blockquote>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6">
+                        <p class="text-gray-600 dark:text-gray-300 mb-8 text-lg leading-relaxed">
                             Our political ideology is built on the foundation of safeguarding our collective future while honoring our rich heritage. This commitment is reflected in our five key pillars:
                         </p>
-                        <ul class="list-disc pl-5 space-y-2 mb-6">
+                        <ul class="list-disc pl-6 space-y-3 mb-8">
                             <li>Progressive social policies that protect and uplift all Kenyans</li>
                             <li>Economic systems that create shared prosperity</li>
                             <li>Environmental stewardship for sustainable development</li>
@@ -134,9 +130,9 @@ The Forward Kenya Party is a national political movement established to transfor
                             <li>National unity through inclusive governance</li>
                         </ul>
                     </div>
-                    <div class="md:w-1/2 flex items-center">
-                        <div class="w-full max-w-md mx-auto p-8">
-                            <div class="relative" style="min-height: 300px;">
+                    <div class="lg:w-1/2 flex items-center justify-center">
+                        <div class="w-full max-w-md mx-auto p-2 md:p-4">
+                            <div class="relative overflow-hidden rounded-xl shadow-xl" style="min-height: 300px;">
                                 <transition 
                                     v-for="(image, index) in images" 
                                     :key="index"
@@ -158,27 +154,33 @@ The Forward Kenya Party is a national political movement established to transfor
             </div>
 
             <!-- Vision & Mission -->
-            <div class="grid md:grid-cols-2 gap-8 mb-16">
+            <div class="grid md:grid-cols-2 gap-8 mb-24">
                 <!-- Vision -->
-                <div class="bg-gradient-to-br from-blue-600 to-green-600 rounded-xl p-8 text-white">
-                    <div class="bg-white/20 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-6">
-                        <i class="fas fa-eye text-2xl"></i>
+                <div class="bg-gradient-to-br from-blue-600 to-green-600 rounded-2xl p-8 text-white transform transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl group relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-blue-600/90 to-green-600/90 group-hover:opacity-0 transition-opacity duration-500"></div>
+                    <div class="relative z-10">
+                        <div class="bg-white/20 backdrop-blur-sm p-4 rounded-full w-16 h-16 flex items-center justify-center mb-6 group-hover:bg-white/30 transition-all duration-500">
+                            <i class="fas fa-eye text-3xl text-white"></i>
+                        </div>
+                        <h3 class="text-2xl md:text-3xl font-bold mb-4">Our Vision</h3>
+                        <p class="text-lg leading-relaxed">
+                            A Kenya where prosperity is shared, opportunities are accessible to all, and sustainable development is achieved through innovative and inclusive governance.
+                        </p>
                     </div>
-                    <h3 class="text-2xl font-bold mb-4">Our Vision</h3>
-                    <p class="mb-4">
-A Kenya where prosperity is shared, opportunities are accessible to all, and sustainable development is achieved through innovative and inclusive governance.
-                    </p>
                 </div>
                 
                 <!-- Mission -->
-                <div class="bg-gradient-to-br from-green-600 to-blue-600 rounded-xl p-8 text-white">
-                    <div class="bg-white/20 p-3 rounded-full w-14 h-14 flex items-center justify-center mb-6">
-                        <i class="fas fa-bullseye text-2xl"></i>
+                <div class="bg-gradient-to-br from-green-600 to-blue-600 rounded-2xl p-8 text-white transform transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl group relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gradient-to-br from-green-600/90 to-blue-600/90 group-hover:opacity-0 transition-opacity duration-500"></div>
+                    <div class="relative z-10">
+                        <div class="bg-white/20 backdrop-blur-sm p-4 rounded-full w-16 h-16 flex items-center justify-center mb-6 group-hover:bg-white/30 transition-all duration-500">
+                            <i class="fas fa-bullseye text-3xl text-white"></i>
+                        </div>
+                        <h3 class="text-2xl md:text-3xl font-bold mb-4">Our Mission</h3>
+                        <p class="text-lg leading-relaxed">
+                            To implement practical solutions that address Kenya's most pressing challenges through evidence-based policies, ethical leadership, and active citizen participation at all levels of governance.
+                        </p>
                     </div>
-                    <h3 class="text-2xl font-bold mb-4">Our Mission</h3>
-                    <p class="mb-4">
-To implement practical solutions that address Kenya's most pressing challenges through evidence-based policies, ethical leadership, and active citizen participation at all levels of governance.
-                    </p>
                 </div>
             </div>
 

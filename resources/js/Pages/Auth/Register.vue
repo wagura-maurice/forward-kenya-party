@@ -68,11 +68,6 @@ const loadingWards = ref(false);
 const form = useForm({
     name: "",
     email: "",
-    password: "",
-    password_confirmation: "",
-    first_name: "",
-    middle_name: "",
-    last_name: "",
     gender: "",
     date_of_birth: "",
     disability_status: "",
@@ -81,16 +76,10 @@ const form = useForm({
     religion_id: null,
     national_id: "",
     telephone: "",
-    address_line_1: "",
-    address_line_2: "",
-    city: "",
-    state: "",
     county_id: null,
     sub_county_id: null,
     constituency_id: null,
     ward_id: null,
-    security_question: "",
-    security_answer: "",
     terms: false,
 });
 
@@ -223,28 +212,13 @@ watch(
 const validateStep = (step) => {
     if (step === 1) {
         if (!form.name)
-            return { isValid: false, message: "Username is required" };
+            return { isValid: false, message: "Full name is required" };
         if (!form.email)
             return { isValid: false, message: "Email is required" };
         if (!form.telephone)
             return { isValid: false, message: "Phone number is required" };
-        if (!form.password)
-            return { isValid: false, message: "Password is required" };
-        if (!form.password_confirmation)
-            return { isValid: false, message: "Please confirm your password" };
-        if (form.password !== form.password_confirmation)
-            return { isValid: false, message: "Passwords do not match" };
-        if (form.password.length < 8)
-            return {
-                isValid: false,
-                message: "Password must be at least 8 characters",
-            };
         return { isValid: true };
     } else if (step === 2) {
-        if (!form.first_name)
-            return { isValid: false, message: "First name is required" };
-        if (!form.last_name)
-            return { isValid: false, message: "Last name is required" };
         if (!form.gender)
             return { isValid: false, message: "Gender is required" };
         if (!form.date_of_birth)
@@ -266,11 +240,6 @@ const validateStep = (step) => {
         }
         return { isValid: true };
     } else if (step === 3) {
-        if (!form.address_line_1)
-            return { isValid: false, message: "Address line 1 is required" };
-        if (!form.city) return { isValid: false, message: "City is required" };
-        /* if (!form.state)
-            return { isValid: false, message: "State is required" }; */
         if (!form.county_id)
             return { isValid: false, message: "County is required" };
         if (!form.sub_county_id)
@@ -279,10 +248,6 @@ const validateStep = (step) => {
             return { isValid: false, message: "Constituency is required" };
         if (!form.ward_id)
             return { isValid: false, message: "Ward is required" };
-        if (!form.security_question)
-            return { isValid: false, message: "Security question is required" };
-        if (!form.security_answer)
-            return { isValid: false, message: "Security answer is required" };
         return { isValid: true };
     }
     return { isValid: true };
@@ -407,11 +372,6 @@ const cleanFormData = (formData) => {
     const allowedFields = [
         "name",
         "email",
-        "password",
-        "password_confirmation",
-        "first_name",
-        "middle_name",
-        "last_name",
         "gender",
         "date_of_birth",
         "disability_status",
@@ -420,16 +380,10 @@ const cleanFormData = (formData) => {
         "religion_id",
         "national_id",
         "telephone",
-        "address_line_1",
-        "address_line_2",
-        "city",
-        "state",
         "county_id",
         "sub_county_id",
         "constituency_id",
         "ward_id",
-        "security_question",
-        "security_answer",
         "terms",
     ];
 
@@ -483,7 +437,7 @@ const cleanFormData = (formData) => {
                                 <div class="flex items-center">
                                     <InputLabel
                                         for="name"
-                                        value="Username"
+                                        value="Full name"
                                         class="block text-sm font-medium text-gray-700"
                                     />
                                     <div class="ml-1 group relative">
@@ -507,7 +461,7 @@ const cleanFormData = (formData) => {
                                     v-model="form.name"
                                     type="text"
                                     class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
-                                    placeholder="Enter your username"
+                                    placeholder="Enter your Full name"
                                     required
                                     autofocus
                                 />
@@ -590,67 +544,6 @@ const cleanFormData = (formData) => {
                                     class="mt-1 text-sm text-red-600"
                                 />
                             </div>
-                            <div class="space-y-2">
-                                <div class="flex items-center">
-                                    <InputLabel
-                                        for="password"
-                                        value="Password"
-                                        class="block text-sm font-medium text-gray-700"
-                                    />
-                                    <div class="ml-1 group relative">
-                                        <i
-                                            class="fas fa-info-circle text-gray-400 hover:text-gray-500 cursor-pointer"
-                                        ></i>
-                                        <div
-                                            class="hidden group-hover:block absolute z-10 mt-1 w-64 p-2 text-xs text-gray-600 bg-white border border-gray-200 rounded shadow-lg"
-                                        >
-                                            Must be at least 8 characters long
-                                            and include a mix of letters,
-                                            numbers, and symbols.
-                                        </div>
-                                    </div>
-
-                                    <i
-                                        class="fas fa-star text-red-500 text-xs ml-1"
-                                    ></i>
-                                </div>
-                                <TextInput
-                                    id="password"
-                                    v-model="form.password"
-                                    type="password"
-                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
-                                    placeholder="Enter your password"
-                                    required
-                                />
-                                <InputError
-                                    :message="form.errors.password"
-                                    class="mt-1 text-sm text-red-600"
-                                />
-                            </div>
-                            <div class="space-y-2">
-                                <div class="flex items-center">
-                                    <InputLabel
-                                        for="password_confirmation"
-                                        value="Confirm Password"
-                                        class="block text-sm font-medium text-gray-700"
-                                    />
-                                    <i
-                                        class="fas fa-star text-red-500 text-xs ml-1"
-                                    ></i>
-                                </div>
-                                <TextInput
-                                    id="password_confirmation"
-                                    v-model="form.password_confirmation"
-                                    type="password"
-                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
-                                    placeholder="Confirm your password"
-                                    required
-                                />
-                                <InputError
-                                    :message="form.errors.password_confirmation"
-                                    class="mt-1 text-sm text-red-600"
-                                />
-                            </div>
                         </div>
 
                         <!-- Step 2: Personal Information -->
@@ -659,114 +552,6 @@ const cleanFormData = (formData) => {
                                 Step 2: Personal details
                             </h2>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div class="space-y-2">
-                                    <div class="flex items-center">
-                                        <InputLabel
-                                            for="first_name"
-                                            value="First Name"
-                                            class="block text-sm font-medium text-gray-700"
-                                        />
-                                        <div class="ml-1 group relative">
-                                            <i
-                                                class="fas fa-info-circle text-gray-400 hover:text-gray-500 cursor-pointer"
-                                            ></i>
-                                            <div
-                                                class="hidden group-hover:block absolute z-10 mt-1 w-64 p-2 text-xs text-gray-600 bg-white border border-gray-200 rounded shadow-lg"
-                                            >
-                                                Enter your full legal name as it
-                                                appears on official documents.
-                                            </div>
-                                        </div>
-
-                                        <i
-                                            class="fas fa-star text-red-500 text-xs ml-1"
-                                        ></i>
-                                    </div>
-                                    <TextInput
-                                        id="first_name"
-                                        v-model="form.first_name"
-                                        type="text"
-                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
-                                        placeholder="Enter your first name"
-                                        required
-                                    />
-                                    <InputError
-                                        :message="form.errors.first_name"
-                                        class="mt-1 text-sm text-red-600"
-                                    />
-                                </div>
-                                <div class="space-y-2">
-                                    <div class="flex items-center">
-                                        <InputLabel
-                                            for="middle_name"
-                                            value="Middle Name"
-                                            class="block text-sm font-medium text-gray-700"
-                                        />
-                                        <div class="ml-1 group relative">
-                                            <i
-                                                class="fas fa-info-circle text-gray-400 hover:text-gray-500 cursor-pointer"
-                                            ></i>
-                                            <div
-                                                class="hidden group-hover:block absolute z-10 mt-1 w-64 p-2 text-xs text-gray-600 bg-white border border-gray-200 rounded shadow-lg"
-                                            >
-                                                Enter your full legal name as it
-                                                appears on official documents.
-                                            </div>
-                                        </div>
-
-                                        <!-- <i
-                                            class="fas fa-star text-red-500 text-xs ml-1"
-                                        ></i> -->
-                                    </div>
-                                    <TextInput
-                                        id="middle_name"
-                                        v-model="form.middle_name"
-                                        type="text"
-                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
-                                        placeholder="Enter your middle name"
-                                        required
-                                    />
-                                    <InputError
-                                        :message="form.errors.middle_name"
-                                        class="mt-1 text-sm text-red-600"
-                                    />
-                                </div>
-                                <div class="space-y-2">
-                                    <div class="flex items-center">
-                                        <InputLabel
-                                            for="last_name"
-                                            value="Last Name"
-                                            class="block text-sm font-medium text-gray-700"
-                                        />
-                                        <div class="ml-1 group relative">
-                                            <i
-                                                class="fas fa-info-circle text-gray-400 hover:text-gray-500 cursor-pointer"
-                                            ></i>
-                                            <div
-                                                class="hidden group-hover:block absolute z-10 mt-1 w-64 p-2 text-xs text-gray-600 bg-white border border-gray-200 rounded shadow-lg"
-                                            >
-                                                Enter your full legal name as it
-                                                appears on official documents.
-                                            </div>
-                                        </div>
-
-                                        <i
-                                            class="fas fa-star text-red-500 text-xs ml-1"
-                                        ></i>
-                                    </div>
-                                    <TextInput
-                                        id="last_name"
-                                        v-model="form.last_name"
-                                        type="text"
-                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
-                                        placeholder="Enter your last name"
-                                        required
-                                    />
-                                    <InputError
-                                        :message="form.errors.last_name"
-                                        class="mt-1 text-sm text-red-600"
-                                    />
-                                </div>
                                 <div class="space-y-2">
                                     <div class="flex items-center">
                                         <InputLabel
@@ -1101,153 +886,6 @@ const cleanFormData = (formData) => {
                             <h2 class="text-base font-medium text-gray-700">
                                 Step 3: Contact and location information
                             </h2>
-                            <div class="space-y-2">
-                                <div class="flex items-center">
-                                    <InputLabel
-                                        for="address_line_1"
-                                        value="Address Line 1"
-                                        class="block text-sm font-medium text-gray-700"
-                                    />
-                                    <div class="ml-1 group relative">
-                                        <i
-                                            class="fas fa-info-circle text-gray-400 hover:text-gray-500 cursor-pointer"
-                                        ></i>
-                                        <div
-                                            class="hidden group-hover:block absolute z-10 mt-1 w-64 p-2 text-xs text-gray-600 bg-white border border-gray-200 rounded shadow-lg"
-                                        >
-                                            Enter your address line 1 as it
-                                            appears on official documents.
-                                        </div>
-                                    </div>
-
-                                    <i
-                                        class="fas fa-star text-red-500 text-xs ml-1"
-                                    ></i>
-                                </div>
-                                <TextInput
-                                    id="address_line_1"
-                                    v-model="form.address_line_1"
-                                    type="text"
-                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
-                                    placeholder="Enter your street address"
-                                    required
-                                />
-                                <InputError
-                                    :message="form.errors.address_line_1"
-                                    class="mt-1 text-sm text-red-600"
-                                />
-                            </div>
-                            <div class="space-y-2">
-                                <div class="flex items-center">
-                                    <InputLabel
-                                        for="address_line_2"
-                                        value="Address Line 2 (Optional)"
-                                        class="block text-sm font-medium text-gray-700"
-                                    />
-                                    <div class="ml-1 group relative">
-                                        <i
-                                            class="fas fa-info-circle text-gray-400 hover:text-gray-500 cursor-pointer"
-                                        ></i>
-                                        <div
-                                            class="hidden group-hover:block absolute z-10 mt-1 w-64 p-2 text-xs text-gray-600 bg-white border border-gray-200 rounded shadow-lg"
-                                        >
-                                            Enter your address line 2 as it
-                                            appears on official documents.
-                                        </div>
-                                    </div>
-
-                                    <!-- <i
-                                        class="fas fa-star text-red-500 text-xs ml-1"
-                                    ></i> -->
-                                </div>
-                                <TextInput
-                                    id="address_line_2"
-                                    v-model="form.address_line_2"
-                                    type="text"
-                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
-                                    placeholder="Apartment, suite, etc. (optional)"
-                                />
-                                <InputError
-                                    :message="form.errors.address_line_2"
-                                    class="mt-1 text-sm text-red-600"
-                                />
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <div class="flex items-center">
-                                        <InputLabel
-                                            for="city"
-                                            value="City/Town"
-                                            class="block text-sm font-medium text-gray-700"
-                                        />
-                                        <div class="ml-1 group relative">
-                                            <i
-                                                class="fas fa-info-circle text-gray-400 hover:text-gray-500 cursor-pointer"
-                                            ></i>
-                                            <div
-                                                class="hidden group-hover:block absolute z-10 mt-1 w-64 p-2 text-xs text-gray-600 bg-white border border-gray-200 rounded shadow-lg"
-                                            >
-                                                Enter your city or town as it
-                                                appears on official documents.
-                                            </div>
-                                        </div>
-
-                                        <i
-                                            class="fas fa-star text-red-500 text-xs ml-1"
-                                        ></i>
-                                    </div>
-                                    <TextInput
-                                        id="city"
-                                        v-model="form.city"
-                                        type="text"
-                                        class="mt-1 block w-full"
-                                        placeholder="Enter your city or town"
-                                        required
-                                    />
-                                    <InputError
-                                        :message="form.errors.city"
-                                        class="mt-2"
-                                    />
-                                </div>
-                                <div class="space-y-2">
-                                    <div class="flex items-center">
-                                        <InputLabel
-                                            for="state"
-                                            value="State/County"
-                                            class="block text-sm font-medium text-gray-700"
-                                        />
-                                        <div class="ml-1 group relative">
-                                            <i
-                                                class="fas fa-info-circle text-gray-400 hover:text-gray-500 cursor-pointer"
-                                            ></i>
-                                            <div
-                                                class="hidden group-hover:block absolute z-10 mt-1 w-64 p-2 text-xs text-gray-600 bg-white border border-gray-200 rounded shadow-lg"
-                                            >
-                                                Enter your state or county as it
-                                                appears on official documents.
-                                            </div>
-                                        </div>
-
-                                        <i
-                                            class="fas fa-star text-red-500 text-xs ml-1"
-                                        ></i>
-                                    </div>
-                                    <TextInput
-                                        id="state"
-                                        v-model="form.state"
-                                        type="text"
-                                        class="mt-1 block w-full"
-                                        placeholder="Enter your state or county"
-                                        required
-                                        readonly
-                                        value="Kenya"
-                                    />
-                                    <InputError
-                                        :message="form.errors.state"
-                                        class="mt-2"
-                                    />
-                                </div>
-                            </div>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div class="space-y-2">
                                     <div class="flex items-center">
@@ -1484,97 +1122,6 @@ const cleanFormData = (formData) => {
                                     />
                                 </div>
                             </div>
-                            <div class="grid grid-cols-1 gap-4 mt-4">
-                                <div class="space-y-2">
-                                    <div class="flex items-center">
-                                        <InputLabel
-                                            for="security_question"
-                                            value="Security Question"
-                                            class="block text-sm font-medium text-gray-700"
-                                        />
-                                        <div class="ml-1 group relative">
-                                            <i
-                                                class="fas fa-info-circle text-gray-400 hover:text-gray-500 cursor-pointer"
-                                            ></i>
-                                            <div
-                                                class="hidden group-hover:block absolute z-10 mt-1 w-64 p-2 text-xs text-gray-600 bg-white border border-gray-200 rounded shadow-lg"
-                                            >
-                                                Select a security question to
-                                                help you recover your account if
-                                                you forget your password.
-                                            </div>
-                                        </div>
-
-                                        <i
-                                            class="fas fa-star text-red-500 text-xs ml-1"
-                                        ></i>
-                                    </div>
-                                    <select
-                                        id="security_question"
-                                        v-model="form.security_question"
-                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
-                                        :class="{
-                                            'opacity-50': form.processing,
-                                        }"
-                                        required
-                                    >
-                                        <option value="" disabled>
-                                            Select a security question
-                                        </option>
-                                        <option
-                                            v-for="(
-                                                question, index
-                                            ) in securityQuestions"
-                                            :key="index"
-                                            :value="question"
-                                        >
-                                            {{ question }}
-                                        </option>
-                                    </select>
-                                    <InputError
-                                        :message="form.errors.security_question"
-                                        class="mt-1 text-sm text-red-600"
-                                    />
-                                </div>
-                                <div class="space-y-2">
-                                    <div class="flex items-center">
-                                        <InputLabel
-                                            for="security_answer"
-                                            value="Security Answer"
-                                            class="block text-sm font-medium text-gray-700"
-                                        />
-                                        <div class="ml-1 group relative">
-                                            <i
-                                                class="fas fa-info-circle text-gray-400 hover:text-gray-500 cursor-pointer"
-                                            ></i>
-                                            <div
-                                                class="hidden group-hover:block absolute z-10 mt-1 w-64 p-2 text-xs text-gray-600 bg-white border border-gray-200 rounded shadow-lg"
-                                            >
-                                                Enter your security question
-                                                answer to help you recover your
-                                                account if you forget your
-                                                password.
-                                            </div>
-                                        </div>
-
-                                        <i
-                                            class="fas fa-star text-red-500 text-xs ml-1"
-                                        ></i>
-                                    </div>
-                                    <TextInput
-                                        id="security_answer"
-                                        v-model="form.security_answer"
-                                        type="text"
-                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
-                                        placeholder="Enter your answer"
-                                        required
-                                    />
-                                    <InputError
-                                        :message="form.errors.security_answer"
-                                        class="mt-1 text-sm text-red-600"
-                                    />
-                                </div>
-                            </div>
                         </div>
 
                         <!-- Step 4: Confirmation -->
@@ -1629,12 +1176,7 @@ const cleanFormData = (formData) => {
                                             <dd
                                                 class="mt-1 text-sm text-gray-900 sm:col-span-2"
                                             >
-                                                {{ form.first_name }}
-                                                {{
-                                                    form.middle_name
-                                                        ? form.middle_name + " "
-                                                        : ""
-                                                }}{{ form.last_name }}
+                                                {{ form.name }}
                                             </dd>
                                         </div>
                                         <div
@@ -1789,14 +1331,7 @@ const cleanFormData = (formData) => {
                                                 class="mt-1 text-sm text-gray-900 sm:col-span-2"
                                             >
                                                 {{
-                                                    [
-                                                        form.address_line_1,
-                                                        form.address_line_2,
-                                                        form.city,
-                                                        form.state,
-                                                    ]
-                                                        .filter(Boolean)
-                                                        .join(", ") ||
+                                                    form.postal_address ||
                                                     "Not specified"
                                                 }}
                                             </dd>
@@ -2028,40 +1563,6 @@ const cleanFormData = (formData) => {
                                                 {{
                                                     form.plwd_number ||
                                                     "Not provided"
-                                                }}
-                                            </dd>
-                                        </div>
-                                        <div
-                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
-                                        >
-                                            <dt
-                                                class="text-sm font-medium text-gray-500"
-                                            >
-                                                Security Question
-                                            </dt>
-                                            <dd
-                                                class="mt-1 text-sm text-gray-900 sm:col-span-2"
-                                            >
-                                                {{
-                                                    form.security_question ||
-                                                    "Not specified"
-                                                }}
-                                            </dd>
-                                        </div>
-                                        <div
-                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
-                                        >
-                                            <dt
-                                                class="text-sm font-medium text-gray-500"
-                                            >
-                                                Security Answer
-                                            </dt>
-                                            <dd
-                                                class="mt-1 text-sm text-gray-900 sm:col-span-2"
-                                            >
-                                                {{
-                                                    form.security_answer ||
-                                                    "Not answered"
                                                 }}
                                             </dd>
                                         </div>

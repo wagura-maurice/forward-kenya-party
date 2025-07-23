@@ -73,6 +73,21 @@ const submitForm = () => {
 };
 </script>
 
+<style scoped>
+@keyframes bounce {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+.animate-bounce {
+    animation: bounce 1s infinite;
+}
+</style>
+
 <template>
     <!-- Pass dynamic props to GuestLayout -->
     <GuestLayout :title="title" :menuLogo="logoUrl" :footerLogo="logoUrl">
@@ -474,20 +489,6 @@ const submitForm = () => {
                             rel="stylesheet"
                             href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
                         />
-                        <style>
-                            @keyframes bounce {
-                                0%,
-                                100% {
-                                    transform: translateY(0);
-                                }
-                                50% {
-                                    transform: translateY(-10px);
-                                }
-                            }
-                            .animate-bounce {
-                                animation: bounce 1s infinite;
-                            }
-                        </style>
                     </div>
                 </div>
             </div>
