@@ -159,6 +159,19 @@ class ReligionTableSeeder extends Seeder
                     'principles' => ['Good Thoughts', 'Good Words', 'Good Deeds'],
                     'practices' => ['Yasna', 'Navjote', 'Tower of Silence']
                 ]),
+            ],
+            // Atheism (Non-theistic)
+            [
+                'type_id' => $types['Non-theistic'],
+                'category_id' => $categories['Religious Education'],
+                'name' => 'Atheism',
+                'slug' => Str::slug('Atheism'),
+                'description' => 'The absence of belief in the existence of deities, often accompanied by a naturalistic worldview.',
+                'configuration' => json_encode([
+                    'beliefs' => ['No belief in deities', 'Naturalistic worldview', 'Humanist principles'],
+                    'philosophies' => ['Secular humanism', 'Rationalism', 'Skepticism'],
+                    'practices' => ['Critical thinking', 'Scientific inquiry', 'Ethical living']
+                ]),
             ]
         ];
 
