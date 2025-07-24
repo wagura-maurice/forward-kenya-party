@@ -69,7 +69,7 @@ class HandleInertiaRequests extends Middleware
                     ->toArray(),
                 'locations' => [
                     'counties' => County::select('id', 'name')->get(),
-                    'subCounties' => SubCounty::select('id', 'name', 'county_id')->get(),
+                    // 'subCounties' => SubCounty::select('id', 'name', 'county_id')->get(),
                     'constituencies' => Constituency::select('id', 'name', 'county_id')->get(),
                     'wards' => Ward::select('id', 'name', 'county_id', 'constituency_id')->get(),
                 ]
