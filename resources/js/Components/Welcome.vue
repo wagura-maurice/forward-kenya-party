@@ -325,10 +325,10 @@ const disabilityStatus = computed(() => {
                                         >
                                             {{ disabilityStatus }}
                                             <span
-                                                v-if="profile.plwd_number"
+                                                v-if="profile.ncpwd_number"
                                                 class="text-sm text-gray-500"
                                             >
-                                                ({{ profile.plwd_number }})
+                                                ({{ profile.ncpwd_number }})
                                             </span>
                                         </p>
                                     </div>
