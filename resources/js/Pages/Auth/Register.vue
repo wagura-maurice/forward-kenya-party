@@ -97,6 +97,9 @@ const form = useForm({
     terms: false,
 });
 
+const isLoading = ref(false);
+const isSubmitting = ref(false);
+
 watch(
     () => form.id_number,
     (newIdNumber) => {
@@ -277,55 +280,62 @@ const handleSubmit = async () => {
 };
 
 const submit = async () => {
-    for (let i = 1; i <= totalSteps; i++) {
-        const { isValid, message } = validateStep(i);
-        if (!isValid) {
-            showToast("error", "Validation Error", `Step ${i}: ${message}`);
-            currentStep.value = i;
-            window.scrollTo({ top: 0, behavior: "smooth" });
+    isSubmitting.value = true;
+    try {
+        for (let i = 1; i <= totalSteps; i++) {
+            const { isValid, message } = validateStep(i);
+            if (!isValid) {
+                showToast("error", "Validation Error", `Step ${i}: ${message}`);
+                currentStep.value = i;
+                window.scrollTo({ top: 0, behavior: "smooth" });
+                return;
+            }
+        }
+
+        // Additional validation for terms in Step 3
+        if (!form.terms) {
+            showToast(
+                "error",
+                "Validation Error",
+                "You must agree to the terms and affirmation"
+            );
             return;
         }
+
+        // Use Inertia's form helper to submit the form
+        form.post(route("register"), {
+            forceFormData: true,
+            onSuccess: () => {
+                // Handle successful registration
+                showToast(
+                    "success",
+                    "Registration Successful",
+                    "Your registration was successful! Redirecting..."
+                );
+                // The server should handle the redirect in the response
+            },
+            onError: (errors) => {
+                // Handle form errors
+                console.error("Registration errors:", errors);
+                let errorMessage = "An error occurred during registration.";
+
+                if (errors && typeof errors === "object") {
+                    errorMessage = Object.values(errors).flat().join(" ");
+                } else if (typeof errors === "string") {
+                    errorMessage = errors;
+                }
+
+                showToast("error", "Registration Failed", errorMessage);
+            },
+            onFinish: () => {
+                form.processing = false;
+            },
+        });
+    } catch (error) {
+        console.error('Form submission error:', error);
+    } finally {
+        isSubmitting.value = false;
     }
-
-    // Additional validation for terms in Step 3
-    if (!form.terms) {
-        showToast(
-            "error",
-            "Validation Error",
-            "You must agree to the terms and affirmation"
-        );
-        return;
-    }
-
-    // Use Inertia's form helper to submit the form
-    form.post(route("register"), {
-        forceFormData: true,
-        onSuccess: () => {
-            // Handle successful registration
-            showToast(
-                "success",
-                "Registration Successful",
-                "Your registration was successful! Redirecting..."
-            );
-            // The server should handle the redirect in the response
-        },
-        onError: (errors) => {
-            // Handle form errors
-            console.error("Registration errors:", errors);
-            let errorMessage = "An error occurred during registration.";
-
-            if (errors && typeof errors === "object") {
-                errorMessage = Object.values(errors).flat().join(" ");
-            } else if (typeof errors === "string") {
-                errorMessage = errors;
-            }
-
-            showToast("error", "Registration Failed", errorMessage);
-        },
-        onFinish: () => {
-            form.processing = false;
-        },
-    });
 };
 
 const getLocationName = (id, locations) => {
@@ -348,6 +358,33 @@ const genderDisplayName = computed(() => {
     return form.gender || "";
 });
 
+const canProceedToNextStep = computed(() => {
+    if (currentStep.value === 1) {
+        return (
+            form.name &&
+            form.telephone &&
+            form.id_type &&
+            form.id_number &&
+            form.date_of_birth &&
+            form.gender &&
+            form.ethnicity_id &&
+            form.religion_id &&
+            (form.disability_status === 'no' || form.ncpwd_number)
+        );
+    } else if (currentStep.value === 2) {
+        return (
+            form.postal_address &&
+            form.county_id &&
+            form.constituency_id &&
+            form.ward_id &&
+            form.signature_member &&
+            form.recruiting_person_signature &&
+            form.recruiting_person_name
+        );
+    } else {
+        return form.terms;
+    }
+});
 </script>
 
 <template>
@@ -375,7 +412,7 @@ const genderDisplayName = computed(() => {
                         </h1>
                     </div>
 
-                    <form @submit.prevent="handleSubmit" class="space-y-4">
+                    <form @submit.prevent="handleSubmit" class="space-y-4" :disabled="isSubmitting">
                         <!-- Step 1: Account and Personal Information -->
                         <div v-if="currentStep === 1" class="space-y-4">
                             <h2 class="text-base font-medium text-gray-700">
@@ -397,9 +434,17 @@ const genderDisplayName = computed(() => {
                                     id="name"
                                     v-model="form.name"
                                     type="text"
-                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
+                                    :class="[
+                                        'block w-full rounded-md shadow-sm sm:text-sm py-2 px-3 border transition duration-150 ease-in-out',
+                                        form.errors.name 
+                                            ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+                                            : 'border-gray-300 focus:border-green-500 focus:ring-green-500',
+                                        isSubmitting ? 'opacity-75 cursor-not-allowed' : ''
+                                    ]"
                                     required
                                     autocomplete="name"
+                                    :disabled="isSubmitting"
+                                    :aria-busy="isSubmitting"
                                     autofocus
                                 />
                                 <InputError
@@ -1628,30 +1673,23 @@ const genderDisplayName = computed(() => {
                                 v-if="currentStep > 1"
                                 type="button"
                                 @click="prevStep"
-                                class="inline-flex items-center px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-400 transition-colors duration-200"
+                                class="inline-flex items-center px-4 py-2 bg-white border border-gray-300 rounded-md font-semibold text-xs text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 disabled:opacity-25 transition ease-in-out duration-150"
+                                :disabled="currentStep === 1 || isSubmitting"
+                                :aria-busy="isSubmitting"
                             >
-                                <i
-                                    class="fas fa-arrow-left mr-2 text-emerald-600"
-                                ></i>
-                                <span class="hidden sm:inline">Previous</span>
+                                <svg v-if="isSubmitting" class="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                {{ isSubmitting ? 'Processing...' : 'Previous' }}
                             </button>
                             <div v-else class="w-24"></div>
 
                             <button
                                 type="submit"
-                                :disabled="
-                                    form.processing ||
-                                    (currentStep === 3 && !form.terms)
-                                "
-                                class="inline-flex items-center px-5 py-2.5 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 transition-colors duration-200"
-                                :class="{
-                                    'opacity-75 cursor-not-allowed':
-                                        form.processing ||
-                                        (currentStep === 3 && !form.terms),
-                                    'shadow-emerald-200':
-                                        !form.processing &&
-                                        (currentStep !== 3 || form.terms),
-                                }"
+                                class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150 disabled:opacity-75 disabled:cursor-not-allowed"
+                                :disabled="!canProceedToNextStep || isSubmitting"
+                                :aria-busy="isSubmitting"
                             >
                                 <i
                                     v-if="form.processing"
