@@ -75,13 +75,13 @@ class CreateNewUser implements CreatesNewUsers
             'gender' => ['required', 'string', 'in:male,female,other'],
             'date_of_birth' => ['required', 'date'],
             'disability_status' => ['nullable', 'string', 'in:none,physical,visual,hearing,mental,other'],
-            'plwd_number' => [
+            'ncpwd_number' => [
                 'nullable', 
                 'string', 
                 'max:255', 
                 function ($attribute, $value, $fail) use ($input) {
                     if (isset($input['disability_status']) && $input['disability_status'] !== 'none' && empty($value)) {
-                        $fail('The PLWD number is required when disability status is selected.');
+                        $fail('The NCPWD number is required when disability status is selected.');
                     }
                 }
             ],
@@ -101,7 +101,7 @@ class CreateNewUser implements CreatesNewUsers
             'security_answer' => ['required', 'string', 'max:255'],
             'terms' => ['required', 'accepted'],
         ], [
-            'plwd_number.required' => 'The PLWD number is required when disability status is selected.',
+            'ncpwd_number.required' => 'The NCPWD number is required when disability status is selected.',
         ])->validate();
 
         // Validate location hierarchy
@@ -132,7 +132,7 @@ class CreateNewUser implements CreatesNewUsers
                 'gender' => $input['gender'],
                 'date_of_birth' => $input['date_of_birth'],
                 'disability_status' => $input['disability_status'],
-                'plwd_number' => $input['disability_status'] !== 'none' ? $input['plwd_number'] : null,
+                'ncpwd_number' => $input['disability_status'] !== 'none' ? $input['ncpwd_number'] : null,
                 'ethnicity_id' => $input['ethnicity_id'],
                 'religion_id' => $input['religion_id'],
                 'telephone' => phoneNumberPrefix($input['telephone']),
