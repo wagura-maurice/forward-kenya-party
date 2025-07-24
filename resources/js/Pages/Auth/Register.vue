@@ -1,7 +1,8 @@
 <!-- resources/js/Pages/Auth/Register.vue -->
 <script setup>
 import { Head, Link, useForm } from "@inertiajs/vue3";
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, watch } from "vue";
+import axios from 'axios';
 import AuthenticationCard from "@/Components/AuthenticationCard.vue";
 import AuthenticationCardLogo from "@/Components/AuthenticationCardLogo.vue";
 import Checkbox from "@/Components/Checkbox.vue";
@@ -11,10 +12,9 @@ import PrimaryButton from "@/Components/PrimaryButton.vue";
 import TextInput from "@/Components/TextInput.vue";
 import VueSelect from "vue-select";
 import "vue-select/dist/vue-select.css";
-import axios from "axios";
 
 const props = defineProps({
-    counties: Array,
+    formData: Object,
 });
 
 const totalSteps = 3; // Updated to 3 steps to include confirmation
@@ -57,13 +57,17 @@ const showToast = (type, title, message) => {
 
 const constituencies = ref([]);
 const wards = ref([]);
-const ethnicities = ref([]);
-const religions = ref([]);
+const isLoadingConstituencies = ref(false);
+const isLoadingWards = ref(false);
 
-const loadingConstituencies = ref(false);
-const loadingWards = ref(false);
-const loadingEthnicities = ref(false);
-const loadingReligions = ref(false);
+// Use the form data from props
+const genders = computed(() => props.formData?.genders || []);
+const ethnicities = computed(() => props.formData?.ethnicities || []);
+const religions = computed(() => props.formData?.religions || []);
+const counties = computed(() => {
+    console.log('Counties data:', props.formData?.locations?.counties);
+    return props.formData?.locations?.counties || [];
+});
 
 const form = useForm({
     // Step 1: Account and Personal Information
@@ -100,100 +104,49 @@ watch(
     }
 );
 
-const fetchEthnicities = async () => {
-    try {
-        loadingEthnicities.value = true;
-        const response = await axios.get("/api/ethnicities");
-        ethnicities.value = response.data?.success ? response.data.data : [];
-    } catch (error) {
-        console.error("Error fetching ethnicities:", error);
-        ethnicities.value = [];
-        showToast("error", "Error", "Failed to load ethnicities");
-    } finally {
-        loadingEthnicities.value = false;
-    }
-};
-
-const fetchReligions = async () => {
-    try {
-        loadingReligions.value = true;
-        const response = await axios.get("/api/religions");
-        religions.value = response.data?.success ? response.data.data : [];
-    } catch (error) {
-        console.error("Error fetching religions:", error);
-        religions.value = [];
-        showToast("error", "Error", "Failed to load religions");
-    } finally {
-        loadingReligions.value = false;
-    }
-};
-
-const fetchConstituencies = async (countyId) => {
-    if (!countyId) {
+// Watch for county changes to filter constituencies
+watch(() => form.county_id, (newCountyId) => {
+    console.log('County changed:', newCountyId);
+    if (newCountyId) {
+        const filtered = props.formData?.locations?.constituencies?.filter(
+            c => c.county_id == newCountyId
+        ) || [];
+        console.log('Filtered constituencies:', filtered);
+        constituencies.value = filtered;
+    } else {
         constituencies.value = [];
-        form.constituency_id = null;
-        return;
     }
-    try {
-        loadingConstituencies.value = true;
-        const response = await axios.get(
-            `/api/locations/counties/${countyId}/constituencies`
-        );
-        constituencies.value = response.data?.success ? response.data.data : [];
-    } catch (error) {
-        console.error("Error fetching constituencies:", error);
-        constituencies.value = [];
-        showToast("error", "Error", "Failed to load constituencies");
-    } finally {
-        loadingConstituencies.value = false;
-    }
-};
-
-const fetchWards = async (constituencyId) => {
-    if (!constituencyId) {
-        wards.value = [];
-        form.ward_id = null;
-        return;
-    }
-    try {
-        loadingWards.value = true;
-        const response = await axios.get(
-            `/api/locations/constituencies/${constituencyId}/wards`
-        );
-        wards.value = response.data?.success ? response.data.data : [];
-    } catch (error) {
-        console.error("Error fetching wards:", error);
-        wards.value = [];
-        showToast("error", "Error", "Failed to load wards");
-    } finally {
-        loadingWards.value = false;
-    }
-};
-
-onMounted(() => {
-    fetchEthnicities();
-    fetchReligions();
+    
+    // Reset dependent fields
+    form.constituency_id = '';
+    form.ward_id = '';
+    wards.value = [];
 });
 
-watch(
-    () => form.county_id,
-    async (newCountyId) => {
-        form.constituency_id = null;
-        form.ward_id = null;
-        constituencies.value = [];
+// Watch for constituency changes to filter wards
+watch(() => form.constituency_id, (newConstituencyId) => {
+    console.log('Constituency changed:', newConstituencyId);
+    if (newConstituencyId) {
+        const filtered = props.formData?.locations?.wards?.filter(
+            w => w.constituency_id == newConstituencyId
+        ) || [];
+        console.log('Filtered wards:', filtered);
+        wards.value = filtered;
+    } else {
         wards.value = [];
-        await fetchConstituencies(newCountyId);
     }
-);
+    
+    // Reset dependent field
+    form.ward_id = '';
+});
 
-watch(
-    () => form.constituency_id,
-    async (newConstituencyId) => {
-        form.ward_id = null;
-        wards.value = [];
-        await fetchWards(newConstituencyId);
+// Watch for disability status changes to handle NCPWD number field
+watch(() => form.disability_status, (newStatus) => {
+    if (newStatus === 'no') {
+        // Clear NCPWD number when disability status is set to 'no'
+        form.ncpwd_number = '';
     }
-);
+});
 
 const validateStep = (step) => {
     if (step === 1) {
@@ -388,6 +341,13 @@ const getItemName = (id, items) => {
 const toTitleCase = (str) => {
     return str.replace(/\b\w/g, (match) => match.toUpperCase());
 };
+
+const genderDisplayName = computed(() => {
+    if (form.gender === 'XY') return 'Male';
+    if (form.gender === 'XX') return 'Female';
+    return form.gender || "";
+});
+
 </script>
 
 <template>
@@ -628,33 +588,20 @@ const toTitleCase = (str) => {
                                             class="fas fa-star text-red-500 text-xs ml-1"
                                         ></i>
                                     </div>
-                                    <div class="grid grid-cols-2 gap-2">
-                                        <label class="inline-flex items-center">
-                                            <input
-                                                type="radio"
-                                                v-model="form.gender"
-                                                value="male"
-                                                class="text-green-600 border-gray-300 focus:ring-green-500"
-                                                required
-                                            />
-                                            <span
-                                                class="ml-1 text-sm text-gray-700"
-                                                >Male</span
-                                            >
-                                        </label>
-                                        <label class="inline-flex items-center">
-                                            <input
-                                                type="radio"
-                                                v-model="form.gender"
-                                                value="female"
-                                                class="text-green-600 border-gray-300 focus:ring-green-500"
-                                            />
-                                            <span
-                                                class="ml-1 text-sm text-gray-700"
-                                                >Female</span
-                                            >
-                                        </label>
-                                    </div>
+                                    <VueSelect
+                                        id="gender"
+                                        v-model="form.gender"
+                                        :options="genders"
+                                        label="name"
+                                        :reduce="(option) => option.id"
+                                        placeholder="Select gender"
+                                        class="w-full"
+                                        :class="{
+                                            'border-red-300': form.errors.gender,
+                                        }"
+                                        required
+                                        :clearable="false"
+                                    />
                                     <InputError
                                         :message="form.errors.gender"
                                         class="mt-1 text-sm text-red-600"
@@ -684,23 +631,11 @@ const toTitleCase = (str) => {
                                         placeholder="Select ethnicity"
                                         class="w-full"
                                         :class="{
-                                            'border-red-300':
-                                                form.errors.ethnicity_id,
+                                            'border-red-300': form.errors.ethnicity_id,
                                         }"
                                         required
-                                    >
-                                        <template #no-options>
-                                            <div
-                                                class="text-sm text-gray-500 py-2 px-3"
-                                            >
-                                                {{
-                                                    loadingEthnicities
-                                                        ? "Loading ethnicities..."
-                                                        : "No ethnicities found"
-                                                }}
-                                            </div>
-                                        </template>
-                                    </VueSelect>
+                                        :clearable="false"
+                                    />
                                     <InputError
                                         :message="form.errors.ethnicity_id"
                                         class="mt-1 text-sm text-red-600"
@@ -726,23 +661,11 @@ const toTitleCase = (str) => {
                                         placeholder="Select religion"
                                         class="w-full"
                                         :class="{
-                                            'border-red-300':
-                                                form.errors.religion_id,
+                                            'border-red-300': form.errors.religion_id,
                                         }"
                                         required
-                                    >
-                                        <template #no-options>
-                                            <div
-                                                class="text-sm text-gray-500 py-2 px-3"
-                                            >
-                                                {{
-                                                    loadingReligions
-                                                        ? "Loading religions..."
-                                                        : "No religions found"
-                                                }}
-                                            </div>
-                                        </template>
-                                    </VueSelect>
+                                        :clearable="false"
+                                    />
                                     <InputError
                                         :message="form.errors.religion_id"
                                         class="mt-1 text-sm text-red-600"
@@ -750,12 +673,12 @@ const toTitleCase = (str) => {
                                 </div>
                             </div>
 
-                            <!-- Are you a PWD and NCPWD Number (Half Width, Conditional) -->
+                            <!-- Disability Status and NCPWD Number (Half Width) -->
                             <div class="grid grid-cols-2 gap-4">
                                 <div class="space-y-2">
                                     <div class="flex items-center">
                                         <InputLabel
-                                            value="Are you a PWD"
+                                            value="Disability Status"
                                             class="block text-sm font-medium text-gray-700"
                                         />
                                         <i
@@ -793,34 +716,40 @@ const toTitleCase = (str) => {
                                         :message="form.errors.disability_status"
                                         class="mt-1 text-sm text-red-600"
                                     />
-                                </div>
-                                <div
-                                    v-if="form.disability_status === 'yes'"
-                                    class="space-y-2"
-                                >
-                                    <div class="flex items-center">
-                                        <InputLabel
-                                            for="ncpwd_number"
-                                            value="NCPWD Number"
-                                            class="block text-sm font-medium text-gray-700"
-                                        />
-                                        <i
-                                            class="fas fa-star text-red-500 text-xs ml-1"
-                                        ></i>
                                     </div>
-                                    <TextInput
-                                        id="ncpwd_number"
-                                        v-model="form.ncpwd_number"
-                                        type="text"
-                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
-                                        placeholder="Enter NCPWD number"
-                                        required
-                                    />
-                                    <InputError
-                                        :message="form.errors.ncpwd_number"
-                                        class="mt-1 text-sm text-red-600"
-                                    />
-                                </div>
+                                    
+                                    <div class="space-y-2">
+                                        <div class="flex items-center">
+                                            <InputLabel
+                                                for="ncpwd_number"
+                                                value="NCPWD Number"
+                                                class="block text-sm font-medium text-gray-700"
+                                            >
+                                                <template #required v-if="form.disability_status === 'yes'">
+                                                    <i class="fas fa-star text-red-500 text-xs ml-1"></i>
+                                                </template>
+                                            </InputLabel>
+                                        </div>
+                                        <TextInput
+                                            id="ncpwd_number"
+                                            v-model="form.ncpwd_number"
+                                            type="text"
+                                            :class="[
+                                                'block w-full rounded-md shadow-sm sm:text-sm py-2 px-3 border transition duration-150 ease-in-out',
+                                                form.disability_status === 'yes' 
+                                                    ? 'border-gray-300 focus:border-green-500 focus:ring-green-500' 
+                                                    : 'bg-gray-100 border-gray-200 text-gray-500 cursor-not-allowed',
+                                                form.errors.ncpwd_number ? 'border-red-500' : ''
+                                            ]"
+                                            :disabled="form.disability_status !== 'yes'"
+                                            :required="form.disability_status === 'yes'"
+                                            placeholder="Enter NCPWD number if applicable"
+                                        />
+                                        <InputError
+                                            :message="form.errors.ncpwd_number"
+                                            class="mt-1 text-sm text-red-600"
+                                        />
+                                    </div>
                             </div>
                         </div>
 
@@ -829,8 +758,7 @@ const toTitleCase = (str) => {
                             <h2 class="text-base font-medium text-gray-700">
                                 Step 2: Contact, Location, and Signatures
                             </h2>
-
-                            <!-- Postal Address (Full Width Textarea) -->
+                            <!-- Postal Address (Full Width) -->
                             <div class="space-y-2">
                                 <div class="flex items-center">
                                     <InputLabel
@@ -842,20 +770,20 @@ const toTitleCase = (str) => {
                                         class="fas fa-star text-red-500 text-xs ml-1"
                                     ></i>
                                 </div>
-                                <textarea
+                                <TextInput
                                     id="postal_address"
                                     v-model="form.postal_address"
+                                    type="text"
                                     class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
-                                    rows="4"
                                     required
-                                ></textarea>
+                                />
                                 <InputError
                                     :message="form.errors.postal_address"
                                     class="mt-1 text-sm text-red-600"
                                 />
                             </div>
 
-                            <!-- County, Constituency (Half Width Pairs) -->
+                            <!-- County, Constituency, and Ward (Half Width) -->
                             <div class="grid grid-cols-2 gap-4">
                                 <div class="space-y-2">
                                     <div class="flex items-center">
@@ -869,27 +797,18 @@ const toTitleCase = (str) => {
                                         ></i>
                                     </div>
                                     <VueSelect
-                                        id="county_id"
                                         v-model="form.county_id"
                                         :options="counties"
                                         label="name"
-                                        :reduce="(option) => option.id"
-                                        placeholder="Select county"
+                                        :reduce="county => county.id"
+                                        placeholder="Select County"
                                         class="w-full"
-                                        :class="{
-                                            'border-red-300':
-                                                form.errors.county_id,
-                                        }"
-                                        required
-                                        @change="
-                                            fetchConstituencies(form.county_id)
-                                        "
+                                        :class="{ 'border-red-500': form.errors.county_id }"
+                                        :clearable="false"
                                     >
                                         <template #no-options>
-                                            <div
-                                                class="text-sm text-gray-500 py-2 px-3"
-                                            >
-                                                No counties found
+                                            <div class="text-sm text-gray-500 py-2 px-3">
+                                                {{ counties.length === 0 ? 'No counties available' : 'Type to search...' }}
                                             </div>
                                         </template>
                                     </VueSelect>
@@ -910,37 +829,19 @@ const toTitleCase = (str) => {
                                         ></i>
                                     </div>
                                     <VueSelect
-                                        id="constituency_id"
                                         v-model="form.constituency_id"
                                         :options="constituencies"
                                         label="name"
-                                        :reduce="(option) => option.id"
-                                        placeholder="Select constituency"
+                                        :reduce="constituency => constituency.id"
+                                        placeholder="Select Constituency"
                                         class="w-full"
-                                        :class="{
-                                            'border-red-300':
-                                                form.errors.constituency_id,
-                                        }"
-                                        :disabled="
-                                            !form.county_id ||
-                                            loadingConstituencies
-                                        "
-                                        required
-                                        @change="
-                                            fetchWards(form.constituency_id)
-                                        "
+                                        :class="{ 'border-red-500': form.errors.constituency_id }"
+                                        :disabled="!form.county_id"
+                                        :clearable="false"
                                     >
                                         <template #no-options>
-                                            <div
-                                                class="text-sm text-gray-500 py-2 px-3"
-                                            >
-                                                {{
-                                                    loadingConstituencies
-                                                        ? "Loading constituencies..."
-                                                        : !form.county_id
-                                                        ? "Please select a county first"
-                                                        : "No constituencies found"
-                                                }}
+                                            <div class="text-sm text-gray-500 py-2 px-3">
+                                                {{ !form.county_id ? 'Please select a county first' : 'No constituencies found' }}
                                             </div>
                                         </template>
                                     </VueSelect>
@@ -965,34 +866,19 @@ const toTitleCase = (str) => {
                                         ></i>
                                     </div>
                                     <VueSelect
-                                        id="ward_id"
                                         v-model="form.ward_id"
                                         :options="wards"
                                         label="name"
-                                        :reduce="(option) => option.id"
-                                        placeholder="Select ward"
+                                        :reduce="ward => ward.id"
+                                        placeholder="Select Ward"
                                         class="w-full"
-                                        :class="{
-                                            'border-red-300':
-                                                form.errors.ward_id,
-                                        }"
-                                        :disabled="
-                                            !form.constituency_id ||
-                                            loadingWards
-                                        "
-                                        required
+                                        :class="{ 'border-red-500': form.errors.ward_id }"
+                                        :disabled="!form.constituency_id"
+                                        :clearable="false"
                                     >
                                         <template #no-options>
-                                            <div
-                                                class="text-sm text-gray-500 py-2 px-3"
-                                            >
-                                                {{
-                                                    loadingWards
-                                                        ? "Loading wards..."
-                                                        : !form.constituency_id
-                                                        ? "Please select a constituency first"
-                                                        : "No wards found"
-                                                }}
+                                            <div class="text-sm text-gray-500 py-2 px-3">
+                                                {{ !form.constituency_id ? 'Please select a constituency first' : 'No wards found' }}
                                             </div>
                                         </template>
                                     </VueSelect>
@@ -1352,7 +1238,7 @@ const toTitleCase = (str) => {
                                                 class="mt-1 text-sm text-gray-900 sm:col-span-2"
                                             >
                                                 {{
-                                                    form.gender ||
+                                                    genderDisplayName ||
                                                     "Not specified"
                                                 }}
                                             </dd>
