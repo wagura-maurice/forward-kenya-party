@@ -51,13 +51,28 @@ class HandleInertiaRequests extends Middleware
             ],
         ];
 
-        // Share all location data for the registration page
+        // Share all location and form data for the registration page
         if ($request->routeIs('register')) {
-            $sharedData['locationData'] = [
-                'counties' => County::select('id', 'name')->get(),
-                'subCounties' => SubCounty::select('id', 'name', 'county_id')->get(),
-                'constituencies' => Constituency::select('id', 'name', 'county_id')->get(),
-                'wards' => Ward::select('id', 'name', 'county_id', 'constituency_id')->get(),
+            $sharedData['formData'] = [
+                'genders' => array_map(
+                    fn($name, $id) => ['id' => $id, 'name' => $name],
+                    array_values(\App\Models\Gender::getGenderOptions()),
+                    array_keys(\App\Models\Gender::getGenderOptions())
+                ),
+                'ethnicities' => \App\Models\Ethnicity::select('id', 'name')
+                    ->orderBy('name')
+                    ->get()
+                    ->toArray(),
+                'religions' => \App\Models\Religion::select('id', 'name')
+                    ->orderBy('name')
+                    ->get()
+                    ->toArray(),
+                'locations' => [
+                    'counties' => County::select('id', 'name')->get(),
+                    'subCounties' => SubCounty::select('id', 'name', 'county_id')->get(),
+                    'constituencies' => Constituency::select('id', 'name', 'county_id')->get(),
+                    'wards' => Ward::select('id', 'name', 'county_id', 'constituency_id')->get(),
+                ]
             ];
         }
 
