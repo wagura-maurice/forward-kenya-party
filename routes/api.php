@@ -2,9 +2,6 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\REST\LocationController;
-use App\Http\Controllers\REST\EthnicityController;
-use App\Http\Controllers\REST\ReligionController;
 use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\WardController;
 use App\Http\Controllers\API\GuestController;
@@ -34,8 +31,11 @@ use App\Http\Controllers\API\ConsulateController;
 use App\Http\Controllers\API\ForeignerController;
 use App\Http\Controllers\API\MediaTypeController;
 use App\Http\Controllers\API\SubCountyController;
+use App\Http\Controllers\REST\LocationController;
+use App\Http\Controllers\REST\ReligionController;
 use App\Http\Controllers\API\DepartmentController;
 use App\Http\Controllers\API\TicketTypeController;
+use App\Http\Controllers\REST\EthnicityController;
 use App\Http\Controllers\AfricaIsTalkingController;
 use App\Http\Controllers\API\InvoiceTypeController;
 use App\Http\Controllers\API\ReceiptTypeController;
@@ -84,7 +84,7 @@ use App\Http\Controllers\API\OutboundBulkVoiceMessageController;
 
 # (*) public access routes
 // Location-based API endpoints
-Route::prefix('locations')->group(function () {
+/* Route::prefix('locations')->group(function () {
     // Get all counties
     Route::get('/counties', [LocationController::class, 'getCounties']);
     
@@ -99,9 +99,9 @@ Route::prefix('locations')->group(function () {
     
     // Get wards by constituency
     Route::get('/constituencies/{constituency}/wards', [LocationController::class, 'getWards']);
-});
+}); */
 
-// Ethnicity API endpoints
+/* // Ethnicity API endpoints
 Route::prefix('ethnicities')->group(function () {
     // Get all ethnicities
     Route::get('/', [EthnicityController::class, 'index']);
@@ -114,9 +114,9 @@ Route::prefix('ethnicities')->group(function () {
     
     // Get a single ethnicity
     Route::get('/{ethnicity}', [EthnicityController::class, 'show']);
-});
+}); */
 
-// Religion API endpoints
+/* // Religion API endpoints
 Route::prefix('religions')->group(function () {
     // Get all religions
     Route::get('/', [ReligionController::class, 'index']);
@@ -129,7 +129,7 @@ Route::prefix('religions')->group(function () {
     
     // Get a single religion
     Route::get('/{religion}', [ReligionController::class, 'show']);
-});
+}); */
 
 // register & login authentication
 Route::group(['prefix' => 'auth'], function () {
