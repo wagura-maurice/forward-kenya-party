@@ -37,7 +37,7 @@ return new class extends Migration
             $table->string('state')->nullable()->comment('User\'s state of residence');
             $table->string('country')->nullable()->comment('User\'s country of residence');
             $table->date('date_of_birth')->nullable()->comment('User\'s date of birth');
-            $table->string('disability_status')->nullable()->comment('User\'s disability status if any');
+            $table->boolean('disability_status')->default(false)->comment('User\'s disability status if any');
             $table->string('ncpwd_number')->nullable()->comment('User\'s NCPWD number if any');
             $table->foreignId('ethnicity_id')
                   ->nullable()
