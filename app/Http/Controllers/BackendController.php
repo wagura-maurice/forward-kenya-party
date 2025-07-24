@@ -45,7 +45,7 @@ class BackendController extends Controller
                 'date_of_birth' => $user->profile->date_of_birth,
                 'telephone' => $user->profile->telephone,
                 'disability_status' => $user->profile->disability_status,
-                'plwd_number' => $user->profile->plwd_number,
+                'ncpwd_number' => $user->profile->ncpwd_number,
                 'address_line_1' => $user->profile->address_line_1,
                 'address_line_2' => $user->profile->address_line_2,
                 'city' => $user->profile->city,
