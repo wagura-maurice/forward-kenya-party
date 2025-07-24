@@ -3,9 +3,11 @@
 namespace App\Actions\Fortify;
 
 use App\Models\User;
+use App\Models\Gender;
 use App\Models\Citizen;
 use App\Models\Profile;
 use Illuminate\Support\Str;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -62,60 +64,67 @@ class CreateNewUser implements CreatesNewUsers
      */
     public function create(array $input)
     {
-        dd($input);
+        \Log::info(print_r($input, true));
         
         // Validate the input
         $validated = Validator::make($input, [
             'name' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:8', 'confirmed'],
-            'first_name' => ['required', 'string', 'max:255'],
-            'middle_name' => ['nullable', 'string', 'max:255'],
-            'last_name' => ['required', 'string', 'max:255'],
-            'gender' => ['required', 'string', 'in:male,female,other'],
-            'date_of_birth' => ['required', 'date'],
-            'disability_status' => ['nullable', 'string', 'in:none,physical,visual,hearing,mental,other'],
+            'telephone' => ['required', 'string', 'max:20', 'telephone'],
+            'id_type' => ['required', 'string', 'in:national_identification_number,passport_number'],
+            'id_number' => ['required', 'string', 'max:50'],
+            'party_membership_number' => ['required', 'string', 'max:50', function ($attribute, $value, $fail) use ($input) {
+                if ($value != $input['id_number']) {
+                    $fail('The party membership number must be the same as the Identification number.');
+                }
+            }],
+            'date_of_birth' => ['required', 'date', 'before:today', function ($attribute, $value, $fail) {
+                if (Carbon::parse($value)->age < 18) {
+                    $fail('The date of birth must be at least 18 years ago.');
+                }
+            }],
+            'gender' => ['required', 'string', 'in:' . implode(',', array_keys(Gender::getGenderOptions()))],
+            'ethnicity_id' => ['required', 'exists:ethnicities,id'],
+            'religion_id' => ['required', 'exists:religions,id'],
+            'disability_status' => ['required', 'boolean'],
             'ncpwd_number' => [
                 'nullable', 
                 'string', 
-                'max:255', 
+                'max:50',
                 function ($attribute, $value, $fail) use ($input) {
-                    if (isset($input['disability_status']) && $input['disability_status'] !== 'none' && empty($value)) {
-                        $fail('The NCPWD number is required when disability status is selected.');
+                    if (($input['disability_status'] ?? false) && empty($value)) {
+                        $fail('The NCPWD number is required when disability status is "Yes".');
                     }
                 }
             ],
-            'ethnicity_id' => ['required', 'exists:ethnicities,id'],
-            'religion_id' => ['required', 'exists:religions,id'],
-            'national_id' => ['required', 'string', 'max:255'],
-            'telephone' => ['required', 'string', 'max:255'],
-            'address_line_1' => ['required', 'string', 'max:255'],
-            'address_line_2' => ['nullable', 'string', 'max:255'],
-            'city' => ['required', 'string', 'max:255'],
-            'state' => ['nullable', 'string', 'max:255'],
+            'postal_address' => ['required', 'string', 'max:255'],
             'county_id' => ['required', 'exists:counties,id'],
-            'sub_county_id' => ['required', 'exists:sub_counties,id'],
             'constituency_id' => ['required', 'exists:constituencies,id'],
             'ward_id' => ['required', 'exists:wards,id'],
-            'security_question' => ['required', 'string', 'max:255'],
-            'security_answer' => ['required', 'string', 'max:255'],
-            'terms' => ['required', 'accepted'],
+            'enlisting_date' => ['required', 'date', 'before_or_equal:today'],
+            'recruiting_person_name' => ['required', 'string', 'max:255'],
+            'signature_member' => ['required', 'file', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
+            'recruiting_person_signature' => ['required', 'file', 'mimes:jpeg,png,jpg,gif,svg', 'max:2048'],
+            'terms' => ['required', 'accepted', 'in:1,true']
         ], [
-            'ncpwd_number.required' => 'The NCPWD number is required when disability status is selected.',
+            'ncpwd_number.required' => 'The NCPWD number is required when disability status is "Yes".',
+            'signature_member.required' => 'Please upload your signature.',
+            'recruiting_person_signature.required' => 'Please upload the recruiting person\'s signature.',
+            'terms.accepted' => 'You must accept the terms and conditions to register.'
         ])->validate();
 
+        // dd($validated);
+
         // Validate location hierarchy
-        $this->validateLocationHierarchy($input);
+        $this->validateLocationHierarchy($validated);
 
         // Start database transaction
-        return DB::transaction(function () use ($input) {
+        return DB::transaction(function () use ($validated) {
             // Create the user
             $user = User::create([
-                'name' => $input['name'],
-                'email' => $input['email'],
-                'password' => Hash::make($input['password']),
-                'email_verified_at' => now(),
-                'status' => 'active',
+                'name' => $validated['name'],
+                'email' => optional($validated)['email'] ?? null,
+                'password' => Hash::make($validated['password'] ?? 'Qwerty123!'),
+                'email_verified_at' => optional($validated)['email'] ? now() : NULL,
                 'last_login_at' => now(),
                 'last_login_ip' => request()->ip(),
             ]);
@@ -126,30 +135,30 @@ class CreateNewUser implements CreatesNewUsers
             Profile::create([
                 'uuid' => Str::uuid()->toString(),
                 'user_id' => $user->id,
-                'first_name' => $input['first_name'],
-                'middle_name' => $input['middle_name'] ?? null,
-                'last_name' => $input['last_name'],
-                'gender' => $input['gender'],
-                'date_of_birth' => $input['date_of_birth'],
-                'disability_status' => $input['disability_status'],
-                'ncpwd_number' => $input['disability_status'] !== 'none' ? $input['ncpwd_number'] : null,
-                'ethnicity_id' => $input['ethnicity_id'],
-                'religion_id' => $input['religion_id'],
-                'telephone' => phoneNumberPrefix($input['telephone']),
-                'address_line_1' => $input['address_line_1'],
-                'address_line_2' => $input['address_line_2'] ?? null,
-                'city' => $input['city'],
-                'state' => $input['state'],
+                'first_name' => explode(' ', $validated['name'])[0],
+                'middle_name' => count(explode(' ', $validated['name'])) > 1 ? explode(' ', $validated['name'])[1] : null,
+                'last_name' => count(explode(' ', $validated['name'])) > 2 ? explode(' ', $validated['name'])[2] : null,
+                'gender' => $validated['gender'],
+                'date_of_birth' => $validated['date_of_birth'],
+                'disability_status' => $validated['disability_status'],
+                'ncpwd_number' => $validated['disability_status'] !== 'false' ? $validated['ncpwd_number'] : null,
+                'ethnicity_id' => $validated['ethnicity_id'],
+                'religion_id' => $validated['religion_id'],
+                'telephone' => phoneNumberPrefix($validated['telephone']),
+                'address_line_1' => explode("\n", $validated['postal_address'])[0],
+                'address_line_2' => count(explode("\n", $validated['postal_address'])) > 1 ? explode("\n", $validated['postal_address'])[1] : null,
+                'city' => count(explode("\n", $validated['postal_address'])) > 1 ? explode("\n", $validated['postal_address'])[1] : null,
+                'state' => count(explode("\n", $validated['postal_address'])) > 2 ? explode("\n", $validated['postal_address'])[2] : null,
             ]);
 
             Citizen::create([
                 'uuid' => Str::uuid()->toString(),
                 'user_id' => $user->id,
-                'county_id' => $input['county_id'],
-                'sub_county_id' => $input['sub_county_id'],
-                'constituency_id' => $input['constituency_id'],
-                'ward_id' => $input['ward_id'],
-                'national_identification_number' => $input['national_id'],
+                'county_id' => $validated['county_id'] ?? null,
+                'sub_county_id' => $validated['sub_county_id'] ?? null,
+                'constituency_id' => $validated['constituency_id'] ?? null,
+                'ward_id' => $validated['ward_id'] ?? null,
+                $validated['id_type'] === 'national_identification_number' ? 'national_identification_number' : 'passport_number' => $validated['id_number'],
             ]);
 
             return $user;
