@@ -97,56 +97,61 @@ defineProps({
 <template>
     <Head :title="title" />
     <GuestLayout :title="title" :menuLogo="logoUrl" :footerLogo="logoUrl">
-        <section class="container mx-auto px-4 py-8 pt-32 md:pt-36 flex-1 max-w-7xl">
-            <!-- Introduction -->
-            <div class="max-w-4xl mx-auto text-center mb-16">
-                <h1 class="mb-4 text-4xl md:text-5xl font-bold text-gray-900 dark:text-white">
-                    {{ title }}
-                </h1>
-                <div class="w-32 h-1.5 bg-gradient-to-r from-green-500 to-blue-500 mx-auto mb-6 rounded-full"></div>
-                <p class="text-lg md:text-xl text-gray-600 dark:text-gray-300 leading-relaxed">
-The Forward Kenya Party is a national political movement established to transform Kenya's governance through progressive policies and ethical leadership. As a beacon of hope and change, we unite Kenyans across all communities with a shared commitment to national development, social equity, and economic transformation. Our foundation is built on the principles of social democracy, ensuring that every policy decision prioritizes the welfare of ordinary citizens while fostering sustainable growth and national unity.
-                </p>
-            </div>
+            <section class="container mx-auto px-4 py-8 pt-36 flex-1">
+            <h2
+                class="mb-4 text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white"
+            >
+                {{ title }}
+            </h2>
+            <div
+                class="w-20 h-1 bg-gradient-to-r from-green-500 to-blue-500 mb-4"
+            ></div>
+            <p
+                class="mb-8 lg:mb-16 font-light text-gray-500 dark:text-gray-400 sm:text-xl"
+            >
+                The Forward Kenya Party is a national political movement established to transform Kenya's governance through progressive policies and ethical leadership. As a beacon of hope and change, we unite Kenyans across all communities with a shared commitment to national development, social equity, and economic transformation. Our foundation is built on the principles of social democracy, ensuring that every policy decision prioritizes the welfare of ordinary citizens while fostering sustainable growth and national unity.
+            </p>
 
             <!-- Ideology Section -->
-            <div class="bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-2xl shadow-xl p-8 md:p-12 mb-24 hover:shadow-2xl transition-all duration-300 border border-gray-100 dark:border-gray-700">
-                <div class="flex flex-col lg:flex-row gap-12 items-center">
-                    <div class="lg:w-1/2">
-                        <h2 class="text-3xl md:text-4xl font-bold text-gray-900 dark:text-white mb-4">Our Ideology</h2>
-                        <div class="w-24 h-1.5 bg-gradient-to-r from-green-500 to-blue-500 mb-8 rounded-full"></div>
-                        <blockquote class="text-2xl font-semibold italic text-gray-700 dark:text-gray-200 mb-8 border-l-4 border-green-500 pl-6 py-2 bg-gray-50/50 dark:bg-gray-700/30 rounded-r-lg">
-                            "OUR LIVES, OUR HERITAGE"
-                            <p class="text-base font-normal mt-2 italic">— Forward Kenya Party Slogan</p>
-                        </blockquote>
-                        <p class="text-gray-600 dark:text-gray-300 mb-8 text-lg leading-relaxed">
-                            Our political ideology is built on the foundation of safeguarding our collective future while honoring our rich heritage. This commitment is reflected in our five key pillars:
-                        </p>
-                        <ul class="list-disc pl-6 space-y-3 mb-8">
-                            <li>Progressive social policies that protect and uplift all Kenyans</li>
-                            <li>Economic systems that create shared prosperity</li>
-                            <li>Environmental stewardship for sustainable development</li>
-                            <li>Devolution of power and resources to grassroots levels</li>
-                            <li>National unity through inclusive governance</li>
-                        </ul>
-                    </div>
-                    <div class="lg:w-1/2 flex items-center justify-center">
-                        <div class="w-full max-w-md mx-auto p-2 md:p-4">
-                            <div class="relative overflow-hidden rounded-xl shadow-xl" style="min-height: 300px;">
-                                <transition 
-                                    v-for="(image, index) in images" 
-                                    :key="index"
-                                    enter-active-class="transition-opacity duration-1000"
-                                    leave-active-class="absolute opacity-0 transition-opacity duration-1000"
-                                    mode="out-in"
-                                >
-                                    <img 
-                                        v-show="currentImageIndex === index"
-                                        :src="image" 
-                                        :alt="'Forward Kenya Party Ideology ' + (index + 1)" 
-                                        class="rounded-lg w-full h-auto max-h-[400px] object-contain"
+            <div class="bg-gradient-to-r from-emerald-500 to-yellow-500 rounded-2xl p-8 mb-10 transform transition-all duration-500 hover:scale-[1.005] hover:shadow-2xl group relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-r from-emerald-500/90 to-yellow-500/90 group-hover:opacity-0 transition-opacity duration-500"></div>
+                <div class="relative z-10">
+                    <div class="flex flex-col lg:flex-row gap-12 items-center">
+                        <div class="lg:w-1/2 text-white">
+                            <h2 class="text-2xl md:text-3xl font-bold mb-4">Our Ideology</h2>
+                            <blockquote class="text-2xl font-semibold italic mb-8 border-l-4 border-white/50 pl-6 py-2 bg-white/10 rounded-r-lg">
+                                "OUR LIVES, OUR HERITAGE"
+                                <p class="text-base font-normal mt-2 italic">— Forward Kenya Party Slogan</p>
+                            </blockquote>
+                            <p class="text-white/90 mb-8 text-lg leading-relaxed">
+                                Our political ideology is built on the foundation of safeguarding our collective future while honoring our rich heritage. This commitment is reflected in our five key pillars:
+                            </p>
+                            <ul class="list-disc pl-6 space-y-3 mb-8 text-white/90">
+                                <li>Progressive social policies that protect and uplift all Kenyans</li>
+                                <li>Economic systems that create shared prosperity</li>
+                                <li>Environmental stewardship for sustainable development</li>
+                                <li>Devolution of power and resources to grassroots levels</li>
+                                <li>National unity through inclusive governance</li>
+                            </ul>
+                        </div>
+                        <div class="lg:w-1/2 flex items-center justify-center">
+                            <div class="w-full max-w-md mx-auto p-2 md:p-4 bg-white/10 backdrop-blur-sm rounded-2xl">
+                                <div class="relative overflow-hidden rounded-xl">
+                                    <transition 
+                                        v-for="(image, index) in images" 
+                                        :key="index"
+                                        enter-active-class="transition-opacity duration-1000"
+                                        leave-active-class="absolute opacity-0 transition-opacity duration-1000"
+                                        mode="out-in"
                                     >
-                                </transition>
+                                        <img 
+                                            v-show="currentImageIndex === index"
+                                            :src="image" 
+                                            :alt="'Forward Kenya Party Ideology ' + (index + 1)" 
+                                            class="rounded-lg w-full h-auto max-h-[400px] object-contain"
+                                        >
+                                    </transition>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -154,7 +159,7 @@ The Forward Kenya Party is a national political movement established to transfor
             </div>
 
             <!-- Vision & Mission -->
-            <div class="grid md:grid-cols-2 gap-8 mb-24">
+            <div class="grid md:grid-cols-2 gap-8 mb-16">
                 <!-- Vision -->
                 <div class="bg-gradient-to-br from-blue-600 to-green-600 rounded-2xl p-8 text-white transform transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl group relative overflow-hidden">
                     <div class="absolute inset-0 bg-gradient-to-br from-blue-600/90 to-green-600/90 group-hover:opacity-0 transition-opacity duration-500"></div>
@@ -237,7 +242,7 @@ The Forward Kenya Party is a national political movement established to transfor
 
             <!-- Who We Are -->
             <div class="bg-gray-50 dark:bg-gray-800 rounded-xl mb-16">
-                <h2 class="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">Who We Are</h2>
+                <h3 class="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">Who We Are</h3>
                 <div class="grid md:grid-cols-2 gap-8 items-center">
                     <div>
                         <p class="text-gray-600 dark:text-gray-300 mb-6">
@@ -281,7 +286,7 @@ Established in 2020, the Forward Kenya Party emerged from a collective desire fo
 
             <!-- Party History -->
             <div class="bg-gray-50 dark:bg-gray-800 rounded-xl mb-16">
-                <h2 class="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">Our History</h2>
+                <h3 class="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">Our History</h3>
                 <div class="relative">
                     <!-- Timeline -->
                     <div class="border-l-2 border-green-500 absolute h-full left-1/2 transform -translate-x-1/2"></div>
@@ -293,7 +298,7 @@ Established in 2020, the Forward Kenya Party emerged from a collective desire fo
                         </div>
                         <div class="flex flex-col md:flex-row justify-between items-center mb-8">
                             <div class="md:w-5/12 text-right pr-8 mb-4 md:mb-0">
-                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">2024</h3>
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">05</h3>
                                 <p class="text-gray-600 dark:text-gray-300">National Expansion</p>
                             </div>
                             <div class="md:w-5/12 pl-8">
@@ -313,7 +318,7 @@ Established in 2020, the Forward Kenya Party emerged from a collective desire fo
                         </div>
                         <div class="flex flex-col md:flex-row-reverse justify-between items-center mb-8">
                             <div class="md:w-5/12 text-left pl-8 mb-4 md:mb-0">
-                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">2023</h3>
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">04</h3>
                                 <p class="text-gray-600 dark:text-gray-300">Grassroots Mobilization</p>
                             </div>
                             <div class="md:w-5/12 pr-8">
@@ -333,7 +338,7 @@ Established in 2020, the Forward Kenya Party emerged from a collective desire fo
                         </div>
                         <div class="flex flex-col md:flex-row justify-between items-center mb-8">
                             <div class="md:w-5/12 text-right pr-8 mb-4 md:mb-0">
-                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">2022</h3>
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">03</h3>
                                 <p class="text-gray-600 dark:text-gray-300">First Elections</p>
                             </div>
                             <div class="md:w-5/12 pl-8">
@@ -353,7 +358,7 @@ Established in 2020, the Forward Kenya Party emerged from a collective desire fo
                         </div>
                         <div class="flex flex-col md:flex-row-reverse justify-between items-center mb-8">
                             <div class="md:w-5/12 text-left pl-8 mb-4 md:mb-0">
-                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">2021</h3>
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">02</h3>
                                 <p class="text-gray-600 dark:text-gray-300">Official Registration</p>
                             </div>
                             <div class="md:w-5/12 pr-8">
@@ -373,7 +378,7 @@ Established in 2020, the Forward Kenya Party emerged from a collective desire fo
                         </div>
                         <div class="flex flex-col md:flex-row justify-between items-center">
                             <div class="md:w-5/12 text-right pr-8 mb-4 md:mb-0">
-                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">2020</h3>
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">01</h3>
                                 <p class="text-gray-600 dark:text-gray-300">Party Conception</p>
                             </div>
                             <div class="md:w-5/12 pl-8">
@@ -396,7 +401,7 @@ Established in 2020, the Forward Kenya Party emerged from a collective desire fo
                     Join Forward Kenya Party today to shape a united, prosperous, and inclusive Kenya. Engage with our platform, contribute to our vision, and be part of the change.
                 </p>
                 <div class="flex flex-col sm:flex-row justify-center gap-4">
-                    <a href="#" class="bg-white text-green-600 hover:bg-gray-100 font-semibold px-8 py-3 rounded-full transition-colors flex items-center justify-center gap-2">
+                    <a :href="route('register')" class="bg-white text-green-600 hover:bg-gray-100 font-semibold px-8 py-3 rounded-full transition-colors flex items-center justify-center gap-2">
                         <i class="fas fa-user-plus"></i>
                         <span>Membership</span>
                     </a>
