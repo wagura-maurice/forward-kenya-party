@@ -10,7 +10,7 @@ use libphonenumber\PhoneNumberUtil;
 use libphonenumber\PhoneNumberFormat;
 
 if (! function_exists('eThrowable')) {
-    function eThrowable(string $_class, string $message, string $trace = null, array $data = []): object
+    function eThrowable(string $_class, string $message, ?string $trace = null, array $data = []): object
     {
         $LOG = new LightOfGuidance;
         $LOG->uuid = (string) Str::uuid();
