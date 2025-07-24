@@ -34,6 +34,19 @@ const stepDescription = computed(() => {
     }
 });
 
+const nextStepDescription = computed(() => {
+    switch (currentStep.value) {
+        case 1:
+            return "Contact, Location, and Signatures";
+        case 2:
+            return "Confirmation";
+        case 3:
+            return "Submit Registration";
+        default:
+            return "";
+    }
+});
+
 const toggleAccordion = (section) => {
     activeAccordion.value = activeAccordion.value === section ? null : section;
 };
@@ -80,7 +93,7 @@ const form = useForm({
     gender: "",
     ethnicity_id: null,
     religion_id: null,
-    disability_status: "no", // 'no', 'yes'
+    disability_status: false, // 'false', 'true'
     ncpwd_number: "",
 
     // Step 2: Contact, Location, and Signatures
@@ -145,7 +158,7 @@ watch(() => form.constituency_id, (newConstituencyId) => {
 
 // Watch for disability status changes to handle NCPWD number field
 watch(() => form.disability_status, (newStatus) => {
-    if (newStatus === 'no') {
+    if (newStatus === false) {
         // Clear NCPWD number when disability status is set to 'no'
         form.ncpwd_number = '';
     }
@@ -182,7 +195,7 @@ const validateStep = (step) => {
             return { isValid: false, message: "Ethnicity is required" };
         if (!form.religion_id)
             return { isValid: false, message: "Religion is required" };
-        if (form.disability_status === "yes" && !form.ncpwd_number?.trim())
+        if (form.disability_status === true && !form.ncpwd_number?.trim())
             return {
                 isValid: false,
                 message:
@@ -369,7 +382,7 @@ const canProceedToNextStep = computed(() => {
             form.gender &&
             form.ethnicity_id &&
             form.religion_id &&
-            (form.disability_status === 'no' || form.ncpwd_number)
+            (form.disability_status === false || form.ncpwd_number)
         );
     } else if (currentStep.value === 2) {
         return (
@@ -723,7 +736,7 @@ const canProceedToNextStep = computed(() => {
                                 <div class="space-y-2">
                                     <div class="flex items-center">
                                         <InputLabel
-                                            value="Disability Status"
+                                            value="Are you a PWD?"
                                             class="block text-sm font-medium text-gray-700"
                                         />
                                         <i
@@ -735,7 +748,7 @@ const canProceedToNextStep = computed(() => {
                                             <input
                                                 type="radio"
                                                 v-model="form.disability_status"
-                                                value="no"
+                                                :value="false"
                                                 class="text-green-600 border-gray-300 focus:ring-green-500"
                                                 required
                                             />
@@ -748,7 +761,7 @@ const canProceedToNextStep = computed(() => {
                                             <input
                                                 type="radio"
                                                 v-model="form.disability_status"
-                                                value="yes"
+                                                :value="true"
                                                 class="text-green-600 border-gray-300 focus:ring-green-500"
                                             />
                                             <span
@@ -763,16 +776,14 @@ const canProceedToNextStep = computed(() => {
                                     />
                                     </div>
                                     
-                                    <div class="space-y-2">
+                                    <div v-if="form.disability_status" class="space-y-2">
                                         <div class="flex items-center">
                                             <InputLabel
                                                 for="ncpwd_number"
                                                 value="NCPWD Number"
                                                 class="block text-sm font-medium text-gray-700"
                                             >
-                                                <template #required v-if="form.disability_status === 'yes'">
-                                                    <i class="fas fa-star text-red-500 text-xs ml-1"></i>
-                                                </template>
+                                                <i class="fas fa-star text-red-500 text-xs ml-1"></i>
                                             </InputLabel>
                                         </div>
                                         <TextInput
@@ -781,14 +792,10 @@ const canProceedToNextStep = computed(() => {
                                             type="text"
                                             :class="[
                                                 'block w-full rounded-md shadow-sm sm:text-sm py-2 px-3 border transition duration-150 ease-in-out',
-                                                form.disability_status === 'yes' 
-                                                    ? 'border-gray-300 focus:border-green-500 focus:ring-green-500' 
-                                                    : 'bg-gray-100 border-gray-200 text-gray-500 cursor-not-allowed',
-                                                form.errors.ncpwd_number ? 'border-red-500' : ''
+                                                form.errors.ncpwd_number ? 'border-red-500' : 'border-gray-300 focus:border-green-500 focus:ring-green-500'
                                             ]"
-                                            :disabled="form.disability_status !== 'yes'"
-                                            :required="form.disability_status === 'yes'"
-                                            placeholder="Enter NCPWD number if applicable"
+                                            required
+                                            placeholder="Enter your NCPWD number"
                                         />
                                         <InputError
                                             :message="form.errors.ncpwd_number"
@@ -1700,7 +1707,7 @@ const canProceedToNextStep = computed(() => {
                                         {{
                                             currentStep === 3
                                                 ? "Submit Application"
-                                                : "Next: " + stepDescription
+                                                : "Next: " + nextStepDescription
                                         }}
                                     </span>
                                     <span class="sm:hidden">{{
