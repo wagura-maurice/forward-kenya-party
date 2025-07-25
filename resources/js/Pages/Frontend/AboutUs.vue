@@ -292,11 +292,11 @@ Established in 2020, the Forward Kenya Party emerged from a collective desire fo
                     <div class="border-l-2 border-green-500 absolute h-full left-1/2 transform -translate-x-1/2"></div>
                     
                     <!-- Timeline Items -->
-                    <div class="relative mb-12">
+                    <div class="relative">
                         <div class="flex items-center mb-4">
                             <div class="bg-green-500 rounded-full w-6 h-6 absolute left-1/2 transform -translate-x-1/2"></div>
                         </div>
-                        <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+                        <div class="flex flex-col md:flex-row justify-between items-center">
                             <div class="md:w-5/12 text-right pr-8 mb-4 md:mb-0">
                                 <h3 class="text-xl font-bold text-gray-900 dark:text-white">05</h3>
                                 <p class="text-gray-600 dark:text-gray-300">National Expansion</p>
@@ -312,11 +312,11 @@ Established in 2020, the Forward Kenya Party emerged from a collective desire fo
                         </div>
                     </div>
 
-                    <div class="relative mb-12">
+                    <div class="relative">
                         <div class="flex items-center mb-4">
                             <div class="bg-green-500 rounded-full w-6 h-6 absolute left-1/2 transform -translate-x-1/2"></div>
                         </div>
-                        <div class="flex flex-col md:flex-row-reverse justify-between items-center mb-8">
+                        <div class="flex flex-col md:flex-row-reverse justify-between items-center">
                             <div class="md:w-5/12 text-left pl-8 mb-4 md:mb-0">
                                 <h3 class="text-xl font-bold text-gray-900 dark:text-white">04</h3>
                                 <p class="text-gray-600 dark:text-gray-300">Grassroots Mobilization</p>
@@ -332,11 +332,11 @@ Established in 2020, the Forward Kenya Party emerged from a collective desire fo
                         </div>
                     </div>
 
-                    <div class="relative mb-12">
+                    <div class="relative">
                         <div class="flex items-center mb-4">
                             <div class="bg-green-500 rounded-full w-6 h-6 absolute left-1/2 transform -translate-x-1/2"></div>
                         </div>
-                        <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+                        <div class="flex flex-col md:flex-row justify-between items-center">
                             <div class="md:w-5/12 text-right pr-8 mb-4 md:mb-0">
                                 <h3 class="text-xl font-bold text-gray-900 dark:text-white">03</h3>
                                 <p class="text-gray-600 dark:text-gray-300">First Elections</p>
@@ -352,11 +352,11 @@ Established in 2020, the Forward Kenya Party emerged from a collective desire fo
                         </div>
                     </div>
 
-                    <div class="relative mb-12">
+                    <div class="relative">
                         <div class="flex items-center mb-4">
                             <div class="bg-green-500 rounded-full w-6 h-6 absolute left-1/2 transform -translate-x-1/2"></div>
                         </div>
-                        <div class="flex flex-col md:flex-row-reverse justify-between items-center mb-8">
+                        <div class="flex flex-col md:flex-row-reverse justify-between items-center">
                             <div class="md:w-5/12 text-left pl-8 mb-4 md:mb-0">
                                 <h3 class="text-xl font-bold text-gray-900 dark:text-white">02</h3>
                                 <p class="text-gray-600 dark:text-gray-300">Official Registration</p>

@@ -39,18 +39,25 @@
                                     {{ slide.description }}
                                 </p>
                             </div>
-                            <div
-                                class="mt-10 flex flex-col items-center space-y-4 sm:flex-row sm:justify-center sm:space-x-6 sm:space-y-0 sm:space-x-reverse gap-2"
-                            >
+                            <div class="mt-10 flex flex-col items-center space-y-4 sm:flex-row sm:justify-center sm:space-x-6 sm:space-y-0 sm:space-x-reverse gap-2">
+                                <!-- Mobile-only Join the Movement button -->
+                                <Link
+                                    :href="route('register')"
+                                    class="sm:hidden inline-block bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white font-semibold px-8 py-4 rounded-full shadow-lg transform hover:-translate-y-1 transition-all duration-300 w-full text-center"
+                                >
+                                    Join the Movement
+                                </Link>
+                                
+                                <!-- Desktop buttons (hidden on mobile) -->
                                 <Link
                                     :href="route('frontend.services')"
-                                    class="inline-block bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white font-semibold px-8 py-4 rounded-full shadow-lg transform hover:-translate-y-1 transition-all duration-300"
+                                    class="hidden sm:inline-block bg-gradient-to-r from-green-500 to-blue-600 hover:from-green-600 hover:to-blue-700 text-white font-semibold px-8 py-4 rounded-full shadow-lg transform hover:-translate-y-1 transition-all duration-300"
                                 >
                                     Our Services
                                 </Link>
                                 <Link
                                     :href="route('frontend.departments')"
-                                    class="inline-block bg-white/10 hover:bg-white/20 text-white font-semibold px-8 py-4 rounded-full backdrop-blur-sm border border-white/20 shadow-lg transform hover:-translate-y-1 transition-all duration-300"
+                                    class="hidden sm:inline-block bg-white/10 hover:bg-white/20 text-white font-semibold px-8 py-4 rounded-full backdrop-blur-sm border border-white/20 shadow-lg transform hover:-translate-y-1 transition-all duration-300"
                                 >
                                     Our Departments
                                 </Link>
