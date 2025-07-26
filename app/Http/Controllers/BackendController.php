@@ -20,9 +20,16 @@ class BackendController extends Controller
                 'religion',
                 'ethnicity',
                 'citizen.county',
-                'citizen.subCounty',
+                'citizen.sub_county',
                 'citizen.constituency',
-                'citizen.ward'
+                'citizen.ward',
+                'citizen.polling_center',
+                'citizen.polling_station',
+                'citizen.polling_stream',
+                'citizen.location',
+                'citizen.village',
+                'citizen.consulate',
+                'citizen.refugee_center'
             ]);
         }]);
 
@@ -64,9 +71,9 @@ class BackendController extends Controller
                     'id' => $user->profile->citizen->county->id,
                     'name' => $user->profile->citizen->county->name
                 ] : null,
-                'sub_county' => $user->profile->citizen->subCounty ? [
-                    'id' => $user->profile->citizen->subCounty->id,
-                    'name' => $user->profile->citizen->subCounty->name
+                'sub_county' => $user->profile->citizen->sub_county ? [
+                    'id' => $user->profile->citizen->sub_county->id,
+                    'name' => $user->profile->citizen->sub_county->name
                 ] : null,
                 'constituency' => $user->profile->citizen->constituency ? [
                     'id' => $user->profile->citizen->constituency->id,
@@ -75,6 +82,34 @@ class BackendController extends Controller
                 'ward' => $user->profile->citizen->ward ? [
                     'id' => $user->profile->citizen->ward->id,
                     'name' => $user->profile->citizen->ward->name
+                ] : null,
+                'location' => $user->profile->citizen->location ? [
+                    'id' => $user->profile->citizen->location->id,
+                    'name' => $user->profile->citizen->location->name
+                ] : null,
+                'village' => $user->profile->citizen->village ? [
+                    'id' => $user->profile->citizen->village->id,
+                    'name' => $user->profile->citizen->village->name
+                ] : null,
+                'polling_center' => $user->profile->citizen->polling_center ? [
+                    'id' => $user->profile->citizen->polling_center->id,
+                    'name' => $user->profile->citizen->polling_center->name
+                ] : null,
+                'polling_station' => $user->profile->citizen->polling_station ? [
+                    'id' => $user->profile->citizen->polling_station->id,
+                    'name' => $user->profile->citizen->polling_station->name
+                ] : null,
+                'polling_stream' => $user->profile->citizen->polling_stream ? [
+                    'id' => $user->profile->citizen->polling_stream->id,
+                    'name' => $user->profile->citizen->polling_stream->name
+                ] : null,
+                'consulate' => $user->profile->citizen->consulate ? [
+                    'id' => $user->profile->citizen->consulate->id,
+                    'name' => $user->profile->citizen->consulate->name
+                ] : null,
+                'refugee_center' => $user->profile->citizen->refugee_center ? [
+                    'id' => $user->profile->citizen->refugee_center->id,
+                    'name' => $user->profile->citizen->refugee_center->name
                 ] : null,
                 'created_at' => $user->profile->created_at,
                 'updated_at' => $user->profile->updated_at
