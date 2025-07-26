@@ -81,3 +81,15 @@ if (!function_exists('generateInvoiceNumber')) {
         return $number;
     }
 } */
+
+if (!function_exists('generateUniqueMembershipNumber')) {
+    function generateUniqueMembershipNumber(): string
+    {
+        do {
+            // Generate a 10-digit number
+            $number = 'FKP-' . strtoupper(Str::random(2)) . '-' . str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
+        } while (\App\Models\Citizen::where('uuid', $number)->exists());
+
+        return $number;
+    }
+}
