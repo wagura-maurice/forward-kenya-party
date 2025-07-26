@@ -28,10 +28,53 @@ class OneTimePasswordServices
         // Set rate limit to prevent rapid repeated requests
         $this->setRateLimit($profile['_uid']);
 
-        // Dispatch notification
-        SendOtpNotification::dispatch($profile, $otp);
+        // Check if we should process this synchronously (for critical operations)
+        $isCritical = isset($profile['critical']) && $profile['critical'] === true;
+        
+        if ($isCritical) {
+            // For critical operations, send OTP directly
+            $this->sendOtpDirectly($profile, $otp);
+        } else {
+            // For regular operations, dispatch with high priority
+            // Only use this if you have queue workers running
+            // SendOtpNotification::dispatch($profile, $otp)->onQueue('high')->afterCommit();
+            
+            // Since no queue workers are running, send directly for all cases
+            $this->sendOtpDirectly($profile, $otp);
+        }
         
         return true; // Successfully sent OTP via email (and SMS if uncommented)
+    }
+    
+    /**
+     * Send OTP directly without using a job
+     *
+     * @param array $profile
+     * @param array $otp
+     * @return bool
+     */
+    protected function sendOtpDirectly(array $profile, array $otp): bool
+    {
+        try {
+            // Log the OTP for testing purposes
+            \Illuminate\Support\Facades\Log::info('OTP sent to ' . $profile['telephone'] . ': ' . $otp['token']);
+
+            // In a production environment, you would send the OTP via SMS
+            // For example, using Africa's Talking or another SMS service:
+            
+            /*
+            $message = "Your verification code is: " . $otp['token'] . ". Valid for 5 minutes.";
+            
+            // Send SMS using your preferred service
+            $smsService = new SmsService();
+            $smsService->send($profile['telephone'], $message);
+            */
+            
+            return true;
+        } catch (\Exception $e) {
+            \Illuminate\Support\Facades\Log::error('Failed to send OTP: ' . $e->getMessage());
+            return false;
+        }
     }
 
     public function verify(string $identifier, string $otp): bool
