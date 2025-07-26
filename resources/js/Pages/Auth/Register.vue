@@ -1,8 +1,9 @@
 <!-- resources/js/Pages/Auth/Register.vue -->
 <script setup>
-import { Head, Link, useForm } from "@inertiajs/vue3";
+import { Head, Link, useForm, router } from "@inertiajs/vue3";
 import { ref, computed, watch } from "vue";
 import axios from "axios";
+import Swal from "sweetalert2";
 import AuthenticationCard from "@/Components/AuthenticationCard.vue";
 import AuthenticationCardLogo from "@/Components/AuthenticationCardLogo.vue";
 import Checkbox from "@/Components/Checkbox.vue";
@@ -16,6 +17,16 @@ import "vue-select/dist/vue-select.css";
 const props = defineProps({
     formData: Object,
 });
+
+// Get OTP configuration from props
+const otpConfig = computed(
+    () =>
+        props.formData?.otp_config || {
+            ttl: 300, // Default: 5 minutes in seconds
+            rate_limit: 60, // Default: 60 seconds between requests
+            attempts_limit: 5, // Default: 5 attempts before OTP is invalidated
+        }
+);
 
 const totalSteps = 3; // Updated to 3 steps to include confirmation
 const currentStep = ref(1);
@@ -105,6 +116,9 @@ const form = useForm({
 
     // Step 3: Review & Submit
     terms: false,
+
+    // OTP verification
+    otpVerified: false,
 });
 
 const isLoading = ref(false);
@@ -186,7 +200,8 @@ const validateStep = (step) => {
             return {
                 isValid: false,
                 message: `${
-                    form.identification_type === "national_identification_number"
+                    form.identification_type ===
+                    "national_identification_number"
                         ? "National Identification Number"
                         : "Passport Number"
                 } is required`,
@@ -255,7 +270,416 @@ const handleSubmit = async () => {
     if (currentStep.value < totalSteps) {
         await nextStep();
     } else {
-        await submit();
+        // If OTP is not verified, show OTP verification modal
+        if (!form.otpVerified) {
+            await sendOtp();
+        } else {
+            await submit();
+        }
+    }
+};
+
+// Send OTP to the user's phone number
+const sendOtp = async () => {
+    try {
+        // Validate the phone number
+        if (!form.telephone) {
+            showToast(
+                "error",
+                "Validation Error",
+                "Phone number is required for OTP verification"
+            );
+            return;
+        }
+
+        // Show loading state
+        Swal.fire({
+            title: "Sending OTP",
+            text: "Please wait while we send an OTP to your phone...",
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            },
+        });
+
+        // Reset attempts counter and expiration time when requesting new OTP
+        otpAttempts.value = 0;
+        cleanupOtpTimer();
+        const expTime = new Date();
+        expTime.setSeconds(expTime.getSeconds() + otpConfig.value.ttl);
+        otpExpirationTime.value = expTime;
+
+        // Send OTP request
+        const response = await axios.post(route("otp.send"), {
+            telephone: form.telephone,
+            critical: true, // Mark as critical for registration
+        });
+
+        if (response.data.status === "success") {
+            // Show OTP verification modal
+            showOtpVerificationModal();
+        } else {
+            throw new Error(response.data.message || "Failed to send OTP. Please try again.");
+        }
+    } catch (error) {
+        console.error("OTP send error:", error);
+
+        // Check if it's a rate limit error
+        if (
+            error.response?.data?.message &&
+            error.response.data.message.includes("wait")
+        ) {
+            // Show countdown timer for rate limit
+            let secondsLeft = otpConfig.value.rate_limit; // Use the rate limit from config
+
+            // Try to extract the exact time from the message if available
+            const timeMatch = error.response.data.message.match(
+                /wait (\d+) (?:seconds|second)/i
+            );
+            if (timeMatch && timeMatch[1]) {
+                secondsLeft = parseInt(timeMatch[1]);
+            }
+
+            const timerInterval = setInterval(() => {
+                secondsLeft -= 1;
+
+                // Update the timer text
+                const timerElement = document.getElementById("otp-timer");
+                if (timerElement) {
+                    timerElement.textContent = `${secondsLeft}`;
+                }
+
+                // When timer reaches zero
+                if (secondsLeft <= 0) {
+                    clearInterval(timerInterval);
+                    Swal.close();
+                }
+            }, 1000);
+
+            Swal.fire({
+                icon: "warning",
+                title: "Rate Limited",
+                html: `
+                    <p>You must wait before requesting another OTP.</p>
+                    <div class="mt-4 text-center">
+                        <p>Try again in <span id="otp-timer" class="font-bold text-lg">${secondsLeft}</span> seconds</p>
+                    </div>
+                `,
+                showConfirmButton: true,
+                confirmButtonText: "OK",
+                confirmButtonColor: "#10b981",
+                willClose: () => {
+                    clearInterval(timerInterval);
+                },
+            });
+        } else {
+            // Regular error handling
+            Swal.fire({
+                icon: "error",
+                title: "OTP Error",
+                text:
+                    error.response?.data?.message ||
+                    "Failed to send OTP. Please try again.",
+            });
+        }
+    }
+};
+
+// Track OTP verification attempts and timer state
+const otpAttempts = ref(0);
+const maxOtpAttempts = computed(() => otpConfig.value.attempts_limit || 5);
+const otpExpirationTime = ref(null);
+let otpTimerInterval = null;
+
+// Format time remaining
+const formatTimeRemaining = (endTime) => {
+    const now = new Date();
+    const diffInSeconds = Math.max(0, Math.floor((endTime - now) / 1000));
+    const minutes = Math.floor(diffInSeconds / 60);
+    const seconds = diffInSeconds % 60;
+    return {
+        formatted: `${minutes}:${seconds.toString().padStart(2, '0')}`,
+        isExpired: diffInSeconds <= 0
+    };
+};
+
+// Clean up timer
+const cleanupOtpTimer = () => {
+    if (otpTimerInterval) {
+        clearInterval(otpTimerInterval);
+        otpTimerInterval = null;
+    }
+};
+
+// Show OTP verification modal
+const showOtpVerificationModal = () => {
+    // Track if resend is on cooldown
+    let isResendDisabled = false;
+    let resendCountdown = 0;
+    let countdownInterval = null;
+    
+    // Initialize or reuse existing expiration time
+    if (!otpExpirationTime.value) {
+        const expTime = new Date();
+        expTime.setSeconds(expTime.getSeconds() + otpConfig.value.ttl);
+        otpExpirationTime.value = expTime;
+    }
+    
+    // Clean up any existing timer
+    cleanupOtpTimer();
+
+    Swal.fire({
+        title: "Phone Verification",
+        html: `
+            <p class="mb-4">We've sent a 6-digit verification code to your phone number: <strong>${
+                form.telephone
+            }</strong></p>
+            <p class="mb-4 text-sm text-gray-600">
+                This code will expire in 
+                <span id="otp-timer" class="font-medium">${formatTimeRemaining(otpExpirationTime.value).formatted}</span>
+            </p>
+            <div class="flex flex-col items-center">
+                <input id="swal-otp-input" class="swal2-input w-full text-center" placeholder="Enter 6-digit code" maxlength="6" type="text">
+                <div class="text-sm text-gray-500 mt-2">
+                    Didn't receive the code?
+                    <button type="button" id="resend-otp-btn" class="text-green-600 hover:text-green-800">Resend</button>
+                    <span id="resend-countdown" class="hidden ml-1 text-gray-500"></span>
+                </div>
+                <div class="text-xs text-gray-500 mt-1">
+                    Attempts remaining: <span class="font-medium">${maxOtpAttempts.value - otpAttempts.value}</span> of ${maxOtpAttempts.value}
+                </div>
+                ${otpAttempts.value > 0 ? `
+                <div class="text-xs text-red-500 mt-1">
+                    ${maxOtpAttempts.value - otpAttempts.value === 0 ? 'No attempts left. ' : ''}${otpAttempts.value} failed attempt${otpAttempts.value > 1 ? 's' : ''}.
+                </div>
+                ` : ''}
+            </div>
+        `,
+        showCancelButton: true,
+        confirmButtonText: "Verify",
+        confirmButtonColor: "#10b981",
+        cancelButtonText: "Cancel",
+        allowOutsideClick: false,
+        preConfirm: () => {
+            const otpInput = document.getElementById("swal-otp-input");
+            const otp = otpInput.value;
+
+            if (!otp || otp.length !== 6) {
+                Swal.showValidationMessage(
+                    "Please enter the 6-digit verification code"
+                );
+                return false;
+            }
+
+            return otp;
+        },
+        didOpen: () => {
+            const resendBtn = document.getElementById("resend-otp-btn");
+            const resendCountdownEl = document.getElementById("resend-countdown");
+            const otpTimerEl = document.getElementById("otp-timer");
+            
+            // Update OTP timer every second
+            if (otpTimerEl) {
+                const updateTimerDisplay = () => {
+                    const { formatted: timeLeft, isExpired } = formatTimeRemaining(otpExpirationTime.value);
+                    otpTimerEl.textContent = timeLeft;
+                    
+                    // Change color to red when less than 1 minute remaining or expired
+                    if (timeLeft.startsWith('0:') || isExpired) {
+                        otpTimerEl.classList.add('text-red-500');
+                        otpTimerEl.classList.remove('text-gray-600');
+                    } else {
+                        otpTimerEl.classList.remove('text-red-500');
+                        otpTimerEl.classList.add('text-gray-600');
+                    }
+                    
+                    // If time's up, update display but keep the interval running
+                    if (isExpired) {
+                        otpTimerEl.textContent = 'expired';
+                        otpTimerEl.classList.add('font-bold');
+                    }
+                };
+                
+                // Initial update
+                updateTimerDisplay();
+                
+                // Set up interval for updates
+                otpTimerInterval = setInterval(updateTimerDisplay, 1000);
+            }
+
+            // Function to update the resend button state
+            const updateResendButton = () => {
+                if (isResendDisabled) {
+                    resendBtn.disabled = true;
+                    resendBtn.classList.remove(
+                        "text-green-600",
+                        "hover:text-green-800"
+                    );
+                    resendBtn.classList.add(
+                        "text-gray-400",
+                        "cursor-not-allowed"
+                    );
+                    resendCountdownEl.classList.remove("hidden");
+                    resendCountdownEl.textContent = `(${resendCountdown}s)`;
+                } else {
+                    resendBtn.disabled = false;
+                    resendBtn.classList.add(
+                        "text-green-600",
+                        "hover:text-green-800"
+                    );
+                    resendBtn.classList.remove(
+                        "text-gray-400",
+                        "cursor-not-allowed"
+                    );
+                    resendCountdownEl.classList.add("hidden");
+                }
+            };
+
+            // Add event listener for resend button
+            resendBtn.addEventListener("click", async () => {
+                if (!isResendDisabled) {
+                    try {
+                        await sendOtp();
+                    } catch (error) {
+                        // Check if it's a rate limit error
+                        if (
+                            error.response?.data?.message &&
+                            error.response.data.message.includes("wait")
+                        ) {
+                            // Extract the wait time or use the rate limit from config
+                            const timeMatch = error.response.data.message.match(
+                                /wait (\d+) (?:seconds|second)/i
+                            );
+                            resendCountdown =
+                                timeMatch && timeMatch[1]
+                                    ? parseInt(timeMatch[1])
+                                    : otpConfig.value.rate_limit;
+
+                            isResendDisabled = true;
+                            updateResendButton();
+
+                            // Start countdown
+                            countdownInterval = setInterval(() => {
+                                resendCountdown -= 1;
+                                updateResendButton();
+
+                                if (resendCountdown <= 0) {
+                                    clearInterval(countdownInterval);
+                                    isResendDisabled = false;
+                                    updateResendButton();
+                                }
+                            }, 1000);
+                        }
+                    }
+                }
+            });
+        },
+        willClose: () => {
+            // Clear any running intervals when the modal is closed
+            if (countdownInterval) {
+                clearInterval(countdownInterval);
+            }
+            // Don't clean up the timer when modal closes
+            // We want to maintain the countdown state
+        },
+    }).then(async (result) => {
+        if (result.isConfirmed) {
+            await verifyOtp(result.value);
+        }
+    });
+};
+
+// Verify OTP
+const verifyOtp = async (otp) => {
+    // If OTP is expired, don't proceed with verification
+    if (otpExpirationTime.value && new Date() > otpExpirationTime.value) {
+        Swal.fire({
+            icon: 'error',
+            title: 'OTP Expired',
+            text: 'The verification code has expired. Please request a new one.',
+            confirmButtonColor: '#10b981',
+        });
+        return;
+    }
+    // Check if max attempts reached
+    if (otpAttempts.value >= maxOtpAttempts.value) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Maximum Attempts Reached',
+            text: `You've exceeded the maximum number of verification attempts. Please request a new OTP.`,
+            confirmButtonColor: '#10b981',
+        });
+        return;
+    }
+
+    // Increment attempts counter
+    otpAttempts.value += 1;
+
+    try {
+        // Show loading state
+        Swal.fire({
+            title: "Verifying OTP",
+            text: "Please wait while we verify your OTP...",
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            },
+        });
+
+        // Verify OTP request
+        const response = await axios.post(route("otp.verify"), {
+            telephone: form.telephone,
+            otp: otp,
+        });
+
+        if (response.data.status === "success" && response.data.verified) {
+            // Reset attempts on successful verification
+            otpAttempts.value = 0;
+            // Mark OTP as verified
+            form.otpVerified = true;
+
+            // Show success message
+            Swal.fire({
+                icon: "success",
+                title: "Phone Verified",
+                text: "Your phone number has been verified successfully.",
+                confirmButtonColor: "#10b981",
+            }).then(() => {
+                // Submit the form after OTP verification
+                submit();
+            });
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "Verification Failed",
+                text: response.data.message || "Invalid OTP. Please try again.",
+                confirmButtonColor: "#10b981",
+            }).then(() => {
+                // Show OTP verification modal again
+                showOtpVerificationModal();
+            });
+        }
+    } catch (error) {
+        console.error("OTP verification error:", error);
+        Swal.fire({
+            icon: "error",
+            title: "Verification Failed",
+            html: `
+                <p>${
+                    error.response?.data?.message ||
+                    "Failed to verify OTP. Please try again."
+                }</p>
+                ${
+                    error.response?.data?.message?.includes("attempts exceeded")
+                        ? `<p class="mt-2 text-sm">You have exceeded the maximum of ${maxAttempts} attempts. Please request a new OTP.</p>`
+                        : ""
+                }
+            `,
+            confirmButtonColor: "#10b981",
+        }).then(() => {
+            // Show OTP verification modal again
+            showOtpVerificationModal();
+        });
     }
 };
 
@@ -279,6 +703,12 @@ const submit = async () => {
                 "Validation Error",
                 "You must agree to the terms and affirmation"
             );
+            return;
+        }
+
+        // Ensure OTP is verified before submitting
+        if (!form.otpVerified) {
+            await sendOtp();
             return;
         }
 
@@ -353,11 +783,7 @@ const canProceedToNextStep = computed(() => {
             (form.disability_status === false || form.ncpwd_number)
         );
     } else if (currentStep.value === 2) {
-        return (
-            form.county_id &&
-            form.constituency_id &&
-            form.ward_id
-        );
+        return form.county_id && form.constituency_id && form.ward_id;
     } else {
         return form.terms;
     }
@@ -521,7 +947,9 @@ const canProceedToNextStep = computed(() => {
                                         v-model="form.identification_type"
                                         class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
                                         required
-                                        @change="form.identification_number = ''"
+                                        @change="
+                                            form.identification_number = ''
+                                        "
                                     >
                                         <option value="">
                                             Select Identification Type
@@ -536,7 +964,9 @@ const canProceedToNextStep = computed(() => {
                                         </option>
                                     </select>
                                     <InputError
-                                        :message="form.errors.identification_type"
+                                        :message="
+                                            form.errors.identification_type
+                                        "
                                         class="mt-1 text-sm text-red-600"
                                     />
                                 </div>
@@ -1043,7 +1473,10 @@ const canProceedToNextStep = computed(() => {
                                                 class="mt-1 text-sm text-gray-900 sm:col-span-2"
                                             >
                                                 {{
-                                                    form.surname + " " + form.other_name || "Not specified"
+                                                    form.surname +
+                                                        " " +
+                                                        form.other_name ||
+                                                    "Not specified"
                                                 }}
                                             </dd>
                                         </div>
