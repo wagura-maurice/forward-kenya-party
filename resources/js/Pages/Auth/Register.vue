@@ -87,8 +87,8 @@ const form = useForm({
     surname: "",
     other_name: "",
     telephone: "",
-    id_type: "national_identification_number", // 'national_identification_number' or 'passport_number'
-    id_number: "",
+    identification_type: "national_identification_number", // 'national_identification_number' or 'passport_number'
+    identification_number: "",
     party_membership_number: props.formData?.membership_number || "",
     date_of_birth: "",
     gender: "",
@@ -177,16 +177,16 @@ const validateStep = (step) => {
                 isValid: false,
                 message: "Member's mobile no. is required",
             };
-        if (!form.id_type)
+        if (!form.identification_type)
             return {
                 isValid: false,
                 message: "Identification type is required",
             };
-        if (!form.id_number?.trim())
+        if (!form.identification_number?.trim())
             return {
                 isValid: false,
                 message: `${
-                    form.id_type === "national_identification_number"
+                    form.identification_type === "national_identification_number"
                         ? "National Identification Number"
                         : "Passport Number"
                 } is required`,
@@ -344,8 +344,8 @@ const canProceedToNextStep = computed(() => {
             form.surname &&
             form.other_name &&
             form.telephone &&
-            form.id_type &&
-            form.id_number &&
+            form.identification_type &&
+            form.identification_number &&
             form.date_of_birth &&
             form.gender &&
             form.ethnicity_id &&
@@ -508,7 +508,7 @@ const canProceedToNextStep = computed(() => {
                                 <div class="space-y-2">
                                     <div class="flex items-center">
                                         <InputLabel
-                                            for="id_type"
+                                            for="identification_type"
                                             value="Identification Type"
                                             class="block text-sm font-medium text-gray-700"
                                         />
@@ -517,11 +517,11 @@ const canProceedToNextStep = computed(() => {
                                         ></i>
                                     </div>
                                     <select
-                                        id="id_type"
-                                        v-model="form.id_type"
+                                        id="identification_type"
+                                        v-model="form.identification_type"
                                         class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
                                         required
-                                        @change="form.id_number = ''"
+                                        @change="form.identification_number = ''"
                                     >
                                         <option value="">
                                             Select Identification Type
@@ -536,7 +536,7 @@ const canProceedToNextStep = computed(() => {
                                         </option>
                                     </select>
                                     <InputError
-                                        :message="form.errors.id_type"
+                                        :message="form.errors.identification_type"
                                         class="mt-1 text-sm text-red-600"
                                     />
                                 </div>
@@ -548,13 +548,13 @@ const canProceedToNextStep = computed(() => {
                                     <div class="flex items-center">
                                         <InputLabel
                                             :for="
-                                                form.id_type ===
+                                                form.identification_type ===
                                                 'national_identification_number'
                                                     ? 'national_identification_number'
                                                     : 'passport_number'
                                             "
                                             :value="
-                                                form.id_type ===
+                                                form.identification_type ===
                                                 'national_identification_number'
                                                     ? 'National Identification Number'
                                                     : 'Passport Number'
@@ -567,16 +567,16 @@ const canProceedToNextStep = computed(() => {
                                     </div>
                                     <TextInput
                                         :id="
-                                            form.id_type ===
+                                            form.identification_type ===
                                             'national_identification_number'
                                                 ? 'national_identification_number'
                                                 : 'passport_number'
                                         "
-                                        v-model="form.id_number"
+                                        v-model="form.identification_number"
                                         type="text"
                                         class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
                                         :placeholder="
-                                            form.id_type ===
+                                            form.identification_type ===
                                             'national_identification_number'
                                                 ? 'Enter National Identification Number'
                                                 : 'Enter Passport Number'
@@ -1059,11 +1059,11 @@ const canProceedToNextStep = computed(() => {
                                                 class="mt-1 text-sm text-gray-900 sm:col-span-2"
                                             >
                                                 {{
-                                                    form.id_number ||
+                                                    form.identification_number ||
                                                     "Not specified"
                                                 }}
                                                 - ({{
-                                                    form.id_type ===
+                                                    form.identification_type ===
                                                     "national_identification_number"
                                                         ? "National Identification Number"
                                                         : "Passport Number"
