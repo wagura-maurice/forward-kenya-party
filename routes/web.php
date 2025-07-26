@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Request;
 use App\Http\Controllers\BackendController;
 use App\Http\Controllers\FrontendController;
+use App\Http\Controllers\OtpVerificationController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 Route::get('/', [FrontendController::class, 'welcome'])->name('frontend.welcome');
@@ -62,3 +63,7 @@ Route::post('/email/verification-notification', function (Request $request) {
 
     return back()->with('status', 'verification-link-failed');
 })->middleware(['auth:sanctum', config('jetstream.auth_session'), 'throttle:6,1'])->name('verification.send');
+
+// OTP Verification Routes
+Route::post('/otp/send', [OtpVerificationController::class, 'sendOtp'])->name('otp.send');
+Route::post('/otp/verify', [OtpVerificationController::class, 'verifyOtp'])->name('otp.verify');
