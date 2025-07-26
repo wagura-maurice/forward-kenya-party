@@ -268,7 +268,7 @@ class Citizen extends Model
         return $this->belongsTo(County::class);
     }
     
-    public function subCounty()
+    public function sub_county()
     {
         return $this->belongsTo(SubCounty::class);
     }
