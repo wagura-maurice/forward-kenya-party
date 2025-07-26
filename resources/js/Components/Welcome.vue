@@ -5,6 +5,9 @@ import ApplicationLogo from "@/Components/ApplicationLogo.vue";
 
 const { props } = usePage();
 
+// Tab state management
+const activeTab = ref('personal');
+
 // Access the authenticated user data
 const user = computed(() => props.auth?.user || null);
 
@@ -26,6 +29,25 @@ const formatDate = (dateString) => {
         return new Date(dateString).toLocaleDateString(undefined, options);
     } catch (e) {
         return "Invalid date";
+    }
+};
+
+// Calculate age from date of birth
+const calculateAge = (dateString) => {
+    if (!dateString) return "N/A";
+    try {
+        const birthDate = new Date(dateString);
+        const today = new Date();
+        let age = today.getFullYear() - birthDate.getFullYear();
+        const monthDiff = today.getMonth() - birthDate.getMonth();
+        
+        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+            age--;
+        }
+        
+        return age;
+    } catch (e) {
+        return "N/A";
     }
 };
 
@@ -134,66 +156,89 @@ const showNotification = (message, isSuccess = true) => {
                 <nav class="mb-6 sm:mb-8" aria-label="Breadcrumb">
                     <ol class="flex items-center space-x-2 text-sm">
                         <li class="inline-flex items-center">
-                            <a href="#" class="inline-flex items-center font-medium text-gray-500 hover:text-primary-600 dark:text-gray-400 dark:hover:text-white transition-colors duration-200">
-                                <i class="fas fa-home w-4 h-4 mr-2"></i>
-                                <span class="hidden sm:inline">Home</span>
-                            </a>
+                            <Link href="/" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
+                                <i class="fas fa-home mr-1.5"></i>
+                                Home
+                            </Link>
                         </li>
-                        <li class="flex items-center text-gray-400">
-                            <i class="fas fa-chevron-right w-3 h-3 mx-2"></i>
-                            <a href="#" class="font-medium text-gray-600 hover:text-primary-600 dark:text-gray-300 dark:hover:text-white transition-colors duration-200">
-                                My Account
-                            </a>
-                        </li>
-                        <li class="flex items-center text-gray-400">
-                            <i class="fas fa-chevron-right w-3 h-3 mx-2"></i>
-                            <span class="font-medium text-primary-600 dark:text-primary-400">
-                                Summary
-                            </span>
+                        <li class="flex items-center">
+                            <i class="fas fa-chevron-right text-xs text-gray-400 mx-2"></i>
+                            <span class="text-gray-600 dark:text-gray-300 font-medium">My Profile</span>
                         </li>
                     </ol>
                 </nav>
 
                 <!-- Page Header -->
-                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-                    <div class="space-y-1">
-                        <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white">
-                            Account Summary
-                        </h2>
-                        <p class="text-sm text-gray-500 dark:text-gray-400">
-                            Welcome back, {{ profile.first_name || 'Member' }}! Here's your account summary.
-                        </p>
-                    </div>
-                    <div class="flex-shrink-0">
-                        <Link
-                            :href="route('profile.show')"
-                            class="text-gray-900 bg-gradient-to-r from-teal-200 to-lime-200 hover:bg-gradient-to-l hover:from-teal-200 hover:to-lime-200 focus:ring-4 focus:outline-none focus:ring-lime-200 dark:focus:ring-teal-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
-                        >
-                            <i class="fas fa-user-edit w-4 h-4 mr-2 transition-transform group-hover:scale-110"></i>
-                            Edit Profile
-                        </Link>
-                    </div>
+                <div class="mb-8">
+                    <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">Member Dashboard</h2>
+                    <p class="text-gray-600 dark:text-gray-300">Welcome back, {{ profile?.surname || 'Member' }}! Here's your account summary.</p>
                 </div>
-                <!-- Content Section -->
-                <div class="overflow-hidden transition-all duration-300">
-                    <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
-                        <!-- Personal Information -->
-                        <div class="space-y-5">
-                            <div class="relative pb-1">
-                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center mb-2">
-                                    <i class="fas fa-user-circle text-primary-600 dark:text-primary-400 mr-2 text-xl"></i>
-                                    Personal Information
-                                </h3>
-                                <div class="absolute -bottom-1 left-0 w-24 h-0.5 bg-gradient-to-r from-green-500 to-blue-500 rounded-full"></div>
-                            </div>
+                
+                <!-- Profile Card with Tabs -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
+                    <!-- Tab Navigation -->
+                    <div class="border-b border-gray-200 dark:border-gray-700">
+                        <nav class="flex -mb-px overflow-x-auto" aria-label="Tabs">
+                            <button 
+                                @click="activeTab = 'personal'"
+                                :class="{
+                                    'border-green-500 text-green-600 dark:text-green-400': activeTab === 'personal',
+                                    'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200': activeTab !== 'personal'}"
+                                class="whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm flex items-center"
+                            >
+                                <i class="fas fa-user-circle mr-2 text-lg"></i>
+                                Personal Information
+                            </button>
+                            <button 
+                                @click="activeTab = 'contact'"
+                                :class="{
+                                    'border-green-500 text-green-600 dark:text-green-400': activeTab === 'contact',
+                                    'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200': activeTab !== 'contact'}"
+                                class="whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm flex items-center"
+                            >
+                                <i class="fas fa-address-card mr-2 text-lg"></i>
+                                Contact Information
+                            </button>
+                            <button 
+                                @click="activeTab = 'location'"
+                                :class="{
+                                    'border-green-500 text-green-600 dark:text-green-400': activeTab === 'location',
+                                    'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200': activeTab !== 'location'}"
+                                class="whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm flex items-center"
+                            >
+                                <i class="fas fa-map-marked-alt mr-2 text-lg"></i>
+                                Location Information
+                            </button>
+                        </nav>
+                    </div>
 
-                            <div class="space-y-4 p-1">
-                                <div class="bg-gradient-to-r from-primary-50 to-blue-50 dark:from-gray-800 dark:to-gray-800 p-3 rounded-lg border border-primary-100 dark:border-gray-700 shadow-sm">
-                                    <p class="text-xs font-semibold text-primary-600 dark:text-primary-400 uppercase tracking-wider mb-1.5 flex items-center">
-                                        <i class="fas fa-id-card mr-1.5 text-sm"></i>
-                                        Member Number
+                    <!-- Tab Content -->
+                    <div class="p-6">
+                        <!-- Personal Information Tab -->
+                        <div v-show="activeTab === 'personal'" class="space-y-6">
+                            <!-- Profile Header -->
+                            <div class="flex flex-col md:flex-row md:items-center md:justify-between border-b border-gray-100 dark:border-gray-700 pb-6">
+                                <div class="flex items-center space-x-4 mb-4 md:mb-0">
+                                    <div class="relative">
+                                        <div class="w-20 h-20 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden">
+                                            <i class="fas fa-user text-4xl text-gray-400"></i>
+                                        </div>
+                                        <span class="absolute -bottom-1 -right-1 bg-green-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+                                            <i class="fas fa-check text-xs"></i>
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <h2 class="text-xl font-bold text-gray-900 dark:text-white">
+                                            {{ profile?.surname }} {{ profile?.other_names }}
+                                        </h2>
+                                        <p class="text-sm text-gray-500 dark:text-gray-400">Party Member</p>
+                                    </div>
+                                </div>
+                                <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg inline-block">
+                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                        Membership Number
                                     </p>
-                                    <div class="flex items-center justify-between bg-white dark:bg-gray-900 px-3 py-2 rounded-md border border-gray-200 dark:border-gray-700">
+                                    <div class="flex items-center">
                                         <div class="flex items-center">
                                             <i class="fas fa-hashtag text-primary-500 dark:text-primary-400 mr-2 text-base"></i>
                                             <span class="text-base font-bold text-gray-900 dark:text-white font-mono tracking-wide uppercase">
@@ -202,179 +247,133 @@ const showNotification = (message, isSuccess = true) => {
                                         </div>
                                         <button 
                                             @click="copyToClipboard(profile?.citizen?.uuid || '')"
-                                            class="text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300 transition-colors duration-200"
+                                            class="text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300 transition-colors duration-200 ml-2"
                                             title="Copy to clipboard"
                                         >
-                                            <i class="far fa-copy text-xs"></i>
+                                            <i class="fas fa-copy"></i>
                                         </button>
                                     </div>
-                                    <p class="text-[11px] text-gray-500 dark:text-gray-400 mt-1.5 flex items-center">
-                                        <i class="fas fa-info-circle mr-1 text-[10px]"></i>
-                                        Your unique Forward Kenya Party identifier
-                                    </p>
                                 </div>
+                            </div>
 
-                                <!-- Surname and Othername in one row -->
-                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <div>
-                                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                            Surname
+                            <!-- Personal Details -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <!-- Personal Information Fields -->
+                                <div>
+                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                        Full Name
+                                    </p>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-user text-gray-400 mr-2 text-sm"></i>
+                                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
+                                            {{ profile?.surname }} {{ profile?.other_names }}
                                         </p>
-                                        <div class="flex items-center">
-                                            <i class="fas fa-user text-gray-400 mr-2 text-sm"></i>
-                                            <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                                {{ profile.last_name ?? user.name }}
-                                            </p>
-                                        </div>
                                     </div>
-                                    <div>
-                                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                            Othername
+                                </div>
+                                <div>
+                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                        Gender
+                                    </p>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-venus-mars text-gray-400 mr-2 text-sm"></i>
+                                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
+                                            {{ profile?.gender ? profile.gender.charAt(0).toUpperCase() + profile.gender.slice(1) : 'Not provided' }}
                                         </p>
-                                        <div class="flex items-center">
-                                            <i class="fas fa-user text-gray-400 mr-2 text-sm"></i>
-                                            <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                                {{ profile.first_name }} {{ profile.middle_name ?? 'NULL' }}
-                                            </p>
-                                        </div>
                                     </div>
-                                    <div>
-                                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                            Gender
+                                </div>
+                                <div>
+                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                        Date of Birth
+                                    </p>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-calendar-alt text-gray-400 mr-2 text-sm"></i>
+                                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
+                                            {{ formatDate(profile?.date_of_birth) }}
+                                            <span class="text-xs text-gray-500 dark:text-gray-400 ml-1">
+                                                (Age: {{ calculateAge(profile?.date_of_birth) }})
+                                            </span>
                                         </p>
-                                        <div class="flex items-center">
-                                            <i class="fas fa-venus-mars text-gray-400 mr-2 text-sm"></i>
-                                            <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                                {{ 
-                                                    profile.gender === 'XX' ? 'Female' : 
-                                                    profile.gender === 'XY' ? 'Male' : 
-                                                    'Not specified' 
-                                                }}
-                                            </p>
-                                        </div>
                                     </div>
-                                    <div>
-                                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                            Date of Birth
+                                </div>
+                                <div>
+                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                        National ID
+                                    </p>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-id-card text-gray-400 mr-2 text-sm"></i>
+                                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
+                                            {{ profile?.citizen?.national_identification_number || 'Not provided' }}
                                         </p>
-                                        <div class="flex items-center">
-                                            <i class="fas fa-calendar-alt text-gray-400 mr-2 text-sm"></i>
-                                            <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                                {{
-                                                    formatDate(
-                                                        profile.date_of_birth
-                                                    ) || 'Not provided'
-                                                }}
-                                            </p>
-                                        </div>
                                     </div>
-                                    <div>
-                                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                            National Identification Number
+                                </div>
+                                <div>
+                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                        Passport Number
+                                    </p>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-passport text-gray-400 mr-2 text-sm"></i>
+                                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
+                                            {{ profile?.citizen?.passport_number || 'Not provided' }}
                                         </p>
-                                        <div class="flex items-center">
-                                            <i class="fas fa-id-card text-gray-400 mr-2 text-sm"></i>
-                                            <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                                {{
-                                                   profile?.citizen ? profile.citizen.national_identification_number : 'Not provided'
-                                                }}
-                                            </p>
-                                        </div>
                                     </div>
-                                    <div>
-                                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                            Passport Number
+                                </div>
+                                <div>
+                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                        Disability Status
+                                    </p>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-wheelchair text-gray-400 mr-2 text-sm"></i>
+                                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
+                                            {{ profile?.disability_status === 'yes' ? 'Yes' : 'No' }}
+                                            <span v-if="profile?.disability_status === 'yes' && profile?.ncpwd_number" class="text-xs text-gray-500 dark:text-gray-400 ml-1">
+                                                (NCPWD: {{ profile.ncpwd_number }})
+                                            </span>
                                         </p>
-                                        <div class="flex items-center">
-                                            <i class="fas fa-passport text-gray-400 mr-2 text-sm"></i>
-                                            <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                                {{ profile?.citizen?.passport_number || 'Not provided' }}
-                                            </p>
-                                        </div>
                                     </div>
-                                    <div>
-                                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                            Disability Status
+                                </div>
+                                <div>
+                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                        Ethnicity
+                                    </p>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-users text-gray-400 mr-2 text-sm"></i>
+                                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
+                                            {{ profile?.ethnicity?.name || 'Not provided' }}
                                         </p>
-                                        <div class="flex items-center">
-                                            <i class="fas fa-wheelchair text-gray-400 mr-2 text-sm"></i>
-                                            <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                                {{ disabilityStatus }}
-                                            </p>
-                                        </div>
                                     </div>
-                                    <div v-if="profile.ncpwd_number">
-                                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                            NCPWD Number
+                                </div>
+                                <div>
+                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                        Religion
+                                    </p>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-pray text-gray-400 mr-2 text-sm"></i>
+                                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
+                                            {{ profile?.religion?.name || 'Not provided' }}
                                         </p>
-                                        <div class="flex items-center">
-                                            <i class="fas fa-id-card text-gray-400 mr-2 text-sm"></i>
-                                            <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                                {{ profile.ncpwd_number }}
-                                            </p>
-                                        </div>
                                     </div>
-                                    <div>
-                                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                            Ethnicity
+                                </div>
+                                <div>
+                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
+                                        Enlisting Date
+                                    </p>
+                                    <div class="flex items-center">
+                                        <i class="fas fa-calendar-plus text-gray-400 mr-2 text-sm"></i>
+                                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
+                                            {{ formatDate(profile?.citizen?.created_at) }}
                                         </p>
-                                        <div class="flex items-center">
-                                            <i class="fas fa-globe text-gray-400 mr-2 text-sm"></i>
-                                            <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                                {{ ethnicity || 'Not provided' }}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                            Religion
-                                        </p>
-                                        <div class="flex items-center">
-                                            <i class="fas fa-pray text-gray-400 mr-2 text-sm"></i>
-                                            <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                                {{ religion || 'Not provided' }}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                            Enlisting Date
-                                        </p>
-                                        <div class="flex items-center">
-                                            <i class="far fa-calendar-check text-gray-400 mr-2 text-sm"></i>
-                                            <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                                2025-01-15
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                            Recruiting Person
-                                        </p>
-                                        <div class="flex items-center">
-                                            <i class="fas fa-user-tie text-gray-400 mr-2 text-sm"></i>
-                                            <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                                John Doe
-                                            </p>
-                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- Contact Information -->
-                        <div class="space-y-5">
-                            <div class="relative pb-1">
-                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center mb-2">
-                                    <i class="fas fa-id-card text-primary-600 dark:text-primary-400 mr-2 text-xl"></i>
-                                    Contact Information
-                                </h3>
-                                <div class="absolute -bottom-1 left-0 w-24 h-0.5 bg-gradient-to-r from-green-500 to-blue-500 rounded-full"></div>
-                            </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-1">
+                        <!-- Contact Information Tab -->
+                        <div v-show="activeTab === 'contact'" class="space-y-6">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Contact Details</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                 <div>
                                     <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                        Email
+                                        Email Address
                                     </p>
                                     <div class="flex items-start">
                                         <i class="fas fa-envelope text-gray-400 mt-0.5 mr-2 flex-shrink-0"></i>
@@ -390,71 +389,28 @@ const showNotification = (message, isSuccess = true) => {
                                     <div class="flex items-center">
                                         <i class="fas fa-phone-alt text-gray-400 mr-2"></i>
                                         <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                            {{
-                                                user?.profile?.telephone ||
-                                                user?.telephone ||
-                                                "Not provided"
-                                            }}
+                                            {{ user?.profile?.telephone || user?.telephone || 'Not provided' }}
                                         </p>
                                     </div>
                                 </div>
-                                <div>
+                                <div class="sm:col-span-2">
                                     <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                        Address Line 1
+                                        Physical Address
                                     </p>
-                                    <div class="flex items-center">
-                                            <i class="fas fa-map-marker-alt text-gray-400 mr-2 text-sm"></i>
-                                            <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                                {{ profile?.address_line_1 || "Not provided" }}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                            Address Line 2
+                                    <div class="flex items-start">
+                                        <i class="fas fa-map-marker-alt text-gray-400 mt-0.5 mr-2 flex-shrink-0"></i>
+                                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
+                                            {{ getAddress }}
                                         </p>
-                                        <div class="flex items-center">
-                                            <i class="fas fa-map-marker-alt text-gray-400 mr-2 text-sm"></i>
-                                            <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                                {{ profile?.address_line_2 || "Not provided" }}
-                                            </p>
-                                        </div>
                                     </div>
-                                    <div>
-                                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                            City
-                                        </p>
-                                        <div class="flex items-center">
-                                            <i class="fas fa-map-marker-alt text-gray-400 mr-2 text-sm"></i>
-                                            <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                                {{ profile?.city || "Not provided" }}
-                                            </p>
-                                        </div>
-                                    </div>
-                                    <div>
-                                        <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                            State
-                                        </p>
-                                        <div class="flex items-center">
-                                            <i class="fas fa-map-marker-alt text-gray-400 mr-2 text-sm"></i>
-                                            <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                                {{ profile?.state || "Not provided" }}
-                                            </p>
-                                        </div>
-                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Location Information -->
-                        <div class="space-y-5">
-                            <div class="relative pb-1">
-                                <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center mb-2">
-                                    <i class="fas fa-map-marked-alt text-primary-600 dark:text-primary-400 mr-2 text-xl"></i>
-                                    Location Information
-                                </h3>
-                                <div class="absolute -bottom-1 left-0 w-24 h-0.5 bg-gradient-to-r from-green-500 to-blue-500 rounded-full"></div>
-                            </div>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-1">
+                        <!-- Location Information Tab -->
+                        <div v-show="activeTab === 'location'" class="space-y-6">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Location Details</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                 <div>
                                     <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
                                         County
@@ -462,7 +418,7 @@ const showNotification = (message, isSuccess = true) => {
                                     <div class="flex items-center">
                                         <i class="fas fa-city text-gray-400 mr-2 text-sm"></i>
                                         <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                            {{ profile?.citizen?.county?.name || "Not provided" }}
+                                            {{ profile?.citizen?.county?.name || 'Not provided' }}
                                         </p>
                                     </div>
                                 </div>
@@ -473,7 +429,7 @@ const showNotification = (message, isSuccess = true) => {
                                     <div class="flex items-center">
                                         <i class="fas fa-map-pin text-gray-400 mr-2 text-sm"></i>
                                         <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                            {{ profile?.citizen?.sub_county?.name || "Not provided" }}
+                                            {{ profile?.citizen?.sub_county?.name || 'Not provided' }}
                                         </p>
                                     </div>
                                 </div>
@@ -484,7 +440,7 @@ const showNotification = (message, isSuccess = true) => {
                                     <div class="flex items-center">
                                         <i class="fas fa-map-signs text-gray-400 mr-2 text-sm"></i>
                                         <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                            {{ profile?.citizen?.constituency?.name || "Not provided" }}
+                                            {{ profile?.citizen?.constituency?.name || 'Not provided' }}
                                         </p>
                                     </div>
                                 </div>
@@ -495,7 +451,7 @@ const showNotification = (message, isSuccess = true) => {
                                     <div class="flex items-center">
                                         <i class="fas fa-map-marker text-gray-400 mr-2 text-sm"></i>
                                         <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                            {{ profile?.citizen?.ward?.name || "Not provided" }}
+                                            {{ profile?.citizen?.ward?.name || 'Not provided' }}
                                         </p>
                                     </div>
                                 </div>
@@ -506,7 +462,7 @@ const showNotification = (message, isSuccess = true) => {
                                     <div class="flex items-center">
                                         <i class="fas fa-map-marker text-gray-400 mr-2 text-sm"></i>
                                         <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                            {{ profile?.citizen?.location?.name || "Not provided" }}
+                                            {{ profile?.citizen?.location?.name || 'Not provided' }}
                                         </p>
                                     </div>
                                 </div>
@@ -517,7 +473,7 @@ const showNotification = (message, isSuccess = true) => {
                                     <div class="flex items-center">
                                         <i class="fas fa-map-marker text-gray-400 mr-2 text-sm"></i>
                                         <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                            {{ profile?.citizen?.village?.name || "Not provided" }}
+                                            {{ profile?.citizen?.village?.name || 'Not provided' }}
                                         </p>
                                     </div>
                                 </div>
@@ -526,9 +482,9 @@ const showNotification = (message, isSuccess = true) => {
                                         Polling Center
                                     </p>
                                     <div class="flex items-center">
-                                        <i class="fas fa-map-marker text-gray-400 mr-2 text-sm"></i>
+                                        <i class="fas fa-vote-yea text-gray-400 mr-2 text-sm"></i>
                                         <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                            {{ profile?.citizen?.polling_center?.name || "Not provided" }}
+                                            {{ profile?.citizen?.polling_center?.name || 'Not provided' }}
                                         </p>
                                     </div>
                                 </div>
@@ -537,9 +493,9 @@ const showNotification = (message, isSuccess = true) => {
                                         Polling Station
                                     </p>
                                     <div class="flex items-center">
-                                        <i class="fas fa-map-marker text-gray-400 mr-2 text-sm"></i>
+                                        <i class="fas fa-vote-yea text-gray-400 mr-2 text-sm"></i>
                                         <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                            {{ profile?.citizen?.polling_station?.name || "Not provided" }}
+                                            {{ profile?.citizen?.polling_station?.name || 'Not provided' }}
                                         </p>
                                     </div>
                                 </div>
@@ -548,9 +504,9 @@ const showNotification = (message, isSuccess = true) => {
                                         Polling Stream
                                     </p>
                                     <div class="flex items-center">
-                                        <i class="fas fa-map-marker text-gray-400 mr-2 text-sm"></i>
+                                        <i class="fas fa-stream text-gray-400 mr-2 text-sm"></i>
                                         <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                            {{ profile?.citizen?.polling_stream?.name || "Not provided" }}
+                                            {{ profile?.citizen?.polling_stream?.name || 'Not provided' }}
                                         </p>
                                     </div>
                                 </div>
