@@ -6,7 +6,6 @@ use App\Models\Ward;
 use App\Models\County;
 use App\Models\Service;
 use Inertia\Middleware;
-use App\Models\SubCounty;
 use App\Models\Department;
 use App\Models\Constituency;
 use Illuminate\Http\Request;
@@ -53,6 +52,13 @@ class HandleInertiaRequests extends Middleware
 
         // Share all location and form data for the registration page
         if ($request->routeIs('register')) {
+            // Import the OTP service constants
+            $otpConstants = [
+                'ttl' => \App\Services\OTP\OneTimePasswordServices::TTL,
+                'rate_limit' => \App\Services\OTP\OneTimePasswordServices::RATE_LIMIT,
+                'attempts_limit' => \App\Services\OTP\OneTimePasswordServices::ATTEMPTS_LIMIT,
+            ];
+            
             $sharedData['formData'] = [
                 'genders' => array_map(
                     fn($name, $id) => ['id' => $id, 'name' => $name],
@@ -77,6 +83,7 @@ class HandleInertiaRequests extends Middleware
                     // 'polling_streams' => PollingStream::select('id', 'name', 'county_id', 'constituency_id', 'ward_id', 'polling_center_id', 'polling_station_id')->get(),
                 ],
                 'membership_number' => generateUniqueMembershipNumber(),
+                'otp_config' => $otpConstants,
             ];
         }
 
