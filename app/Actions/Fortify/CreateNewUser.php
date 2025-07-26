@@ -64,6 +64,7 @@ class CreateNewUser implements CreatesNewUsers
      */
     public function create(array $input)
     {
+        dd($input);
         \Log::info(print_r($input, true));
         
         // Validate the input
