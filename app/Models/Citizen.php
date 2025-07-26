@@ -288,7 +288,35 @@ class Citizen extends Model
         return $this->belongsTo(Location::class);
     }
     
+    public function village()
+    {
+        return $this->belongsTo(Village::class);
+    }
 
+    public function polling_center()
+    {
+        return $this->belongsTo(PollingCenter::class);
+    }
+    
+    public function polling_station()
+    {
+        return $this->belongsTo(PollingStation::class);
+    }
+
+    public function polling_stream()
+    {
+        return $this->belongsTo(PollingStream::class);
+    }
+    
+    public function consulate()
+    {
+        return $this->belongsTo(Consulate::class);
+    }
+    
+    public function refugee_center()
+    {
+        return $this->belongsTo(RefugeeCenter::class);
+    }
     
     public function verifiedBy()
     {
@@ -361,25 +389,5 @@ class Citizen extends Model
     public function scopeStatus($query, int $status)
     {
         return $query->where('_status', $status);
-    }
-
-    public function village()
-    {
-        return $this->belongsTo(Village::class, 'village_id');
-    }
-
-    public function pollingStation()
-    {
-        return $this->belongsTo(PollingStation::class, 'polling_station_id');
-    }
-
-    public function consulate()
-    {
-        return $this->belongsTo(Consulate::class, 'consulate_id');
-    }
-
-    public function refugeeCenter()
-    {
-        return $this->belongsTo(RefugeeCenter::class, 'refugee_center_id');
     }
 }
