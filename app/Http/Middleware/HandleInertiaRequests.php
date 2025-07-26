@@ -72,7 +72,11 @@ class HandleInertiaRequests extends Middleware
                     // 'subCounties' => SubCounty::select('id', 'name', 'county_id')->get(),
                     'constituencies' => Constituency::select('id', 'name', 'county_id')->get(),
                     'wards' => Ward::select('id', 'name', 'county_id', 'constituency_id')->get(),
-                ]
+                    // 'polling_centers' => PollingCenter::select('id', 'name', 'county_id', 'constituency_id', 'ward_id')->get(),
+                    // 'polling_stations' => PollingStation::select('id', 'name', 'county_id', 'constituency_id', 'ward_id', 'polling_center_id')->get(),
+                    // 'polling_streams' => PollingStream::select('id', 'name', 'county_id', 'constituency_id', 'ward_id', 'polling_center_id', 'polling_station_id')->get(),
+                ],
+                'membership_number' => generateUniqueMembershipNumber(),
             ];
         }
 
