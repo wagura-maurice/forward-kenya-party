@@ -2,7 +2,7 @@
 <script setup>
 import { Head, Link, useForm } from "@inertiajs/vue3";
 import { ref, computed, watch } from "vue";
-import axios from 'axios';
+import axios from "axios";
 import AuthenticationCard from "@/Components/AuthenticationCard.vue";
 import AuthenticationCardLogo from "@/Components/AuthenticationCardLogo.vue";
 import Checkbox from "@/Components/Checkbox.vue";
@@ -26,7 +26,7 @@ const stepDescription = computed(() => {
         case 1:
             return "Account and Personal Information";
         case 2:
-            return "Contact, Location, and Signatures";
+            return "Location and Enlisting Information";
         case 3:
             return "Confirmation";
         default:
@@ -37,7 +37,7 @@ const stepDescription = computed(() => {
 const nextStepDescription = computed(() => {
     switch (currentStep.value) {
         case 1:
-            return "Contact, Location, and Signatures";
+            return "Location and Enlisting Information";
         case 2:
             return "Confirmation";
         case 3:
@@ -78,17 +78,18 @@ const genders = computed(() => props.formData?.genders || []);
 const ethnicities = computed(() => props.formData?.ethnicities || []);
 const religions = computed(() => props.formData?.religions || []);
 const counties = computed(() => {
-    console.log('Counties data:', props.formData?.locations?.counties);
+    console.log("Counties data:", props.formData?.locations?.counties);
     return props.formData?.locations?.counties || [];
 });
 
 const form = useForm({
     // Step 1: Account and Personal Information
-    name: "",
+    surname: "",
+    other_name: "",
     telephone: "",
     id_type: "national_identification_number", // 'national_identification_number' or 'passport_number'
     id_number: "",
-    party_membership_number: "", // Read-only, mirrors id_number
+    party_membership_number: props.formData?.membership_number || "",
     date_of_birth: "",
     gender: "",
     ethnicity_id: null,
@@ -96,15 +97,11 @@ const form = useForm({
     disability_status: false, // 'false', 'true'
     ncpwd_number: "",
 
-    // Step 2: Contact, Location, and Signatures
-    postal_address: "",
+    // Step 2: Location and Enlisting Information
     county_id: null,
     constituency_id: null,
     ward_id: null,
     enlisting_date: new Date().toISOString().split("T")[0], // Set to today (July 24, 2025), read-only
-    signature_member: null,
-    recruiting_person_name: "",
-    recruiting_person_signature: null,
 
     // Step 3: Review & Submit
     terms: false,
@@ -113,62 +110,68 @@ const form = useForm({
 const isLoading = ref(false);
 const isSubmitting = ref(false);
 
+// Watch for county changes to filter constituencies
 watch(
-    () => form.id_number,
-    (newIdNumber) => {
-        form.party_membership_number = newIdNumber; // Sync with id_number, read-only
+    () => form.county_id,
+    (newCountyId) => {
+        console.log("County changed:", newCountyId);
+        if (newCountyId) {
+            const filtered =
+                props.formData?.locations?.constituencies?.filter(
+                    (c) => c.county_id == newCountyId
+                ) || [];
+            console.log("Filtered constituencies:", filtered);
+            constituencies.value = filtered;
+        } else {
+            constituencies.value = [];
+        }
+
+        // Reset dependent fields
+        form.constituency_id = "";
+        form.ward_id = "";
+        wards.value = [];
     }
 );
 
-// Watch for county changes to filter constituencies
-watch(() => form.county_id, (newCountyId) => {
-    console.log('County changed:', newCountyId);
-    if (newCountyId) {
-        const filtered = props.formData?.locations?.constituencies?.filter(
-            c => c.county_id == newCountyId
-        ) || [];
-        console.log('Filtered constituencies:', filtered);
-        constituencies.value = filtered;
-    } else {
-        constituencies.value = [];
-    }
-    
-    // Reset dependent fields
-    form.constituency_id = '';
-    form.ward_id = '';
-    wards.value = [];
-});
-
 // Watch for constituency changes to filter wards
-watch(() => form.constituency_id, (newConstituencyId) => {
-    console.log('Constituency changed:', newConstituencyId);
-    if (newConstituencyId) {
-        const filtered = props.formData?.locations?.wards?.filter(
-            w => w.constituency_id == newConstituencyId
-        ) || [];
-        console.log('Filtered wards:', filtered);
-        wards.value = filtered;
-    } else {
-        wards.value = [];
+watch(
+    () => form.constituency_id,
+    (newConstituencyId) => {
+        console.log("Constituency changed:", newConstituencyId);
+        if (newConstituencyId) {
+            const filtered =
+                props.formData?.locations?.wards?.filter(
+                    (w) => w.constituency_id == newConstituencyId
+                ) || [];
+            console.log("Filtered wards:", filtered);
+            wards.value = filtered;
+        } else {
+            wards.value = [];
+        }
+
+        // Reset dependent field
+        form.ward_id = "";
     }
-    
-    // Reset dependent field
-    form.ward_id = '';
-});
+);
 
 // Watch for disability status changes to handle NCPWD number field
-watch(() => form.disability_status, (newStatus) => {
-    if (newStatus === false) {
-        // Clear NCPWD number when disability status is set to 'no'
-        form.ncpwd_number = '';
+watch(
+    () => form.disability_status,
+    (newStatus) => {
+        if (newStatus === false) {
+            // Clear NCPWD number when disability status is set to 'no'
+            form.ncpwd_number = "";
+        }
     }
-});
+);
 
 const validateStep = (step) => {
     if (step === 1) {
         // Step 1: Account and Personal Information
-        if (!form.name?.trim())
-            return { isValid: false, message: "Name of member is required" };
+        if (!form.surname?.trim())
+            return { isValid: false, message: "Surname is required" };
+        if (!form.other_name?.trim())
+            return { isValid: false, message: "Other name is required" };
         if (!form.telephone?.trim())
             return {
                 isValid: false,
@@ -205,9 +208,7 @@ const validateStep = (step) => {
     }
 
     if (step === 2) {
-        // Step 2: Contact, Location, and Signatures
-        if (!form.postal_address?.trim())
-            return { isValid: false, message: "Postal Address is required" };
+        // Step 2: Location and Enlisting Information
         if (!form.county_id)
             return {
                 isValid: false,
@@ -222,21 +223,6 @@ const validateStep = (step) => {
             return {
                 isValid: false,
                 message: "Ward of voter registration is required",
-            };
-        if (!form.signature_member)
-            return {
-                isValid: false,
-                message: "Signature of member is required",
-            };
-        if (!form.recruiting_person_signature)
-            return {
-                isValid: false,
-                message: "Signature of recruiting person is required",
-            };
-        if (!form.recruiting_person_name?.trim())
-            return {
-                isValid: false,
-                message: "Name of recruiting person is required",
             };
         return { isValid: true };
     }
@@ -262,25 +248,6 @@ const prevStep = () => {
     if (currentStep.value > 1) {
         currentStep.value--;
         window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-};
-
-const handleFileUpload = (event, field) => {
-    const file = event.target.files[0];
-    if (file) {
-        if (file.type !== "image/png") {
-            form.errors[field] = "Only PNG files are allowed";
-            event.target.value = "";
-            return;
-        }
-        const maxSize = 2 * 1024 * 1024; // 2MB
-        if (file.size > maxSize) {
-            form.errors[field] = "File size must be less than 2MB";
-            event.target.value = "";
-            return;
-        }
-        form[field] = file;
-        form.errors[field] = "";
     }
 };
 
@@ -345,7 +312,7 @@ const submit = async () => {
             },
         });
     } catch (error) {
-        console.error('Form submission error:', error);
+        console.error("Form submission error:", error);
     } finally {
         isSubmitting.value = false;
     }
@@ -366,15 +333,16 @@ const toTitleCase = (str) => {
 };
 
 const genderDisplayName = computed(() => {
-    if (form.gender === 'XY') return 'Male';
-    if (form.gender === 'XX') return 'Female';
+    if (form.gender === "XY") return "Male";
+    if (form.gender === "XX") return "Female";
     return form.gender || "";
 });
 
 const canProceedToNextStep = computed(() => {
     if (currentStep.value === 1) {
         return (
-            form.name &&
+            form.surname &&
+            form.other_name &&
             form.telephone &&
             form.id_type &&
             form.id_number &&
@@ -386,13 +354,9 @@ const canProceedToNextStep = computed(() => {
         );
     } else if (currentStep.value === 2) {
         return (
-            form.postal_address &&
             form.county_id &&
             form.constituency_id &&
-            form.ward_id &&
-            form.signature_member &&
-            form.recruiting_person_signature &&
-            form.recruiting_person_name
+            form.ward_id
         );
     } else {
         return form.terms;
@@ -425,45 +389,91 @@ const canProceedToNextStep = computed(() => {
                         </h1>
                     </div>
 
-                    <form @submit.prevent="handleSubmit" class="space-y-4" :disabled="isSubmitting">
+                    <form
+                        @submit.prevent="handleSubmit"
+                        class="space-y-4"
+                        :disabled="isSubmitting"
+                    >
                         <!-- Step 1: Account and Personal Information -->
                         <div v-if="currentStep === 1" class="space-y-4">
                             <h2 class="text-base font-medium text-gray-700">
                                 Step 1: Account and Personal Information
                             </h2>
-                            <!-- Name of Member (Full Width) -->
-                            <div class="space-y-2">
-                                <div class="flex items-center">
-                                    <InputLabel
-                                        for="name"
-                                        value="Name of Member"
-                                        class="block text-sm font-medium text-gray-700"
+
+                            <!-- Surname and Other Name (Half Width) -->
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="space-y-2">
+                                    <div class="flex items-center">
+                                        <InputLabel
+                                            for="surname"
+                                            value="Surname"
+                                            class="block text-sm font-medium text-gray-700"
+                                        />
+                                        <i
+                                            class="fas fa-star text-red-500 text-xs ml-1"
+                                        ></i>
+                                    </div>
+                                    <TextInput
+                                        id="surname"
+                                        v-model="form.surname"
+                                        type="text"
+                                        :class="[
+                                            'block w-full rounded-md shadow-sm sm:text-sm py-2 px-3 border transition duration-150 ease-in-out',
+                                            form.errors.surname
+                                                ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                                                : 'border-gray-300 focus:border-green-500 focus:ring-green-500',
+                                            isSubmitting
+                                                ? 'opacity-75 cursor-not-allowed'
+                                                : '',
+                                        ]"
+                                        placeholder="Enter your surname"
+                                        required
+                                        autocomplete="name"
+                                        :disabled="isSubmitting"
+                                        :aria-busy="isSubmitting"
+                                        autofocus
                                     />
-                                    <i
-                                        class="fas fa-star text-red-500 text-xs ml-1"
-                                    ></i>
+                                    <InputError
+                                        :message="form.errors.surname"
+                                        class="mt-1 text-sm text-red-600"
+                                    />
                                 </div>
-                                <TextInput
-                                    id="name"
-                                    v-model="form.name"
-                                    type="text"
-                                    :class="[
-                                        'block w-full rounded-md shadow-sm sm:text-sm py-2 px-3 border transition duration-150 ease-in-out',
-                                        form.errors.name 
-                                            ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
-                                            : 'border-gray-300 focus:border-green-500 focus:ring-green-500',
-                                        isSubmitting ? 'opacity-75 cursor-not-allowed' : ''
-                                    ]"
-                                    required
-                                    autocomplete="name"
-                                    :disabled="isSubmitting"
-                                    :aria-busy="isSubmitting"
-                                    autofocus
-                                />
-                                <InputError
-                                    :message="form.errors.name"
-                                    class="mt-1 text-sm text-red-600"
-                                />
+                                <div class="space-y-2">
+                                    <div class="flex items-center">
+                                        <InputLabel
+                                            for="other_name"
+                                            value="Other Name"
+                                            class="block text-sm font-medium text-gray-700"
+                                        />
+                                        <i
+                                            class="fas fa-star text-red-500 text-xs ml-1"
+                                        ></i>
+                                    </div>
+                                    <TextInput
+                                        id="other_name"
+                                        v-model="form.other_name"
+                                        type="text"
+                                        :class="[
+                                            'block w-full rounded-md shadow-sm sm:text-sm py-2 px-3 border transition duration-150 ease-in-out',
+                                            form.errors.other_name
+                                                ? 'border-red-500 focus:border-red-500 focus:ring-red-500'
+                                                : 'border-gray-300 focus:border-green-500 focus:ring-green-500',
+                                            isSubmitting
+                                                ? 'opacity-75 cursor-not-allowed'
+                                                : '',
+                                        ]"
+                                        placeholder="Enter your other name"
+                                        required
+                                        autocomplete="name"
+                                        :disabled="isSubmitting"
+                                        :aria-busy="isSubmitting"
+                                        autofocus
+                                    />
+                                    <InputError
+                                        :message="form.errors.other_name"
+                                        class="mt-1 text-sm text-red-600"
+                                    />
+                                </div>
                             </div>
 
                             <!-- Member's Mobile No. and Identification Type (Half Width) -->
@@ -486,6 +496,9 @@ const canProceedToNextStep = computed(() => {
                                         class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
                                         placeholder="e.g. 0712345678"
                                         required
+                                        autocomplete="tel"
+                                        :disabled="isSubmitting"
+                                        :aria-busy="isSubmitting"
                                     />
                                     <InputError
                                         :message="form.errors.telephone"
@@ -652,10 +665,11 @@ const canProceedToNextStep = computed(() => {
                                         :options="genders"
                                         label="name"
                                         :reduce="(option) => option.id"
-                                        placeholder="Select gender"
+                                        placeholder="Select sex"
                                         class="w-full"
                                         :class="{
-                                            'border-red-300': form.errors.gender,
+                                            'border-red-300':
+                                                form.errors.gender,
                                         }"
                                         required
                                         :clearable="false"
@@ -689,7 +703,8 @@ const canProceedToNextStep = computed(() => {
                                         placeholder="Select ethnicity"
                                         class="w-full"
                                         :class="{
-                                            'border-red-300': form.errors.ethnicity_id,
+                                            'border-red-300':
+                                                form.errors.ethnicity_id,
                                         }"
                                         required
                                         :clearable="false"
@@ -719,7 +734,8 @@ const canProceedToNextStep = computed(() => {
                                         placeholder="Select religion"
                                         class="w-full"
                                         :class="{
-                                            'border-red-300': form.errors.religion_id,
+                                            'border-red-300':
+                                                form.errors.religion_id,
                                         }"
                                         required
                                         :clearable="false"
@@ -774,67 +790,49 @@ const canProceedToNextStep = computed(() => {
                                         :message="form.errors.disability_status"
                                         class="mt-1 text-sm text-red-600"
                                     />
+                                </div>
+
+                                <div
+                                    v-if="form.disability_status"
+                                    class="space-y-2"
+                                >
+                                    <div class="flex items-center">
+                                        <InputLabel
+                                            for="ncpwd_number"
+                                            value="NCPWD Number"
+                                            class="block text-sm font-medium text-gray-700"
+                                        >
+                                            <i
+                                                class="fas fa-star text-red-500 text-xs ml-1"
+                                            ></i>
+                                        </InputLabel>
                                     </div>
-                                    
-                                    <div v-if="form.disability_status" class="space-y-2">
-                                        <div class="flex items-center">
-                                            <InputLabel
-                                                for="ncpwd_number"
-                                                value="NCPWD Number"
-                                                class="block text-sm font-medium text-gray-700"
-                                            >
-                                                <i class="fas fa-star text-red-500 text-xs ml-1"></i>
-                                            </InputLabel>
-                                        </div>
-                                        <TextInput
-                                            id="ncpwd_number"
-                                            v-model="form.ncpwd_number"
-                                            type="text"
-                                            :class="[
-                                                'block w-full rounded-md shadow-sm sm:text-sm py-2 px-3 border transition duration-150 ease-in-out',
-                                                form.errors.ncpwd_number ? 'border-red-500' : 'border-gray-300 focus:border-green-500 focus:ring-green-500'
-                                            ]"
-                                            required
-                                            placeholder="Enter your NCPWD number"
-                                        />
-                                        <InputError
-                                            :message="form.errors.ncpwd_number"
-                                            class="mt-1 text-sm text-red-600"
-                                        />
-                                    </div>
+                                    <TextInput
+                                        id="ncpwd_number"
+                                        v-model="form.ncpwd_number"
+                                        type="text"
+                                        :class="[
+                                            'block w-full rounded-md shadow-sm sm:text-sm py-2 px-3 border transition duration-150 ease-in-out',
+                                            form.errors.ncpwd_number
+                                                ? 'border-red-500'
+                                                : 'border-gray-300 focus:border-green-500 focus:ring-green-500',
+                                        ]"
+                                        required
+                                        placeholder="Enter your NCPWD number"
+                                    />
+                                    <InputError
+                                        :message="form.errors.ncpwd_number"
+                                        class="mt-1 text-sm text-red-600"
+                                    />
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Step 2: Contact, Location, and Signatures -->
+                        <!-- Step 2: Location and Enlisting Information -->
                         <div v-if="currentStep === 2" class="space-y-4">
                             <h2 class="text-base font-medium text-gray-700">
-                                Step 2: Contact, Location, and Signatures
+                                Step 2: Location and Enlisting Information
                             </h2>
-                            <!-- Postal Address (Full Width) -->
-                            <div class="space-y-2">
-                                <div class="flex items-center">
-                                    <InputLabel
-                                        for="postal_address"
-                                        value="Postal Address"
-                                        class="block text-sm font-medium text-gray-700"
-                                    />
-                                    <i
-                                        class="fas fa-star text-red-500 text-xs ml-1"
-                                    ></i>
-                                </div>
-                                <TextInput
-                                    id="postal_address"
-                                    v-model="form.postal_address"
-                                    type="text"
-                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
-                                    required
-                                />
-                                <InputError
-                                    :message="form.errors.postal_address"
-                                    class="mt-1 text-sm text-red-600"
-                                />
-                            </div>
-
                             <!-- County, Constituency, and Ward (Half Width) -->
                             <div class="grid grid-cols-2 gap-4">
                                 <div class="space-y-2">
@@ -852,15 +850,24 @@ const canProceedToNextStep = computed(() => {
                                         v-model="form.county_id"
                                         :options="counties"
                                         label="name"
-                                        :reduce="county => county.id"
+                                        :reduce="(county) => county.id"
                                         placeholder="Select County"
                                         class="w-full"
-                                        :class="{ 'border-red-500': form.errors.county_id }"
+                                        :class="{
+                                            'border-red-500':
+                                                form.errors.county_id,
+                                        }"
                                         :clearable="false"
                                     >
                                         <template #no-options>
-                                            <div class="text-sm text-gray-500 py-2 px-3">
-                                                {{ counties.length === 0 ? 'No counties available' : 'Type to search...' }}
+                                            <div
+                                                class="text-sm text-gray-500 py-2 px-3"
+                                            >
+                                                {{
+                                                    counties.length === 0
+                                                        ? "No counties available"
+                                                        : "Type to search..."
+                                                }}
                                             </div>
                                         </template>
                                     </VueSelect>
@@ -884,16 +891,27 @@ const canProceedToNextStep = computed(() => {
                                         v-model="form.constituency_id"
                                         :options="constituencies"
                                         label="name"
-                                        :reduce="constituency => constituency.id"
+                                        :reduce="
+                                            (constituency) => constituency.id
+                                        "
                                         placeholder="Select Constituency"
                                         class="w-full"
-                                        :class="{ 'border-red-500': form.errors.constituency_id }"
+                                        :class="{
+                                            'border-red-500':
+                                                form.errors.constituency_id,
+                                        }"
                                         :disabled="!form.county_id"
                                         :clearable="false"
                                     >
                                         <template #no-options>
-                                            <div class="text-sm text-gray-500 py-2 px-3">
-                                                {{ !form.county_id ? 'Please select a county first' : 'No constituencies found' }}
+                                            <div
+                                                class="text-sm text-gray-500 py-2 px-3"
+                                            >
+                                                {{
+                                                    !form.county_id
+                                                        ? "Please select a county first"
+                                                        : "No constituencies found"
+                                                }}
                                             </div>
                                         </template>
                                     </VueSelect>
@@ -921,16 +939,25 @@ const canProceedToNextStep = computed(() => {
                                         v-model="form.ward_id"
                                         :options="wards"
                                         label="name"
-                                        :reduce="ward => ward.id"
+                                        :reduce="(ward) => ward.id"
                                         placeholder="Select Ward"
                                         class="w-full"
-                                        :class="{ 'border-red-500': form.errors.ward_id }"
+                                        :class="{
+                                            'border-red-500':
+                                                form.errors.ward_id,
+                                        }"
                                         :disabled="!form.constituency_id"
                                         :clearable="false"
                                     >
                                         <template #no-options>
-                                            <div class="text-sm text-gray-500 py-2 px-3">
-                                                {{ !form.constituency_id ? 'Please select a constituency first' : 'No wards found' }}
+                                            <div
+                                                class="text-sm text-gray-500 py-2 px-3"
+                                            >
+                                                {{
+                                                    !form.constituency_id
+                                                        ? "Please select a constituency first"
+                                                        : "No wards found"
+                                                }}
                                             </div>
                                         </template>
                                     </VueSelect>
@@ -963,171 +990,6 @@ const canProceedToNextStep = computed(() => {
                                         class="mt-1 text-sm text-red-600"
                                     />
                                 </div>
-                            </div>
-
-                            <!-- Signature of Member and Signature of Recruiting Person (Half Width) -->
-                            <div class="grid grid-cols-2 gap-4">
-                                <div class="space-y-2">
-                                    <div class="flex items-center">
-                                        <InputLabel
-                                            for="signature_member"
-                                            value="Signature of Member"
-                                            class="block text-sm font-medium text-gray-700"
-                                        />
-                                        <i
-                                            class="fas fa-star text-red-500 text-xs ml-1"
-                                        ></i>
-                                    </div>
-                                    <div
-                                        class="flex items-center justify-center w-full"
-                                    >
-                                        <label
-                                            for="signature_member"
-                                            class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
-                                        >
-                                            <div
-                                                class="flex flex-col items-center justify-center pt-5 pb-6"
-                                            >
-                                                <i
-                                                    class="fas fa-signature text-3xl text-gray-400 mb-2"
-                                                ></i>
-                                                <p
-                                                    class="mb-2 text-sm text-gray-500"
-                                                >
-                                                    <span class="font-semibold"
-                                                        >Click to upload</span
-                                                    >
-                                                    or drag and drop
-                                                </p>
-                                                <p
-                                                    class="text-xs text-gray-500"
-                                                >
-                                                    PNG (MAX. 2MB)
-                                                </p>
-                                            </div>
-                                            <input
-                                                id="signature_member"
-                                                type="file"
-                                                class="hidden"
-                                                accept="image/png"
-                                                @change="
-                                                    (e) =>
-                                                        handleFileUpload(
-                                                            e,
-                                                            'signature_member'
-                                                        )
-                                                "
-                                            />
-                                        </label>
-                                    </div>
-                                    <div
-                                        v-if="form.signature_member"
-                                        class="mt-2 text-sm text-green-600"
-                                    >
-                                        <i class="fas fa-check-circle mr-1"></i>
-                                        Signature uploaded successfully
-                                    </div>
-                                    <InputError
-                                        :message="form.errors.signature_member"
-                                        class="mt-1 text-sm text-red-600"
-                                    />
-                                </div>
-                                <div class="space-y-2">
-                                    <div class="flex items-center">
-                                        <InputLabel
-                                            for="recruiting_person_signature"
-                                            value="Signature of Recruiting Person"
-                                            class="block text-sm font-medium text-gray-700"
-                                        />
-                                        <i
-                                            class="fas fa-star text-red-500 text-xs ml-1"
-                                        ></i>
-                                    </div>
-                                    <div
-                                        class="flex items-center justify-center w-full"
-                                    >
-                                        <label
-                                            for="recruiting_person_signature"
-                                            class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100"
-                                        >
-                                            <div
-                                                class="flex flex-col items-center justify-center pt-5 pb-6"
-                                            >
-                                                <i
-                                                    class="fas fa-signature text-3xl text-gray-400 mb-2"
-                                                ></i>
-                                                <p
-                                                    class="mb-2 text-sm text-gray-500"
-                                                >
-                                                    <span class="font-semibold"
-                                                        >Click to upload</span
-                                                    >
-                                                    or drag and drop
-                                                </p>
-                                                <p
-                                                    class="text-xs text-gray-500"
-                                                >
-                                                    PNG (MAX. 2MB)
-                                                </p>
-                                            </div>
-                                            <input
-                                                id="recruiting_person_signature"
-                                                type="file"
-                                                class="hidden"
-                                                accept="image/png"
-                                                @change="
-                                                    (e) =>
-                                                        handleFileUpload(
-                                                            e,
-                                                            'recruiting_person_signature'
-                                                        )
-                                                "
-                                            />
-                                        </label>
-                                    </div>
-                                    <div
-                                        v-if="form.recruiting_person_signature"
-                                        class="mt-2 text-sm text-green-600"
-                                    >
-                                        <i class="fas fa-check-circle mr-1"></i>
-                                        Signature uploaded successfully
-                                    </div>
-                                    <InputError
-                                        :message="
-                                            form.errors
-                                                .recruiting_person_signature
-                                        "
-                                        class="mt-1 text-sm text-red-600"
-                                    />
-                                </div>
-                            </div>
-
-                            <!-- Name of Recruiting Person (Full Width) -->
-                            <div class="space-y-2">
-                                <div class="flex items-center">
-                                    <InputLabel
-                                        for="recruiting_person_name"
-                                        value="Name of Recruiting Person"
-                                        class="block text-sm font-medium text-gray-700"
-                                    />
-                                    <i
-                                        class="fas fa-star text-red-500 text-xs ml-1"
-                                    ></i>
-                                </div>
-                                <TextInput
-                                    id="recruiting_person_name"
-                                    v-model="form.recruiting_person_name"
-                                    type="text"
-                                    class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
-                                    placeholder="Enter the name of the recruiting person"
-                                    required
-                                />
-                                <InputError
-                                    :message="
-                                        form.errors.recruiting_person_name
-                                    "
-                                    class="mt-1 text-sm text-red-600"
-                                />
                             </div>
                         </div>
 
@@ -1181,7 +1043,7 @@ const canProceedToNextStep = computed(() => {
                                                 class="mt-1 text-sm text-gray-900 sm:col-span-2"
                                             >
                                                 {{
-                                                    form.name || "Not specified"
+                                                    form.surname + " " + form.other_name || "Not specified"
                                                 }}
                                             </dd>
                                         </div>
@@ -1345,17 +1207,14 @@ const canProceedToNextStep = computed(() => {
                                                 class="mt-1 text-sm text-gray-900 sm:col-span-2"
                                             >
                                                 {{
-                                                    form.disability_status ===
-                                                    "yes"
+                                                    form.disability_status
                                                         ? "Yes"
                                                         : "No"
                                                 }}
                                             </dd>
                                         </div>
                                         <div
-                                            v-if="
-                                                form.disability_status === 'yes'
-                                            "
+                                            v-if="form.disability_status"
                                             class="sm:grid sm:grid-cols-3 sm:gap-4"
                                         >
                                             <dt
@@ -1432,23 +1291,6 @@ const canProceedToNextStep = computed(() => {
                                             <dt
                                                 class="text-sm font-medium text-gray-500"
                                             >
-                                                Postal Address
-                                            </dt>
-                                            <dd
-                                                class="mt-1 text-sm text-gray-900 sm:col-span-2"
-                                            >
-                                                {{
-                                                    form.postal_address ||
-                                                    "Not specified"
-                                                }}
-                                            </dd>
-                                        </div>
-                                        <div
-                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
-                                        >
-                                            <dt
-                                                class="text-sm font-medium text-gray-500"
-                                            >
                                                 County of Voter Registration
                                             </dt>
                                             <dd
@@ -1498,106 +1340,6 @@ const canProceedToNextStep = computed(() => {
                                                         form.ward_id,
                                                         wards
                                                     )
-                                                }}
-                                            </dd>
-                                        </div>
-                                    </dl>
-                                </div>
-                            </div>
-
-                            <div
-                                class="bg-white rounded-lg shadow overflow-hidden border border-gray-200"
-                            >
-                                <div
-                                    class="px-6 py-4 bg-gray-50 border-b border-gray-200 flex justify-between items-center cursor-pointer"
-                                    @click="toggleAccordion('signatures')"
-                                >
-                                    <h3
-                                        class="text-lg font-medium text-gray-900"
-                                    >
-                                        Signatures and Enlisting Information
-                                    </h3>
-                                    <i
-                                        class="fas fa-chevron-down w-5 h-5 text-gray-500 transform transition-transform duration-200"
-                                        :class="{
-                                            'rotate-180':
-                                                activeAccordion ===
-                                                'signatures',
-                                        }"
-                                    ></i>
-                                </div>
-                                <div
-                                    v-if="activeAccordion === 'signatures'"
-                                    class="p-6"
-                                >
-                                    <dl class="space-y-4">
-                                        <div
-                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
-                                        >
-                                            <dt
-                                                class="text-sm font-medium text-gray-500"
-                                            >
-                                                Enlisting Date
-                                            </dt>
-                                            <dd
-                                                class="mt-1 text-sm text-gray-900 sm:col-span-2"
-                                            >
-                                                {{
-                                                    form.enlisting_date ||
-                                                    "Not specified"
-                                                }}
-                                            </dd>
-                                        </div>
-                                        <div
-                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
-                                        >
-                                            <dt
-                                                class="text-sm font-medium text-gray-500"
-                                            >
-                                                Signature of Member
-                                            </dt>
-                                            <dd
-                                                class="mt-1 text-sm text-gray-900 sm:col-span-2"
-                                            >
-                                                {{
-                                                    form.signature_member
-                                                        ? "Uploaded"
-                                                        : "Not uploaded"
-                                                }}
-                                            </dd>
-                                        </div>
-                                        <div
-                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
-                                        >
-                                            <dt
-                                                class="text-sm font-medium text-gray-500"
-                                            >
-                                                Signature of Recruiting Person
-                                            </dt>
-                                            <dd
-                                                class="mt-1 text-sm text-gray-900 sm:col-span-2"
-                                            >
-                                                {{
-                                                    form.recruiting_person_signature
-                                                        ? "Uploaded"
-                                                        : "Not uploaded"
-                                                }}
-                                            </dd>
-                                        </div>
-                                        <div
-                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
-                                        >
-                                            <dt
-                                                class="text-sm font-medium text-gray-500"
-                                            >
-                                                Name of Recruiting Person
-                                            </dt>
-                                            <dd
-                                                class="mt-1 text-sm text-gray-900 sm:col-span-2"
-                                            >
-                                                {{
-                                                    form.recruiting_person_name ||
-                                                    "Not specified"
                                                 }}
                                             </dd>
                                         </div>
@@ -1684,18 +1426,39 @@ const canProceedToNextStep = computed(() => {
                                 :disabled="currentStep === 1 || isSubmitting"
                                 :aria-busy="isSubmitting"
                             >
-                                <svg v-if="isSubmitting" class="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-700" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                <svg
+                                    v-if="isSubmitting"
+                                    class="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-700"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                >
+                                    <circle
+                                        class="opacity-25"
+                                        cx="12"
+                                        cy="12"
+                                        r="10"
+                                        stroke="currentColor"
+                                        stroke-width="4"
+                                    ></circle>
+                                    <path
+                                        class="opacity-75"
+                                        fill="currentColor"
+                                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                                    ></path>
                                 </svg>
-                                {{ isSubmitting ? 'Processing...' : 'Previous' }}
+                                {{
+                                    isSubmitting ? "Processing..." : "Previous"
+                                }}
                             </button>
                             <div v-else class="w-24"></div>
 
                             <button
                                 type="submit"
                                 class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150 disabled:opacity-75 disabled:cursor-not-allowed"
-                                :disabled="!canProceedToNextStep || isSubmitting"
+                                :disabled="
+                                    !canProceedToNextStep || isSubmitting
+                                "
                                 :aria-busy="isSubmitting"
                             >
                                 <i
