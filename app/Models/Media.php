@@ -12,20 +12,6 @@ use Illuminate\Support\Str;
 class Media extends Model
 {
     use HasFactory, SoftDeletes;
-
-    /**
-     * The data type of the auto-incrementing ID.
-     *
-     * @var string
-     */
-    // protected $keyType = 'string';
-    
-    /**
-     * Indicates if the model's ID is auto-incrementing.
-     *
-     * @var bool
-     */
-    // public $incrementing = false;
     
     /**
      * The attributes that should be cast.
@@ -33,7 +19,6 @@ class Media extends Model
      * @var array
      */
     protected $casts = [
-        // 'uuid' => 'string',
         'configuration' => 'array',
         'metadata' => 'array',
     ];
@@ -79,6 +64,7 @@ class Media extends Model
      * @var array
      */
     protected $fillable = [
+        'id',
         'uuid',
         'name',
         'file_name',

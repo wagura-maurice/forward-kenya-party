@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\DB;
 
 class User extends Authenticatable /* implements MustVerifyEmail */
 {
@@ -60,29 +61,33 @@ class User extends Authenticatable /* implements MustVerifyEmail */
     public function updateProfilePhoto($photo)
     {
         // Create a new media record for the profile photo
-        $media = Media::create([
-            'uuid' => (string) \Illuminate\Support\Str::uuid(),
-            'name' => 'profile_photo_' . $this->id,
-            'slug' => 'profile-photo-' . $this->id,
-            'description' => 'Profile photo for ' . $this->name,
-            'type_id' => MediaType::where('slug', $photo->extension())->first()->id, // Assuming 2 is the ID for 'image' type
-            'category_id' => MediaCategory::where('slug', 'profile_photo')->first()->id, // Default category
-            'file_path' => $photo->store('uploads/media/profile-photos/' . Str::snake(now()->toDateTimeString()), 'public'),
+        $media = new Media;
+
+        // Media Data Fill
+        $media->fill([
+            'uuid' => Str::uuid()->toString(),
+            'name' => ucwords(strtolower("{$this->name} profile photo at " . now()->format('F j, Y, g:i a'))),
+            'slug' => Str::slug("{$this->name} profile photo at " . now()->format('F j, Y, g:i a')),
+            'description' => 'Profile photo for user; ' . $this->name,
+            'type_id' => MediaType::where('slug', 'image')->first()->id, // Assuming 2 is the ID for 'image' type
+            'category_id' => MediaCategory::where('slug', 'profile_photos')->first()->id, // Default category
+            'file_path' => $photo->store('uploads/media/profile-photos/' . Str::slug(now()->toDateTimeString()), 'public'),
             'file_name' => $photo->hashName(),
             'file_extension' => $photo->extension(),
             'file_size' => $photo->getSize(),
-            'mime_type' => $photo->getMimeType(),
-            'is_public' => true,
             'metadata' => [
                 'upload_source' => 'profile_photo',
                 'user_id' => $this->id,
                 'original_name' => $photo->getClientOriginalName(),
+                'mime_type' => $photo->getMimeType(),
             ]
         ]);
+
+        $media->save();
         
         // Update the user's profile_photo_path
         $this->forceFill([
-            'profile_photo_path' => $media->file_path,
+            'profile_photo_id' => $media->id,
         ])->save();
     }
     
