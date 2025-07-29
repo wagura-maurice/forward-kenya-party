@@ -79,6 +79,7 @@ return new class extends Migration
             $table->json('hobbies_interests')->nullable()->comment('Array of user\'s hobbies and interests');
             $table->json('communication_preferences')->nullable()->comment('User\'s communication preferences');
             $table->string('preferred_contact_method', 20)->default('email')->comment('Preferred method of contact');
+            $table->string('profile_burner_photo_path', 2048)->nullable();
             $table->bigInteger('telegram_user_id')->unsigned()->nullable()->unique()->comment('Telegram user ID for bot communications');
             $table->string('telegram_username', 50)->nullable()->comment('Telegram username (without @)');
             $table->boolean('kyc_verified')->default(false)->comment('Flag indicating whether the user\'s KYC (Know Your Customer) is verified');
