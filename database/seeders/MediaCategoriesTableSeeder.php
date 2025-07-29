@@ -18,68 +18,131 @@ class MediaCategoriesTableSeeder extends Seeder
         // Delete all existing records in the media_categories table
         \DB::table('media_categories')->delete();
 
-        // Define possible media categories
+        // Define media categories for a political party organization
         $categories = [
             [
-                'name' => 'Images',
-                'slug' => Str::slug('Images'),
-                'description' => 'Media category for images such as photos, illustrations, and graphics.',
-                'configuration' => json_encode(['allow_uploads' => true]),
+                'name' => 'Profile Photos',
+                'slug' => 'profile_photos',
+                'description' => 'Member and staff profile pictures',
+                'configuration' => json_encode([
+                    'max_size' => 2048, // 2MB
+                    'allowed_types' => ['jpg', 'jpeg', 'png'],
+                    'dimensions' => '300x300',
+                    'required' => false
+                ]),
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             [
-                'name' => 'Videos',
-                'slug' => Str::slug('Videos'),
-                'description' => 'Media category for videos such as clips, movies, and tutorials.',
-                'configuration' => json_encode(['allow_streaming' => true]),
+                'name' => 'Campaign Materials',
+                'slug' => 'campaign_materials',
+                'description' => 'Election campaign posters, flyers, and banners',
+                'configuration' => json_encode([
+                    'max_size' => 5120, // 5MB
+                    'allowed_types' => ['jpg', 'jpeg', 'png', 'pdf'],
+                    'categories' => ['posters', 'flyers', 'banners']
+                ]),
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             [
-                'name' => 'Audio',
-                'slug' => Str::slug('Audio'),
-                'description' => 'Media category for audio files such as music, podcasts, and sound effects.',
-                'configuration' => json_encode(['allow_downloads' => true]),
+                'name' => 'Official Documents',
+                'slug' => 'official_documents',
+                'description' => 'Party manifestos, policy papers, and official statements',
+                'configuration' => json_encode([
+                    'max_size' => 10240, // 10MB
+                    'allowed_types' => ['pdf', 'doc', 'docx', 'odt'],
+                    'version_control' => true
+                ]),
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             [
-                'name' => 'Documents',
-                'slug' => Str::slug('Documents'),
-                'description' => 'Media category for documents such as PDFs, Word files, and spreadsheets.',
-                'configuration' => json_encode(['allow_previews' => true]),
+                'name' => 'Event Media',
+                'slug' => 'event_media',
+                'description' => 'Photos and videos from party events, rallies, and meetings',
+                'configuration' => json_encode([
+                    'max_size' => 15360, // 15MB
+                    'allowed_types' => ['jpg', 'jpeg', 'png', 'mp4', 'mov'],
+                    'metadata' => ['date', 'location', 'attendees']
+                ]),
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             [
-                'name' => 'Animations',
-                'slug' => Str::slug('Animations'),
-                'description' => 'Media category for animations such as GIFs, motion graphics, and 3D models.',
-                'configuration' => json_encode(['allow_looping' => true]),
+                'name' => 'Press Releases',
+                'slug' => 'press_releases',
+                'description' => 'Official press statements and media advisories',
+                'configuration' => json_encode([
+                    'max_size' => 5120, // 5MB
+                    'allowed_types' => ['pdf', 'docx', 'txt'],
+                    'approval_required' => true
+                ]),
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             [
-                'name' => 'Presentations',
-                'slug' => Str::slug('Presentations'),
-                'description' => 'Media category for presentations such as PowerPoint slides and Keynote files.',
-                'configuration' => json_encode(['allow_editing' => true]),
+                'name' => 'Speeches',
+                'slug' => 'speeches',
+                'description' => 'Transcripts and recordings of important speeches',
+                'configuration' => json_encode([
+                    'max_size' => 10240, // 10MB
+                    'allowed_types' => ['mp3', 'wav', 'docx', 'pdf'],
+                    'transcript_required' => true
+                ]),
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             [
-                'name' => 'Archives',
-                'slug' => Str::slug('Archives'),
-                'description' => 'Media category for archived files such as ZIPs, RARs, and compressed folders.',
-                'configuration' => json_encode(['allow_extraction' => true]),
+                'name' => 'Training Materials',
+                'slug' => 'training_materials',
+                'description' => 'Resources for member training and development',
+                'configuration' => json_encode([
+                    'max_size' => 25600, // 25MB
+                    'allowed_types' => ['pdf', 'ppt', 'pptx', 'mp4'],
+                    'access_level' => 'members_only'
+                ]),
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             [
-                'name' => 'Templates',
-                'slug' => Str::slug('Templates'),
-                'description' => 'Media category for templates such as design mockups, website themes, and document formats.',
-                'configuration' => json_encode(['allow_customization' => true]),
+                'name' => 'Social Media Assets',
+                'slug' => 'social_media_assets',
+                'description' => 'Graphics and content for social media platforms',
+                'configuration' => json_encode([
+                    'max_size' => 5120, // 5MB
+                    'allowed_types' => ['jpg', 'jpeg', 'png', 'gif', 'mp4'],
+                    'platforms' => ['facebook', 'twitter', 'instagram', 'youtube']
+                ]),
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             [
-                'name' => 'Icons',
-                'slug' => Str::slug('Icons'),
-                'description' => 'Media category for icons such as app icons, UI elements, and vector graphics.',
-                'configuration' => json_encode(['allow_scaling' => true]),
+                'name' => 'Financial Records',
+                'slug' => 'financial_records',
+                'description' => 'Audit reports, funding disclosures, and financial statements',
+                'configuration' => json_encode([
+                    'max_size' => 10240, // 10MB
+                    'allowed_types' => ['pdf', 'xlsx', 'xls'],
+                    'access_level' => 'restricted',
+                    'retention_period' => '7 years'
+                ]),
+                'created_at' => now(),
+                'updated_at' => now()
             ],
             [
-                'name' => 'Fonts',
-                'slug' => Str::slug('Fonts'),
-                'description' => 'Media category for fonts such as typefaces, font families, and web fonts.',
-                'configuration' => json_encode(['allow_embedding' => true]),
-            ],
+                'name' => 'Member Records',
+                'slug' => 'member_records',
+                'description' => 'Confidential member information and documentation',
+                'configuration' => json_encode([
+                    'max_size' => 5120, // 5MB
+                    'allowed_types' => ['pdf', 'docx', 'jpg', 'jpeg', 'png'],
+                    'encryption_required' => true,
+                    'access_level' => 'admin_only'
+                ]),
+                'created_at' => now(),
+                'updated_at' => now()
+            ]
         ];
 
         // Insert the media categories into the database using Eloquent
