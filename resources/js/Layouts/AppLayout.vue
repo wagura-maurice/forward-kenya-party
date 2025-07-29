@@ -273,13 +273,6 @@ onUnmounted(() => {
                                         </div>
                                     </div>
                                 </div>
-                                <NavLink
-                                    :href="route('profile.show')"
-                                    :active="route().current('profile.show')"
-                                    class="ml-4"
-                                >
-                                    Profile
-                                </NavLink>
                             </div>
                         </div>
 
@@ -479,13 +472,19 @@ onUnmounted(() => {
                                         <div
                                             class="block px-4 py-2 text-xs text-gray-400"
                                         >
-                                            My Account
+                                            Manage Account
                                         </div>
+
+                                        <DropdownLink
+                                            :href="route('profile')"
+                                        >
+                                            My Profile
+                                        </DropdownLink>
 
                                         <DropdownLink
                                             :href="route('profile.show')"
                                         >
-                                            My Profile
+                                            Account Settings
                                         </DropdownLink>
 
                                         <DropdownLink
@@ -499,6 +498,13 @@ onUnmounted(() => {
                                         </DropdownLink>
 
                                         <div class="border-t border-gray-200" />
+                                        
+                                        <!-- System Settings -->
+                                        <DropdownLink
+                                            :href="route('settings')"
+                                        >
+                                            System Settings
+                                        </DropdownLink>
 
                                         <!-- Authentication -->
                                         <form @submit.prevent="logout">
@@ -729,10 +735,17 @@ onUnmounted(() => {
 
                         <div class="mt-3 space-y-1">
                             <ResponsiveNavLink
+                                :href="route('profile')"
+                                :active="route().current('profile')"
+                            >
+                                My Profile
+                            </ResponsiveNavLink>
+
+                            <ResponsiveNavLink
                                 :href="route('profile.show')"
                                 :active="route().current('profile.show')"
                             >
-                                Profile
+                                Account Settings
                             </ResponsiveNavLink>
 
                             <ResponsiveNavLink
@@ -741,6 +754,13 @@ onUnmounted(() => {
                                 :active="route().current('api-tokens.index')"
                             >
                                 Developer Access
+                            </ResponsiveNavLink>
+
+                            <ResponsiveNavLink
+                                :href="route('settings')"
+                                :active="route().current('settings')"
+                            >
+                                System Settings
                             </ResponsiveNavLink>
 
                             <!-- Authentication -->
