@@ -791,7 +791,7 @@ const canProceedToNextStep = computed(() => {
 </script>
 
 <template>
-    <Head title="Register" />
+    <Head title="Sign up" />
 
     <div
         class="min-h-screen flex flex-col justify-center items-center bg-gray-100 px-4 py-8 md:h-screen"

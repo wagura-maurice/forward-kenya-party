@@ -30,7 +30,7 @@ const submit = () => {
 </script>
 
 <template>
-    <Head title="Log in" />
+    <Head title="Sign in" />
 
     <AuthenticationCard>
         <template #logo>
@@ -99,7 +99,7 @@ const submit = () => {
                     <span class="ms-2 text-sm text-gray-600">Remember me</span>
                 </label>
 
-                <!-- Login Button -->
+                <!-- Sign In Button -->
                 <div class="mt-4">
                     <PrimaryButton
                         class="w-full"
