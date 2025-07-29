@@ -135,7 +135,7 @@ Route::prefix('religions')->group(function () {
 Route::group(['prefix' => 'auth'], function () {
     Route::post('/sign-up', [AuthenticationController::class, 'signUp'])->name('auth.sign-up');
     Route::post('/sign-in', [AuthenticationController::class, 'signIn'])->name('auth.sign-in');
-    Route::get('/request-otp', [AuthenticationController::class, 'requestOTP'])->name('auth.request-otp');
+    Route::post('/request-otp', [AuthenticationController::class, 'requestOTP'])->name('auth.request-otp');
     Route::post('/verify-otp', [AuthenticationController::class, 'verifyOTP'])->name('auth.verify-otp');
     Route::post('/forgot-password', [AuthenticationController::class, 'forgotPassword'])->name('auth.forgot-password');
     Route::post('/reset-password', [AuthenticationController::class, 'resetPassword'])->name('auth.reset-password');

@@ -6,7 +6,6 @@ use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Request;
 use App\Http\Controllers\BackendController;
 use App\Http\Controllers\FrontendController;
-use App\Http\Controllers\OtpVerificationController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 Route::get('/', [FrontendController::class, 'welcome'])->name('frontend.welcome');
@@ -33,6 +32,13 @@ Route::middleware([
     Route::get('/dashboard', [BackendController::class, 'dashboard'])->name('dashboard');
     
     // Dynamic department and service routes are registered in RouteServiceProvider
+
+    // Profile
+    Route::get('/profile', [BackendController::class, 'profile'])->name('profile');
+    Route::get('/profile/{user_id}/view', [BackendController::class, 'viewProfile'])->name('profile.view');
+
+    // Settings
+    Route::get('/settings', [BackendController::class, 'settings'])->name('settings');
 });
 
 Route::get('/email/verify', function () {
@@ -64,6 +70,3 @@ Route::post('/email/verification-notification', function (Request $request) {
     return back()->with('status', 'verification-link-failed');
 })->middleware(['auth:sanctum', config('jetstream.auth_session'), 'throttle:6,1'])->name('verification.send');
 
-// OTP Verification Routes
-Route::post('/otp/send', [OtpVerificationController::class, 'sendOtp'])->name('otp.send');
-Route::post('/otp/verify', [OtpVerificationController::class, 'verifyOtp'])->name('otp.verify');
