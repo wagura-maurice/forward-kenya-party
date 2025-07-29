@@ -93,6 +93,8 @@ class CreateNewUser implements CreatesNewUsers
                 function ($attribute, $value, $fail) use ($input) {
                     if (($input['disability_status'] ?? false) && empty($value)) {
                         $fail('The NCPWD number is required when disability status is "Yes".');
+                    } elseif ($value && Profile::where('ncpwd_number', $value)->exists()) {
+                        $fail('The NCPWD number has already been taken.');
                     }
                 }
             ],
