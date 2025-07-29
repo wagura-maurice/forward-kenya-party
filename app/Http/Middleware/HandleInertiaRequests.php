@@ -4,11 +4,21 @@ namespace App\Http\Middleware;
 
 use App\Models\Ward;
 use App\Models\County;
+use App\Models\Gender;
 use App\Models\Service;
+use App\Models\Village;
 use Inertia\Middleware;
+use App\Models\Location;
+use App\Models\Religion;
+use App\Models\Ethnicity;
+use App\Models\SubCounty;
 use App\Models\Department;
 use App\Models\Constituency;
 use Illuminate\Http\Request;
+use App\Models\PollingCenter;
+use App\Models\PollingStream;
+use App\Models\PollingStation;
+use App\Services\OTP\OneTimePasswordServices;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -50,37 +60,39 @@ class HandleInertiaRequests extends Middleware
             ],
         ];
 
-        // Share all location and form data for the registration page
-        if ($request->routeIs('register')) {
+        // Share all location and form data for the registration and profile pages
+        if ($request->routeIs('register') || str_starts_with($request->path(), 'user/profile') || $request->routeIs('profile.*')) {
             // Import the OTP service constants
             $otpConstants = [
-                'ttl' => \App\Services\OTP\OneTimePasswordServices::TTL,
-                'rate_limit' => \App\Services\OTP\OneTimePasswordServices::RATE_LIMIT,
-                'attempts_limit' => \App\Services\OTP\OneTimePasswordServices::ATTEMPTS_LIMIT,
+                'ttl' => OneTimePasswordServices::TTL,
+                'rate_limit' => OneTimePasswordServices::RATE_LIMIT,
+                'attempts_limit' => OneTimePasswordServices::ATTEMPTS_LIMIT,
             ];
             
             $sharedData['formData'] = [
                 'genders' => array_map(
                     fn($name, $id) => ['id' => $id, 'name' => $name],
-                    array_values(\App\Models\Gender::getGenderOptions()),
-                    array_keys(\App\Models\Gender::getGenderOptions())
+                    array_values(Gender::getGenderOptions()),
+                    array_keys(Gender::getGenderOptions())
                 ),
-                'ethnicities' => \App\Models\Ethnicity::select('id', 'name')
+                'ethnicities' => Ethnicity::select('id', 'name')
                     ->orderBy('name')
                     ->get()
                     ->toArray(),
-                'religions' => \App\Models\Religion::select('id', 'name')
+                'religions' => Religion::select('id', 'name')
                     ->orderBy('name')
                     ->get()
                     ->toArray(),
                 'locations' => [
-                    'counties' => County::select('id', 'name')->get(),
-                    // 'subCounties' => SubCounty::select('id', 'name', 'county_id')->get(),
-                    'constituencies' => Constituency::select('id', 'name', 'county_id')->get(),
-                    'wards' => Ward::select('id', 'name', 'county_id', 'constituency_id')->get(),
-                    // 'polling_centers' => PollingCenter::select('id', 'name', 'county_id', 'constituency_id', 'ward_id')->get(),
-                    // 'polling_stations' => PollingStation::select('id', 'name', 'county_id', 'constituency_id', 'ward_id', 'polling_center_id')->get(),
-                    // 'polling_streams' => PollingStream::select('id', 'name', 'county_id', 'constituency_id', 'ward_id', 'polling_center_id', 'polling_station_id')->get(),
+                    'counties' => County::select('id', 'name')->get()->toArray(),
+                    'sub_counties' => SubCounty::select('id', 'name', 'county_id')->get()->toArray(),
+                    'constituencies' => Constituency::select('id', 'name', 'county_id')->get()->toArray(),
+                    'wards' => Ward::select('id', 'name', 'county_id', 'constituency_id')->get()->toArray(),
+                    'locations' => Location::select('id', 'name', 'county_id', 'constituency_id', 'ward_id')->get()->toArray(),
+                    'villages' => Village::select('id', 'name', 'county_id', 'constituency_id', 'ward_id', 'location_id')->get()->toArray(),
+                    'polling_centers' => PollingCenter::select('id', 'name', 'county_id', 'constituency_id', 'ward_id', 'location_id', 'village_id')->get()->toArray(),
+                    'polling_stations' => PollingStation::select('id', 'name', 'center_id')->get()->toArray(),
+                    'polling_streams' => PollingStream::select('id', 'name', 'center_id', 'station_id')->get()->toArray(),
                 ],
                 'membership_number' => generateUniqueMembershipNumber(),
                 'otp_config' => $otpConstants,
