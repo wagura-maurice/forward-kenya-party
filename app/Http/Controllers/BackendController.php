@@ -14,24 +14,83 @@ class BackendController extends Controller
 {
     public function dashboard(Request $request)
     {
+        $user = $request->user()->load('roles');
+        $roles = $user->roles->sortByDesc('id')->pluck('name')->toArray();
+
+        // Get recent activities
+        $featuredProjects = Activity::latest()
+            ->take(5)
+            ->get();
+
+        // Get statistics
+        $stats = [
+            'total_users' => User::count(),
+            'total_services' => Service::count(),
+            'total_departments' => Department::count(),
+            'featured_projects' => $featuredProjects->count(),
+        ];
+
+        // Get featured services and departments
+        $featuredServices = Service::where('is_featured', true)
+            ->with('departments')
+            ->orderBy('name')
+            ->take(4)
+            ->get();
+
+        $featuredDepartments = Department::where('is_featured', true)
+            ->withCount('services')
+            ->orderBy('name')
+            ->take(4)
+            ->get();
+
+        return Inertia::render('Dashboard', [
+            'title' => ucwords($roles[0]) . ' Dashboard',
+            'breadcrumbs' => [
+                [
+                    'label' => 'Dashboard',
+                    'url' => route('dashboard')
+                ]
+            ],
+            'data' => [
+                'stats' => $stats,
+                'featuredServices' => $featuredServices,
+                'featuredDepartments' => $featuredDepartments,
+                'featuredProjects' => $featuredProjects,
+                'role' => $roles[0],
+            ],
+            'canLogin' => Route::has('login'),
+            'canRegister' => Route::has('register'),
+            'laravelVersion' => \Illuminate\Foundation\Application::VERSION,
+            'phpVersion' => PHP_VERSION,
+        ]);
+    }
+
+    public function profile(Request $request)
+    {
         // Get the authenticated user with their profile and relationships
-        $user = $request->user()->load(['profile' => function($query) {
-            $query->with([
-                'religion',
-                'ethnicity',
-                'citizen.county',
-                'citizen.sub_county',
-                'citizen.constituency',
-                'citizen.ward',
-                'citizen.polling_center',
-                'citizen.polling_station',
-                'citizen.polling_stream',
-                'citizen.location',
-                'citizen.village',
-                'citizen.consulate',
-                'citizen.refugee_center'
-            ]);
-        }]);
+        $user = $request->user()->load([
+            'profile' => function($query) {
+                $query->with([
+                    'religion',
+                    'ethnicity',
+                    'citizen' => function($query) {
+                        $query->with([
+                            'county',
+                            'sub_county',
+                            'constituency',
+                            'ward',
+                            'location',
+                            'village',
+                            'polling_center',
+                            'polling_station',
+                            'polling_stream',
+                            'consulate',
+                            'refugee_center'
+                        ]);
+                    }
+                ]);
+            }
+        ]);
 
         // Prepare the user data for the frontend
         $userData = [
@@ -43,29 +102,19 @@ class BackendController extends Controller
         ];
 
         if ($user->profile) {
-            $userData['profile'] = [
-                'uuid' => $user->profile->uuid,
-                'first_name' => $user->profile->first_name,
-                'middle_name' => $user->profile->middle_name,
-                'last_name' => $user->profile->last_name,
-                'gender' => $user->profile->gender,
-                'date_of_birth' => $user->profile->date_of_birth,
-                'telephone' => $user->profile->telephone,
-                'disability_status' => $user->profile->disability_status,
-                'ncpwd_number' => $user->profile->ncpwd_number,
-                'address_line_1' => $user->profile->address_line_1,
-                'address_line_2' => $user->profile->address_line_2,
-                'city' => $user->profile->city,
-                'state' => $user->profile->state,
-                'postal_code' => $user->profile->postal_code,
-                'religion' => $user->profile->religion ? [
-                    'id' => $user->profile->religion->id,
-                    'name' => $user->profile->religion->name
-                ] : null,
-                'ethnicity' => $user->profile->ethnicity ? [
-                    'id' => $user->profile->ethnicity->id,
-                    'name' => $user->profile->ethnicity->name
-                ] : null,
+            $profile = $user->profile->toArray();
+            
+            $profile['religion'] = $user->profile->religion ? [
+                'id' => $user->profile->religion->id,
+                'name' => $user->profile->religion->name
+            ] : null;
+
+            $profile['ethnicity'] = $user->profile->ethnicity ? [
+                'id' => $user->profile->ethnicity->id,
+                'name' => $user->profile->ethnicity->name
+            ] : null;
+
+            $profile['citizen'] = $user->profile->citizen ? [
                 'national_identification_number' => $user->profile->citizen->national_identification_number,
                 'county' => $user->profile->citizen->county ? [
                     'id' => $user->profile->citizen->county->id,
@@ -111,48 +160,58 @@ class BackendController extends Controller
                     'id' => $user->profile->citizen->refugee_center->id,
                     'name' => $user->profile->citizen->refugee_center->name
                 ] : null,
-                'created_at' => $user->profile->created_at,
-                'updated_at' => $user->profile->updated_at
-            ];
+            ] : null;
+
+            $userData['profile'] = $profile;
         }
 
-        // Get recent activities
-        $recentActivities = Activity::latest()
-            ->take(5)
-            ->get();
-
-        // Get statistics
-        $stats = [
-            'total_users' => User::count(),
-            'total_services' => Service::count(),
-            'total_departments' => Department::count(),
-            'recent_activities' => $recentActivities->count(),
-        ];
-
-        // Get featured services and departments
-        $featuredServices = Service::where('is_featured', true)
-            ->with('departments')
-            ->orderBy('name')
-            ->take(4)
-            ->get();
-
-        $featuredDepartments = Department::where('is_featured', true)
-            ->withCount('services')
-            ->orderBy('name')
-            ->take(4)
-            ->get();
-
-        return Inertia::render('Dashboard', [
-            'title' => 'Dashboard',
-            'auth' => [
+        return Inertia::render('Profile/Index', [
+            'title' => 'My Profile',
+            'data' => [
                 'user' => $userData
             ],
-            'stats' => $stats,
-            'featuredServices' => $featuredServices,
-            'featuredDepartments' => $featuredDepartments,
-            'recentActivities' => $recentActivities,
             'breadcrumbs' => [
-                ['label' => 'Dashboard', 'url' => route('dashboard')]
+                ['label' => 'Profile', 'url' => route('profile')]
+            ],
+            'canLogin' => Route::has('login'),
+            'canRegister' => Route::has('register'),
+            'laravelVersion' => \Illuminate\Foundation\Application::VERSION,
+            'phpVersion' => PHP_VERSION,
+        ]);
+    }
+
+    public function viewProfile(Request $request, $user_id)
+    {
+        return Inertia::render('Profile/View', [
+            'title' => 'View Profile',
+            'data' => [
+                'user' => User::find($user_id)
+            ],
+            'breadcrumbs' => [
+                [
+                    'label' => 'Profile',
+                    'url' => route('profile')
+                ]
+            ],
+            'canLogin' => Route::has('login'),
+            'canRegister' => Route::has('register'),
+            'laravelVersion' => \Illuminate\Foundation\Application::VERSION,
+            'phpVersion' => PHP_VERSION,
+        ]);
+    }
+
+    public function settings(Request $request)
+    {
+        return Inertia::render('Settings', [
+            'title' => 'Systems Settings',
+            'data' => [
+                'user' => $request->user()
+            ],
+            'breadcrumbs' => [
+                [
+                    'label' => 'Settings',
+                    'url' => route('settings')
+                ]
             ],
             'canLogin' => Route::has('login'),
             'canRegister' => Route::has('register'),

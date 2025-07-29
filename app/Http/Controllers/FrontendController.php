@@ -171,7 +171,7 @@ class FrontendController extends Controller
             'departments_last_page' => $departments->lastPage(),
         ]);
 
-        return Inertia::render('Frontend/Welcome', [
+        return Inertia::render('Welcome', [
             'canLogin' => Route::has('login'),
             'canRegister' => Route::has('register'),
             'logoUrl' => asset('assets/FKP COLLATERALS/FKP PNG/Secondary logo/Asset 5FKP.png'),
