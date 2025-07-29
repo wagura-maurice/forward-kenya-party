@@ -1,5 +1,5 @@
 <script setup>
-import { Head, Link, usePage } from "@inertiajs/vue3";
+import { Head, Link, usePage, router } from "@inertiajs/vue3";
 import { computed, onMounted, ref } from "vue";
 import ApplicationLogo from "@/Components/ApplicationLogo.vue";
 
@@ -13,13 +13,6 @@ const user = computed(() => props.auth?.user || null);
 
 // Access the profile data with all relationships
 const profile = computed(() => user.value?.profile || {});
-
-// Debugging
-onMounted(() => {
-    console.log("Page props:", props);
-    console.log("User data:", user.value);
-    console.log("Profile data:", profile.value);
-});
 
 // Format date to a readable string
 const formatDate = (dateString) => {
@@ -146,406 +139,329 @@ const showNotification = (message, isSuccess = true) => {
         showToast.value = false;
     }, 3000);
 };
+
+// Library section state
+const isLibraryExpanded = ref(false);
+
+// Toggle library section
+const toggleLibrary = () => {
+    isLibraryExpanded.value = !isLibraryExpanded.value;
+};
+
+// Import route helper
+// Inside the <script setup> section
+const {
+    stats,
+    featuredServices,
+    featuredDepartments,
+    latestActivities
+} = props.data || {
+    stats: null,
+    featuredServices: null,
+    featuredDepartments: null,
+    latestActivities: null
+};
 </script>
 
 <template>
     <div class="min-h-screen bg-white dark:bg-gray-900">
         <section class="py-6 sm:py-8">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <!-- Breadcrumb -->
-                <nav class="mb-6 sm:mb-8" aria-label="Breadcrumb">
-                    <ol class="flex items-center space-x-2 text-sm">
-                        <li class="inline-flex items-center">
-                            <Link href="/" class="text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors">
-                                <i class="fas fa-home mr-1.5"></i>
-                                Home
-                            </Link>
-                        </li>
-                        <li class="flex items-center">
-                            <i class="fas fa-chevron-right text-xs text-gray-400 mx-2"></i>
-                            <span class="text-gray-600 dark:text-gray-300 font-medium">My Profile</span>
-                        </li>
-                    </ol>
-                </nav>
-
-                <!-- Page Header -->
-                <div class="mb-8">
-                    <h2 class="text-2xl md:text-3xl font-bold text-gray-900 dark:text-white mb-2">Member Dashboard</h2>
-                    <p class="text-gray-600 dark:text-gray-300">Welcome back, {{ profile?.surname || 'Member' }}! Here's your account summary.</p>
-                </div>
-                
-                <!-- Profile Card with Tabs -->
-                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
-                    <!-- Tab Navigation -->
-                    <div class="border-b border-gray-200 dark:border-gray-700">
-                        <nav class="flex -mb-px overflow-x-auto" aria-label="Tabs">
-                            <button 
-                                @click="activeTab = 'personal'"
-                                :class="{
-                                    'border-green-500 text-green-600 dark:text-green-400': activeTab === 'personal',
-                                    'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200': activeTab !== 'personal'}"
-                                class="whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm flex items-center"
-                            >
-                                <i class="fas fa-user-circle mr-2 text-lg"></i>
-                                Personal Information
-                            </button>
-                            <button 
-                                @click="activeTab = 'contact'"
-                                :class="{
-                                    'border-green-500 text-green-600 dark:text-green-400': activeTab === 'contact',
-                                    'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200': activeTab !== 'contact'}"
-                                class="whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm flex items-center"
-                            >
-                                <i class="fas fa-address-card mr-2 text-lg"></i>
-                                Contact Information
-                            </button>
-                            <button 
-                                @click="activeTab = 'location'"
-                                :class="{
-                                    'border-green-500 text-green-600 dark:text-green-400': activeTab === 'location',
-                                    'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-200': activeTab !== 'location'}"
-                                class="whitespace-nowrap py-4 px-6 border-b-2 font-medium text-sm flex items-center"
-                            >
-                                <i class="fas fa-map-marked-alt mr-2 text-lg"></i>
-                                Location Information
-                            </button>
-                        </nav>
+                <div v-if="stats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                    <!-- Total Users Card -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700">
+                        <div class="p-6">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+                                    <i class="fas fa-users text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Users</p>
+                                    <p class="text-2xl font-semibold text-gray-900 dark:text-white">
+                                        {{ stats.total_users || 0 }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    <!-- Tab Content -->
+                    <!-- Active Members Card -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700">
+                        <div class="p-6">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400">
+                                    <i class="fas fa-user-friends text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Active Members</p>
+                                    <p class="text-2xl font-semibold text-gray-900 dark:text-white">
+                                        {{ stats.active_members || 0 }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Branches Card -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700">
+                        <div class="p-6">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400">
+                                    <i class="fas fa-building text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Branches</p>
+                                    <p class="text-2xl font-semibold text-gray-900 dark:text-white">
+                                        {{ stats.total_branches || 0 }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Partnerships Card -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700">
+                        <div class="p-6">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400">
+                                    <i class="fas fa-handshake text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Partnerships</p>
+                                    <p class="text-2xl font-semibold text-gray-900 dark:text-white">
+                                        {{ stats.total_partnerships || 0 }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Departments Card -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700">
+                        <div class="p-6">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400">
+                                    <i class="fas fa-code-branch text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Departments</p>
+                                    <p class="text-2xl font-semibold text-gray-900 dark:text-white">
+                                        {{ stats.total_departments || 0 }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Services Card -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700">
+                        <div class="p-6">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400">
+                                    <i class="fas fa-user-check text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Services</p>
+                                    <p class="text-2xl font-semibold text-gray-900 dark:text-white">
+                                        {{ stats.total_services || 0 }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Projects Card -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700">
+                        <div class="p-6">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400">
+                                    <i class="fas fa-history text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Projects</p>
+                                    <p class="text-2xl font-semibold text-gray-900 dark:text-white">
+                                        {{ stats.featured_projects || 0 }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Upcoming Events Card -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700">
+                        <div class="p-6">
+                            <div class="flex items-center">
+                                <div class="p-3 rounded-full bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400">
+                                    <i class="fas fa-calendar-alt text-xl"></i>
+                                </div>
+                                <div class="ml-4">
+                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Upcoming Events</p>
+                                    <p class="text-2xl font-semibold text-gray-900 dark:text-white">
+                                        {{ stats.upcoming_events || 0 }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div v-if="props.data.role === 'administrator'">
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700 mb-10">
+                        <div class="p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                                <i class="fas fa-history text-primary-600 dark:text-primary-400 mr-2"></i>
+                                Latest Activites
+                            </h3>
+                            <p class="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4">
+                                These activity logs are pulled from all the models in the database using the Laravel Spatie Audit Trail package.
+                            </p>
+                            <div class="space-y-4">
+                                <div v-for="(activity, index) in latestActivities" :key="index" 
+                                    class="flex items-start pb-4 border-b border-gray-100 dark:border-gray-700 last:border-0 last:pb-0">
+                                    <div class="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg mr-3">
+                                        <i class="fas text-blue-500 dark:text-blue-400" :class="getActivityIcon(activity.log_name)"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                            {{ activity.description }}
+                                        </p>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400">
+                                            {{ formatRelativeTime(activity.created_at) }}
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Library Section -->
+                <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700 mb-10">
                     <div class="p-6">
-                        <!-- Personal Information Tab -->
-                        <div v-show="activeTab === 'personal'" class="space-y-6">
-                            <!-- Profile Header -->
-                            <div class="flex flex-col md:flex-row md:items-center md:justify-between border-b border-gray-100 dark:border-gray-700 pb-6">
-                                <div class="flex items-center space-x-4 mb-4 md:mb-0">
-                                    <div class="relative">
-                                        <div class="w-20 h-20 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden">
-                                            <i class="fas fa-user text-4xl text-gray-400"></i>
-                                        </div>
-                                        <span class="absolute -bottom-1 -right-1 bg-green-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                                            <i class="fas fa-check text-xs"></i>
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center">
+                                <i class="fas fa-book-open text-primary-600 dark:text-primary-400 mr-2"></i>
+                                Library
+                            </h3>
+                            <button 
+                                @click="toggleLibrary"
+                                class="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                                :title="isLibraryExpanded ? 'Hide Documents' : 'Show Documents'"
+                            >
+                                <i class="fas" :class="isLibraryExpanded ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+                            </button>
+                        </div>
+                        <p class="text-sm text-gray-500 dark:text-gray-400 mb-4">
+                            Download important party documents and resources
+                        </p>
+                        <div v-show="isLibraryExpanded" class="space-y-3">
+                            <!-- FKP Ideology -->
+                            <div class="flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200">
+                                <div class="w-10 h-10 flex items-center justify-center bg-blue-50 dark:bg-blue-900/20 rounded-lg mr-3">
+                                    <i class="fas fa-book-open text-blue-500 dark:text-blue-400 text-lg"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                        Party Ideology
+                                    </p>
+                                    <p class="text-xs text-gray-600 dark:text-gray-300 mt-1 mb-1">
+                                        Core principles and beliefs that guide the Forward Kenya Party
+                                    </p>
+                                    <div class="flex justify-between items-center w-full text-xs text-gray-500 dark:text-gray-400">
+                                        <span class="flex-shrink-0">
+                                            <a :href="route('profile.view', 1)" class="text-gray-500 dark:text-gray-400 hover:text-green-600 hover:underline hover:decoration-green-600 underline-offset-4">FKP Admin</a> • <span class="text-gray-400 dark:text-gray-500">15 June 2025</span>
                                         </span>
-                                    </div>
-                                    <div>
-                                        <h2 class="text-xl font-bold text-gray-900 dark:text-white">
-                                            {{ profile?.surname }} {{ profile?.other_names }}
-                                        </h2>
-                                        <p class="text-sm text-gray-500 dark:text-gray-400">Party Member</p>
+                                        <span class="ml-2 whitespace-nowrap"><i class="far fa-file-pdf mr-1"></i> PDF • 2.4 MB</span>
                                     </div>
                                 </div>
-                                <div class="bg-gray-50 dark:bg-gray-700 p-3 rounded-lg inline-block">
-                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                        Membership Number
+                                <a href="/assets/FKP_Documents/FKP IDEOLOGY.pdf" download target="_blank" class="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200" title="Download party ideology document">
+                                    <i class="fas fa-arrow-down text-green-600"></i>
+                                </a>
+                            </div>
+
+                            <!-- Party Manifesto -->
+                            <div class="flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200">
+                                <div class="w-10 h-10 flex items-center justify-center bg-green-50 dark:bg-green-900/20 rounded-lg mr-3">
+                                    <i class="fas fa-file-alt text-green-500 dark:text-green-400 text-lg"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                        Party Manifesto
                                     </p>
-                                    <div class="flex items-center">
-                                        <div class="flex items-center">
-                                            <i class="fas fa-hashtag text-primary-500 dark:text-primary-400 mr-2 text-base"></i>
-                                            <span class="text-base font-bold text-gray-900 dark:text-white font-mono tracking-wide uppercase">
-                                                {{ profile?.citizen?.uuid || 'N/A' }}
+                                    <p class="text-xs text-gray-600 dark:text-gray-300 mt-1 mb-1">
+                                        Our comprehensive plan and commitments for national development
+                                    </p>
+                                    <div class="flex justify-between items-center w-full text-xs text-gray-500 dark:text-gray-400">
+                                        <span class="flex-shrink-0">
+                                            <a :href="route('profile.view', 1)" class="text-gray-500 dark:text-gray-400 hover:text-green-600 hover:underline hover:decoration-green-600 underline-offset-4">FKP Admin</a> • <span class="text-gray-400 dark:text-gray-500">15 June 2025</span>
+                                        </span>
+                                        <span class="ml-2 whitespace-nowrap"><i class="far fa-file-pdf mr-1"></i> PDF • 1.8 MB</span>
+                                    </div>
+                                </div>
+                                <a href="/assets/FKP_Documents/FKP MANIFESTO (1).pdf" download target="_blank" class="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200" title="Download party manifesto document">
+                                    <i class="fas fa-arrow-down text-green-600"></i>
+                                </a>
+                            </div>
+
+                            <!-- Party Constitution -->
+                            <div class="flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200">
+                                <div class="w-10 h-10 flex items-center justify-center bg-purple-50 dark:bg-purple-900/20 rounded-lg mr-3">
+                                    <i class="fas fa-scroll text-purple-500 dark:text-purple-400 text-lg"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                        Party Constitution
+                                    </p>
+                                    <p class="text-xs text-gray-600 dark:text-gray-300 mt-1 mb-1">
+                                        Legal framework and structure of the Forward Kenya Party
+                                    </p>
+                                    <div class="flex justify-between items-center w-full text-xs text-gray-500 dark:text-gray-400">
+                                        <span class="flex-shrink-0">
+                                            <a :href="route('profile.view', 1)" class="text-gray-500 dark:text-gray-400 hover:text-green-600 hover:underline hover:decoration-green-600 underline-offset-4">FKP Admin</a> • <span class="text-gray-400 dark:text-gray-500">15 June 2025</span>
+                                        </span>
+                                        <span class="ml-2 whitespace-nowrap"><i class="far fa-file-pdf mr-1"></i> PDF • 3.1 MB</span>
+                                    </div>
+                                </div>
+                                <a href="/assets/FKP_Documents/FORWARD KENYA PARTY CONSTITUTION.pdf" download target="_blank" class="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200" title="Download party constitution document">
+                                    <i class="fas fa-arrow-down text-green-600"></i>
+                                </a>
+                            </div>
+
+                            <!-- Party Nomination Rules -->
+                            <div class="flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors duration-200">
+                                <div class="w-10 h-10 flex items-center justify-center bg-yellow-50 dark:bg-yellow-900/20 rounded-lg mr-3">
+                                    <i class="fas fa-file-contract text-yellow-500 dark:text-yellow-400 text-lg"></i>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                        Party Nomination Rules
+                                    </p>
+                                    <p class="text-xs text-gray-600 dark:text-gray-300 mt-1 mb-1">
+                                        Guidelines and procedures for party nominations and elections
+                                    </p>
+                                    <div class="w-full">
+                                        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center w-full text-xs text-gray-500 dark:text-gray-400 gap-1">
+                                            <span class="flex-shrink-0">
+                                                <a :href="route('profile.view', 1)" class="text-gray-500 dark:text-gray-400 hover:text-green-600 hover:underline hover:decoration-green-600 underline-offset-4">FKP Admin</a> • <span class="text-gray-400 dark:text-gray-500">15 June 2025</span>
                                             </span>
+                                            <div class="flex items-center gap-1">
+                                                <i class="far fa-file-pdf"></i>
+                                                <span>PDF</span>
+                                                <span>•</span>
+                                                <span>2.4 MB</span>
+                                            </div>
                                         </div>
-                                        <button 
-                                            @click="copyToClipboard(profile?.citizen?.uuid || '')"
-                                            class="text-primary-600 hover:text-primary-800 dark:text-primary-400 dark:hover:text-primary-300 transition-colors duration-200 ml-2"
-                                            title="Copy to clipboard"
-                                        >
-                                            <i class="fas fa-copy"></i>
-                                        </button>
                                     </div>
                                 </div>
-                            </div>
-
-                            <!-- Personal Details -->
-                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                <!-- Personal Information Fields -->
-                                <div>
-                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                        Full Name
-                                    </p>
-                                    <div class="flex items-center">
-                                        <i class="fas fa-user text-gray-400 mr-2 text-sm"></i>
-                                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                            {{ profile?.surname }} {{ profile?.other_names }}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div>
-                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                        Gender
-                                    </p>
-                                    <div class="flex items-center">
-                                        <i class="fas fa-venus-mars text-gray-400 mr-2 text-sm"></i>
-                                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                            {{ profile?.gender ? profile.gender.charAt(0).toUpperCase() + profile.gender.slice(1) : 'Not provided' }}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div>
-                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                        Date of Birth
-                                    </p>
-                                    <div class="flex items-center">
-                                        <i class="fas fa-calendar-alt text-gray-400 mr-2 text-sm"></i>
-                                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                            {{ formatDate(profile?.date_of_birth) }}
-                                            <span class="text-xs text-gray-500 dark:text-gray-400 ml-1">
-                                                (Age: {{ calculateAge(profile?.date_of_birth) }})
-                                            </span>
-                                        </p>
-                                    </div>
-                                </div>
-                                <div>
-                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                        National ID
-                                    </p>
-                                    <div class="flex items-center">
-                                        <i class="fas fa-id-card text-gray-400 mr-2 text-sm"></i>
-                                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                            {{ profile?.citizen?.national_identification_number || 'Not provided' }}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div>
-                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                        Passport Number
-                                    </p>
-                                    <div class="flex items-center">
-                                        <i class="fas fa-passport text-gray-400 mr-2 text-sm"></i>
-                                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                            {{ profile?.citizen?.passport_number || 'Not provided' }}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div>
-                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                        Disability Status
-                                    </p>
-                                    <div class="flex items-center">
-                                        <i class="fas fa-wheelchair text-gray-400 mr-2 text-sm"></i>
-                                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                            {{ profile?.disability_status === 'yes' ? 'Yes' : 'No' }}
-                                            <span v-if="profile?.disability_status === 'yes' && profile?.ncpwd_number" class="text-xs text-gray-500 dark:text-gray-400 ml-1">
-                                                (NCPWD: {{ profile.ncpwd_number }})
-                                            </span>
-                                        </p>
-                                    </div>
-                                </div>
-                                <div>
-                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                        Ethnicity
-                                    </p>
-                                    <div class="flex items-center">
-                                        <i class="fas fa-users text-gray-400 mr-2 text-sm"></i>
-                                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                            {{ profile?.ethnicity?.name || 'Not provided' }}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div>
-                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                        Religion
-                                    </p>
-                                    <div class="flex items-center">
-                                        <i class="fas fa-pray text-gray-400 mr-2 text-sm"></i>
-                                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                            {{ profile?.religion?.name || 'Not provided' }}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div>
-                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                        Enlisting Date
-                                    </p>
-                                    <div class="flex items-center">
-                                        <i class="fas fa-calendar-plus text-gray-400 mr-2 text-sm"></i>
-                                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                            {{ formatDate(profile?.citizen?.created_at) }}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Contact Information Tab -->
-                        <div v-show="activeTab === 'contact'" class="space-y-6">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Contact Details</h3>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                <div>
-                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                        Email Address
-                                    </p>
-                                    <div class="flex items-start">
-                                        <i class="fas fa-envelope text-gray-400 mt-0.5 mr-2 flex-shrink-0"></i>
-                                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                            {{ user?.email || "Not available" }}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div>
-                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                        Phone Number
-                                    </p>
-                                    <div class="flex items-center">
-                                        <i class="fas fa-phone-alt text-gray-400 mr-2"></i>
-                                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                            {{ user?.profile?.telephone || user?.telephone || 'Not provided' }}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div class="sm:col-span-2">
-                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                        Physical Address
-                                    </p>
-                                    <div class="flex items-start">
-                                        <i class="fas fa-map-marker-alt text-gray-400 mt-0.5 mr-2 flex-shrink-0"></i>
-                                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                            {{ getAddress }}
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Location Information Tab -->
-                        <div v-show="activeTab === 'location'" class="space-y-6">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">Location Details</h3>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                <div>
-                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                        County
-                                    </p>
-                                    <div class="flex items-center">
-                                        <i class="fas fa-city text-gray-400 mr-2 text-sm"></i>
-                                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                            {{ profile?.citizen?.county?.name || 'Not provided' }}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div>
-                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                        Sub-County
-                                    </p>
-                                    <div class="flex items-center">
-                                        <i class="fas fa-map-pin text-gray-400 mr-2 text-sm"></i>
-                                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                            {{ profile?.citizen?.sub_county?.name || 'Not provided' }}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div>
-                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                        Constituency
-                                    </p>
-                                    <div class="flex items-center">
-                                        <i class="fas fa-map-signs text-gray-400 mr-2 text-sm"></i>
-                                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                            {{ profile?.citizen?.constituency?.name || 'Not provided' }}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div>
-                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                        Ward
-                                    </p>
-                                    <div class="flex items-center">
-                                        <i class="fas fa-map-marker text-gray-400 mr-2 text-sm"></i>
-                                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                            {{ profile?.citizen?.ward?.name || 'Not provided' }}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div>
-                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                        Location
-                                    </p>
-                                    <div class="flex items-center">
-                                        <i class="fas fa-map-marker text-gray-400 mr-2 text-sm"></i>
-                                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                            {{ profile?.citizen?.location?.name || 'Not provided' }}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div>
-                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                        Village
-                                    </p>
-                                    <div class="flex items-center">
-                                        <i class="fas fa-map-marker text-gray-400 mr-2 text-sm"></i>
-                                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                            {{ profile?.citizen?.village?.name || 'Not provided' }}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div>
-                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                        Polling Center
-                                    </p>
-                                    <div class="flex items-center">
-                                        <i class="fas fa-vote-yea text-gray-400 mr-2 text-sm"></i>
-                                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                            {{ profile?.citizen?.polling_center?.name || 'Not provided' }}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div>
-                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                        Polling Station
-                                    </p>
-                                    <div class="flex items-center">
-                                        <i class="fas fa-vote-yea text-gray-400 mr-2 text-sm"></i>
-                                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                            {{ profile?.citizen?.polling_station?.name || 'Not provided' }}
-                                        </p>
-                                    </div>
-                                </div>
-                                <div>
-                                    <p class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">
-                                        Polling Stream
-                                    </p>
-                                    <div class="flex items-center">
-                                        <i class="fas fa-stream text-gray-400 mr-2 text-sm"></i>
-                                        <p class="text-sm font-medium text-gray-800 dark:text-gray-200">
-                                            {{ profile?.citizen?.polling_stream?.name || 'Not provided' }}
-                                        </p>
-                                    </div>
-                                </div>
+                                <a href="/assets/FKP_Documents/NOMINATION_RULES_AMMENDED 12.5.25.pdf" download target="_blank" class="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors duration-200" title="Download party nomination rules document">
+                                    <i class="fas fa-arrow-down text-green-600"></i>
+                                </a>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+
         </section>
     </div>
-    
-    <!-- Toast Notification -->
-    <transition
-        enter-active-class="transform ease-out duration-300 transition"
-        enter-from-class="translate-y-2 opacity-0 sm:translate-y-0 sm:translate-x-2"
-        enter-to-class="translate-y-0 opacity-100 sm:translate-x-0"
-        leave-active-class="transition ease-in duration-100"
-        leave-from-class="opacity-100"
-        leave-to-class="opacity-0"
-    >
-        <div v-if="showToast" class="toast-notification fixed bottom-4 right-4 max-w-sm w-full bg-green-50 dark:bg-green-900 rounded-lg shadow-lg p-4 transform transition-all duration-300 ease-in-out z-50">
-            <div class="flex items-start">
-                <div class="flex-shrink-0">
-                    <i class="fas fa-check-circle text-green-500 dark:text-green-400 text-xl"></i>
-                </div>
-                <div class="ml-3 w-0 flex-1 pt-0.5">
-                    <p class="text-sm font-medium text-green-800 dark:text-green-100">
-                        {{ toastMessage }}
-                    </p>
-                </div>
-                <div class="ml-4 flex-shrink-0 flex">
-                    <button 
-                        @click="showToast = false"
-                        class="inline-flex text-gray-400 hover:text-gray-500 focus:outline-none"
-                    >
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-    </transition>
 </template>
