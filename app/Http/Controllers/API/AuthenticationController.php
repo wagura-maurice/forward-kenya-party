@@ -102,17 +102,12 @@ class AuthenticationController extends Controller
         ]);
 
         try {
-            if ($this->oneTimePasswordServices->send($request->telephone)) {
-                return response()->json([
-                    'status' => 'success',
-                    'message' => 'OTP has been sent to your telephone number.'
-                ], 201);
-            } else {
-                return response()->json([
-                    'status' => 'warning',
-                    'message' => 'OTP failed to send to your telephone number. Please try again later!'
-                ], 200);
-            }
+            $this->oneTimePasswordServices->send($request->telephone);
+
+            return response()->json([
+                'status' => 'success',
+                'message' => 'OTP has been sent to your telephone number.'
+            ], 201);
         } catch (\Throwable $th) {
             return response()->json([
                 'status' => 'error',
