@@ -463,7 +463,7 @@ const showOtpVerificationModal = () => {
     cleanupOtpTimer();
 
     Swal.fire({
-        title: "Registration Verification",
+        title: "Application Submission Verification",
         html: `
             <p class="mb-4 text-md">You'll receive a 6-digit verification code on your telephone number: <strong>${
                 form.telephone
