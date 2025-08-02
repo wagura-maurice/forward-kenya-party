@@ -83,7 +83,7 @@ class AfricaIsTalkingServices
         $profile = Profile::where('telephone', $phoneNumber)->firstOrFail();
 
         // Get the existing configuration and update the out_bound_text_message field.
-        $configuration = $profile->configuration;
+        $configuration = json_decode($profile->configuration, true);
 
         // If the configuration is not an array, initialize it as an empty array.
         if (!is_array($configuration)) {
@@ -94,6 +94,6 @@ class AfricaIsTalkingServices
         $configuration['out_bound_text_message'] = false;
 
         // Save the updated configuration back to the profile.
-        $profile->update(['configuration' => $configuration]);
+        $profile->update(['configuration' => json_encode($configuration)]);
     }
 }
