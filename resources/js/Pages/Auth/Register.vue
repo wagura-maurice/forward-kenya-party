@@ -469,17 +469,17 @@ const showOtpVerificationModal = () => {
                 form.telephone
             }</strong></p>
             <p class="mb-4 text-sm text-gray-600">
-                This code will expire in 
+                <span id="otp-timer-message">Verification code expires in </span>
                 <span id="otp-timer" class="font-medium">${formatTimeRemaining(otpExpirationTime.value).formatted}</span>
             </p>
             <div class="flex flex-col items-center">
                 <input id="swal-otp-input" class="swal2-input w-full text-center" placeholder="Enter 6-digit code" maxlength="6" type="text">
                 <div class="text-sm text-gray-500 mt-2">
                     Didn't receive the code?
-                    <button type="button" id="resend-otp-btn" class="text-green-600 hover:text-green-800">Resend</button>
-                    <span id="resend-countdown" class="hidden ml-1 text-gray-500"></span>
+                    <button type="button" id="resend-otp-btn" class="text-gray-400 cursor-not-allowed" disabled>Resend</button>
+                    <span id="resend-countdown" class="ml-1 text-gray-500"></span>
                 </div>
-                <div class="text-xs text-gray-500 mt-1">
+                <div class="text-xs text-gray-500 mt-1 hidden">
                     Attempts remaining: <span class="font-medium">${maxOtpAttempts.value - otpAttempts.value}</span> of ${maxOtpAttempts.value}
                 </div>
                 ${otpAttempts.value > 0 ? `
@@ -528,9 +528,15 @@ const showOtpVerificationModal = () => {
                     }
                     
                     // If time's up, update display but keep the interval running
+                    const timerMessageEl = document.getElementById('otp-timer-message');
                     if (isExpired) {
-                        otpTimerEl.textContent = 'expired';
-                        otpTimerEl.classList.add('font-bold');
+                        if (timerMessageEl) {
+                            timerMessageEl.textContent = 'Verification code has ';
+                            otpTimerEl.textContent = 'expired';
+                            otpTimerEl.classList.add('font-bold');
+                        }
+                    } else if (timerMessageEl) {
+                        timerMessageEl.textContent = 'Verification code expires in ';
                     }
                 };
                 
@@ -545,27 +551,24 @@ const showOtpVerificationModal = () => {
             const updateResendButton = () => {
                 if (isResendDisabled) {
                     resendBtn.disabled = true;
-                    resendBtn.classList.remove(
-                        "text-green-600",
-                        "hover:text-green-800"
-                    );
-                    resendBtn.classList.add(
-                        "text-gray-400",
-                        "cursor-not-allowed"
-                    );
-                    resendCountdownEl.classList.remove("hidden");
+                    resendBtn.classList.remove("text-green-600", "hover:text-green-800");
+                    resendBtn.classList.add("text-gray-400", "cursor-not-allowed");
                     resendCountdownEl.textContent = `(${resendCountdown}s)`;
                 } else {
-                    resendBtn.disabled = false;
-                    resendBtn.classList.add(
-                        "text-green-600",
-                        "hover:text-green-800"
-                    );
-                    resendBtn.classList.remove(
-                        "text-gray-400",
-                        "cursor-not-allowed"
-                    );
-                    resendCountdownEl.classList.add("hidden");
+                    // Only enable the button if the OTP has expired
+                    const isOtpExpired = formatTimeRemaining(otpExpirationTime.value).isExpired;
+                    if (isOtpExpired) {
+                        resendBtn.disabled = false;
+                        resendBtn.classList.add("text-green-600", "hover:text-green-800");
+                        resendBtn.classList.remove("text-gray-400", "cursor-not-allowed");
+                        resendCountdownEl.textContent = '';
+                    } else {
+                        resendBtn.disabled = true;
+                        resendBtn.classList.remove("text-green-600", "hover:text-green-800");
+                        resendBtn.classList.add("text-gray-400", "cursor-not-allowed");
+                        const timeLeft = formatTimeRemaining(otpExpirationTime.value).formatted;
+                        resendCountdownEl.textContent = `(wait ${timeLeft})`;
+                    }
                 }
             };
 
