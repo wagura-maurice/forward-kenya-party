@@ -271,13 +271,13 @@ class AppServiceProvider extends ServiceProvider
         // App Db Schema.
         Schema::defaultStringLength(191);
         
-        // telephone validation for the whole world
+        // telephone validation for kenya only
         Validator::extend('telephone', function ($attribute, $value, $parameters, $validator) {
             $phoneUtil = PhoneNumberUtil::getInstance();
             
             try {
                 // Parse the phone number and ensure the region is valid
-                $phoneNumber = $phoneUtil->parse($value);
+                $phoneNumber = $phoneUtil->parse($value, 'KE');
         
                 // Check if the phone number is valid
                 return $phoneUtil->isValidNumber($phoneNumber);
