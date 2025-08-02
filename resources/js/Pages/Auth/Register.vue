@@ -463,28 +463,25 @@ const showOtpVerificationModal = () => {
     cleanupOtpTimer();
 
     Swal.fire({
-        title: "Phone Verification",
+        title: "Registration Verification",
         html: `
-            <p class="mb-4">We've sent a 6-digit verification code to your phone number: <strong>${
+            <p class="mb-4 text-md">You'll receive a 6-digit verification code on your telephone number: <strong>${
                 form.telephone
-            }</strong></p>
-            <p class="mb-4 text-sm text-gray-600">
-                <span id="otp-timer-message">Verification code expires in </span>
-                <span id="otp-timer" class="font-medium">${formatTimeRemaining(otpExpirationTime.value).formatted}</span>
-            </p>
+            }</strong>.</p>
+            <p class="text-xs text-gray-600">Please check your mobile device for the OTP code.</p>
             <div class="flex flex-col items-center">
-                <input id="swal-otp-input" class="swal2-input w-full text-center" placeholder="Enter 6-digit code" maxlength="6" type="text">
-                <div class="text-sm text-gray-500 mt-2">
-                    Didn't receive the code?
-                    <button type="button" id="resend-otp-btn" class="text-gray-400 cursor-not-allowed" disabled>Resend</button>
-                    <span id="resend-countdown" class="ml-1 text-gray-500"></span>
-                </div>
-                <div class="text-xs text-gray-500 mt-1 hidden">
-                    Attempts remaining: <span class="font-medium">${maxOtpAttempts.value - otpAttempts.value}</span> of ${maxOtpAttempts.value}
+                <input id="swal-otp-input" class="swal2-input w-full text-center mb-1" placeholder="Enter 6-digit code" maxlength="6" type="text">
+                <div id="otp-timer-container" class="text-sm text-gray-600 mt-2">
+                    <span id="otp-timer-message">Verification code expires in </span>
+                    <strong id="otp-timer" class="font-medium">${formatTimeRemaining(otpExpirationTime.value).formatted}</strong>
+                    <span id="otp-expired-message" class="hidden">
+                        <span class="text-red-500 font-medium">Verification code expired!</span>
+                        <button id="resend-otp-btn" class="ml-1 font-medium text-green-600 hover:text-green-800 cursor-pointer bg-transparent border-none p-0">Resend OTP</button>
+                    </span>
                 </div>
                 ${otpAttempts.value > 0 ? `
-                <div class="text-xs text-red-500 mt-1">
-                    ${maxOtpAttempts.value - otpAttempts.value === 0 ? 'No attempts left. ' : ''}${otpAttempts.value} failed attempt${otpAttempts.value > 1 ? 's' : ''}.
+                <div class="text-sm text-red-500 mt-1">
+                    ${otpAttempts.value} failed attempt${otpAttempts.value > 1 ? 's' : ''}${otpAttempts.value === maxOtpAttempts.value - 1 ? ' (last attempt)' : otpAttempts.value >= maxOtpAttempts.value ? '. Maximum attempts reached' : ''}.
                 </div>
                 ` : ''}
             </div>
@@ -510,42 +507,107 @@ const showOtpVerificationModal = () => {
         didOpen: () => {
             const resendBtn = document.getElementById("resend-otp-btn");
             const resendCountdownEl = document.getElementById("resend-countdown");
-            const otpTimerEl = document.getElementById("otp-timer");
+            // Update the timer display
+            const updateTimerDisplay = () => {
+                const now = new Date();
+                const timeLeft = Math.max(0, Math.ceil((otpExpirationTime.value - now) / 1000));
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                
+                const otpTimerEl = document.getElementById('otp-timer');
+                const timerMessageEl = document.getElementById('otp-timer-message');
+                const expiredMessageEl = document.getElementById('otp-expired-message');
+                const otpInput = document.getElementById('swal-otp-input');
+                const confirmButton = document.querySelector('.swal2-confirm');
+                
+                if (!otpTimerEl || !timerMessageEl || !expiredMessageEl) return;
+                
+                const isExpired = timeLeft <= 0;
+                const formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
+                // Only update DOM if the value has changed
+                if (otpTimerEl.textContent !== formattedTime) {
+                    otpTimerEl.textContent = formattedTime;
+                }
+                
+                // Toggle visibility and states based on expiration
+                if (isExpired) {
+                    if (!expiredMessageEl.classList.contains('hidden')) return; // Already in correct state
+                    
+                    timerMessageEl.classList.add('hidden');
+                    otpTimerEl.classList.add('hidden');
+                    expiredMessageEl.classList.remove('hidden');
+                    
+                    // Disable input and button
+                    if (otpInput) otpInput.disabled = true;
+                    if (confirmButton) confirmButton.disabled = true;
+                } else {
+                    if (!timerMessageEl.classList.contains('hidden') && 
+                        !otpTimerEl.classList.contains('hidden') && 
+                        expiredMessageEl.classList.contains('hidden')) {
+                        // Already in correct state, just update colors if needed
+                        otpTimerEl.classList.toggle('text-red-500', timeLeft <= 60);
+                        otpTimerEl.classList.toggle('text-gray-600', timeLeft > 60);
+                        return;
+                    }
+                    
+                    // Update to show countdown
+                    timerMessageEl.textContent = 'Verification code expires in ';
+                    timerMessageEl.classList.remove('hidden');
+                    otpTimerEl.classList.remove('hidden');
+                    expiredMessageEl.classList.add('hidden');
+                    
+                    // Update colors
+                    otpTimerEl.classList.toggle('text-red-500', timeLeft <= 60);
+                    otpTimerEl.classList.toggle('text-gray-600', timeLeft > 60);
+                    
+                    // Enable input and button
+                    if (otpInput) otpInput.disabled = false;
+                    if (confirmButton) confirmButton.disabled = false;
+                }
+            };
             
-            // Update OTP timer every second
-            if (otpTimerEl) {
-                const updateTimerDisplay = () => {
-                    const { formatted: timeLeft, isExpired } = formatTimeRemaining(otpExpirationTime.value);
-                    otpTimerEl.textContent = timeLeft;
-                    
-                    // Change color to red when less than 1 minute remaining or expired
-                    if (timeLeft.startsWith('0:') || isExpired) {
-                        otpTimerEl.classList.add('text-red-500');
-                        otpTimerEl.classList.remove('text-gray-600');
-                    } else {
-                        otpTimerEl.classList.remove('text-red-500');
-                        otpTimerEl.classList.add('text-gray-600');
+            // Set up the timer interval with requestAnimationFrame for smoother updates
+            let lastUpdate = 0;
+            let animationFrameId = null;
+            
+            const updateLoop = (timestamp) => {
+                if (!otpTimerInterval) {
+                    if (animationFrameId) {
+                        cancelAnimationFrame(animationFrameId);
+                        animationFrameId = null;
                     }
-                    
-                    // If time's up, update display but keep the interval running
-                    const timerMessageEl = document.getElementById('otp-timer-message');
-                    if (isExpired) {
-                        if (timerMessageEl) {
-                            timerMessageEl.textContent = 'Verification code has ';
-                            otpTimerEl.textContent = 'expired';
-                            otpTimerEl.classList.add('font-bold');
-                        }
-                    } else if (timerMessageEl) {
-                        timerMessageEl.textContent = 'Verification code expires in ';
-                    }
-                };
+                    return;
+                }
                 
-                // Initial update
-                updateTimerDisplay();
+                // Only update DOM at most every 500ms for better performance
+                if (timestamp - lastUpdate > 500) {
+                    updateTimerDisplay();
+                    lastUpdate = timestamp;
+                }
                 
-                // Set up interval for updates
-                otpTimerInterval = setInterval(updateTimerDisplay, 1000);
-            }
+                // Continue the animation loop
+                animationFrameId = requestAnimationFrame(updateLoop);
+            };
+            
+            // Initial update
+            updateTimerDisplay();
+            
+            // Start the animation loop
+            otpTimerInterval = true; // Use a truthy value as a flag
+            animationFrameId = requestAnimationFrame(updateLoop);
+            
+            // Cleanup function for when the modal is closed
+            const cleanup = () => {
+                if (animationFrameId) {
+                    cancelAnimationFrame(animationFrameId);
+                    animationFrameId = null;
+                }
+                otpTimerInterval = null;
+            };
+            
+            // Return cleanup function to be called when modal closes
+            return cleanup;
 
             // Function to update the resend button state
             const updateResendButton = () => {
@@ -638,6 +700,10 @@ const verifyOtp = async (otp) => {
         });
         return;
     }
+    
+    // Increment attempts counter
+    otpAttempts.value += 1;
+
     // Check if max attempts reached
     if (otpAttempts.value >= maxOtpAttempts.value) {
         Swal.fire({
@@ -648,9 +714,6 @@ const verifyOtp = async (otp) => {
         });
         return;
     }
-
-    // Increment attempts counter
-    otpAttempts.value += 1;
 
     try {
         // Show loading state
@@ -678,8 +741,8 @@ const verifyOtp = async (otp) => {
             // Show success message
             Swal.fire({
                 icon: "success",
-                title: "Phone Verified",
-                text: "Your phone number has been verified successfully.",
+                title: "Telephone Verified",
+                text: "Your telephone number has been verified successfully.",
                 confirmButtonColor: "#10b981",
             }).then(() => {
                 // Submit the form after OTP verification
