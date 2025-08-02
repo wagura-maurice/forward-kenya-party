@@ -4,11 +4,27 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\Activitylog\Models\Activity as BaseActivity;
 
-class Activity extends Model
+class Activity extends BaseActivity
 {
     use HasFactory, SoftDeletes;
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'activities';
+
+    /**
+     * The name of the "updated at" column.
+     *
+     * @var string|null
+     */
+    const UPDATED_AT = null;
 
     // Status constants
     const PENDING = 0;
@@ -41,22 +57,32 @@ class Activity extends Model
     }
 
     /**
+     * The model's default values for attributes.
+     *
+     * @var array
+     */
+    protected $attributes = [
+        'type_id' => 1,
+        'category_id' => 1,
+    ];
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
     protected $fillable = [
-        'uuid',
         'type_id',
         'category_id',
+        'uuid',
         'user_id',
         'service_id',
         'department_id',
-        'activityable_id',
         'activityable_type',
+        'activityable_id',
+        'related_to_id',
         'title',
         'action',
-        'description',
         'details',
         '_status',
         'scheduled_for',
@@ -64,20 +90,64 @@ class Activity extends Model
         'completed_at',
         'ip_address',
         'user_agent',
-        'metadata'
+        'metadata',
+        'uuid'
     ];
-    
+
     protected $casts = [
-        'data' => 'array',
+        'properties' => 'collection',
         'metadata' => 'array',
         'scheduled_for' => 'datetime',
         'started_at' => 'datetime',
         'completed_at' => 'datetime',
     ];
 
+    /**
+     * Get the user who was affected by the activity.
+     */
+    public function affectedUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'properties->affected_user_id');
+    }
+
+    /**
+     * Get the user who performed the activity.
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Get the category of the activity.
+     */
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(ActivityCategory::class, 'category_id');
+    }
+
+    /**
+     * Get the type of the activity.
+     */
+    public function type(): BelongsTo
+    {
+        return $this->belongsTo(ActivityType::class, 'type_id');
+    }
+
+    /**
+     * Get the request class for validation.
+     */
     protected function getRequestClass(): string
     {
-        return \App\Http\Requests\API\ActivityRequest::class;
+        return 'App\Http\Requests\ActivityRequest';
+    }
+
+    /**
+     * Get the log name to use for the model.
+     */
+    public function getLogNameToUse(string $eventName = ''): string
+    {
+        return $this->log_name ?? config('activitylog.default_log_name', 'default');
     }
 
     protected function getResourceClass(): string
@@ -115,29 +185,6 @@ class Activity extends Model
             'started_at' => 'nullable|date',
             'completed_at' => 'nullable|date',
         ];
-    }
-
-    public function type()
-    {
-        return $this->belongsTo(ActivityType::class, 'type_id');
-    }
-    
-    public function category()
-    {
-        return $this->belongsTo(ActivityCategory::class, 'category_id');
-    }
-    
-    public function user()
-    {
-        return $this->belongsTo(User::class, 'user_id');
-    }
-    
-    /**
-     * Get the service associated with the activity.
-     */
-    public function service()
-    {
-        return $this->belongsTo(Service::class);
     }
     
     /**

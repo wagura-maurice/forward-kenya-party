@@ -2,13 +2,16 @@
 
 namespace App\Models;
 
+use Spatie\Activitylog\LogOptions;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\Activitylog\Traits\CausesActivity;
 
 class Citizen extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, LogsActivity, CausesActivity;
     
     // Registration point constants
     const ONLINE = 0;
@@ -22,7 +25,161 @@ class Citizen extends Model
     const REJECTED = 4;
     
     /**
-     * Get all status options with their labels
+     * The attributes that should be logged for the citizen.
+     *
+     * @return LogOptions
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('citizens')
+            ->setDefaultProperties([
+                'type_id' => 1,
+                'category_id' => 1,
+            ])
+            ->setDescriptionForEvent(fn(string $eventName) => match($eventName) {
+                'created' => 'Citizen record was created',
+                'updated' => 'Citizen record was updated',
+                'deleted' => 'Citizen record was deleted',
+                'restored' => 'Citizen record was restored',
+                'forceDeleted' => 'Citizen record was permanently deleted',
+                default => "Citizen record {$eventName}",
+            })
+            ->logAll()
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->dontLogIfAttributesChangedOnly(['last_updated_at'])
+            ->logExcept([
+                'created_at', 
+                'updated_at', 
+                'deleted_at',
+                'user_id',
+                'profile_id',
+                'ward_id',
+                'constituency_id',
+                'county_id',
+                'registration_point',
+                'registration_latitude',
+                'registration_longitude',
+                'registration_accuracy',
+                'registration_altitude',
+                'registration_photo_path',
+                'registration_device_info'
+            ])
+            ->setDescriptionForEvent(function(string $eventName) {
+                return match($eventName) {
+                    'created' => 'Citizen registration was created',
+                    'updated' => 'Citizen registration was updated',
+                    'deleted' => 'Citizen registration was deleted',
+                    'restored' => 'Citizen registration was restored',
+                    'status_updated' => 'Citizen registration status was updated',
+                    default => "Citizen registration was {$eventName}",
+                };
+            })
+            ->useLogName('citizens')
+            ->dontLogIfAttributesChangedOnly(['updated_at', 'last_verified_at']);
+    }
+
+    /**
+     * Get all activities for this citizen.
+     */
+    public function activities()
+    {
+        return $this->morphMany(Activity::class, 'subject');
+    }
+
+    /**
+     * Get activities where this citizen was affected.
+     */
+    public function affectedActivities()
+    {
+        return Activity::where('subject_type', self::class)
+            ->where('subject_id', $this->id);
+    }
+    
+    /**
+     * Log a custom activity for this citizen.
+     *
+     * @param string $action
+     * @param string $description
+     * @param array $properties
+     * @param string|null $logName
+     * @return \Spatie\Activitylog\Models\Activity
+     */
+    public function logActivity(string $action, string $description, array $properties = [], ?string $logName = null)
+    {
+        $causer = auth()->user() ?? $this->user ?? null;
+        
+        $activity = activity($logName ?? 'citizens')
+            ->performedOn($this)
+            ->withProperties($properties);
+            
+        if ($causer) {
+            $activity->causedBy($causer);
+        }
+            
+        return $activity->log($description);
+    }
+    
+    /**
+     * Boot the model.
+     */
+    protected static function booted()
+    {
+        static::created(function ($citizen) {
+            // Log citizen creation with additional context
+            $citizen->logActivity(
+                'created',
+                'Citizen registration was created',
+                [
+                    'status' => $citizen->status,
+                    'registration_point' => $citizen->registration_point,
+                    'ward_id' => $citizen->ward_id
+                ]
+            );
+        });
+        
+        static::updating(function ($citizen) {
+            // Log status changes
+            if ($citizen->isDirty('status')) {
+                $citizen->logActivity(
+                    'status_updated',
+                    'Citizen registration status was updated',
+                    [
+                        'from' => $citizen->getOriginal('status'),
+                        'to' => $citizen->status,
+                        'status_label' => self::statusLabels()[$citizen->status] ?? 'Unknown'
+                    ]
+                );
+            }
+            
+            // Log when important fields are updated
+            $importantFields = ['first_name', 'last_name', 'id_number', 'phone_number', 'email'];
+            if (count(array_intersect($importantFields, array_keys($citizen->getDirty()))) > 0) {
+                $citizen->logActivity(
+                    'details_updated',
+                    'Citizen details were updated',
+                    ['changed' => array_intersect_key($citizen->getDirty(), array_flip($importantFields))]
+                );
+            }
+        });
+        
+        static::deleted(function ($citizen) {
+            // Log deletion with soft delete status
+            $citizen->logActivity(
+                $citizen->isForceDeleting() ? 'force_deleted' : 'deleted',
+                'Citizen registration was ' . ($citizen->isForceDeleting() ? 'permanently deleted' : 'soft deleted')
+            );
+        });
+        
+        static::restored(function ($citizen) {
+            // Log restoration
+            $citizen->logActivity('restored', 'Citizen registration was restored');
+        });
+    }
+    
+    /**
+     * Get all status options with their labels"
      */
     public static function statusLabels(): array
     {

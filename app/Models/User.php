@@ -5,27 +5,27 @@ namespace App\Models;
 use App\Models\Media;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
+use Spatie\Activitylog\LogOptions;
 use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Support\Facades\DB;
 use libphonenumber\PhoneNumberUtil;
 use libphonenumber\PhoneNumberFormat;
 use Laravel\Jetstream\HasProfilePhoto;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Spatie\Activitylog\Traits\LogsActivity;
 use Laravel\Fortify\TwoFactorAuthenticatable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Spatie\Activitylog\Traits\CausesActivity;
 
 class User extends Authenticatable /* implements MustVerifyEmail */
 {
-    use HasApiTokens;
-    use HasFactory;
-    use Notifiable;
-    use TwoFactorAuthenticatable;
+    use HasApiTokens, HasFactory, Notifiable, TwoFactorAuthenticatable, LogsActivity, CausesActivity;
     
     // We'll implement our own profile photo handling
     use HasProfilePhoto;
@@ -34,6 +34,94 @@ class User extends Authenticatable /* implements MustVerifyEmail */
     const PENDING = 0;
     const ACTIVE = 1;
     const INACTIVE = 2;
+
+    /**
+     * The attributes that should be logged for the user.
+     *
+     * @return array
+     */
+    /**
+     * Get the activity log options for the model.
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('users')
+            ->logOnly(['name', 'email'])
+            ->logOnlyDirty()
+            ->setDescriptionForEvent(fn(string $eventName) => match($eventName) {
+                'created' => 'User account was created',
+                'updated' => 'User account was updated',
+                'deleted' => 'User account was deleted',
+                'restored' => 'User account was restored',
+                'forceDeleted' => 'User account was permanently deleted',
+                default => "User {$eventName}",
+            })
+            ->logOnly(['name', 'email', 'status', 'phone_number'])
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->dontLogIfAttributesChangedOnly(['last_login_at', 'updated_at'])
+            ->logExcept([
+                'password', 
+                'remember_token', 
+                'two_factor_recovery_codes', 
+                'two_factor_secret',
+                'email_verified_at',
+                'current_team_id',
+                'profile_photo_path',
+                'last_login_at',
+                'last_login_ip',
+                'last_login_user_agent',
+                'last_login_os',
+                'last_login_device',
+                'last_login_location',
+                'two_factor_confirmed_at',
+            ])
+            ->dontLogIfAttributesChangedOnly(['last_login_at', 'last_login_ip', 'updated_at']);
+    }
+
+    /**
+     * Get all activities where this user is the subject.
+     */
+    public function activities()
+    {
+        return $this->morphMany(Activity::class, 'subject');
+    }
+
+    /**
+     * Get all activities caused by this user.
+     */
+    public function causedActivities()
+    {
+        return $this->morphMany(Activity::class, 'causer');
+    }
+
+    /**
+     * Get activities where this user was affected.
+     */
+    public function affectedActivities()
+    {
+        return Activity::where('properties->affected_user_id', $this->id)
+            ->orWhere('user_id', $this->id);
+    }
+    
+    /**
+     * Log a custom activity for this user.
+     *
+     * @param string $action
+     * @param string $description
+     * @param array $properties
+     * @param string|null $logName
+     * @return \Spatie\Activitylog\Models\Activity
+     */
+    public function logActivity(string $action, string $description, array $properties = [], ?string $logName = null)
+    {
+        return activity($logName)
+            ->causedBy(auth()->user() ?? $this)
+            ->performedOn($this)
+            ->withProperties($properties)
+            ->log($description);
+    }
     
     /**
      * Get the URL to the user's profile photo.

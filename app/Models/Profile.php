@@ -4,15 +4,18 @@ namespace App\Models;
 
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
+use Spatie\Activitylog\LogOptions;
 use Illuminate\Database\Eloquent\Model;
+use Spatie\Activitylog\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Spatie\Activitylog\Traits\CausesActivity;
 
 class Profile extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, LogsActivity, CausesActivity;
     
     // Constants for marital status
     const MARITAL_STATUS_SINGLE = 0;
@@ -27,6 +30,138 @@ class Profile extends Model
     const HIGHEST_LEVEL_OF_EDUCATION_HIGH_SCHOOL = 2;
     const HIGHEST_LEVEL_OF_EDUCATION_UNIVERSITY = 3;
     const HIGHEST_LEVEL_OF_EDUCATION_OTHER = 4;
+
+    /**
+     * The attributes that should be logged for the profile.
+     *
+     * @return LogOptions
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('profiles')
+            ->setDefaultProperties([
+                'type_id' => 1,
+                'category_id' => 1,
+            ])
+            ->setDescriptionForEvent(fn(string $eventName) => match($eventName) {
+                'created' => 'Profile was created',
+                'updated' => 'Profile was updated',
+                'deleted' => 'Profile was deleted',
+                'restored' => 'Profile was restored',
+                'forceDeleted' => 'Profile was permanently deleted',
+                default => "Profile {$eventName}",
+            })
+            ->logAll()
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->dontLogIfAttributesChangedOnly(['last_updated_at'])
+            ->logExcept([
+                'created_at', 
+                'updated_at', 
+                'deleted_at',
+                'user_id',
+                'id_number_verified_at',
+                'email_verified_at',
+                'phone_verified_at'
+            ])
+            ->setDescriptionForEvent(function(string $eventName) {
+                return match($eventName) {
+                    'created' => 'Profile was created',
+                    'updated' => 'Profile was updated',
+                    'deleted' => 'Profile was deleted',
+                    'restored' => 'Profile was restored',
+                    default => "Profile was {$eventName}",
+                };
+            })
+            ->useLogName('profiles')
+            ->dontLogIfAttributesChangedOnly(['updated_at']);
+    }
+    
+    /**
+     * Log a custom activity for this profile.
+     *
+     * @param string $action
+     * @param string $description
+     * @param array $properties
+     * @param string|null $logName
+     * @return \Spatie\Activitylog\Models\Activity
+     */
+    public function logActivity(string $action, string $description, array $properties = [], ?string $logName = null)
+    {
+        $causer = auth()->user() ?? $this->user ?? null;
+        
+        $activity = activity($logName ?? 'profiles')
+            ->performedOn($this)
+            ->withProperties($properties);
+            
+        if ($causer) {
+            $activity->causedBy($causer);
+        }
+            
+        return $activity->log($description);
+    }
+
+    /**
+     * Get all activities for this profile.
+     */
+    public function activities()
+    {
+        return $this->morphMany(Activity::class, 'subject');
+    }
+    
+    /**
+     * Get activities related to this profile.
+     */
+    public function profileActivities()
+    {
+        return Activity::where('subject_type', self::class)
+            ->where('subject_id', $this->id);
+    }
+    
+    /**
+     * Boot the model.
+     */
+    protected static function booted()
+    {
+        static::updating(function ($profile) {
+            // Log when sensitive information is updated
+            if ($profile->isDirty(['id_number', 'date_of_birth', 'gender'])) {
+                $profile->logActivity(
+                    'sensitive_update',
+                    'Updated sensitive profile information',
+                    [
+                        'changed' => $profile->getDirty(),
+                        'old' => array_intersect_key($profile->getOriginal(), $profile->getDirty())
+                    ]
+                );
+            }
+        });
+        
+        static::created(function ($profile) {
+            // Log profile creation with additional context
+            $profile->logActivity(
+                'created',
+                'Profile was created',
+                ['user_id' => $profile->user_id]
+            );
+        });
+        
+        static::deleted(function ($profile) {
+            // Log profile deletion with soft delete status
+            $profile->logActivity(
+                $profile->isForceDeleting() ? 'force_deleted' : 'deleted',
+                'Profile was ' . ($profile->isForceDeleting() ? 'permanently deleted' : 'soft deleted')
+            );
+        });
+        
+        static::restored(function ($profile) {
+            // Log profile restoration
+            $profile->logActivity('restored', 'Profile was restored');
+        });
+    }
+
+
 
     // Constants for employment status
     const EMPLOYMENT_STATUS_EMPLOYED = 0;
