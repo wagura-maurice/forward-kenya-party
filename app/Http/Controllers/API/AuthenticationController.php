@@ -98,36 +98,19 @@ class AuthenticationController extends Controller
     public function requestOTP(Request $request)
     {
         $request->validate([
-            'email' => 'nullable|string|exists:users,email',
-            'telephone' => 'nullable|string|telephone|exists:profiles,telephone',
+            'telephone' => 'required|string|telephone',
         ]);
 
-        if (!$request->filled('email') && !$request->filled('telephone')) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'You must provide either an email or a telephone number.'
-            ], 400);
-        }
-
         try {
-            $profile = findProfileByEmailOrTelephone(optional($request)->email, optional($request)->telephone);
-
-            if (!isset($profile)) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Profile not found.'
-                ], 404);
-            }
-            
-            if ($this->oneTimePasswordServices->send($profile)) {
+            if ($this->oneTimePasswordServices->send($request->telephone)) {
                 return response()->json([
                     'status' => 'success',
-                    'message' => 'OTP has been sent to your email or telephone number.'
+                    'message' => 'OTP has been sent to your telephone number.'
                 ], 201);
             } else {
                 return response()->json([
                     'status' => 'warning',
-                    'message' => 'OTP failed to send to your email or telephone number. Please try again later!'
+                    'message' => 'OTP failed to send to your telephone number. Please try again later!'
                 ], 200);
             }
         } catch (\Throwable $th) {
@@ -141,36 +124,15 @@ class AuthenticationController extends Controller
     public function verifyOTP(Request $request)
     {
         $request->validate([
-            'email' => 'nullable|string|exists:users,email',
-            'telephone' => 'nullable|string|telephone|exists:profiles,telephone',
+            'telephone' => 'required|string|telephone',
             'otp' => 'required|string|min:6|max:6',
         ]);
 
-        if (!$request->filled('email') && !$request->filled('telephone')) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'You must provide either an email or a telephone number.'
-            ], 400);
-        }
-
         try {
-            $profile = findProfileByEmailOrTelephone(optional($request)->email, optional($request)->telephone);
-
-            if (!isset($profile)) {
-                return response()->json([
-                    'status' => 'error',
-                    'message' => 'Profile not found.'
-                ], 404);
-            }
-
-            if ($this->oneTimePasswordServices->verify($profile->_uid, $request->otp)) {
+            if ($this->oneTimePasswordServices->verify($request->telephone, $request->otp)) {
                 return response()->json([
                     'status' => 'success',
-                    'message' => 'OTP verified successfully.',
-                    'data' => [
-                        'user' => $profile->user,
-                        'accessToken' => $profile->user->createToken('sanctumToken', $profile->user->abilities()->toArray())->plainTextToken
-                    ]
+                    'message' => 'OTP verified successfully.'
                 ], 200);
             } else {
                 return response()->json([
