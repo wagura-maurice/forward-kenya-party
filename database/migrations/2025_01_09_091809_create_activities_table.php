@@ -20,11 +20,8 @@ return new class extends Migration
             // Identifiers
             $table->uuid('uuid')
                   ->unique()
+                  ->default(DB::raw('(UUID())'))
                   ->comment('Globally unique identifier for the activity');
-            $table->string('reference_number', 50)
-                  ->nullable()
-                  ->unique()
-                  ->comment('Human-readable reference number');
             
             // Relationships
             $table->foreignId('type_id')
@@ -40,12 +37,12 @@ return new class extends Migration
                   ->comment('Category of activity');
                   
             $table->foreignId('user_id')
+                  ->nullable()
                   ->constrained('users')
-                  ->onDelete('cascade')
+                  ->onDelete('set null')
                   ->onUpdate('cascade')
                   ->comment('User who performed the activity');
                   
-            // Service relationship
             $table->foreignId('service_id')
                   ->nullable()
                   ->constrained('services')
@@ -53,22 +50,12 @@ return new class extends Migration
                   ->onUpdate('cascade')
                   ->comment('The service this activity is related to');
                   
-            // Department relationship (the department handling this activity)
             $table->foreignId('department_id')
                   ->nullable()
                   ->constrained('departments')
                   ->onDelete('set null')
                   ->onUpdate('cascade')
                   ->comment('The department handling this activity');
-                  
-            // Polymorphic relationship for different user types
-            $table->string('activityable_type')
-                  ->nullable()
-                  ->comment('Type of user (Citizen, Resident, Refugee, etc)');
-                  
-            $table->unsignedBigInteger('activityable_id')
-                  ->nullable()
-                  ->comment('ID of the user (citizen, resident, etc)');
                   
             $table->foreignId('related_to_id')
                   ->nullable()
@@ -95,7 +82,7 @@ return new class extends Migration
             
             // Status and timestamps
             $table->unsignedTinyInteger('_status')
-                  ->default(Activity::PENDING)
+                  ->default(0)
                   ->comment('Status: 0=Pending, 1=Completed, 2=Failed, 3=In Progress');
                   
             $table->timestamp('scheduled_for')
@@ -123,19 +110,54 @@ return new class extends Migration
                   ->nullable()
                   ->comment('Additional data stored in JSON format');
             
-            // Index for polymorphic relationship
-            $table->index(['activityable_type', 'activityable_id']);
+            // Activity log specific fields
+            $table->string('log_name')
+                  ->nullable()
+                  ->comment('The log name for filtering activities');
+                  
+            $table->string('event')
+                  ->nullable()
+                  ->comment('The event that triggered the activity');
+            
+            // Subject (polymorphic relationship)
+            $table->string('subject_type')->nullable();
+            $table->unsignedBigInteger('subject_id')->nullable();
+            
+            // Causer (polymorphic relationship)
+            $table->string('causer_type')->nullable();
+            $table->unsignedBigInteger('causer_id')->nullable();
+            
+            // Properties and batch
+            $table->json('properties')
+                  ->nullable()
+                  ->comment('Additional properties for the activity');
+                  
+            $table->uuid('batch_uuid')
+                  ->nullable()
+                  ->comment('Batch UUID for grouping related activities');
             
             // Timestamps
             $table->timestamps();
             $table->softDeletes();
+        });
+        
+        // Add indexes after table creation to avoid issues with long index names
+        Schema::table('activities', function (Blueprint $table) {
+            // Index for polymorphic relationships
+            $table->index(['subject_type', 'subject_id'], 'activities_subject_index');
+            $table->index(['causer_type', 'causer_id'], 'activities_causer_index');
             
-            // Indexes for better performance
-            $table->index(['user_id', '_status', 'created_at'], 'user_activity_status_idx');
-            $table->index(['type_id', 'category_id', 'created_at'], 'activity_type_category_idx');
-            $table->index('reference_number');
-            $table->index('action');
-            $table->index('scheduled_for');
+            // Other indexes for better performance
+            $table->index('log_name', 'activities_log_name_index');
+            $table->index('batch_uuid', 'activities_batch_uuid_index');
+            $table->index('action', 'activities_action_index');
+            $table->index('scheduled_for', 'activities_scheduled_for_index');
+            $table->index('_status', 'activities_status_index');
+            $table->index('created_at', 'activities_created_at_index');
+            
+            // Composite indexes
+            $table->index(['user_id', '_status', 'created_at'], 'activities_user_status_created_idx');
+            $table->index(['type_id', 'category_id', 'created_at'], 'activities_type_category_created_idx');
         });
         
         // Add table comment (MySQL syntax)
