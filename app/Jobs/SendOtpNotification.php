@@ -35,25 +35,34 @@ class SendOtpNotification implements ShouldQueue
      */
     public function middleware()
     {
-        return [new WithoutOverlapping($this->profile['_uid'])];
+        return [new WithoutOverlapping($this->telephone)];
     }
     
-    // We'll set the queue in the dispatch method instead of using a property
+    /**
+     * The telephone number to send the OTP to.
+     *
+     * @var string
+     */
+    protected $telephone;
 
-    protected $profile;
-    protected $otp;
+    /**
+     * The OTP code to send.
+     *
+     * @var string
+     */
+    protected $otpCode;
 
     /**
      * Create a new job instance.
      *
-     * @param array $profile
-     * @param array $otp
+     * @param string $telephone
+     * @param string $otpCode
      * @return void
      */
-    public function __construct(array $profile, array $otp)
+    public function __construct(string $telephone, string $otpCode)
     {
-        $this->profile = $profile;
-        $this->otp = $otp;
+        $this->telephone = $telephone;
+        $this->otpCode = $otpCode;
     }
 
     /**
@@ -65,17 +74,17 @@ class SendOtpNotification implements ShouldQueue
     {
         try {
             // Log the OTP for testing purposes
-            Log::info('OTP sent to ' . $this->profile['telephone'] . ': ' . $this->otp['token']);
+            Log::info('OTP sent to ' . $this->telephone . ': ' . $this->otpCode);
 
             // In a production environment, you would send the OTP via SMS
             // For example, using Africa's Talking or another SMS service:
             
             /*
-            $message = "Your verification code is: " . $this->otp['token'] . ". Valid for 5 minutes.";
+            $message = "Your verification code is: " . $this->otpCode . ". Valid for 5 minutes.";
             
             // Send SMS using your preferred service
             $smsService = new SmsService();
-            $smsService->send($this->profile['telephone'], $message);
+            $smsService->send($this->telephone, $message);
             */
             
             // For now, we'll just log it for testing
@@ -89,13 +98,12 @@ class SendOtpNotification implements ShouldQueue
     /**
      * Dispatch the job with the given arguments synchronously.
      *
-     * @param  array  $profile
-     * @param  array  $otp
+     * @param  string  $telephone
+     * @param  string  $otpCode
      * @return mixed
      */
-    public static function dispatchSync($profile, $otp)
+    public static function dispatchNow($telephone, $otpCode)
     {
-        $job = new static($profile, $otp);
-        return $job->handle(); // Run immediately in the current process
+        return (new static($telephone, $otpCode))->handle();
     }
 }
