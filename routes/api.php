@@ -83,66 +83,17 @@ use App\Http\Controllers\API\OutboundBulkVoiceMessageController;
 })->middleware('auth:sanctum'); */
 
 # (*) public access routes
-// Location-based API endpoints
-/* Route::prefix('locations')->group(function () {
-    // Get all counties
-    Route::get('/counties', [LocationController::class, 'getCounties']);
-    
-    // Get sub-counties by county
-    Route::get('/counties/{county}/sub-counties', [LocationController::class, 'getSubCounties']);
-    
-    // Get constituencies by sub-county
-    Route::get('/sub-counties/{subCounty}/constituencies', [LocationController::class, 'getConstituenciesBySubCounty']);
-    
-    // Get constituencies by county
-    Route::get('/counties/{county}/constituencies', [LocationController::class, 'getConstituenciesByCounty']);
-    
-    // Get wards by constituency
-    Route::get('/constituencies/{constituency}/wards', [LocationController::class, 'getWards']);
-}); */
-
-/* // Ethnicity API endpoints
-Route::prefix('ethnicities')->group(function () {
-    // Get all ethnicities
-    Route::get('/', [EthnicityController::class, 'index']);
-    
-    // Get ethnicities by category
-    Route::get('/categories/{category}', [EthnicityController::class, 'getByCategory']);
-    
-    // Get ethnicities by type
-    Route::get('/types/{type}', [EthnicityController::class, 'getByType']);
-    
-    // Get a single ethnicity
-    Route::get('/{ethnicity}', [EthnicityController::class, 'show']);
-}); */
-
-/* // Religion API endpoints
-Route::prefix('religions')->group(function () {
-    // Get all religions
-    Route::get('/', [ReligionController::class, 'index']);
-    
-    // Get religions by category
-    Route::get('/categories/{category}', [ReligionController::class, 'getByCategory']);
-    
-    // Get religions by type
-    Route::get('/types/{type}', [ReligionController::class, 'getByType']);
-    
-    // Get a single religion
-    Route::get('/{religion}', [ReligionController::class, 'show']);
-}); */
 
 // register & login authentication
 Route::group(['prefix' => 'auth'], function () {
     Route::post('/sign-up', [AuthenticationController::class, 'signUp'])->name('auth.sign-up');
     Route::post('/sign-in', [AuthenticationController::class, 'signIn'])->name('auth.sign-in');
-    Route::post('/request-otp', [AuthenticationController::class, 'requestOTP'])->name('auth.request-otp');
-    Route::post('/verify-otp', [AuthenticationController::class, 'verifyOTP'])->name('auth.verify-otp');
     Route::post('/forgot-password', [AuthenticationController::class, 'forgotPassword'])->name('auth.forgot-password');
     Route::post('/reset-password', [AuthenticationController::class, 'resetPassword'])->name('auth.reset-password');
     Route::get('/request-email-verification', [AuthenticationController::class, 'requestEmailVerification'])->name('auth.request-email-verification');
     Route::post('/verify-email', [AuthenticationController::class, 'verifyEmail'])->name('auth.verify-email');
-    Route::get('/request-opt-verification', [AuthenticationController::class, 'requestOtpVerification'])->name('auth.request-opt-verification');
-    Route::post('/verify-opt', [AuthenticationController::class, 'verifyOtp'])->name('auth.verify-opt');
+    Route::post('/request-otp', [AuthenticationController::class, 'requestOTP'])->name('auth.request-otp');
+    Route::post('/verify-otp', [AuthenticationController::class, 'verifyOTP'])->name('auth.verify-otp');
     Route::middleware('auth:sanctum')->post('/sign-out', [AuthenticationController::class, 'signOut'])->name('auth.sign-out');
 });
 
