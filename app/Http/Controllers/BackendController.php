@@ -58,10 +58,9 @@ class BackendController extends Controller
                 'featuredProjects' => $featuredProjects,
                 'role' => $roles[0],
             ],
-            'canLogin' => Route::has('login'),
-            'canRegister' => Route::has('register'),
-            'laravelVersion' => \Illuminate\Foundation\Application::VERSION,
-            'phpVersion' => PHP_VERSION,
+            'data' => [
+                'user' => $user
+            ],
         ]);
     }
 
@@ -167,16 +166,12 @@ class BackendController extends Controller
 
         return Inertia::render('Profile/Index', [
             'title' => 'My Profile',
-            'data' => [
-                'user' => $userData
-            ],
             'breadcrumbs' => [
                 ['label' => 'Profile', 'url' => route('profile')]
             ],
-            'canLogin' => Route::has('login'),
-            'canRegister' => Route::has('register'),
-            'laravelVersion' => \Illuminate\Foundation\Application::VERSION,
-            'phpVersion' => PHP_VERSION,
+            'data' => [
+                'user' => $userData
+            ],
         ]);
     }
 
@@ -184,19 +179,15 @@ class BackendController extends Controller
     {
         return Inertia::render('Profile/View', [
             'title' => 'View Profile',
-            'data' => [
-                'user' => User::find($user_id)
-            ],
             'breadcrumbs' => [
                 [
                     'label' => 'Profile',
                     'url' => route('profile')
                 ]
             ],
-            'canLogin' => Route::has('login'),
-            'canRegister' => Route::has('register'),
-            'laravelVersion' => \Illuminate\Foundation\Application::VERSION,
-            'phpVersion' => PHP_VERSION,
+                'data' => [
+                'user' => User::find($user_id)
+            ],
         ]);
     }
 
@@ -204,19 +195,15 @@ class BackendController extends Controller
     {
         return Inertia::render('Settings', [
             'title' => 'Systems Settings',
-            'data' => [
-                'user' => $request->user()
-            ],
             'breadcrumbs' => [
                 [
                     'label' => 'Settings',
                     'url' => route('settings')
                 ]
             ],
-            'canLogin' => Route::has('login'),
-            'canRegister' => Route::has('register'),
-            'laravelVersion' => \Illuminate\Foundation\Application::VERSION,
-            'phpVersion' => PHP_VERSION,
+            'data' => [
+                'user' => $request->user()
+            ],
         ]);
     }
 }
