@@ -139,7 +139,7 @@ class User extends Authenticatable /* implements MustVerifyEmail */
     public function getProfilePhotoUrlAttribute()
     {
         // If we have a profile photo ID, get the URL from the media table
-        if ($this->profile_photo_id && $this->profilePhoto) {
+        if ($this->profile_photo_path && $this->profilePhoto) {
             return Storage::url($this->profilePhoto->file_path);
         }
         
@@ -183,9 +183,9 @@ class User extends Authenticatable /* implements MustVerifyEmail */
             ]
         ]);
         
-        // Update the user's profile_photo_id
+        // Update the user's profile_photo_path
         $this->forceFill([
-            'profile_photo_id' => $media->id,
+            'profile_photo_path' => $media->file_path,
         ])->save();
     }
     

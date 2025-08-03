@@ -21,6 +21,10 @@ class Media extends Model
     protected $casts = [
         'configuration' => 'array',
         'metadata' => 'array',
+        'approved_at' => 'datetime',
+        'processed_at' => 'datetime',
+        'file_size' => 'integer',
+        '_status' => 'integer',
     ];
 
     // Status constants
@@ -64,36 +68,42 @@ class Media extends Model
      * @var array
      */
     protected $fillable = [
-        'id',
         'uuid',
         'name',
+        'slug',
+        'description',
+        'type_id',
+        'category_id',
         'file_name',
+        'file_extension',
+        'file_path',
+        'file_size',
         'mime_type',
-        'size',
-        'path',
-        'disk',
-        'conversions',
-        'custom_properties',
-        'responsive_images',
-        'order_column',
-        'model_type',
-        'model_id',
-        'collection_name',
+        'metadata',
+        'user_id',
+        'approved_at',
+        '_status',
         'media_type_id',
         'media_category_id',
-        'is_featured',
-        'alt_text',
-        'caption',
-        'description',
-        'metadata',
-        'configuration',
-        'session_id',
-        'session_amount',
-        'network_code',
-        'failure_reason',
-        'processed_at',
-        '_status',
+        'endpoint_url',
+        'file_type'
     ];
+    
+
+    
+    /**
+     * Indicates if the IDs are auto-incrementing.
+     *
+     * @var bool
+     */
+    public $incrementing = true;
+
+    /**
+     * The data type of the auto-incrementing ID.
+     *
+     * @var string
+     */
+    protected $keyType = 'integer';
     
     /**
      * The "booting" method of the model.
@@ -104,8 +114,8 @@ class Media extends Model
         
         // Generate UUID when creating a new model
         static::creating(function ($model) {
-            if (empty($model->{$model->getKeyName()})) {
-                $model->{$model->getKeyName()} = (string) Str::uuid();
+            if (empty($model->uuid)) {
+                $model->uuid = (string) Str::uuid();
             }
         });
     }
