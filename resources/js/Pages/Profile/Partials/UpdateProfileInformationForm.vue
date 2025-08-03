@@ -1170,6 +1170,7 @@ const toggleSection = (section) => {
                                     v-model="form.surname"
                                     type="text"
                                     class="mt-1 block w-full"
+                                    :value="user.profile?.lastname || user.name"
                                     placeholder="Enter your surname"
                                     required
                                     autocomplete="family-name"
@@ -1191,6 +1192,7 @@ const toggleSection = (section) => {
                                     v-model="form.other_name"
                                     type="text"
                                     class="mt-1 block w-full"
+                                    :value="user.profile?.firstname + ' ' + user.profile?.middlename"
                                     placeholder="Enter your other names"
                                     required
                                     autocomplete="given-name"
@@ -1212,6 +1214,7 @@ const toggleSection = (section) => {
                                     v-model="form.date_of_birth"
                                     type="date"
                                     class="mt-1 block w-full"
+                                    :value="user.profile?.date_of_birth"
                                     placeholder="Select your date of birth"
                                     required
                                 />
@@ -1239,6 +1242,7 @@ const toggleSection = (section) => {
                                             .genders"
                                         :key="gender.id"
                                         :value="gender.id"
+                                        :selected="user.profile?.gender === gender.id"
                                     >
                                         {{ gender.name }}
                                     </option>
@@ -1267,6 +1271,7 @@ const toggleSection = (section) => {
                                             .ethnicities"
                                         :key="ethnicity.id"
                                         :value="ethnicity.id"
+                                        :selected="user.profile?.ethnicity_id === ethnicity.id"
                                     >
                                         {{ ethnicity.name }}
                                     </option>
@@ -1295,6 +1300,7 @@ const toggleSection = (section) => {
                                             .religions"
                                         :key="religion.id"
                                         :value="religion.id"
+                                        :selected="user.profile?.religion_id === religion.id"
                                     >
                                         {{ religion.name }}
                                     </option>
@@ -1362,6 +1368,7 @@ const toggleSection = (section) => {
                                     "
                                     type="text"
                                     class="mt-1 block w-full"
+                                    :value="user.citizen?.national_identification_number"
                                     placeholder="e.g., 12345678"
                                     :required="!form.passport_number"
                                     autocomplete="off"
@@ -1392,6 +1399,7 @@ const toggleSection = (section) => {
                                     v-model="form.passport_number"
                                     type="text"
                                     class="mt-1 block w-full"
+                                    :value="user.citizen?.passport_number"
                                     placeholder="e.g., A1234567"
                                     :required="!form.national_identification_number"
                                     autocomplete="off"
@@ -1415,6 +1423,7 @@ const toggleSection = (section) => {
                                     v-model="form.driver_license_number"
                                     type="text"
                                     class="mt-1 block w-full"
+                                    :value="user.citizen?.driver_license_number"
                                     placeholder="e.g., DL12345678"
                                 />
                                 <InputError
@@ -1436,6 +1445,7 @@ const toggleSection = (section) => {
                                     v-model="form.ncpwd_number"
                                     type="text"
                                     class="mt-1 block w-full"
+                                    :value="user.profile?.ncpwd_number"
                                     placeholder="e.g., NCPWD/1234/5678"
                                 />
                                 <InputError
@@ -1493,6 +1503,7 @@ const toggleSection = (section) => {
                                     v-model="form.email"
                                     type="email"
                                     class="mt-1 block w-full"
+                                    :value="user.email"
                                     placeholder="your.email@example.com"
                                     autocomplete="email"
                                 />
@@ -1547,6 +1558,7 @@ const toggleSection = (section) => {
                                     v-model="form.telephone"
                                     type="tel"
                                     class="border-gray-300 focus:border-green-500 focus:ring-green-500 rounded-md shadow-sm mt-1 block w-full"
+                                    :value="user.profile?.telephone"
                                     placeholder="e.g., 0712345678"
                                     required
                                     @input="formatPhoneNumber"
@@ -1570,6 +1582,7 @@ const toggleSection = (section) => {
                                     v-model="form.address_line_1"
                                     type="text"
                                     class="mt-1 block w-full"
+                                    :value="user.profile?.address_line_1"
                                     placeholder="e.g., 123 Main Street"
                                 />
                                 <InputError
@@ -1591,6 +1604,7 @@ const toggleSection = (section) => {
                                     v-model="form.address_line_2"
                                     type="text"
                                     class="mt-1 block w-full"
+                                    :value="user.profile?.address_line_2"
                                     placeholder="e.g., Apartment, suite, etc. (optional)"
                                 />
                                 <InputError
@@ -1612,6 +1626,7 @@ const toggleSection = (section) => {
                                     v-model="form.city"
                                     type="text"
                                     class="mt-1 block w-full"
+                                    :value="user.profile?.city"
                                     placeholder="e.g., Nairobi"
                                 />
                                 <InputError
@@ -1633,6 +1648,7 @@ const toggleSection = (section) => {
                                     v-model="form.state"
                                     type="text"
                                     class="mt-1 block w-full"
+                                    :value="user.profile?.state"
                                     placeholder="e.g., Nairobi"
                                 />
                                 <InputError
@@ -1654,8 +1670,8 @@ const toggleSection = (section) => {
                                     v-model="form.country"
                                     type="text"
                                     class="mt-1 block w-full bg-gray-100 dark:bg-gray-800 cursor-not-allowed"
+                                    :value="user.profile?.country || 'Kenya'"
                                     placeholder="e.g., Kenya"
-                                    value="Kenya"
                                     readonly
                                 />
                                 <InputError
@@ -1719,6 +1735,9 @@ const toggleSection = (section) => {
                                             .locations.counties"
                                         :key="county.id"
                                         :value="county.id"
+                                        :selected="
+                                            form.county_id === user.citizen.county_id
+                                        "
                                     >
                                         {{ county.name }}
                                     </option>
@@ -1745,6 +1764,9 @@ const toggleSection = (section) => {
                                             v-for="sub_county in filteredSubCounties"
                                             :key="sub_county.id"
                                             :value="sub_county.id"
+                                            :selected="
+                                                form.sub_county_id === user.citizen.sub_county_id
+                                            "
                                         >
                                             {{ sub_county.name }}
                                         </option>
@@ -1783,6 +1805,10 @@ const toggleSection = (section) => {
                                         v-for="constituency in filteredConstituencies"
                                         :key="constituency.id"
                                         :value="constituency.id"
+                                        :selected="
+                                            form.constituency_id ===
+                                            user.citizen.constituency_id
+                                        "
                                     >
                                         {{ constituency.name }}
                                     </option>
@@ -1812,6 +1838,9 @@ const toggleSection = (section) => {
                                         v-for="ward in filteredWards"
                                         :key="ward.id"
                                         :value="ward.id"
+                                        :selected="
+                                            form.ward_id === user.citizen.ward_id
+                                        "
                                     >
                                         {{ ward.name }}
                                     </option>
@@ -1838,6 +1867,10 @@ const toggleSection = (section) => {
                                             v-for="location in filteredLocations"
                                             :key="location.id"
                                             :value="location.id"
+                                            :selected="
+                                                form.location_id ===
+                                                user.citizen.location_id
+                                            "
                                         >
                                             {{ location.name }}
                                         </option>
@@ -1872,6 +1905,10 @@ const toggleSection = (section) => {
                                             v-for="village in filteredVillages"
                                             :key="village.id"
                                             :value="village.id"
+                                            :selected="
+                                                form.village_id ===
+                                                user.citizen.village_id
+                                            "
                                         >
                                             {{ village.name }}
                                         </option>
@@ -1908,6 +1945,10 @@ const toggleSection = (section) => {
                                             v-for="polling_center in filteredPollingCenters"
                                             :key="polling_center.id"
                                             :value="polling_center.id"
+                                            :selected="
+                                                form.polling_center_id ===
+                                                user.citizen.polling_center_id
+                                            "
                                         >
                                             {{ polling_center.name }}
                                         </option>
@@ -1944,6 +1985,10 @@ const toggleSection = (section) => {
                                             v-for="station in filteredPollingStations"
                                             :key="station.id"
                                             :value="station.id"
+                                            :selected="
+                                                form.polling_station_id ===
+                                                user.citizen.polling_station_id
+                                            "
                                         >
                                             {{ station.name }}
                                         </option>
@@ -1980,6 +2025,10 @@ const toggleSection = (section) => {
                                             v-for="stream in filteredPollingStreams"
                                             :key="stream.id"
                                             :value="stream.id"
+                                            :selected="
+                                                form.polling_stream_id ===
+                                                user.citizen.polling_stream_id
+                                            "
                                         >
                                             {{ stream.name }}
                                         </option>
