@@ -190,12 +190,25 @@ class OneTimePasswordServices
         Cache::put($this->getRateLimitKey($identifier) . ':expiry', $expiresAt->timestamp, $expiresAt);
     }
 
+    /**
+     * Invalidate and clear the OTP for the given identifier
+     * This clears all related cache entries for the OTP
+     */
     protected function invalidateOtp(string $identifier): void
     {
         $key = $this->getCacheKey($identifier);
         Cache::forget($key);
         Cache::forget($this->getAttemptsKey($identifier));
         Cache::forget($this->getExpirationKey($identifier));
+    }
+
+    /**
+     * Clear the OTP for the given identifier
+     * This is an alias for invalidateOtp for better code readability
+     */
+    public function clearOtp(string $identifier): void
+    {
+        $this->invalidateOtp($identifier);
     }
 
     protected function getCacheKey(string $identifier): string
