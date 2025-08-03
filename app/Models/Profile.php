@@ -38,24 +38,12 @@ class Profile extends Model
      */
     public function getActivitylogOptions(): LogOptions
     {
-        return LogOptions::defaults()
+        $options = LogOptions::defaults()
             ->useLogName('profiles')
-            ->setDefaultProperties([
-                'type_id' => 1,
-                'category_id' => 1,
-            ])
-            ->setDescriptionForEvent(fn(string $eventName) => match($eventName) {
-                'created' => 'Profile was created',
-                'updated' => 'Profile was updated',
-                'deleted' => 'Profile was deleted',
-                'restored' => 'Profile was restored',
-                'forceDeleted' => 'Profile was permanently deleted',
-                default => "Profile {$eventName}",
-            })
             ->logAll()
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
-            ->dontLogIfAttributesChangedOnly(['last_updated_at'])
+            ->dontLogIfAttributesChangedOnly(['last_updated_at', 'updated_at'])
             ->logExcept([
                 'created_at', 
                 'updated_at', 
@@ -64,18 +52,27 @@ class Profile extends Model
                 'id_number_verified_at',
                 'email_verified_at',
                 'phone_verified_at'
-            ])
-            ->setDescriptionForEvent(function(string $eventName) {
-                return match($eventName) {
-                    'created' => 'Profile was created',
-                    'updated' => 'Profile was updated',
-                    'deleted' => 'Profile was deleted',
-                    'restored' => 'Profile was restored',
-                    default => "Profile was {$eventName}",
-                };
-            })
-            ->useLogName('profiles')
-            ->dontLogIfAttributesChangedOnly(['updated_at']);
+            ]);
+            
+        // Add properties to all logged activities
+        $options->properties = array_merge($options->properties ?? [], [
+            'type_id' => 1,
+            'category_id' => 1,
+        ]);
+        
+        // Set description for events
+        $options->setDescriptionForEvent(function(string $eventName) {
+            return match($eventName) {
+                'created' => 'Profile was created',
+                'updated' => 'Profile was updated',
+                'deleted' => 'Profile was deleted',
+                'restored' => 'Profile was restored',
+                'forceDeleted' => 'Profile was permanently deleted',
+                default => "Profile was {$eventName}",
+            };
+        });
+        
+        return $options;
     }
     
     /**

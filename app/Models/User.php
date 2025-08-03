@@ -45,22 +45,17 @@ class User extends Authenticatable /* implements MustVerifyEmail */
      */
     public function getActivitylogOptions(): LogOptions
     {
-        return LogOptions::defaults()
+        $options = LogOptions::defaults()
             ->useLogName('users')
-            ->logOnly(['name', 'email'])
-            ->logOnlyDirty()
-            ->setDescriptionForEvent(fn(string $eventName) => match($eventName) {
-                'created' => 'User account was created',
-                'updated' => 'User account was updated',
-                'deleted' => 'User account was deleted',
-                'restored' => 'User account was restored',
-                'forceDeleted' => 'User account was permanently deleted',
-                default => "User {$eventName}",
-            })
             ->logOnly(['name', 'email', 'status', 'phone_number'])
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
-            ->dontLogIfAttributesChangedOnly(['last_login_at', 'updated_at'])
+            ->dontLogIfAttributesChangedOnly([
+                'last_login_at', 
+                'last_login_ip', 
+                'updated_at',
+                'two_factor_confirmed_at'
+            ])
             ->logExcept([
                 'password', 
                 'remember_token', 
@@ -76,8 +71,21 @@ class User extends Authenticatable /* implements MustVerifyEmail */
                 'last_login_device',
                 'last_login_location',
                 'two_factor_confirmed_at',
-            ])
-            ->dontLogIfAttributesChangedOnly(['last_login_at', 'last_login_ip', 'updated_at']);
+            ]);
+            
+        // Add description for events
+        $options->setDescriptionForEvent(function(string $eventName) {
+            return match($eventName) {
+                'created' => 'User account was created',
+                'updated' => 'User account was updated',
+                'deleted' => 'User account was deleted',
+                'restored' => 'User account was restored',
+                'forceDeleted' => 'User account was permanently deleted',
+                default => "User {$eventName}",
+            };
+        });
+        
+        return $options;
     }
 
     /**

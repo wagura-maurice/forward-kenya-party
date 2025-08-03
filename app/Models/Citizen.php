@@ -31,24 +31,12 @@ class Citizen extends Model
      */
     public function getActivitylogOptions(): LogOptions
     {
-        return LogOptions::defaults()
+        $options = LogOptions::defaults()
             ->useLogName('citizens')
-            ->setDefaultProperties([
-                'type_id' => 1,
-                'category_id' => 1,
-            ])
-            ->setDescriptionForEvent(fn(string $eventName) => match($eventName) {
-                'created' => 'Citizen record was created',
-                'updated' => 'Citizen record was updated',
-                'deleted' => 'Citizen record was deleted',
-                'restored' => 'Citizen record was restored',
-                'forceDeleted' => 'Citizen record was permanently deleted',
-                default => "Citizen record {$eventName}",
-            })
             ->logAll()
             ->logOnlyDirty()
             ->dontSubmitEmptyLogs()
-            ->dontLogIfAttributesChangedOnly(['last_updated_at'])
+            ->dontLogIfAttributesChangedOnly(['last_updated_at', 'updated_at', 'last_verified_at'])
             ->logExcept([
                 'created_at', 
                 'updated_at', 
@@ -65,19 +53,28 @@ class Citizen extends Model
                 'registration_altitude',
                 'registration_photo_path',
                 'registration_device_info'
-            ])
-            ->setDescriptionForEvent(function(string $eventName) {
-                return match($eventName) {
-                    'created' => 'Citizen registration was created',
-                    'updated' => 'Citizen registration was updated',
-                    'deleted' => 'Citizen registration was deleted',
-                    'restored' => 'Citizen registration was restored',
-                    'status_updated' => 'Citizen registration status was updated',
-                    default => "Citizen registration was {$eventName}",
-                };
-            })
-            ->useLogName('citizens')
-            ->dontLogIfAttributesChangedOnly(['updated_at', 'last_verified_at']);
+            ]);
+            
+        // Add properties to all logged activities
+        $options->properties = array_merge($options->properties ?? [], [
+            'type_id' => 1,
+            'category_id' => 1,
+        ]);
+        
+        // Set description for events
+        $options->setDescriptionForEvent(function(string $eventName) {
+            return match($eventName) {
+                'created' => 'Citizen registration was created',
+                'updated' => 'Citizen registration was updated',
+                'deleted' => 'Citizen registration was deleted',
+                'restored' => 'Citizen registration was restored',
+                'forceDeleted' => 'Citizen record was permanently deleted',
+                'status_updated' => 'Citizen registration status was updated',
+                default => "Citizen registration was {$eventName}",
+            };
+        });
+        
+        return $options;
     }
 
     /**
