@@ -156,18 +156,22 @@ class User extends Authenticatable /* implements MustVerifyEmail */
      */
     public function updateProfilePhoto($photo)
     {
+        // Get media type and category
+        $mediaType = MediaType::where('slug', 'image')->firstOrFail();
+        $mediaCategory = MediaCategory::where('slug', 'profile_photos')->firstOrFail();
+        
+        // Store the file
+        $filePath = $photo->store('uploads/media/profile-photos/' . Str::slug(now()->toDateTimeString()), 'public');
+        
         // Create a new media record for the profile photo
-        $media = new Media;
-
-        // Media Data Fill
-        $media->fill([
-            'uuid' => Str::uuid()->toString(),
+        $media = Media::create([
+            'uuid' => (string) Str::uuid(),
             'name' => ucwords(strtolower("{$this->name} profile photo at " . now()->format('F j, Y, g:i a'))),
-            'slug' => Str::slug("{$this->name} profile photo at " . now()->format('F j, Y, g:i a')),
+            'slug' => Str::slug("{$this->name} profile photo at " . now()->toDateTimeString()),
             'description' => 'Profile photo for user; ' . $this->name,
-            'type_id' => MediaType::where('slug', 'image')->first()->id, // Assuming 2 is the ID for 'image' type
-            'category_id' => MediaCategory::where('slug', 'profile_photos')->first()->id, // Default category
-            'file_path' => $photo->store('uploads/media/profile-photos/' . Str::slug(now()->toDateTimeString()), 'public'),
+            'type_id' => $mediaType->id,
+            'category_id' => $mediaCategory->id,
+            'file_path' => $filePath,
             'file_name' => $photo->hashName(),
             'file_extension' => $photo->extension(),
             'file_size' => $photo->getSize(),
@@ -178,10 +182,8 @@ class User extends Authenticatable /* implements MustVerifyEmail */
                 'mime_type' => $photo->getMimeType(),
             ]
         ]);
-
-        $media->save();
         
-        // Update the user's profile_photo_path
+        // Update the user's profile_photo_id
         $this->forceFill([
             'profile_photo_id' => $media->id,
         ])->save();
