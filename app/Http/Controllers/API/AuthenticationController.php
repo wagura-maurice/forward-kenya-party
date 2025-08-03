@@ -116,29 +116,83 @@ class AuthenticationController extends Controller
         }
     }
 
+    /**
+     * Verify the OTP for the given telephone number.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function verifyOTP(Request $request)
     {
-        $request->validate([
+        // Validate request data
+        $validated = $request->validate([
             'telephone' => 'required|string|telephone',
-            'otp' => 'required|string|min:6|max:6',
+            'otp' => [
+                'required',
+                'string',
+                'size:6',
+                'regex:/^[0-9]+$/' // Ensure OTP contains only digits
+            ],
         ]);
 
         try {
-            if ($this->oneTimePasswordServices->verify($request->telephone, $request->otp)) {
+            // Verify OTP with rate limiting
+            $verificationResult = $this->oneTimePasswordServices->verify(
+                $validated['telephone'],
+                $validated['otp']
+            );
+
+            if ($verificationResult) {
+                // Clear any existing OTP after successful verification
+                $this->oneTimePasswordServices->clearOtp($validated['telephone']);
+                
                 return response()->json([
                     'status' => 'success',
-                    'message' => 'OTP verified successfully.'
+                    'message' => 'OTP verified successfully.',
+                    'verified' => true
                 ], 200);
-            } else {
+            }
+
+            // Handle failed verification
+            $attemptsRemaining = $this->oneTimePasswordServices->getRemainingAttempts($validated['telephone']);
+            
+            if ($attemptsRemaining <= 0) {
                 return response()->json([
                     'status' => 'error',
-                    'message' => 'Invalid OTP. Please try again.'
-                ], 400);
+                    'message' => 'Maximum OTP attempts reached. Please request a new OTP.',
+                    'attempts_remaining' => 0,
+                    'verified' => false
+                ], 429); // 429 Too Many Requests
             }
-        } catch (\Throwable $th) {
+
             return response()->json([
                 'status' => 'error',
-                'message' => 'OTP Verification Error: ' . $th->getMessage()
+                'message' => 'Invalid OTP. Please try again.',
+                'attempts_remaining' => $attemptsRemaining,
+                'verified' => false
+            ], 400);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Handle validation errors
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Validation failed',
+                'errors' => $e->errors(),
+                'verified' => false
+            ], 422);
+            
+        } catch (\Exception $e) {
+            // Log the error for debugging
+            \Log::error('OTP Verification Error: ' . $e->getMessage(), [
+                'telephone' => $validated['telephone'] ?? null,
+                'ip' => $request->ip(),
+                'user_agent' => $request->userAgent()
+            ]);
+
+            return response()->json([
+                'status' => 'error',
+                'message' => 'Unable to verify OTP at this time. Please try again later.',
+                'verified' => false
             ], 500);
         }
     }
