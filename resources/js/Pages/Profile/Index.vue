@@ -187,11 +187,20 @@ const copyToClipboard = (text) => {
                         <div class="flex justify-between items-start -mt-12 mb-3">
                             <!-- Avatar Section -->
                             <div class="relative">
-                                <div class="h-20 w-20 rounded-full border-4 border-white bg-white shadow-lg overflow-hidden">
-                                    <div class="h-full w-full flex items-center justify-center text-3xl bg-green-100 text-green-600 font-semibold">
-                                        {{ getInitials(fullName) }}
+                                <div
+                                    v-if="
+                                        $page.props.jetstream.managesProfilePhotos
+                                    "
+                                    class="h-20 w-20 rounded-full border-4 border-white bg-white shadow-lg overflow-hidden"
+                                    >
+                                        <img
+                                            class="h-full w-full rounded-full object-cover"
+                                            :src="
+                                                $page.props.auth.user.profile_photo_url
+                                            "
+                                            :alt="$page.props.auth.user.name"
+                                        />
                                     </div>
-                                </div>
                                 <span class="absolute bottom-0 right-0 bg-green-500 rounded-full p-1 border-2 border-white">
                                     <i class="fas fa-check text-white text-xs" aria-hidden="true"></i>
                                 </span>
@@ -526,7 +535,7 @@ const copyToClipboard = (text) => {
                                     <p
                                         class="text-sm font-medium text-gray-800 dark:text-gray-200"
                                     >
-                                        {{ profile?.email || "Not provided" }}
+                                        {{ user.email || "Not provided" }}
                                     </p>
                                 </div>
                             </div>
