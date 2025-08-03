@@ -21,6 +21,7 @@ const { props: pageProps } = usePage();
 // Access authenticated user data
 const user = computed(() => pageProps?.auth?.user || null);
 const profile = computed(() => user.value?.profile || {});
+const citizen = computed(() => user.value?.citizen || {});
 
 // OTP Configuration
 const otpConfig = {
@@ -1170,7 +1171,7 @@ const toggleSection = (section) => {
                                     v-model="form.surname"
                                     type="text"
                                     class="mt-1 block w-full"
-                                    :value="user.profile?.lastname || user.name"
+                                    :value="profile?.last_name"
                                     placeholder="Enter your surname"
                                     required
                                     autocomplete="family-name"
@@ -1192,7 +1193,7 @@ const toggleSection = (section) => {
                                     v-model="form.other_name"
                                     type="text"
                                     class="mt-1 block w-full"
-                                    :value="user.profile?.firstname + ' ' + user.profile?.middlename"
+                                    :value="user.profile?.first_name + ' ' + user.profile?.middle_name"
                                     placeholder="Enter your other names"
                                     required
                                     autocomplete="given-name"
@@ -1736,7 +1737,7 @@ const toggleSection = (section) => {
                                         :key="county.id"
                                         :value="county.id"
                                         :selected="
-                                            form.county_id === user.citizen.county_id
+                                            form.county_id === user.citizen?.county_id
                                         "
                                     >
                                         {{ county.name }}
@@ -1765,7 +1766,7 @@ const toggleSection = (section) => {
                                             :key="sub_county.id"
                                             :value="sub_county.id"
                                             :selected="
-                                                form.sub_county_id === user.citizen.sub_county_id
+                                                form.sub_county_id === user.citizen?.sub_county_id
                                             "
                                         >
                                             {{ sub_county.name }}
@@ -1807,7 +1808,7 @@ const toggleSection = (section) => {
                                         :value="constituency.id"
                                         :selected="
                                             form.constituency_id ===
-                                            user.citizen.constituency_id
+                                            user.citizen?.constituency_id
                                         "
                                     >
                                         {{ constituency.name }}
@@ -1839,7 +1840,7 @@ const toggleSection = (section) => {
                                         :key="ward.id"
                                         :value="ward.id"
                                         :selected="
-                                            form.ward_id === user.citizen.ward_id
+                                            form.ward_id === user.citizen?.ward_id
                                         "
                                     >
                                         {{ ward.name }}
@@ -1869,7 +1870,7 @@ const toggleSection = (section) => {
                                             :value="location.id"
                                             :selected="
                                                 form.location_id ===
-                                                user.citizen.location_id
+                                                user.citizen?.location_id
                                             "
                                         >
                                             {{ location.name }}
@@ -1907,7 +1908,7 @@ const toggleSection = (section) => {
                                             :value="village.id"
                                             :selected="
                                                 form.village_id ===
-                                                user.citizen.village_id
+                                                user.citizen?.village_id
                                             "
                                         >
                                             {{ village.name }}
@@ -1947,7 +1948,7 @@ const toggleSection = (section) => {
                                             :value="polling_center.id"
                                             :selected="
                                                 form.polling_center_id ===
-                                                user.citizen.polling_center_id
+                                                user.citizen?.polling_center_id
                                             "
                                         >
                                             {{ polling_center.name }}
@@ -1987,7 +1988,7 @@ const toggleSection = (section) => {
                                             :value="station.id"
                                             :selected="
                                                 form.polling_station_id ===
-                                                user.citizen.polling_station_id
+                                                user.citizen?.polling_station_id
                                             "
                                         >
                                             {{ station.name }}
@@ -2027,7 +2028,7 @@ const toggleSection = (section) => {
                                             :value="stream.id"
                                             :selected="
                                                 form.polling_stream_id ===
-                                                user.citizen.polling_stream_id
+                                                user.citizen?.polling_stream_id
                                             "
                                         >
                                             {{ stream.name }}
