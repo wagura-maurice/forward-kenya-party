@@ -71,9 +71,7 @@ const submit = () => {
                         <!-- Password Label on the Left -->
                         <InputLabel for="password" value="Password" />
                         <!-- Forgot Password Link on the Right -->
-                        <Link
-                            v-if="canResetPassword"
-                            :href="route('password.request')"
+                        <Link :href="route('password.request')"
                             class="text-sm text-green-600 hover:text-green-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 font-medium hover:underline hover:decoration-green-600 hover:dark:decoration-green-500 underline-offset-4 dark:text-green-500"
                         >
                             Forgot your password?

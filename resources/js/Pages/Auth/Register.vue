@@ -468,7 +468,7 @@ const showOtpVerificationModal = () => {
             <p class="mb-4 text-md">You'll receive a 6-digit verification code on your telephone number: <strong>${
                 form.telephone
             }</strong>.</p>
-            <p class="text-xs text-gray-600">Please check your mobile device for the OTP code.</p>
+            <p class="text-xs text-gray-600">Please check your mobile device for the OTP code text message.</p>
             <div class="flex flex-col items-center">
                 <input id="swal-otp-input" class="swal2-input w-full text-center mb-1" placeholder="Enter 6-digit code" maxlength="6" type="text">
                 <div id="otp-timer-container" class="text-sm text-gray-600 mt-2">
