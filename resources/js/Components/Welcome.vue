@@ -381,22 +381,55 @@ const formatChange = (change) => {
                                 <i class="fas fa-bolt text-primary-600 dark:text-primary-400 mr-2"></i>
                                 Quick Actions
                             </h3>
+                            <p class="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4">
+                                These quick actions are available for the administrator role.
+                            </p>
                             <div class="space-y-2">
-                                <a href="#" class="flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300">
-                                    <i class="fas fa-plus-circle text-green-500 w-5 mr-3"></i>
-                                    <span>Add New Member</span>
-                                </a>
-                                <a href="#" class="flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300">
-                                    <i class="fas fa-file-import text-blue-500 w-5 mr-3"></i>
-                                    <span>Import Data</span>
-                                </a>
-                                <a href="#" class="flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300">
-                                    <i class="fas fa-file-export text-purple-500 w-5 mr-3"></i>
-                                    <span>Export Reports</span>
-                                </a>
-                                <Link :href="route('settings')" class="flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300">
-                                    <i class="fas fa-cog text-gray-500 w-5 mr-3"></i>
-                                    <span>Settings</span>
+                                <!-- Member Management -->
+                                <Link :href="route('settings')" class="flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300 group">
+                                    <div class="w-8 h-8 flex items-center justify-center bg-green-50 dark:bg-green-900/20 rounded-lg mr-3 group-hover:bg-green-100 dark:group-hover:bg-green-800/30 transition-colors">
+                                        <i class="fas fa-user-plus text-green-600 dark:text-green-400"></i>
+                                    </div>
+                                    <div>
+                                        <div class="font-medium">Add New Member</div>
+                                        <div class="text-xs text-gray-500 dark:text-gray-400">Register a new party member</div>
+                                    </div>
+                                </Link>
+
+                                <!-- Data Management -->
+                                <div class="border-t border-gray-100 dark:border-gray-700 my-2"></div>
+
+                                <Link :href="route('settings')" class="flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300 group">
+                                    <div class="w-8 h-8 flex items-center justify-center bg-amber-50 dark:bg-amber-900/20 rounded-lg mr-3 group-hover:bg-amber-100 dark:group-hover:bg-amber-800/30 transition-colors">
+                                        <i class="fas fa-file-import text-amber-600 dark:text-amber-400"></i>
+                                    </div>
+                                    <div>
+                                        <div class="font-medium">Import/Export</div>
+                                        <div class="text-xs text-gray-500 dark:text-gray-400">Manage data in bulk</div>
+                                    </div>
+                                </Link>
+                                
+                                <Link :href="route('settings')" class="flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300 group">
+                                    <div class="w-8 h-8 flex items-center justify-center bg-purple-50 dark:bg-purple-900/20 rounded-lg mr-3 group-hover:bg-purple-100 dark:group-hover:bg-purple-800/30 transition-colors">
+                                        <i class="fas fa-chart-bar text-purple-600 dark:text-purple-400"></i>
+                                    </div>
+                                    <div>
+                                        <div class="font-medium">View Reports</div>
+                                        <div class="text-xs text-gray-500 dark:text-gray-400">Analytics and insights</div>
+                                    </div>
+                                </Link>
+
+                                <!-- System -->
+                                <div class="border-t border-gray-100 dark:border-gray-700 my-2"></div>
+
+                                <Link :href="route('settings')" class="flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300 group">
+                                    <div class="w-8 h-8 flex items-center justify-center bg-gray-100 dark:bg-gray-700 rounded-lg mr-3 group-hover:bg-gray-200 dark:group-hover:bg-gray-600 transition-colors">
+                                        <i class="fas fa-cog text-gray-600 dark:text-gray-300"></i>
+                                    </div>
+                                    <div>
+                                        <div class="font-medium">Settings</div>
+                                        <div class="text-xs text-gray-500 dark:text-gray-400">System configuration</div>
+                                    </div>
                                 </Link>
                             </div>
                         </div>
