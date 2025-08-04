@@ -378,7 +378,7 @@ const formatChange = (change) => {
                     <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700">
                         <div class="p-6">
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center mb-4">
-                                <i class="fas fa-bolt text-yellow-500 dark:text-yellow-400 mr-2"></i>
+                                <i class="fas fa-bolt text-primary-600 dark:text-primary-400 mr-2"></i>
                                 Quick Actions
                             </h3>
                             <div class="space-y-2">
