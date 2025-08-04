@@ -22,13 +22,13 @@ const { title } = defineProps({
                 <nav aria-label="Breadcrumb" class="flex">
                     <ol class="inline-flex items-center space-x-1 md:space-x-3">
                         <li class="inline-flex items-center">
-                            <a
+                            <Link
                                 :href="route('dashboard')"
                                 class="inline-flex items-center text-sm font-medium text-gray-700 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400"
                             >
                                 <i class="fas fa-home mr-2"></i>
                                 Dashboard
-                            </a>
+                            </Link>
                         </li>
                     </ol>
                 </nav>
