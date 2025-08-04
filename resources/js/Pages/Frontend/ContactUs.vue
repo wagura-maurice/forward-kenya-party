@@ -112,10 +112,10 @@ const submitForm = () => {
                 <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
                     <div class="flex items-center mb-4">
                         <div
-                            class="bg-blue-100 p-3 rounded-full w-12 h-12 flex items-center justify-center"
+                            class="bg-green-100 p-3 rounded-full w-12 h-12 flex items-center justify-center"
                         >
                             <i
-                                class="fas fa-phone-alt text-blue-600 text-xl"
+                                class="fas fa-phone-alt text-green-600 text-xl"
                             ></i>
                         </div>
                         <h3
@@ -164,10 +164,10 @@ const submitForm = () => {
                 <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
                     <div class="flex items-center mb-4">
                         <div
-                            class="bg-purple-100 p-3 rounded-full w-12 h-12 flex items-center justify-center"
+                            class="bg-green-100 p-3 rounded-full w-12 h-12 flex items-center justify-center"
                         >
                             <i
-                                class="fas fa-map-marker-alt text-purple-600 text-xl"
+                                class="fas fa-map-marker-alt text-green-600 text-xl"
                             ></i>
                         </div>
                         <h3
