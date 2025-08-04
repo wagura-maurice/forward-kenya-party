@@ -730,75 +730,78 @@ const updateProfileInformation = async (skipVerification = false) => {
         }
     }
 
-    try {
-        // Use Inertia's form helper which handles file uploads and CSRF automatically
-        form.transform((data) => ({
+    // Log the form data being sent
+    console.log('Form data being submitted:', JSON.stringify(form.data(), null, 2));
+    
+    // Use Inertia's form helper which handles file uploads and CSRF automatically
+    form.transform((data) => {
+        console.log('Transformed form data:', JSON.stringify(data, null, 2));
+        return {
             ...data,
             _method: 'PUT' // Laravel's way to handle PUT/PATCH/DELETE via POST
-        })).post(route('user-profile-information.update'), {
-            onSuccess: () => {
-                // Clear the photo input on success
-                clearPhotoFileInput();
-                
-                // Show success message
-                showToast('success', 'Success', 'Profile updated successfully!');
-                
-                // Refresh the page to show updated profile
-                window.location.reload();
-            },
-            onError: (errors) => {
-                console.error('Error updating profile:', errors);
-                showToast('error', 'Error', 'Failed to update profile. Please check the form for errors.');
-            },
-            preserveScroll: true,
-            forceFormData: true // Important for file uploads
-        });
-        return;
-        
-        // Clear the photo input on success
-        clearPhotoFileInput();
-        
-        // Show success message
-        Swal.fire({
-            toast: true,
-            position: "top-end",
-            icon: "success",
-            title: "Profile updated successfully!",
-            showConfirmButton: false,
-            timer: 3000,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-                toast.addEventListener("mouseenter", Swal.stopTimer);
-                toast.addEventListener("mouseleave", Swal.resumeTimer);
-            },
-        });
-        
-        // Refresh the page to show updated profile
-        window.location.reload();
-        
-    } catch (error) {
-        console.error('Error updating profile:', error);
-        
-        // Show error message
-        const errorMessage = error.response?.data?.message || 'Failed to update profile. Please try again.';
-        const firstError = error.response?.data?.errors 
-            ? Object.values(error.response.data.errors).flat()[0]
-            : errorMessage;
+        };
+    }).post(route('user-profile-information.update'), {
+        onStart: () => {
+            console.log('Form submission started');
+            form.processing = true;
+        },
+        onFinish: () => {
+            console.log('Form submission finished');
+            form.processing = false;
+        },
+        onSuccess: (page) => {
+            console.log('Profile update successful', page);
+            // Clear the photo input on success
+            clearPhotoFileInput();
             
-        Swal.fire({
-            toast: true,
-            position: "top-end",
-            icon: "error",
-            title: firstError,
-            showConfirmButton: false,
-            timer: 5000,
-            timerProgressBar: true,
-            didOpen: (toast) => {
-                toast.addEventListener("mouseenter", Swal.stopTimer);
-                toast.addEventListener("mouseleave", Swal.resumeTimer);
-            },
-        });
-    }
+            // Show success message
+            showToast('success', 'Success', 'Profile updated successfully!');
+            
+            // Refresh the page to show updated profile
+            window.location.reload();
+        },
+        onError: (errors) => {
+            console.error('Detailed error updating profile:', {
+                errors,
+                response: errors?.response,
+                data: errors?.response?.data,
+                status: errors?.response?.status,
+                statusText: errors?.response?.statusText
+            });
+            
+            // Extract the first error message if available
+            let errorMessage = 'Failed to update profile. Please check the form for errors.';
+            
+            // Handle different error response formats
+            if (errors && typeof errors === 'object') {
+                // Check for Laravel validation errors
+                if (errors.updateProfileInformation) {
+                    const errorObj = errors.updateProfileInformation;
+                    const firstErrorKey = Object.keys(errorObj)[0];
+                    if (firstErrorKey) {
+                        errorMessage = Array.isArray(errorObj[firstErrorKey]) 
+                            ? errorObj[firstErrorKey][0] 
+                            : String(errorObj[firstErrorKey]);
+                    }
+                } 
+                // Handle Inertia form errors
+                else if (Object.keys(errors).length > 0) {
+                    const firstError = Object.values(errors)[0];
+                    errorMessage = Array.isArray(firstError) ? firstError[0] : String(firstError);
+                }
+            }
+            
+            showToast('error', 'Error', errorMessage);
+        },
+        preserveScroll: true,
+        forceFormData: true, // Important for file uploads
+        onCancelToken: (cancelToken) => {
+            console.log('Request cancel token created');
+        },
+        onCancel: () => {
+            console.log('Request was cancelled');
+        }
+    });
 };
 
 const sendEmailVerification = () => {
