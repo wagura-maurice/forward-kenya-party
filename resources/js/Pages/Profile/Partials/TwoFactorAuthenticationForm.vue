@@ -187,7 +187,7 @@ const disableTwoFactorAuthentication = () => {
                 </div>
             </div>
 
-            <div class="mt-5">
+            <div class="mt-5 flex items-center justify-end">
                 <div v-if="! twoFactorEnabled">
                     <ConfirmsPassword @confirmed="enableTwoFactorAuthentication">
                         <PrimaryButton type="button" :class="{ 'opacity-25': enabling }" :disabled="enabling">

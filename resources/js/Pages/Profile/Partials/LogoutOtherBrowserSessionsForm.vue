@@ -87,12 +87,12 @@ const closeModal = () => {
                 </div>
             </div>
 
-            <div class="flex items-center mt-5">
+            <div class="mt-5 flex items-center justify-end">
                 <PrimaryButton @click="confirmLogout">
                     Log Out Other Browser Sessions
                 </PrimaryButton>
 
-                <ActionMessage :on="form.recentlySuccessful" class="ms-3">
+                <ActionMessage :on="form.recentlySuccessful">
                     Done.
                 </ActionMessage>
             </div>

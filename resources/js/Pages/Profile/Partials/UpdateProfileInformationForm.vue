@@ -1990,10 +1990,20 @@ const toggleSection = (section) => {
                                         :disabled="!form.citizen.ward_id || isLoadingLocations"
                                     >
                                         <option value="">Select Location</option>
+                                        <!-- Show current location first if it exists -->
+                                        <option 
+                                            v-if="citizen?.location && citizen.location.ward_id == form.citizen.ward_id"
+                                            :value="citizen.location_id"
+                                            :key="'current-location-' + citizen.location_id"
+                                        >
+                                            {{ citizen.location.name }}
+                                        </option>
+                                        <!-- Then show other filtered locations -->
                                         <option
                                             v-for="location in filteredLocations"
                                             :key="location.id"
                                             :value="location.id"
+                                            :disabled="citizen?.location_id === location.id"
                                         >
                                             {{ location.name }}
                                         </option>
@@ -2023,10 +2033,20 @@ const toggleSection = (section) => {
                                         :disabled="!form.citizen.location_id || isLoadingVillages"
                                     >
                                         <option value="">Select Village</option>
+                                        <!-- Show current village first if it exists -->
+                                        <option 
+                                            v-if="citizen?.village && citizen.village.location_id == form.citizen.location_id"
+                                            :value="citizen.village_id"
+                                            :key="'current-village-' + citizen.village_id"
+                                        >
+                                            {{ citizen.village.name }}
+                                        </option>
+                                        <!-- Then show other filtered villages -->
                                         <option
                                             v-for="village in filteredVillages"
                                             :key="village.id"
                                             :value="village.id"
+                                            :disabled="citizen?.village_id === village.id"
                                         >
                                             {{ village.name }}
                                         </option>
@@ -2059,13 +2079,22 @@ const toggleSection = (section) => {
                                         <option value="">
                                             Select Polling Center
                                         </option>
-                                        <option
-                                            v-for="pollingCenter in filteredPollingCenters"
-                                            :key="pollingCenter.id"
-                                            :value="pollingCenter.id"
-
+                                        <!-- Show current polling center first if it exists -->
+                                        <option 
+                                            v-if="citizen?.polling_center && citizen.polling_center.ward_id == form.citizen.ward_id"
+                                            :value="citizen.polling_center_id"
+                                            :key="'current-center-' + citizen.polling_center_id"
                                         >
-                                            {{ pollingCenter.name }}
+                                            {{ citizen.polling_center.name }}
+                                        </option>
+                                        <!-- Then show other filtered polling centers -->
+                                        <option
+                                            v-for="center in filteredPollingCenters"
+                                            :key="center.id"
+                                            :value="center.id"
+                                            :disabled="citizen?.polling_center_id === center.id"
+                                        >
+                                            {{ center.name }}
                                         </option>
                                     </select>
                                     <div v-if="isLoadingPollingCenters" class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -2096,13 +2125,22 @@ const toggleSection = (section) => {
                                         <option value="">
                                             Select Polling Station
                                         </option>
-                                        <option
-                                            v-for="pollingStation in filteredPollingStations"
-                                            :key="pollingStation.id"
-                                            :value="pollingStation.id"
-
+                                        <!-- Show current polling station first if it exists -->
+                                        <option 
+                                            v-if="citizen?.polling_station && citizen.polling_station.polling_center_id == form.citizen.polling_center_id"
+                                            :value="citizen.polling_station_id"
+                                            :key="'current-station-' + citizen.polling_station_id"
                                         >
-                                            {{ pollingStation.name }}
+                                            {{ citizen.polling_station.name }}
+                                        </option>
+                                        <!-- Then show other filtered polling stations -->
+                                        <option
+                                            v-for="station in filteredPollingStations"
+                                            :key="station.id"
+                                            :value="station.id"
+                                            :disabled="citizen?.polling_station_id === station.id"
+                                        >
+                                            {{ station.name }}
                                         </option>
                                     </select>
                                     <div v-if="isLoadingPollingStations" class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -2133,13 +2171,22 @@ const toggleSection = (section) => {
                                         <option value="">
                                             Select Polling Stream
                                         </option>
-                                        <option
-                                            v-for="pollingStream in filteredPollingStreams"
-                                            :key="pollingStream.id"
-                                            :value="pollingStream.id"
-
+                                        <!-- Show current polling stream first if it exists -->
+                                        <option 
+                                            v-if="citizen?.polling_stream && citizen.polling_stream.polling_station_id == form.citizen.polling_station_id"
+                                            :value="citizen.polling_stream_id"
+                                            :key="'current-stream-' + citizen.polling_stream_id"
                                         >
-                                            {{ pollingStream.name }}
+                                            {{ citizen.polling_stream.name }}
+                                        </option>
+                                        <!-- Then show other filtered polling streams -->
+                                        <option
+                                            v-for="stream in filteredPollingStreams"
+                                            :key="stream.id"
+                                            :value="stream.id"
+                                            :disabled="citizen?.polling_stream_id === stream.id"
+                                        >
+                                            {{ stream.name }}
                                         </option>
                                     </select>
                                     <div v-if="isLoadingPollingStreams" class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
