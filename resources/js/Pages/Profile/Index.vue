@@ -212,7 +212,7 @@ const copyToClipboard = (text) => {
                             
                             <!-- Edit Button - Top Right -->
                             <a :href="route('profile.show')" class="mt-2">
-                                <button class="inline-flex items-center px-3 py-1.5 bg-white dark:bg-gray-700 border border-gray-300 rounded-md text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                <button class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 rounded-md text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
                                     <i class="fas fa-edit mr-1"></i>
                                     Edit
                                 </button>
