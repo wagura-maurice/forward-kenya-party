@@ -70,6 +70,7 @@ return new class extends Migration
                   ->comment('Title of the activity');
                   
             $table->string('action', 100)
+                  ->nullable()
                   ->comment('Action performed (e.g., created, updated, deleted)');
                   
             $table->text('description')
