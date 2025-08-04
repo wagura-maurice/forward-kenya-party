@@ -58,6 +58,16 @@ class HandleInertiaRequests extends Middleware
                 'success' => $request->session()->get('success'),
                 'error' => $request->session()->get('error'),
             ],
+            'auth' => [
+                'user' => $request->user() ? [
+                    'id' => $request->user()->id,
+                    'name' => $request->user()->name,
+                    'email' => $request->user()->email,
+                    'profile_photo_path' => optional($request->user())->profile_photo_path ?? $request->user()->defaultProfilePhotoPath(),
+                    'profile' => $request->user()->profile ? $request->user()->profile->load('ethnicity', 'religion')->toArray() : null,
+                    'citizen' => $request->user()->citizen ? $request->user()->citizen->load('county', 'sub_county', 'constituency', 'ward', 'location', 'village', 'polling_center', 'polling_station', 'polling_stream')->toArray() : null,
+                ] : null,
+            ],
         ];
 
         // Share all location and form data for the registration and profile pages
