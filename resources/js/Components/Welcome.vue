@@ -148,18 +148,94 @@ const toggleLibrary = () => {
     isLibraryExpanded.value = !isLibraryExpanded.value;
 };
 
-// Import route helper
-// Inside the <script setup> section
+// Get the page props
+const { data } = usePage().props;
+
+// Destructure the data with default values
 const {
-    stats,
-    featuredServices,
-    featuredDepartments,
-    latestActivities
-} = props.data || {
-    stats: null,
-    featuredServices: null,
-    featuredDepartments: null,
-    latestActivities: null
+    stats = {
+        total_users: 0,
+        total_services: 0,
+        total_departments: 0,
+        featured_projects: 0
+    },
+    featuredServices = [],
+    featuredDepartments = [],
+    featuredProjects = [],
+    latestActivities = [],
+    role = 'member'
+} = data || {};
+
+// Get icon class based on activity type
+const getActivityIcon = (iconType) => {
+    const icons = {
+        'plus': 'fa-plus-circle',
+        'pencil-alt': 'fa-pen',
+        'trash': 'fa-trash',
+        'sign-in-alt': 'fa-sign-in-alt',
+        'sign-out-alt': 'fa-sign-out-alt',
+        'user-plus': 'fa-user-plus',
+        'bell': 'fa-bell'
+    };
+    return icons[iconType] || 'fa-circle';
+};
+
+// Get color class based on activity type
+const getActivityColor = (color) => {
+    const colors = {
+        'green': 'text-green-500',
+        'blue': 'text-blue-500',
+        'red': 'text-red-500',
+        'indigo': 'text-indigo-500',
+        'gray': 'text-gray-500'
+    };
+    return colors[color] || 'text-gray-500';
+};
+
+// Format relative time (e.g., '2 hours ago')
+const formatRelativeTime = (dateString) => {
+    if (!dateString) return '';
+    
+    const date = new Date(dateString);
+    const now = new Date();
+    const seconds = Math.floor((now - date) / 1000);
+    
+    const intervals = {
+        year: 31536000,
+        month: 2592000,
+        week: 604800,
+        day: 86400,
+        hour: 3600,
+        minute: 60,
+        second: 1
+    };
+    
+    for (const [unit, secondsInUnit] of Object.entries(intervals)) {
+        const interval = Math.floor(seconds / secondsInUnit);
+        if (interval >= 1) {
+            return interval === 1 
+                ? `${interval} ${unit} ago`
+                : `${interval} ${unit}s ago`;
+        }
+    }
+    
+    return 'just now';
+};
+
+// Format percentage change with appropriate styling
+const formatChange = (change) => {
+    if (change === undefined || change === null) return { text: 'N/A', class: 'text-gray-500' };
+    const isPositive = change > 0;
+    const isNeutral = change === 0;
+    
+    return {
+        text: `${isPositive ? '+' : ''}${change}%`,
+        class: isNeutral 
+            ? 'text-gray-500' 
+            : isPositive 
+                ? 'text-green-500 dark:text-green-400' 
+                : 'text-red-500 dark:text-red-400'
+    };
 };
 </script>
 
@@ -167,169 +243,161 @@ const {
     <div class="min-h-screen bg-white dark:bg-gray-900">
         <section class="py-6 sm:py-8">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div v-if="stats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-                    <!-- Total Users Card -->
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700">
-                        <div class="p-6">
-                            <div class="flex items-center">
-                                <div class="p-3 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
-                                    <i class="fas fa-users text-xl"></i>
-                                </div>
-                                <div class="ml-4">
-                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Total Users</p>
-                                    <p class="text-2xl font-semibold text-gray-900 dark:text-white">
-                                        {{ stats.total_users || 0 }}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Active Members Card -->
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700">
-                        <div class="p-6">
-                            <div class="flex items-center">
-                                <div class="p-3 rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-600 dark:text-yellow-400">
-                                    <i class="fas fa-user-friends text-xl"></i>
-                                </div>
-                                <div class="ml-4">
-                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Active Members</p>
-                                    <p class="text-2xl font-semibold text-gray-900 dark:text-white">
-                                        {{ stats.active_members || 0 }}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Branches Card -->
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700">
-                        <div class="p-6">
-                            <div class="flex items-center">
-                                <div class="p-3 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400">
-                                    <i class="fas fa-building text-xl"></i>
-                                </div>
-                                <div class="ml-4">
-                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Branches</p>
-                                    <p class="text-2xl font-semibold text-gray-900 dark:text-white">
-                                        {{ stats.total_branches || 0 }}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Partnerships Card -->
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700">
-                        <div class="p-6">
-                            <div class="flex items-center">
-                                <div class="p-3 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400">
-                                    <i class="fas fa-handshake text-xl"></i>
-                                </div>
-                                <div class="ml-4">
-                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Partnerships</p>
-                                    <p class="text-2xl font-semibold text-gray-900 dark:text-white">
-                                        {{ stats.total_partnerships || 0 }}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Departments Card -->
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700">
-                        <div class="p-6">
-                            <div class="flex items-center">
-                                <div class="p-3 rounded-full bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400">
-                                    <i class="fas fa-code-branch text-xl"></i>
-                                </div>
-                                <div class="ml-4">
-                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Departments</p>
-                                    <p class="text-2xl font-semibold text-gray-900 dark:text-white">
-                                        {{ stats.total_departments || 0 }}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Services Card -->
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700">
-                        <div class="p-6">
-                            <div class="flex items-center">
-                                <div class="p-3 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400">
-                                    <i class="fas fa-user-check text-xl"></i>
-                                </div>
-                                <div class="ml-4">
-                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Services</p>
-                                    <p class="text-2xl font-semibold text-gray-900 dark:text-white">
-                                        {{ stats.total_services || 0 }}
-                                    </p>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+                    <!-- Stat Card Component -->
+                    <template v-for="(stat, key) in [
+                        { 
+                            key: 'total_users', 
+                            title: 'Total Users', 
+                            icon: 'users', 
+                            color: 'blue',
+                            iconClass: 'fas fa-users'
+                        },
+                        { 
+                            key: 'active_users', 
+                            title: 'Active Members', 
+                            icon: 'user-check', 
+                            color: 'green',
+                            iconClass: 'fas fa-user-check'
+                        },
+                        { 
+                            key: 'branches', 
+                            title: 'Branches', 
+                            icon: 'code-branch', 
+                            color: 'purple',
+                            iconClass: 'fas fa-code-branch'
+                        },
+                        { 
+                            key: 'partnerships', 
+                            title: 'Partnerships', 
+                            icon: 'handshake', 
+                            color: 'yellow',
+                            iconClass: 'fas fa-handshake'
+                        },
+                        { 
+                            key: 'departments', 
+                            title: 'Departments', 
+                            icon: 'sitemap', 
+                            color: 'indigo',
+                            iconClass: 'fas fa-sitemap'
+                        },
+                        { 
+                            key: 'services', 
+                            title: 'Services', 
+                            icon: 'concierge-bell', 
+                            color: 'pink',
+                            iconClass: 'fas fa-concierge-bell'
+                        },
+                        { 
+                            key: 'projects', 
+                            title: 'Projects', 
+                            icon: 'project-diagram', 
+                            color: 'red',
+                            iconClass: 'fas fa-project-diagram'
+                        },
+                        { 
+                            key: 'upcoming_events', 
+                            title: 'Upcoming Events', 
+                            icon: 'calendar-alt', 
+                            color: 'pink',
+                            iconClass: 'fas fa-calendar-alt'
+                        }
+                    ]" :key="stat.key">
+                        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-shadow duration-200">
+                            <div class="p-6">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex items-center">
+                                        <div :class="['p-3 rounded-full', `bg-${stat.color}-100 dark:bg-${stat.color}-900/30 text-${stat.color}-600 dark:text-${stat.color}-400`]">
+                                            <i :class="[stat.iconClass, 'text-xl']"></i>
+                                        </div>
+                                        <div class="ml-4">
+                                            <p class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ stat.title }}</p>
+                                            <p class="text-2xl font-semibold text-gray-900 dark:text-white">
+                                                {{ stats[stat.key]?.count || 0 }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div v-if="stats[stat.key]?.change !== undefined" class="ml-2 flex flex-col items-end">
+                                        <span :class="['text-xs font-medium', formatChange(stats[stat.key]?.change).class]">
+                                            {{ formatChange(stats[stat.key]?.change).text }}
+                                        </span>
+                                        <span class="text-xs text-gray-400 mt-0.5">vs last month</span>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- Projects Card -->
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700">
-                        <div class="p-6">
-                            <div class="flex items-center">
-                                <div class="p-3 rounded-full bg-cyan-100 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400">
-                                    <i class="fas fa-history text-xl"></i>
-                                </div>
-                                <div class="ml-4">
-                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Projects</p>
-                                    <p class="text-2xl font-semibold text-gray-900 dark:text-white">
-                                        {{ stats.featured_projects || 0 }}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Upcoming Events Card -->
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700">
-                        <div class="p-6">
-                            <div class="flex items-center">
-                                <div class="p-3 rounded-full bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400">
-                                    <i class="fas fa-calendar-alt text-xl"></i>
-                                </div>
-                                <div class="ml-4">
-                                    <p class="text-sm font-medium text-gray-500 dark:text-gray-400">Upcoming Events</p>
-                                    <p class="text-2xl font-semibold text-gray-900 dark:text-white">
-                                        {{ stats.upcoming_events || 0 }}
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    </template>
                 </div>
 
-                <div v-if="props.data.role === 'administrator'">
-                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700 mb-10">
+                <!-- Latest Activities Section -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10" v-if="role === 'administrator'">
+                    <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700">
                         <div class="p-6">
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center mb-4">
                                 <i class="fas fa-history text-primary-600 dark:text-primary-400 mr-2"></i>
-                                Latest Activites
+                                Latest Activities
                             </h3>
                             <p class="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4">
                                 These activity logs are pulled from all the models in the database using the Laravel Spatie Audit Trail package.
                             </p>
                             <div class="space-y-4">
-                                <div v-for="(activity, index) in latestActivities" :key="index" 
-                                    class="flex items-start pb-4 border-b border-gray-100 dark:border-gray-700 last:border-0 last:pb-0">
-                                    <div class="p-2 bg-blue-50 dark:bg-blue-900/20 rounded-lg mr-3">
-                                        <i class="fas text-blue-500 dark:text-blue-400" :class="getActivityIcon(activity.log_name)"></i>
+                                <div v-if="latestActivities.length === 0" class="text-center py-4 text-gray-500">
+                                    No recent activities found.
+                                </div>
+                                <div v-for="activity in latestActivities" :key="activity.id" class="flex items-start">
+                                    <div class="flex-shrink-0">
+                                        <div class="h-10 w-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                                            <i :class="['fas', getActivityIcon(activity.icon), 'text-lg', getActivityColor(activity.color)]"></i>
+                                        </div>
                                     </div>
-                                    <div class="flex-1 min-w-0">
-                                        <p class="text-sm font-medium text-gray-900 dark:text-white truncate">
+                                    <div class="ml-4 flex-1 min-w-0">
+                                        <p class="text-sm font-medium text-gray-900 dark:text-white">
                                             {{ activity.description }}
                                         </p>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400">
-                                            {{ formatRelativeTime(activity.created_at) }}
-                                        </p>
+                                        <div class="flex items-center mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                            <span>{{ activity.user_name }}</span>
+                                            <span class="mx-1">•</span>
+                                            <span>{{ activity.created_at }}</span>
+                                            <span v-if="activity.subject_type" class="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-gray-700">
+                                                {{ activity.subject_type }}
+                                            </span>
+                                        </div>
                                     </div>
                                 </div>
+                            </div>
+                            <div v-if="latestActivities.length > 0" class="mt-4 text-right">
+                                <a href="#" class="text-sm font-medium text-primary-600 hover:text-green-700 dark:text-primary-400 dark:hover:text-primary-300 hover:underline underline-offset-4">
+                                    View all activities
+                                    <i class="fas fa-arrow-right ml-1"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions Card -->
+                    <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700">
+                        <div class="p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white flex items-center mb-4">
+                                <i class="fas fa-bolt text-yellow-500 dark:text-yellow-400 mr-2"></i>
+                                Quick Actions
+                            </h3>
+                            <div class="space-y-2">
+                                <a href="#" class="flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300">
+                                    <i class="fas fa-plus-circle text-green-500 w-5 mr-3"></i>
+                                    <span>Add New Member</span>
+                                </a>
+                                <a href="#" class="flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300">
+                                    <i class="fas fa-file-import text-blue-500 w-5 mr-3"></i>
+                                    <span>Import Data</span>
+                                </a>
+                                <a href="#" class="flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300">
+                                    <i class="fas fa-file-export text-purple-500 w-5 mr-3"></i>
+                                    <span>Export Reports</span>
+                                </a>
+                                <Link :href="route('settings')" class="flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300">
+                                    <i class="fas fa-cog text-gray-500 w-5 mr-3"></i>
+                                    <span>Settings</span>
+                                </Link>
                             </div>
                         </div>
                     </div>
