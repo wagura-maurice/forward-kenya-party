@@ -20,8 +20,73 @@ const { props: pageProps } = usePage();
 
 // Access authenticated user data
 const user = computed(() => pageProps?.auth?.user || null);
+
+// Access the profile and citizen data
 const profile = computed(() => user.value?.profile || {});
 const citizen = computed(() => user.value?.citizen || {});
+
+// Initialize form with default values and validation rules
+const form = useForm({
+    _method: "PUT",
+    // User Profile Information
+    profile: {
+        // Personal Information
+        surname: '',
+        other_name: '',
+        email: '',
+        photo: null,
+        date_of_birth: "",
+        gender: "",
+        ncpwd_number: "",
+        ethnicity_id: "",
+        religion_id: "",
+        // Contact Information
+        telephone: "",
+        address_line_1: "",
+        address_line_2: "",
+        city: "",
+        state: "",
+        country: ""
+    },
+    // Citizen Information
+    citizen: {
+        // Identification Information
+        national_identification_number: "",
+        passport_number: "",
+        driver_license_number: "",
+        // Local Government Information
+        county_id: "",
+        sub_county_id: "",
+        constituency_id: "",
+        ward_id: "",
+        location_id: "",
+        village_id: "",
+        polling_center_id: "",
+        polling_station_id: "",
+        polling_stream_id: ""
+    }
+}, {
+    // Custom validation rules
+    resetOnSuccess: false,
+    rules: {
+        'citizen.national_identification_number': [
+            (value, form) => {
+                if (!value && !form.citizen.passport_number) {
+                    return "Either National Identification Number or Passport Number is required";
+                }
+                return true;
+            }
+        ],
+        'citizen.passport_number': [
+            (value, form) => {
+                if (!value && !form.citizen.national_identification_number) {
+                    return "Either Passport Number or National Identification Number is required";
+                }
+                return true;
+            }
+        ]
+    }
+});
 
 // OTP Configuration
 const otpConfig = {
@@ -41,8 +106,6 @@ const otpForm = useForm({
     field_to_verify: '',
     verification_value: ''
 });
-
-
 
 // Format time remaining
 const formatTimeRemaining = (endTime) => {
@@ -484,111 +547,126 @@ const showToast = (type, title, message) => {
     });
 };
 
-// Initialize form with default values and validation rules
-const form = useForm({
-    _method: "PUT",
-    // Personal Information
-    surname: '',
-    other_name: '',
-    email: '',
-    photo: null,
-    date_of_birth: "",
-    gender: "",
-    ncpwd_number: "",
-    ethnicity_id: "",
-    religion_id: "",
-    // Contact Information
-    telephone: "",
-    address_line_1: "",
-    address_line_2: "",
-    city: "",
-    state: "",
-    country: "",
-    // Identification Information
-    national_identification_number: "",
-    passport_number: "",
-    driver_license_number: "",
-    // Local Government Information
-    county_id: "",
-    sub_county_id: "",
-    constituency_id: "",
-    ward_id: "",
-    location_id: "",
-    village_id: "",
-    polling_center_id: "",
-    polling_station_id: "",
-    polling_stream_id: ""
-}, {
-    // Custom validation rules
-    resetOnSuccess: false,
-    rules: {
-        national_identification_number: [
-            (value, form) => {
-                if (!value && !form.passport_number) {
-                    return "Either National Identification Number or Passport Number is required";
-                }
-                return true;
+// Watch for profile changes to update form data
+watch(profile, (newProfile) => {
+    if (newProfile) {
+        // Update profile fields in form
+        Object.keys(newProfile).forEach(key => {
+            if (key in form.profile) {
+                form.profile[key] = newProfile[key];
             }
-        ],
-        passport_number: [
-            (value, form) => {
-                if (!value && !form.national_identification_number) {
-                    return "Either Passport Number or National Identification Number is required";
-                }
-                return true;
-            }
-        ]
+        });
     }
-});
+}, { immediate: true, deep: true });
+
+// Watch for citizen changes to update form data
+watch(citizen, (newCitizen) => {
+    if (newCitizen && Object.keys(newCitizen).length > 0) {
+        // Update citizen fields in form
+        Object.keys(newCitizen).forEach(key => {
+            if (key in form.citizen) {
+                form.citizen[key] = newCitizen[key];
+            }
+        });
+    }
+}, { immediate: true, deep: true });
 
 // Watch for profile changes to update form
 watch(profile, (newProfile) => {
     if (newProfile) {
-        form.surname = newProfile.last_name || '';
-        form.other_name = newProfile.first_name || '';
-        form.email = user.value?.email || '';
-        form.date_of_birth = newProfile.date_of_birth || '';
-        form.gender = newProfile.gender || '';
-        form.ncpwd_number = newProfile.ncpwd_number || '';
-        form.ethnicity_id = newProfile.ethnicity_id || '';
-        form.religion_id = newProfile.religion_id || '';
-        form.telephone = newProfile.telephone || '';
-        form.address_line_1 = newProfile.address_line_1 || '';
-        form.address_line_2 = newProfile.address_line_2 || '';
-        form.city = newProfile.city || '';
-        form.state = newProfile.state || '';
-        form.country = newProfile.country || '';
+        // Update profile fields
+        form.profile.surname = newProfile.last_name || null;
+        form.profile.other_name = (newProfile.first_name || '') + (newProfile.middle_name ? ` ${newProfile.middle_name}` : '');
+        form.profile.email = newProfile.email || user.value.email;
         
-        if (newProfile.citizen) {
-            form.national_identification_number = newProfile.citizen.national_identification_number || '';
-            form.passport_number = newProfile.citizen.passport_number || '';
-            form.driver_license_number = newProfile.citizen.driver_license_number || '';
-            form.county_id = newProfile.citizen.county_id || '';
-            form.sub_county_id = newProfile.citizen.sub_county_id || '';
-            form.constituency_id = newProfile.citizen.constituency_id || '';
-            form.ward_id = newProfile.citizen.ward_id || '';
-            form.location_id = newProfile.citizen.location_id || '';
-            form.village_id = newProfile.citizen.village_id || '';
-            form.polling_center_id = newProfile.citizen.polling_center_id || '';
-            form.polling_station_id = newProfile.citizen.polling_station_id || '';
-            form.polling_stream_id = newProfile.citizen.polling_stream_id || '';
+        // Format date_of_birth for HTML date input (YYYY-MM-DD)
+        const dob = newProfile.date_of_birth || null;
+        if (dob) {
+            const date = new Date(dob);
+            form.profile.date_of_birth = !isNaN(date.getTime()) ? date.toISOString().split('T')[0] : '';
+        } else {
+            form.profile.date_of_birth = '';
         }
+
+        // Update other profile fields
+        form.profile.gender = newProfile.gender || null;
+        form.profile.ncpwd_number = newProfile.ncpwd_number || null;
+        form.profile.ethnicity_id = newProfile.ethnicity_id || null;
+        form.profile.religion_id = newProfile.religion_id || null;
+        form.profile.telephone = newProfile.telephone || null;
+        form.profile.address_line_1 = newProfile.address_line_1 || null;
+        form.profile.address_line_2 = newProfile.address_line_2 || null;
+        form.profile.city = newProfile.city || null;
+        form.profile.state = newProfile.state || null;
+        form.profile.country = newProfile.country || null;
     }
-}, { immediate: true });
+}, { immediate: true, deep: true });
+
+// Watch for citizen changes to update form
+watch(citizen, (newCitizen) => {
+    if (newCitizen && Object.keys(newCitizen).length > 0) {
+        console.log('Updating citizen form data:', newCitizen);
+        
+        // Update citizen fields
+        form.citizen.national_identification_number = newCitizen.national_identification_number || null;
+        form.citizen.passport_number = newCitizen.passport_number || null;
+        form.citizen.driver_license_number = newCitizen.driver_license_number || null;
+        
+        // Update location fields
+        form.citizen.county_id = newCitizen.county_id || null;
+        form.citizen.sub_county_id = newCitizen.sub_county_id || null;
+        form.citizen.constituency_id = newCitizen.constituency_id || null;
+        form.citizen.ward_id = newCitizen.ward_id || null;
+        form.citizen.location_id = newCitizen.location_id || null;
+        form.citizen.village_id = newCitizen.village_id || null;
+        form.citizen.polling_center_id = newCitizen.polling_center_id || null;
+        form.citizen.polling_station_id = newCitizen.polling_station_id || null;
+        form.citizen.polling_stream_id = newCitizen.polling_stream_id || null;
+        
+        // Log the updated form data for debugging
+        console.log('Updated form.citizen:', form.citizen);
+    }
+}, { immediate: true, deep: true });
 
 const verificationLinkSent = ref(null);
 const photoPreview = ref(null);
 const photoInput = ref(null);
 
-const updateProfileInformation = async (skipVerification = false) => {
-    // Set up the photo if provided
-    if (photoInput.value?.files?.[0]) {
-        form.photo = photoInput.value.files[0];
+// Create a function to prepare form data
+const prepareFormData = () => {
+    const formData = new FormData();
+    
+    // Add all profile fields to formData
+    if (form.profile) {
+        Object.keys(form.profile).forEach(key => {
+            // Skip photo here, we'll add it separately
+            if (key !== 'photo' && form.profile[key] !== null && form.profile[key] !== undefined) {
+                formData.append(`profile[${key}]`, form.profile[key]);
+            }
+        });
     }
     
+    // Add photo separately if it exists
+    if (photoInput.value?.files?.[0]) {
+        formData.append('profile[photo]', photoInput.value.files[0]);
+    }
+    
+    // Add all citizen fields to formData
+    if (form.citizen) {
+        Object.keys(form.citizen).forEach(key => {
+            if (form.citizen[key] !== null && form.citizen[key] !== undefined) {
+                formData.append(`citizen[${key}]`, form.citizen[key]);
+            }
+        });
+    }
+    
+    return formData;
+};
+
+const updateProfileInformation = async (skipVerification = false) => {
     // Check if we need to verify email or telephone
-    const emailChanged = user?.email && form.email !== user.email;
-    const telephoneChanged = profile?.telephone && form.telephone !== profile.telephone;
+    const emailChanged = user?.email && form.profile.email !== user.email;
+    const telephoneChanged = profile?.telephone && form.profile.telephone !== profile.telephone;
     
     // Only trigger OTP if:
     // 1. We're not skipping verification
@@ -652,68 +730,75 @@ const updateProfileInformation = async (skipVerification = false) => {
         }
     }
 
-    // Prepare form data
-    const formData = new FormData();
-    
-    // Add all form fields to FormData
-    Object.keys(form).forEach(key => {
-        // Skip internal properties and methods
-        if (typeof form[key] !== 'function' && !key.startsWith('_')) {
-            // Handle file uploads
-            if (key === 'photo' && form.photo instanceof File) {
-                formData.append('photo', form.photo);
-            } else if (form[key] !== null && form[key] !== undefined) {
-                formData.append(key, form[key]);
-            }
-        }
-    });
-    
-    // Use the Inertia form to submit the data
-    form.post(route("user-profile-information.update"), {
-        errorBag: "updateProfileInformation",
-        preserveScroll: true,
-        forceFormData: true,
-        onSuccess: (response) => {
-            clearPhotoFileInput();
-            shouldVerifyOnSubmit.value = false;
-
-            // Show success toast
-            Swal.fire({
-                toast: true,
-                position: "top-end",
-                icon: "success",
-                title:
-                    response.props.flash.message ||
-                    "Profile updated successfully!",
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.addEventListener("mouseenter", Swal.stopTimer);
-                    toast.addEventListener("mouseleave", Swal.resumeTimer);
-                },
-            });
-        },
-        onError: (errors) => {
-            // Show error toast with the first error message
-            const firstError = Object.values(errors).flat()[0];
-
-            Swal.fire({
-                toast: true,
-                position: "top-end",
-                icon: "error",
-                title:
-                    firstError || "Failed to update profile. Please try again.",
-                showConfirmButton: false,
-                timer: 5000,
-                timerProgressBar: true,
-                didOpen: (toast) => {
-                    toast.addEventListener("mouseenter", Swal.stopTimer);
-                    toast.addEventListener("mouseleave", Swal.resumeTimer);
-                },
-            });
-        },
-    });
+    try {
+        // Use Inertia's form helper which handles file uploads and CSRF automatically
+        form.transform((data) => ({
+            ...data,
+            _method: 'PUT' // Laravel's way to handle PUT/PATCH/DELETE via POST
+        })).post(route('user-profile-information.update'), {
+            onSuccess: () => {
+                // Clear the photo input on success
+                clearPhotoFileInput();
+                
+                // Show success message
+                showToast('success', 'Success', 'Profile updated successfully!');
+                
+                // Refresh the page to show updated profile
+                window.location.reload();
+            },
+            onError: (errors) => {
+                console.error('Error updating profile:', errors);
+                showToast('error', 'Error', 'Failed to update profile. Please check the form for errors.');
+            },
+            preserveScroll: true,
+            forceFormData: true // Important for file uploads
+        });
+        return;
+        
+        // Clear the photo input on success
+        clearPhotoFileInput();
+        
+        // Show success message
+        Swal.fire({
+            toast: true,
+            position: "top-end",
+            icon: "success",
+            title: "Profile updated successfully!",
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener("mouseenter", Swal.stopTimer);
+                toast.addEventListener("mouseleave", Swal.resumeTimer);
+            },
+        });
+        
+        // Refresh the page to show updated profile
+        window.location.reload();
+        
+    } catch (error) {
+        console.error('Error updating profile:', error);
+        
+        // Show error message
+        const errorMessage = error.response?.data?.message || 'Failed to update profile. Please try again.';
+        const firstError = error.response?.data?.errors 
+            ? Object.values(error.response.data.errors).flat()[0]
+            : errorMessage;
+            
+        Swal.fire({
+            toast: true,
+            position: "top-end",
+            icon: "error",
+            title: firstError,
+            showConfirmButton: false,
+            timer: 5000,
+            timerProgressBar: true,
+            didOpen: (toast) => {
+                toast.addEventListener("mouseenter", Swal.stopTimer);
+                toast.addEventListener("mouseleave", Swal.resumeTimer);
+            },
+        });
+    }
 };
 
 const sendEmailVerification = () => {
@@ -726,13 +811,42 @@ const selectNewPhoto = () => {
 
 const updatePhotoPreview = () => {
     const photo = photoInput.value.files[0];
-
+    
     if (!photo) return;
+    
+    // Validate file type
+    if (!photo.type.match('image.*')) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Invalid File Type',
+            text: 'Please select an image file (JPEG, PNG, GIF, etc.)',
+            confirmButtonColor: '#10b981',
+        });
+        clearPhotoFileInput();
+        return;
+    }
+    
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    if (photo.size > maxSize) {
+        Swal.fire({
+            icon: 'error',
+            title: 'File Too Large',
+            text: 'Maximum file size is 5MB. Please choose a smaller file.',
+            confirmButtonColor: '#10b981',
+        });
+        clearPhotoFileInput();
+        return;
+    }
 
     const reader = new FileReader();
 
     reader.onload = (e) => {
         photoPreview.value = e.target.result;
+        // Update the form with the new photo
+        if (form.profile) {
+            form.profile.photo = photo;
+        }
     };
 
     reader.readAsDataURL(photo);
@@ -803,13 +917,13 @@ const filteredPollingStations = ref([]);
 const filteredPollingStreams = ref([]);
 
 // Watcher for county changes
-watch(() => form.county_id, (newCountyId) => {
+watch(() => form.citizen.county_id, (newCountyId) => {
     if (!newCountyId) {
         filteredSubCounties.value = [];
         filteredConstituencies.value = [];
         // Reset only county-dependent fields
-        form.sub_county_id = '';
-        form.constituency_id = '';
+        form.citizen.sub_county_id = '';
+        form.citizen.constituency_id = '';
         return;
     }
     
@@ -824,16 +938,16 @@ watch(() => form.county_id, (newCountyId) => {
     ) || [];
     
     // Reset only county-dependent fields
-    form.sub_county_id = '';
-    form.constituency_id = '';
+    form.citizen.sub_county_id = '';
+    form.citizen.constituency_id = '';
 });
 
 // Watcher for constituency changes
-watch(() => form.constituency_id, (newConstituencyId) => {
+watch(() => form.citizen.constituency_id, (newConstituencyId) => {
     if (!newConstituencyId) {
         filteredWards.value = [];
         // Reset only constituency-dependent fields
-        form.ward_id = '';
+        form.citizen.ward_id = '';
         return;
     }
     
@@ -842,17 +956,17 @@ watch(() => form.constituency_id, (newConstituencyId) => {
     ) || [];
     
     // Reset only constituency-dependent fields
-    form.ward_id = '';
+    form.citizen.ward_id = '';
 });
 
 // Watcher for ward changes
-watch(() => form.ward_id, (newWardId) => {
+watch(() => form.citizen.ward_id, (newWardId) => {
     if (!newWardId) {
         filteredLocations.value = [];
         filteredPollingCenters.value = [];
         // Reset only ward-dependent fields
-        form.location_id = '';
-        form.polling_center_id = '';
+        form.citizen.location_id = '';
+        form.citizen.polling_center_id = '';
         return;
     }
     
@@ -867,16 +981,16 @@ watch(() => form.ward_id, (newWardId) => {
     ) || [];
     
     // Reset only ward-dependent fields
-    form.location_id = '';
-    form.polling_center_id = '';
+    form.citizen.location_id = '';
+    form.citizen.polling_center_id = '';
 });
 
 // Watcher for location changes
-watch(() => form.location_id, (newLocationId) => {
+watch(() => form.citizen.location_id, (newLocationId) => {
     if (!newLocationId) {
         filteredVillages.value = [];
         // Reset only location-dependent fields
-        form.village_id = '';
+        form.citizen.village_id = '';
         return;
     }
     
@@ -885,15 +999,15 @@ watch(() => form.location_id, (newLocationId) => {
     ) || [];
     
     // Reset only location-dependent fields
-    form.village_id = '';
+    form.citizen.village_id = '';
 });
 
 // Watcher for polling center changes
-watch(() => form.polling_center_id, (newCenterId) => {
+watch(() => form.citizen.polling_center_id, (newCenterId) => {
     if (!newCenterId) {
         filteredPollingStations.value = [];
         // Reset only polling-center-dependent fields
-        form.polling_station_id = '';
+        form.citizen.polling_station_id = '';
         return;
     }
     
@@ -902,15 +1016,15 @@ watch(() => form.polling_center_id, (newCenterId) => {
     ) || [];
     
     // Reset only polling-center-dependent fields
-    form.polling_station_id = '';
+    form.citizen.polling_station_id = '';
 });
 
 // Watcher for polling station changes
-watch(() => form.polling_station_id, (newStationId) => {
+watch(() => form.citizen.polling_station_id, (newStationId) => {
     if (!newStationId) {
         filteredPollingStreams.value = [];
         // Reset only polling-station-dependent fields
-        form.polling_stream_id = '';
+        form.citizen.polling_stream_id = '';
         return;
     }
     
@@ -919,137 +1033,137 @@ watch(() => form.polling_station_id, (newStationId) => {
     ) || [];
     
     // Reset only polling-station-dependent fields
-    form.polling_stream_id = '';
+    form.citizen.polling_stream_id = '';
 });
 
 
 
 // Watchers to clear child fields when parent changes
-watch(() => form.county_id, () => {
-    form.sub_county_id = '';
-    form.constituency_id = '';
-    form.ward_id = '';
-    form.location_id = '';
-    form.village_id = '';
-    form.polling_center_id = '';
-    form.polling_station_id = '';
-    form.polling_stream_id = '';
+watch(() => form.citizen.county_id, () => {
+    form.citizen.sub_county_id = '';
+    form.citizen.constituency_id = '';
+    form.citizen.ward_id = '';
+    form.citizen.location_id = '';
+    form.citizen.village_id = '';
+    form.citizen.polling_center_id = '';
+    form.citizen.polling_station_id = '';
+    form.citizen.polling_stream_id = '';
 });
 
-watch(() => form.constituency_id, () => {
-    form.ward_id = '';
-    form.location_id = '';
-    form.village_id = '';
-    form.polling_center_id = '';
-    form.polling_station_id = '';
-    form.polling_stream_id = '';
+watch(() => form.citizen.constituency_id, () => {
+    form.citizen.ward_id = '';
+    form.citizen.location_id = '';
+    form.citizen.village_id = '';
+    form.citizen.polling_center_id = '';
+    form.citizen.polling_station_id = '';
+    form.citizen.polling_stream_id = '';
 });
 
-watch(() => form.ward_id, () => {
-    form.location_id = '';
-    form.village_id = '';
-    form.polling_center_id = '';
-    form.polling_station_id = '';
-    form.polling_stream_id = '';
+watch(() => form.citizen.ward_id, () => {
+    form.citizen.location_id = '';
+    form.citizen.village_id = '';
+    form.citizen.polling_center_id = '';
+    form.citizen.polling_station_id = '';
+    form.citizen.polling_stream_id = '';
 });
 
-watch(() => form.location_id, () => {
-    form.village_id = '';
+watch(() => form.citizen.location_id, () => {
+    form.citizen.village_id = '';
 });
 
-watch(() => form.polling_center_id, () => {
-    form.polling_station_id = '';
-    form.polling_stream_id = '';
+watch(() => form.citizen.polling_center_id, () => {
+    form.citizen.polling_station_id = '';
+    form.citizen.polling_stream_id = '';
 });
 
-watch(() => form.polling_station_id, () => {
-    form.polling_stream_id = '';
+watch(() => form.citizen.polling_station_id, () => {
+    form.citizen.polling_stream_id = '';
 });
 
 // Watch for county changes to filter sub-counties and reset dependent fields
 watch(
-    () => form.county_id,
+    () => form.citizen.county_id,
     (newCountyId) => {
         // Reset dependent fields
-        form.sub_county_id = '';
-        form.constituency_id = '';
-        form.ward_id = '';
-        form.location_id = '';
-        form.village_id = '';
-        form.polling_center_id = '';
-        form.polling_station_id = '';
+        form.citizen.sub_county_id = '';
+        form.citizen.constituency_id = '';
+        form.citizen.ward_id = '';
+        form.citizen.location_id = '';
+        form.citizen.village_id = '';
+        form.citizen.polling_center_id = '';
+        form.citizen.polling_station_id = '';
         form.polling_stream_id = '';
     }
 );
 
 // Watch for sub-county changes to reset dependent fields
 watch(
-    () => form.sub_county_id,
+    () => form.citizen.sub_county_id,
     (newSubCountyId) => {
         if (newSubCountyId) {
             // Reset dependent fields if needed
-            form.ward_id = '';
-            form.location_id = '';
-            form.village_id = '';
-            form.polling_center_id = '';
-            form.polling_station_id = '';
-            form.polling_stream_id = '';
+            form.citizen.ward_id = '';
+            form.citizen.location_id = '';
+            form.citizen.village_id = '';
+            form.citizen.polling_center_id = '';
+            form.citizen.polling_station_id = '';
+            form.citizen.polling_stream_id = '';
         }
     }
 );
 
 // Watch for constituency changes to reset dependent fields
 watch(
-    () => form.constituency_id,
+    () => form.citizen.constituency_id,
     (newConstituencyId) => {
         // Reset dependent fields
-        form.ward_id = '';
-        form.location_id = '';
-        form.village_id = '';
-        form.polling_center_id = '';
-        form.polling_station_id = '';
-        form.polling_stream_id = '';
+        form.citizen.ward_id = '';
+        form.citizen.location_id = '';
+        form.citizen.village_id = '';
+        form.citizen.polling_center_id = '';
+        form.citizen.polling_station_id = '';
+        form.citizen.polling_stream_id = '';
     }
 );
 
 // Watch for ward changes to reset dependent fields
 watch(
-    () => form.ward_id,
+    () => form.citizen.ward_id,
     (newWardId) => {
         // Reset dependent fields
-        form.location_id = '';
-        form.village_id = '';
-        form.polling_center_id = '';
-        form.polling_station_id = '';
-        form.polling_stream_id = '';
+        form.citizen.location_id = '';
+        form.citizen.village_id = '';
+        form.citizen.polling_center_id = '';
+        form.citizen.polling_station_id = '';
+        form.citizen.polling_stream_id = '';
     }
 );
 
 // Watch for location changes to reset village field
 watch(
-    () => form.location_id,
+    () => form.citizen.location_id,
     (newLocationId) => {
         if (newLocationId) {
-            form.village_id = '';
+            form.citizen.village_id = '';
         }
     }
 );
 
 // Watch for polling center changes to reset dependent fields
 watch(
-    () => form.polling_center_id,
+    () => form.citizen.polling_center_id,
     (newCenterId) => {
-        form.polling_station_id = '';
-        form.polling_stream_id = '';
+        form.citizen.polling_station_id = '';
+        form.citizen.polling_stream_id = '';
     }
 );
 
 // Watch for polling station changes to reset polling stream
 watch(
-    () => form.polling_station_id,
+    () => form.citizen.polling_station_id,
     (newStationId) => {
         if (newStationId) {
-            form.polling_stream_id = '';
+            form.citizen.polling_stream_id = '';
         }
     }
 );
@@ -1088,7 +1202,7 @@ const toggleSection = (section) => {
                 <!-- Current Profile Photo -->
                 <div v-show="!photoPreview" class="mt-2">
                     <img
-                        :src="user.profile_photo_url"
+                        :src="user.profile_photo_path"
                         :alt="user.name"
                         class="rounded-full size-20 object-cover"
                     />
@@ -1168,10 +1282,9 @@ const toggleSection = (section) => {
                                 </InputLabel>
                                 <TextInput
                                     id="surname"
-                                    v-model="form.surname"
+                                    v-model="form.profile.surname"
                                     type="text"
                                     class="mt-1 block w-full"
-                                    :value="profile?.last_name"
                                     placeholder="Enter your surname"
                                     required
                                     autocomplete="family-name"
@@ -1190,16 +1303,15 @@ const toggleSection = (section) => {
                                 </InputLabel>
                                 <TextInput
                                     id="other_name"
-                                    v-model="form.other_name"
+                                    v-model="form.profile.other_name"
                                     type="text"
                                     class="mt-1 block w-full"
-                                    :value="user.profile?.first_name + ' ' + user.profile?.middle_name"
                                     placeholder="Enter your other names"
                                     required
                                     autocomplete="given-name"
                                 />
                                 <InputError
-                                    :message="form.errors.other_name"
+                                    :message="form.errors['profile.other_name']"
                                     class="mt-2"
                                 />
                             </div>
@@ -1212,15 +1324,14 @@ const toggleSection = (section) => {
                                 </InputLabel>
                                 <TextInput
                                     id="date_of_birth"
-                                    v-model="form.date_of_birth"
+                                    v-model="form.profile.date_of_birth"
                                     type="date"
                                     class="mt-1 block w-full"
-                                    :value="user.profile?.date_of_birth"
-                                    placeholder="Select your date of birth"
+                                    :max="new Date().toISOString().split('T')[0]"
                                     required
                                 />
                                 <InputError
-                                    :message="form.errors.date_of_birth"
+                                    :message="form.errors['profile.date_of_birth']"
                                     class="mt-2"
                                 />
                             </div>
@@ -1233,7 +1344,7 @@ const toggleSection = (section) => {
                                 </InputLabel>
                                 <select
                                     id="gender"
-                                    v-model="form.gender"
+                                    v-model="form.profile.gender"
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                     required
                                 >
@@ -1262,7 +1373,7 @@ const toggleSection = (section) => {
                                 </InputLabel>
                                 <select
                                     id="ethnicity_id"
-                                    v-model="form.ethnicity_id"
+                                    v-model="form.profile.ethnicity_id"
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                     required
                                 >
@@ -1291,7 +1402,7 @@ const toggleSection = (section) => {
                                 </InputLabel>
                                 <select
                                     id="religion_id"
-                                    v-model="form.religion_id"
+                                    v-model="form.profile.religion_id"
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                     required
                                 >
@@ -1365,19 +1476,17 @@ const toggleSection = (section) => {
                                 <TextInput
                                     id="national_identification_number"
                                     v-model="
-                                        form.national_identification_number
+                                        form.citizen.national_identification_number
                                     "
                                     type="text"
                                     class="mt-1 block w-full"
-                                    :value="user.citizen?.national_identification_number"
                                     placeholder="e.g., 12345678"
-                                    :required="!form.passport_number"
+                                    :required="!form.citizen.passport_number"
                                     autocomplete="off"
                                 />
                                 <InputError
                                     :message="
-                                        form.errors
-                                            .national_identification_number
+                                        form.errors['citizen.national_identification_number']
                                     "
                                     class="mt-2"
                                 />
@@ -1397,16 +1506,15 @@ const toggleSection = (section) => {
                                 </InputLabel>
                                 <TextInput
                                     id="passport_number"
-                                    v-model="form.passport_number"
+                                    v-model="form.citizen.passport_number"
                                     type="text"
                                     class="mt-1 block w-full"
-                                    :value="user.citizen?.passport_number"
                                     placeholder="e.g., A1234567"
-                                    :required="!form.national_identification_number"
+                                    :required="!form.citizen.national_identification_number"
                                     autocomplete="off"
                                 />
                                 <InputError
-                                    :message="form.errors.passport_number"
+                                    :message="form.errors['citizen.passport_number']"
                                     class="mt-2"
                                 />
                             </div>
@@ -1421,14 +1529,13 @@ const toggleSection = (section) => {
                                 </InputLabel>
                                 <TextInput
                                     id="driver_license_number"
-                                    v-model="form.driver_license_number"
+                                    v-model="form.citizen.driver_license_number"
                                     type="text"
                                     class="mt-1 block w-full"
-                                    :value="user.citizen?.driver_license_number"
                                     placeholder="e.g., DL12345678"
                                 />
                                 <InputError
-                                    :message="form.errors.driver_license_number"
+                                    :message="form.errors['citizen.driver_license_number']"
                                     class="mt-2"
                                 />
                             </div>
@@ -1443,10 +1550,9 @@ const toggleSection = (section) => {
                                 </InputLabel>
                                 <TextInput
                                     id="ncpwd_number"
-                                    v-model="form.ncpwd_number"
+                                    v-model="form.profile.ncpwd_number"
                                     type="text"
                                     class="mt-1 block w-full"
-                                    :value="user.profile?.ncpwd_number"
                                     placeholder="e.g., NCPWD/1234/5678"
                                 />
                                 <InputError
@@ -1501,15 +1607,14 @@ const toggleSection = (section) => {
                                 </InputLabel>
                                 <TextInput
                                     id="email"
-                                    v-model="form.email"
+                                    v-model="form.profile.email"
                                     type="email"
                                     class="mt-1 block w-full"
-                                    :value="user.email"
                                     placeholder="your.email@example.com"
                                     autocomplete="email"
                                 />
                                 <InputError
-                                    :message="form.errors.email"
+                                    :message="form.errors['profile.email']"
                                     class="mt-2"
                                 />
 
@@ -1556,16 +1661,15 @@ const toggleSection = (section) => {
                                 <input
                                     id="telephone"
                                     name="telephone"
-                                    v-model="form.telephone"
+                                    v-model="form.profile.telephone"
                                     type="tel"
                                     class="border-gray-300 focus:border-green-500 focus:ring-green-500 rounded-md shadow-sm mt-1 block w-full"
-                                    :value="user.profile?.telephone"
                                     placeholder="e.g., 0712345678"
                                     required
                                     @input="formatPhoneNumber"
                                 />
                                 <InputError
-                                    :message="form.errors.telephone"
+                                    :message="form.errors['profile.telephone']"
                                     class="mt-2"
                                 />
                             </div>
@@ -1580,14 +1684,13 @@ const toggleSection = (section) => {
                                 </InputLabel>
                                 <TextInput
                                     id="address_line_1"
-                                    v-model="form.address_line_1"
+                                    v-model="form.profile.address_line_1"
                                     type="text"
                                     class="mt-1 block w-full"
-                                    :value="user.profile?.address_line_1"
                                     placeholder="e.g., 123 Main Street"
                                 />
                                 <InputError
-                                    :message="form.errors.address_line_1"
+                                    :message="form.errors['profile.address_line_1']"
                                     class="mt-2"
                                 />
                             </div>
@@ -1602,14 +1705,13 @@ const toggleSection = (section) => {
                                 </InputLabel>
                                 <TextInput
                                     id="address_line_2"
-                                    v-model="form.address_line_2"
+                                    v-model="form.profile.address_line_2"
                                     type="text"
                                     class="mt-1 block w-full"
-                                    :value="user.profile?.address_line_2"
                                     placeholder="e.g., Apartment, suite, etc. (optional)"
                                 />
                                 <InputError
-                                    :message="form.errors.address_line_2"
+                                    :message="form.errors['profile.address_line_2']"
                                     class="mt-2"
                                 />
                             </div>
@@ -1624,14 +1726,13 @@ const toggleSection = (section) => {
                                 </InputLabel>
                                 <TextInput
                                     id="city"
-                                    v-model="form.city"
+                                    v-model="form.profile.city"
                                     type="text"
                                     class="mt-1 block w-full"
-                                    :value="user.profile?.city"
                                     placeholder="e.g., Nairobi"
                                 />
                                 <InputError
-                                    :message="form.errors.city"
+                                    :message="form.errors['profile.city']"
                                     class="mt-2"
                                 />
                             </div>
@@ -1646,14 +1747,13 @@ const toggleSection = (section) => {
                                 </InputLabel>
                                 <TextInput
                                     id="state"
-                                    v-model="form.state"
+                                    v-model="form.profile.state"
                                     type="text"
                                     class="mt-1 block w-full"
-                                    :value="user.profile?.state"
                                     placeholder="e.g., Nairobi"
                                 />
                                 <InputError
-                                    :message="form.errors.state"
+                                    :message="form.errors['profile.state']"
                                     class="mt-2"
                                 />
                             </div>
@@ -1668,15 +1768,14 @@ const toggleSection = (section) => {
                                 </InputLabel>
                                 <TextInput
                                     id="country"
-                                    v-model="form.country"
+                                    v-model="form.profile.country"
                                     type="text"
                                     class="mt-1 block w-full bg-gray-100 dark:bg-gray-800 cursor-not-allowed"
-                                    :value="user.profile?.country || 'Kenya'"
                                     placeholder="e.g., Kenya"
                                     readonly
                                 />
                                 <InputError
-                                    :message="form.errors.country"
+                                    :message="form.errors['profile.country']"
                                     class="mt-2"
                                 />
                             </div>
@@ -1726,25 +1825,21 @@ const toggleSection = (section) => {
                                 </InputLabel>
                                 <select
                                     id="county_id"
-                                    v-model="form.county_id"
+                                    v-model="form.citizen.county_id"
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                     required
                                 >
                                     <option value="">Select County</option>
                                     <option
-                                        v-for="county in $page.props.formData
-                                            .locations.counties"
+                                        v-for="county in $page.props.formData.locations.counties"
                                         :key="county.id"
                                         :value="county.id"
-                                        :selected="
-                                            form.county_id === user.citizen?.county_id
-                                        "
                                     >
                                         {{ county.name }}
                                     </option>
                                 </select>
                                 <InputError
-                                    :message="form.errors.county_id"
+                                    :message="form.errors['citizen.county_id']"
                                     class="mt-2"
                                 />
                             </div>
@@ -1756,18 +1851,15 @@ const toggleSection = (section) => {
                                 <div class="relative">
                                     <select
                                         id="sub_county_id"
-                                        v-model="form.sub_county_id"
+                                        v-model="form.citizen.sub_county_id"
                                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                        :disabled="!form.county_id || isLoadingSubCounties"
+                                        :disabled="!form.citizen.county_id || isLoadingSubCounties"
                                     >
                                         <option value="">Select Sub County</option>
                                         <option
                                             v-for="sub_county in filteredSubCounties"
                                             :key="sub_county.id"
                                             :value="sub_county.id"
-                                            :selected="
-                                                form.sub_county_id === user.citizen?.sub_county_id
-                                            "
                                         >
                                             {{ sub_county.name }}
                                         </option>
@@ -1780,7 +1872,7 @@ const toggleSection = (section) => {
                                     </div>
                                 </div>
                                 <InputError
-                                    :message="form.errors.sub_county_id"
+                                    :message="form.errors['citizen.sub_county_id']"
                                     class="mt-2"
                                 />
                             </div>
@@ -1794,9 +1886,9 @@ const toggleSection = (section) => {
                                 </InputLabel>
                                 <select
                                     id="constituency_id"
-                                    v-model="form.constituency_id"
+                                    v-model="form.citizen.constituency_id"
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                    :disabled="!form.county_id"
+                                    :disabled="!form.citizen.county_id"
                                     required
                                 >
                                     <option value="">
@@ -1806,16 +1898,12 @@ const toggleSection = (section) => {
                                         v-for="constituency in filteredConstituencies"
                                         :key="constituency.id"
                                         :value="constituency.id"
-                                        :selected="
-                                            form.constituency_id ===
-                                            user.citizen?.constituency_id
-                                        "
                                     >
                                         {{ constituency.name }}
                                     </option>
                                 </select>
                                 <InputError
-                                    :message="form.errors.constituency_id"
+                                    :message="form.errors['citizen.constituency_id']"
                                     class="mt-2"
                                 />
                             </div>
@@ -1827,27 +1915,32 @@ const toggleSection = (section) => {
                                         class="fas fa-star text-red-500 text-xs ml-1"
                                     ></i>
                                 </InputLabel>
-                                <select
-                                    id="ward_id"
-                                    v-model="form.ward_id"
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                    :disabled="!form.constituency_id"
-                                    required
-                                >
-                                    <option value="">Select Ward</option>
-                                    <option
-                                        v-for="ward in filteredWards"
-                                        :key="ward.id"
-                                        :value="ward.id"
-                                        :selected="
-                                            form.ward_id === user.citizen?.ward_id
-                                        "
+                                <div class="relative">
+                                    <select
+                                        id="ward_id"
+                                        v-model="form.citizen.ward_id"
+                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                        :disabled="!form.citizen.constituency_id || isLoadingWards"
+                                        required
                                     >
-                                        {{ ward.name }}
-                                    </option>
-                                </select>
+                                        <option value="">Select Ward</option>
+                                        <option
+                                            v-for="ward in filteredWards"
+                                            :key="ward.id"
+                                            :value="ward.id"
+                                        >
+                                            {{ ward.name }}
+                                        </option>
+                                    </select>
+                                    <div v-if="isLoadingWards" class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+                                        <svg class="animate-spin h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                    </div>
+                                </div>
                                 <InputError
-                                    :message="form.errors.ward_id"
+                                    :message="form.errors['citizen.ward_id']"
                                     class="mt-2"
                                 />
                             </div>
@@ -1859,19 +1952,15 @@ const toggleSection = (section) => {
                                 <div class="relative">
                                     <select
                                         id="location_id"
-                                        v-model="form.location_id"
+                                        v-model="form.citizen.location_id"
                                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                        :disabled="!form.ward_id || isLoadingLocations"
+                                        :disabled="!form.citizen.ward_id || isLoadingLocations"
                                     >
                                         <option value="">Select Location</option>
                                         <option
                                             v-for="location in filteredLocations"
                                             :key="location.id"
                                             :value="location.id"
-                                            :selected="
-                                                form.location_id ===
-                                                user.citizen?.location_id
-                                            "
                                         >
                                             {{ location.name }}
                                         </option>
@@ -1884,7 +1973,7 @@ const toggleSection = (section) => {
                                     </div>
                                 </div>
                                 <InputError
-                                    :message="form.errors.location_id"
+                                    :message="form.errors['citizen.location_id']"
                                     class="mt-2"
                                 />
                             </div>
@@ -1896,20 +1985,15 @@ const toggleSection = (section) => {
                                 <div class="relative">
                                     <select
                                         id="village_id"
-                                        v-model="form.village_id"
+                                        v-model="form.citizen.village_id"
                                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                        :disabled="!form.location_id || isLoadingVillages"
-    
+                                        :disabled="!form.citizen.location_id || isLoadingVillages"
                                     >
                                         <option value="">Select Village</option>
                                         <option
                                             v-for="village in filteredVillages"
                                             :key="village.id"
                                             :value="village.id"
-                                            :selected="
-                                                form.village_id ===
-                                                user.citizen?.village_id
-                                            "
                                         >
                                             {{ village.name }}
                                         </option>
@@ -1922,7 +2006,7 @@ const toggleSection = (section) => {
                                     </div>
                                 </div>
                                 <InputError
-                                    :message="form.errors.village_id"
+                                    :message="form.errors['citizen.village_id']"
                                     class="mt-2"
                                 />
                             </div>
@@ -1934,24 +2018,21 @@ const toggleSection = (section) => {
                                 <div class="relative">
                                     <select
                                         id="polling_center_id"
-                                        v-model="form.polling_center_id"
+                                        v-model="form.citizen.polling_center_id"
                                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                        :disabled="!form.ward_id || isLoadingPollingCenters"
+                                        :disabled="!form.citizen.ward_id || isLoadingPollingCenters"
     
                                     >
                                         <option value="">
                                             Select Polling Center
                                         </option>
                                         <option
-                                            v-for="polling_center in filteredPollingCenters"
-                                            :key="polling_center.id"
-                                            :value="polling_center.id"
-                                            :selected="
-                                                form.polling_center_id ===
-                                                user.citizen?.polling_center_id
-                                            "
+                                            v-for="pollingCenter in filteredPollingCenters"
+                                            :key="pollingCenter.id"
+                                            :value="pollingCenter.id"
+
                                         >
-                                            {{ polling_center.name }}
+                                            {{ pollingCenter.name }}
                                         </option>
                                     </select>
                                     <div v-if="isLoadingPollingCenters" class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -1962,7 +2043,7 @@ const toggleSection = (section) => {
                                     </div>
                                 </div>
                                 <InputError
-                                    :message="form.errors.polling_center_id"
+                                    :message="form.errors['citizen.polling_center_id']"
                                     class="mt-2"
                                 />
                             </div>
@@ -1974,24 +2055,21 @@ const toggleSection = (section) => {
                                 <div class="relative">
                                     <select
                                         id="polling_station_id"
-                                        v-model="form.polling_station_id"
+                                        v-model="form.citizen.polling_station_id"
                                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                        :disabled="!form.polling_center_id || isLoadingPollingStations"
+                                        :disabled="!form.citizen.polling_center_id || isLoadingPollingStations"
     
                                     >
                                         <option value="">
                                             Select Polling Station
                                         </option>
                                         <option
-                                            v-for="station in filteredPollingStations"
-                                            :key="station.id"
-                                            :value="station.id"
-                                            :selected="
-                                                form.polling_station_id ===
-                                                user.citizen?.polling_station_id
-                                            "
+                                            v-for="pollingStation in filteredPollingStations"
+                                            :key="pollingStation.id"
+                                            :value="pollingStation.id"
+
                                         >
-                                            {{ station.name }}
+                                            {{ pollingStation.name }}
                                         </option>
                                     </select>
                                     <div v-if="isLoadingPollingStations" class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -2002,7 +2080,7 @@ const toggleSection = (section) => {
                                     </div>
                                 </div>
                                 <InputError
-                                    :message="form.errors.polling_station_id"
+                                    :message="form.errors['citizen.polling_station_id']"
                                     class="mt-2"
                                 />
                             </div>
@@ -2014,24 +2092,21 @@ const toggleSection = (section) => {
                                 <div class="relative">
                                     <select
                                         id="polling_stream_id"
-                                        v-model="form.polling_stream_id"
+                                        v-model="form.citizen.polling_stream_id"
                                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                        :disabled="!form.polling_station_id || isLoadingPollingStreams"
+                                        :disabled="!form.citizen.polling_station_id || isLoadingPollingStreams"
     
                                     >
                                         <option value="">
                                             Select Polling Stream
                                         </option>
                                         <option
-                                            v-for="stream in filteredPollingStreams"
-                                            :key="stream.id"
-                                            :value="stream.id"
-                                            :selected="
-                                                form.polling_stream_id ===
-                                                user.citizen?.polling_stream_id
-                                            "
+                                            v-for="pollingStream in filteredPollingStreams"
+                                            :key="pollingStream.id"
+                                            :value="pollingStream.id"
+
                                         >
-                                            {{ stream.name }}
+                                            {{ pollingStream.name }}
                                         </option>
                                     </select>
                                     <div v-if="isLoadingPollingStreams" class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
@@ -2042,7 +2117,7 @@ const toggleSection = (section) => {
                                     </div>
                                 </div>
                                 <InputError
-                                    :message="form.errors.polling_stream_id"
+                                    :message="form.errors['citizen.polling_stream_id']"
                                     class="mt-2"
                                 />
                             </div>
