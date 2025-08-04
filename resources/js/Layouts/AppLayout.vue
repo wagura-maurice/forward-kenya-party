@@ -25,6 +25,10 @@ const navigationData = computed(() => ({
 
 const props = defineProps({
     title: String,
+    role: {
+        type: String,
+        default: 'member',
+    },
     navigation: {
         type: Object,
         default: () => ({
@@ -502,7 +506,7 @@ onUnmounted(() => {
                                         <!-- System Settings -->
                                         <DropdownLink
                                             :href="route('settings')"
-                                            v-if="role === 'administrator'"
+                                            v-if="props.role === 'administrator'"
                                         >
                                             System Settings
                                         </DropdownLink>
@@ -760,7 +764,7 @@ onUnmounted(() => {
                             <ResponsiveNavLink
                                 :href="route('settings')"
                                 :active="route().current('settings')"
-                                v-if="role === 'administrator'"
+                                v-if="props.role === 'administrator'"
                             >
                                 System Settings
                             </ResponsiveNavLink>
