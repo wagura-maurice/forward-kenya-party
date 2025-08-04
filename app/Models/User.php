@@ -4,10 +4,11 @@ namespace App\Models;
 
 use App\Models\Media;
 use Illuminate\Support\Str;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
-use Spatie\Activitylog\LogOptions;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\DB;
+use Spatie\Activitylog\LogOptions;
 use libphonenumber\PhoneNumberUtil;
 use libphonenumber\PhoneNumberFormat;
 use Laravel\Jetstream\HasProfilePhoto;
@@ -15,13 +16,13 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Notifications\Notifiable;
 use Spatie\Activitylog\Traits\LogsActivity;
 use Laravel\Fortify\TwoFactorAuthenticatable;
+use Spatie\Activitylog\Traits\CausesActivity;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Spatie\Activitylog\Traits\CausesActivity;
 
 class User extends Authenticatable /* implements MustVerifyEmail */
 {
@@ -132,23 +133,6 @@ class User extends Authenticatable /* implements MustVerifyEmail */
     }
     
     /**
-     * Get the URL to the user's profile photo.
-     *
-     * @return string
-     */
-    public function getProfilePhotoUrlAttribute()
-    {
-        // If we have a profile photo ID, get the URL from the media table
-        if ($this->profile_photo_path && $this->profilePhoto) {
-            return Storage::url($this->profilePhoto->file_path);
-        }
-        
-        // Fall back to the default implementation from HasProfilePhoto
-        $default = $this->defaultProfilePhotoUrl();
-        return $default ?: null;
-    }
-    
-    /**
      * Update the user's profile photo from a file upload.
      *
      * @param  mixed  $photo
@@ -160,14 +144,17 @@ class User extends Authenticatable /* implements MustVerifyEmail */
         $mediaType = MediaType::where('slug', 'image')->firstOrFail();
         $mediaCategory = MediaCategory::where('slug', 'profile_photos')->firstOrFail();
         
-        // Store the file
-        $filePath = $photo->store('uploads/media/profile-photos/' . Str::slug(now()->toDateTimeString()), 'public');
+        // Store the file using the public disk
+        $filePath = $photo->store(
+            'uploads/' . $mediaType->slug . '/' . $mediaCategory->slug . '/' . Str::slug(Carbon::parse(REQUEST_TIMESTAMP)->toDateTimeString()), 
+            'public' // Explicitly use the public disk
+        );
         
         // Create a new media record for the profile photo
         $media = Media::create([
-            'uuid' => (string) Str::uuid(),
-            'name' => ucwords(strtolower("{$this->name} profile photo at " . now()->format('F j, Y, g:i a'))),
-            'slug' => Str::slug("{$this->name} profile photo at " . now()->toDateTimeString()),
+            'uuid' => Str::uuid()->toString(),
+            'name' => ucwords(strtolower("{$this->name} profile photo at " . Carbon::parse(REQUEST_TIMESTAMP)->format('F j, Y, g:i a'))),
+            'slug' => Str::slug("{$this->name} profile photo at " . Carbon::parse(REQUEST_TIMESTAMP)->format('YmdHis')),
             'description' => 'Profile photo for user; ' . $this->name,
             'type_id' => $mediaType->id,
             'category_id' => $mediaCategory->id,
@@ -183,31 +170,13 @@ class User extends Authenticatable /* implements MustVerifyEmail */
             ]
         ]);
         
-        // Update the user's profile_photo_path
+        // Generate the correct URL without the /storage prefix
+        $publicPath = str_replace('storage/', 'uploads/', $filePath);
         $this->forceFill([
-            'profile_photo_path' => $media->file_path,
+            'profile_photo_path' => '/' . $publicPath,
         ])->save();
     }
-    
-    /**
-     * Get the default profile photo URL if no profile photo has been uploaded.
-     *
-     * @return string
-     */
-    protected function defaultProfilePhotoUrl()
-    {
-        $name = trim(collect(explode(' ', $this->name))->map(function ($segment) {
-            return mb_substr($segment, 0, 1);
-        })->join(' '));
 
-        return 'https://ui-avatars.com/api/?name='.urlencode($name).'&color=7F9CF5&background=EBF4FF';
-    }
-
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
     /**
      * The attributes that are mass assignable.
      *
@@ -258,8 +227,33 @@ class User extends Authenticatable /* implements MustVerifyEmail */
      *
      * @var array<int, string>
      */
+    /**
+     * Get the URL to the user's profile photo.
+     *
+     * @return string
+     */
+    public function getProfilePhotoPathAttribute($value)
+    {
+        // If we have a profile photo path, return it
+        if ($value) {
+            return $value;
+        }
+
+        // Generate default avatar URL
+        $name = trim(collect(explode(' ', $this->name))->map(function ($segment) {
+            return mb_substr($segment, 0, 1);
+        })->join(' '));
+
+        return 'https://ui-avatars.com/api/?name='.urlencode($name).'&color=7F9CF5&background=EBF4FF';
+    }
+
+    /**
+     * The attributes that should be appended to the model's array form.
+     *
+     * @var array<int, string>
+     */
     protected $appends = [
-        'profile_photo_url',
+        'profile_photo_path',
     ];
 
     /**
