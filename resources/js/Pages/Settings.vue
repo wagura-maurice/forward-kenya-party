@@ -14,13 +14,13 @@ const activeTab = ref('core');
 
 const tabs = [
     { id: 'core', name: 'Core Settings', icon: 'cog' },
-    { id: 'media', name: 'Media Management', icon: 'images' },
-    { id: 'roles', name: 'Roles & Permissions', icon: 'user-shield' },
-    { id: 'regions', name: 'Regions', icon: 'map-marked-alt' },
+    { id: 'roles', name: 'Roles & Abilities', icon: 'user-shield' },
+    { id: 'media', name: 'Media', icon: 'images' },
+    { id: 'regions', name: 'Location', icon: 'map-marked-alt' },
     { id: 'demographics', name: 'Demographics', icon: 'users' },
     { id: 'departments', name: 'Departments', icon: 'sitemap' },
     { id: 'services', name: 'Services', icon: 'concierge-bell' },
-    { id: 'communications', name: 'Communications', icon: 'comments' },
+    { id: 'communications', name: 'Communications', icon: 'envelope' },
 ];
 
 const subTabs = {
@@ -30,27 +30,30 @@ const subTabs = {
     ],
     regions: [
         { id: 'counties', name: 'Counties', icon: 'map' },
-        { id: 'subcounties', name: 'Sub-Counties', icon: 'map-marked' },
+        { id: 'subcounties', name: 'Sub-Counties', icon: 'map-marked-alt' },
         { id: 'constituencies', name: 'Constituencies', icon: 'map-pin' },
         { id: 'wards', name: 'Wards', icon: 'map-signs' },
         { id: 'locations', name: 'Locations', icon: 'location-arrow' },
         { id: 'villages', name: 'Villages', icon: 'home' },
         { id: 'polling-centers', name: 'Polling Centers', icon: 'vote-yea' },
         { id: 'polling-stations', name: 'Polling Stations', icon: 'vote-yea' },
+        { id: 'polling-streams', name: 'Polling Streams', icon: 'vote-yea' },
     ],
     demographics: [
+        { id: 'genders', name: 'Genders', icon: 'venus-mars' },
         { id: 'ethnicities', name: 'Ethnic Groups', icon: 'users' },
+        { id: 'religions', name: 'Religions', icon: 'place-of-worship' },
     ],
     departments: [
-        { id: 'department-types', name: 'Department Types', icon: 'sitemap' },
+        { id: 'department-types', name: 'Types', icon: 'sitemap' },
         { id: 'department-categories', name: 'Categories', icon: 'folder' },
     ],
     services: [
-        { id: 'service-types', name: 'Service Types', icon: 'concierge-bell' },
+        { id: 'service-types', name: 'Types', icon: 'concierge-bell' },
         { id: 'service-categories', name: 'Categories', icon: 'folder' },
     ],
     communications: [
-        { id: 'communication-types', name: 'Communication Types', icon: 'comments' },
+        { id: 'communication-types', name: 'Types', icon: 'envelope' },
         { id: 'communication-categories', name: 'Categories', icon: 'folder' },
     ],
 };
@@ -73,12 +76,23 @@ const hasSubTabs = (tabId) => {
                     <ol class="inline-flex items-center space-x-1 md:space-x-3">
                         <li class="inline-flex items-center">
                             <a
-                                :href="route('settings')"
+                                :href="route('dashboard')"
                                 class="inline-flex items-center text-sm font-medium text-gray-700 dark:text-gray-400 hover:text-green-600 dark:hover:text-green-400"
                             >
                                 <i class="fas fa-home mr-2"></i>
-                                Settings
+                                Dashboard
                             </a>
+                        </li>
+                        <li aria-current="page">
+                            <div class="flex items-center">
+                                <i
+                                    class="fas fa-chevron-right text-gray-400 mx-2"
+                                ></i>
+                                <span
+                                    class="text-sm font-medium text-gray-500 dark:text-gray-400"
+                                    >{{ title }}</span
+                                >
+                            </div>
                         </li>
                     </ol>
                 </nav>
@@ -97,7 +111,7 @@ const hasSubTabs = (tabId) => {
                                 </h3>
                                 <div v-for="tab in tabs" :key="tab.id">
                                     <button
-                                        @click="activeTab = tab.id"
+                                        @click="activeTab = activeTab === tab.id ? null : tab.id"
                                         :class="[
                                             activeTab === tab.id
                                                 ? 'bg-green-50 text-green-700 dark:bg-gray-600 dark:text-white'
