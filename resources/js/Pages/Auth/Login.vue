@@ -14,7 +14,7 @@ defineProps({
 });
 
 const form = useForm({
-    email: "",
+    login: "", // Changed from email to login to support both email and phone
     password: "",
     remember: false,
 });
@@ -49,20 +49,20 @@ const submit = () => {
             </h1>
 
             <form @submit.prevent="submit" class="space-y-4 md:space-y-6">
-                <!-- Email Input -->
+                <!-- Login Input (Email or Telephone) -->
                 <div>
-                    <InputLabel for="email" value="Email" />
+                    <InputLabel for="login" value="Email Address / Telephone Number" />
                     <TextInput
-                        id="email"
-                        v-model="form.email"
-                        type="email"
+                        id="login"
+                        v-model="form.login"
+                        type="text"
                         class="mt-1 block w-full"
                         required
                         autofocus
                         autocomplete="username"
-                        placeholder="john@example.com"
+                        placeholder="Enter your email address or telephone number"
                     />
-                    <InputError class="mt-2" :message="form.errors.email" />
+                    <InputError class="mt-2" :message="form.errors.login || form.errors.email" />
                 </div>
 
                 <!-- Password Input and Forgot Password -->
