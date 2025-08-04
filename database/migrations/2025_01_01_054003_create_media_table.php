@@ -15,7 +15,7 @@ return new class extends Migration
         Schema::create('media', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique()->comment('Globally unique identifier for the media');
-            $table->string('name')->unique()->comment('Name of the media (e.g., "Contract_Agreement")');
+            $table->string('name')->comment('Name of the media (e.g., "Contract_Agreement")');
             $table->string('slug')->nullable()->unique()->comment('SEO-friendly URL slug (e.g., "contract-agreement")');
             $table->text('description')->nullable()->comment('Description of the media');
             
