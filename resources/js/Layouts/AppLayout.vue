@@ -502,6 +502,7 @@ onUnmounted(() => {
                                         <!-- System Settings -->
                                         <DropdownLink
                                             :href="route('settings')"
+                                            v-if="role === 'administrator'"
                                         >
                                             System Settings
                                         </DropdownLink>
@@ -759,6 +760,7 @@ onUnmounted(() => {
                             <ResponsiveNavLink
                                 :href="route('settings')"
                                 :active="route().current('settings')"
+                                v-if="role === 'administrator'"
                             >
                                 System Settings
                             </ResponsiveNavLink>
