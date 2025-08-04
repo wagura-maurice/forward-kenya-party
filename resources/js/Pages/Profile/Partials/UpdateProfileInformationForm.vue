@@ -1847,6 +1847,9 @@ const toggleSection = (section) => {
                             <div class="col-span-6 sm:col-span-3">
                                 <InputLabel for="sub_county_id">
                                     Sub County
+                                    <i
+                                        class="fas fa-star text-red-500 text-xs ml-1"
+                                    ></i>
                                 </InputLabel>
                                 <div class="relative">
                                     <select
@@ -1856,10 +1859,20 @@ const toggleSection = (section) => {
                                         :disabled="!form.citizen.county_id || isLoadingSubCounties"
                                     >
                                         <option value="">Select Sub County</option>
+                                        <!-- Show current sub-county first if it exists -->
+                                        <option 
+                                            v-if="citizen?.sub_county && citizen.sub_county.county_id == form.citizen.county_id"
+                                            :value="citizen.sub_county_id"
+                                            :key="'current-subcounty-' + citizen.sub_county_id"
+                                        >
+                                            {{ citizen.sub_county.name }}
+                                        </option>
+                                        <!-- Then show other filtered sub-counties -->
                                         <option
                                             v-for="sub_county in filteredSubCounties"
                                             :key="sub_county.id"
                                             :value="sub_county.id"
+                                            :disabled="citizen?.sub_county_id === sub_county.id"
                                         >
                                             {{ sub_county.name }}
                                         </option>
@@ -1884,24 +1897,34 @@ const toggleSection = (section) => {
                                         class="fas fa-star text-red-500 text-xs ml-1"
                                     ></i>
                                 </InputLabel>
-                                <select
-                                    id="constituency_id"
-                                    v-model="form.citizen.constituency_id"
-                                    class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                    :disabled="!form.citizen.county_id"
-                                    required
-                                >
-                                    <option value="">
-                                        Select Constituency
-                                    </option>
-                                    <option
-                                        v-for="constituency in filteredConstituencies"
-                                        :key="constituency.id"
-                                        :value="constituency.id"
+                                <div class="relative">
+                                    <select
+                                        id="constituency_id"
+                                        v-model="form.citizen.constituency_id"
+                                        class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
+                                        :disabled="!form.citizen.county_id"
+                                        required
                                     >
-                                        {{ constituency.name }}
-                                    </option>
-                                </select>
+                                        <option value="">Select Constituency</option>
+                                        <!-- Show current constituency first if it exists -->
+                                        <option 
+                                            v-if="citizen?.constituency && citizen.constituency.county_id == form.citizen.county_id"
+                                            :value="citizen.constituency_id"
+                                            :key="'current-constituency-' + citizen.constituency_id"
+                                        >
+                                            {{ citizen.constituency.name }}
+                                        </option>
+                                        <!-- Then show other filtered constituencies -->
+                                        <option
+                                            v-for="constituency in filteredConstituencies"
+                                            :key="constituency.id"
+                                            :value="constituency.id"
+                                            :disabled="citizen?.constituency_id === constituency.id"
+                                        >
+                                            {{ constituency.name }}
+                                        </option>
+                                    </select>
+                                </div>
                                 <InputError
                                     :message="form.errors['citizen.constituency_id']"
                                     class="mt-2"
@@ -1924,10 +1947,20 @@ const toggleSection = (section) => {
                                         required
                                     >
                                         <option value="">Select Ward</option>
+                                        <!-- Show current ward first if it exists -->
+                                        <option 
+                                            v-if="citizen?.ward && citizen.ward.constituency_id == form.citizen.constituency_id"
+                                            :value="citizen.ward_id"
+                                            :key="'current-ward-' + citizen.ward_id"
+                                        >
+                                            {{ citizen.ward.name }}
+                                        </option>
+                                        <!-- Then show other filtered wards -->
                                         <option
                                             v-for="ward in filteredWards"
                                             :key="ward.id"
                                             :value="ward.id"
+                                            :disabled="citizen?.ward_id === ward.id"
                                         >
                                             {{ ward.name }}
                                         </option>
