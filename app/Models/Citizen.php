@@ -64,12 +64,12 @@ class Citizen extends Model
         // Set description for events
         $options->setDescriptionForEvent(function(string $eventName) {
             return match($eventName) {
-                'created' => 'Citizen registration was created',
-                'updated' => 'Citizen registration was updated',
-                'deleted' => 'Citizen registration was deleted',
-                'restored' => 'Citizen registration was restored',
-                'forceDeleted' => 'Citizen record was permanently deleted',
-                'status_updated' => 'Citizen registration status was updated',
+                'created' => 'Citizen #'.$this->uuid.' registration was created',
+                'updated' => 'Citizen #'.$this->uuid.' registration was updated',
+                'deleted' => 'Citizen #'.$this->uuid.' registration was deleted',
+                'restored' => 'Citizen #'.$this->uuid.' registration was restored',
+                'forceDeleted' => 'Citizen #'.$this->uuid.' record was permanently deleted',
+                'status_updated' => 'Citizen #'.$this->uuid.' registration status was updated',
                 default => "Citizen registration was {$eventName}",
             };
         });

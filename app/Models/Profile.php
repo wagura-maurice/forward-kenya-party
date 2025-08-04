@@ -63,12 +63,12 @@ class Profile extends Model
         // Set description for events
         $options->setDescriptionForEvent(function(string $eventName) {
             return match($eventName) {
-                'created' => 'Profile was created',
-                'updated' => 'Profile was updated',
-                'deleted' => 'Profile was deleted',
-                'restored' => 'Profile was restored',
-                'forceDeleted' => 'Profile was permanently deleted',
-                default => "Profile was {$eventName}",
+                'created' => 'Profile #'.$this->uuid.' was created',
+                'updated' => 'Profile #'.$this->uuid.' was updated',
+                'deleted' => 'Profile #'.$this->uuid.' was deleted',
+                'restored' => 'Profile #'.$this->uuid.' was restored',
+                'forceDeleted' => 'Profile #'.$this->uuid.' was permanently deleted',
+                default => "Profile #'.$this->uuid.' was {$eventName}",
             };
         });
         

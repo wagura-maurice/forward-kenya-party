@@ -77,12 +77,12 @@ class User extends Authenticatable /* implements MustVerifyEmail */
         // Add description for events
         $options->setDescriptionForEvent(function(string $eventName) {
             return match($eventName) {
-                'created' => 'User account was created',
-                'updated' => 'User account was updated',
-                'deleted' => 'User account was deleted',
-                'restored' => 'User account was restored',
-                'forceDeleted' => 'User account was permanently deleted',
-                default => "User {$eventName}",
+                'created' => 'User #'.$this->id.' account was created',
+                'updated' => 'User #'.$this->id.' account was updated',
+                'deleted' => 'User #'.$this->id.' account was deleted',
+                'restored' => 'User #'.$this->id.' account was restored',
+                'forceDeleted' => 'User #'.$this->id.' account was permanently deleted',
+                default => "User #'.$this->id.' {$eventName}",
             };
         });
         
