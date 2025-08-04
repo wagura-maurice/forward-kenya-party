@@ -12,6 +12,52 @@ use Illuminate\Support\Facades\Route;
 
 class BackendController extends Controller
 {
+    /**
+     * Get the appropriate icon for an activity
+     *
+     * @param string $description
+     * @return string
+     */
+    protected function getActivityIcon($description)
+    {
+        if (str_contains(strtolower($description), 'created')) {
+            return 'plus';
+        } elseif (str_contains(strtolower($description), 'updated')) {
+            return 'pencil-alt';
+        } elseif (str_contains(strtolower($description), 'deleted')) {
+            return 'trash';
+        } elseif (str_contains(strtolower($description), 'login')) {
+            return 'sign-in-alt';
+        } elseif (str_contains(strtolower($description), 'logout')) {
+            return 'sign-out-alt';
+        } elseif (str_contains(strtolower($description), 'registered')) {
+            return 'user-plus';
+        } else {
+            return 'bell';
+        }
+    }
+
+    /**
+     * Get the appropriate color for an activity
+     *
+     * @param string $description
+     * @return string
+     */
+    protected function getActivityColor($description)
+    {
+        if (str_contains(strtolower($description), 'created') || str_contains(strtolower($description), 'registered')) {
+            return 'green';
+        } elseif (str_contains(strtolower($description), 'updated')) {
+            return 'blue';
+        } elseif (str_contains(strtolower($description), 'deleted')) {
+            return 'red';
+        } elseif (str_contains(strtolower($description), 'login') || str_contains(strtolower($description), 'logout')) {
+            return 'indigo';
+        } else {
+            return 'gray';
+        }
+    }
+    
     public function dashboard(Request $request)
     {
         $user = $request->user()->load('roles');
@@ -22,12 +68,68 @@ class BackendController extends Controller
             ->take(5)
             ->get();
 
-        // Get statistics
+        // Get statistics with percentage changes
+        $oneMonthAgo = now()->subMonth();
+        
+        // Helper function to calculate percentage change
+        $calculateChange = function($current, $previous) {
+            if ($previous === 0) return $current > 0 ? 100 : 0;
+            return round((($current - $previous) / $previous) * 100, 1);
+        };
+        
+        // Get user statistics
+        $currentUsers = User::count();
+        $previousUsers = User::where('created_at', '<', $oneMonthAgo)->count();
+        
+        // Get active users (assuming last login within last 30 days)
+        $activeUsers = User::where('last_login_at', '>=', now()->subDays(30))->count();
+        $previousActiveUsers = User::where('last_login_at', '>=', $oneMonthAgo->copy()->subDays(30))
+            ->where('last_login_at', '<', $oneMonthAgo)
+            ->count();
+        
+        // Get other statistics
+        $currentServices = Service::count();
+        $previousServices = Service::where('created_at', '<', $oneMonthAgo)->count();
+        
+        $currentDepartments = Department::count();
+        $previousDepartments = Department::where('created_at', '<', $oneMonthAgo)->count();
+        
+        $currentProjects = $featuredProjects->count();
+        $previousProjects = Activity::where('created_at', '<', $oneMonthAgo)->count();
+        
         $stats = [
-            'total_users' => User::count(),
-            'total_services' => Service::count(),
-            'total_departments' => Department::count(),
-            'featured_projects' => $featuredProjects->count(),
+            'total_users' => [
+                'count' => $currentUsers,
+                'change' => $calculateChange($currentUsers, $previousUsers)
+            ],
+            'active_users' => [
+                'count' => $activeUsers,
+                'change' => $calculateChange($activeUsers, $previousActiveUsers)
+            ],
+            'branches' => [
+                'count' => 0, // To be implemented
+                'change' => 0
+            ],
+            'partnerships' => [
+                'count' => 0, // To be implemented
+                'change' => 0
+            ],
+            'departments' => [
+                'count' => $currentDepartments,
+                'change' => $calculateChange($currentDepartments, $previousDepartments)
+            ],
+            'services' => [
+                'count' => $currentServices,
+                'change' => $calculateChange($currentServices, $previousServices)
+            ],
+            'projects' => [
+                'count' => $currentProjects,
+                'change' => $calculateChange($currentProjects, $previousProjects)
+            ],
+            'upcoming_events' => [
+                'count' => 0, // To be implemented
+                'change' => 0
+            ]
         ];
 
         // Get featured services and departments
@@ -42,6 +144,25 @@ class BackendController extends Controller
             ->orderBy('name')
             ->take(4)
             ->get();
+            
+        // Get latest activities
+        $latestActivities = Activity::with(['user', 'subject'])
+            ->latest()
+            ->take(5)
+            ->get()
+            ->map(function ($activity) {
+                return [
+                    'id' => $activity->id,
+                    'description' => $activity->description,
+                    'subject_type' => class_basename($activity->subject_type),
+                    'subject_id' => $activity->subject_id,
+                    'user_name' => $activity->user->name ?? 'System',
+                    'user_avatar' => $activity->user->profile_photo_url ?? null,
+                    'created_at' => $activity->created_at->diffForHumans(),
+                    'icon' => $this->getActivityIcon($activity->description),
+                    'color' => $this->getActivityColor($activity->description)
+                ];
+            });
 
         return Inertia::render('Dashboard', [
             'title' => ucwords($roles[0]) . ' Dashboard',
@@ -56,9 +177,8 @@ class BackendController extends Controller
                 'featuredServices' => $featuredServices,
                 'featuredDepartments' => $featuredDepartments,
                 'featuredProjects' => $featuredProjects,
+                'latestActivities' => $latestActivities,
                 'role' => $roles[0],
-            ],
-            'data' => [
                 'user' => $user
             ],
         ]);
@@ -203,7 +323,7 @@ class BackendController extends Controller
             ],
             'data' => [
                 'user' => $request->user()
-            ],
+            ]
         ]);
     }
 }
