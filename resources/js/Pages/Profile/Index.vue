@@ -25,6 +25,10 @@ const toastMessage = ref("");
 // Access authenticated user data
 const user = computed(() => props.auth?.user || null);
 const profile = computed(() => user.value?.profile || {});
+const citizen = computed(() => user.value?.citizen || {});
+
+// console.log(user.value);
+// console.log(citizen);
 
 // Computed properties
 const fullName = computed(() => {
@@ -196,7 +200,7 @@ const copyToClipboard = (text) => {
                                         <img
                                             class="h-full w-full rounded-full object-cover"
                                             :src="
-                                                $page.props.auth.user.profile_photo_url
+                                                $page.props.auth.user.profile_photo_path
                                             "
                                             :alt="$page.props.auth.user.name"
                                         />
@@ -229,11 +233,11 @@ const copyToClipboard = (text) => {
                                 </div>
                                 <div class="flex items-center bg-gray-50 dark:bg-gray-700/50 px-2 py-1 rounded-full text-md">
                                     <span class="text-gray-500 dark:text-gray-400 mr-1">ID:</span>
-                                    <span class="font-medium">{{ profile?.citizen?.uuid || "N/A" }}</span>
+                                    <span class="font-medium">{{ citizen?.uuid || "N/A" }}</span>
                                     <button
-                                        @click="copyToClipboard(profile?.citizen?.uuid)"
+                                        @click="copyToClipboard(citizen?.uuid)"
                                         class="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 transition-colors ml-1"
-                                        :disabled="!profile?.citizen?.uuid"
+                                        :disabled="!citizen?.uuid"
                                         title="Copy membership number"
                                     >
                                         <i class="fas fa-copy text-md"></i>
@@ -335,7 +339,7 @@ const copyToClipboard = (text) => {
                                         class="fas fa-user text-gray-400 mr-2 text-sm"
                                     ></i>
                                     <p
-                                        class="text-sm font-medium text-gray-800 dark:text-gray-200"
+                                        class="text-sm font-medium text-gray-800 dark:text-gray-200 capitalize"
                                     >
                                         {{ profile?.last_name || user.name }}
                                     </p>
@@ -352,7 +356,7 @@ const copyToClipboard = (text) => {
                                         class="fas fa-user text-gray-400 mr-2 text-sm"
                                     ></i>
                                     <p
-                                        class="text-sm font-medium text-gray-800 dark:text-gray-200"
+                                        class="text-sm font-medium text-gray-800 dark:text-gray-200 capitalize"
                                     >
                                         {{ profile?.first_name }} {{ profile?.middle_name}}
                                     </p>
@@ -395,7 +399,7 @@ const copyToClipboard = (text) => {
                                         class="fas fa-venus-mars text-gray-400 mr-2 text-sm"
                                     ></i>
                                     <p
-                                        class="text-sm font-medium text-gray-800 dark:text-gray-200"
+                                        class="text-sm font-medium text-gray-800 dark:text-gray-200 capitalize"
                                     >
                                         {{ genderDisplayName }}
                                     </p>
@@ -415,8 +419,7 @@ const copyToClipboard = (text) => {
                                         class="text-sm font-medium text-gray-800 dark:text-gray-200"
                                     >
                                         {{
-                                            profile?.citizen
-                                                ?.national_identification_number ||
+                                            citizen?.national_identification_number ||
                                             "Not provided"
                                         }}
                                     </p>
@@ -436,8 +439,7 @@ const copyToClipboard = (text) => {
                                         class="text-sm font-medium text-gray-800 dark:text-gray-200"
                                     >
                                         {{
-                                            profile?.citizen
-                                                ?.passport_number ||
+                                            citizen?.passport_number ||
                                             "Not provided"
                                         }}
                                     </p>
@@ -488,7 +490,7 @@ const copyToClipboard = (text) => {
                                         class="fas fa-users text-gray-400 mr-2 text-sm"
                                     ></i>
                                     <p
-                                        class="text-sm font-medium text-gray-800 dark:text-gray-200"
+                                        class="text-sm font-medium text-gray-800 dark:text-gray-200 capitalize"
                                     >
                                         {{ profile?.ethnicity?.name }}
                                     </p>
@@ -505,7 +507,7 @@ const copyToClipboard = (text) => {
                                         class="fas fa-pray text-gray-400 mr-2 text-sm"
                                     ></i>
                                     <p
-                                        class="text-sm font-medium text-gray-800 dark:text-gray-200"
+                                        class="text-sm font-medium text-gray-800 dark:text-gray-200 capitalize"
                                     >
                                         {{ profile?.religion?.name }}
                                     </p>
@@ -567,7 +569,7 @@ const copyToClipboard = (text) => {
                                         class="fas fa-map-marker-alt text-gray-400 mt-0.5 mr-2 text-sm"
                                     ></i>
                                     <p
-                                        class="text-sm font-medium text-gray-800 dark:text-gray-200"
+                                        class="text-sm font-medium text-gray-800 dark:text-gray-200 capitalize"
                                     >
                                         {{ profile?.address_line_1 || "Not provided" }}
                                     </p>
@@ -584,7 +586,7 @@ const copyToClipboard = (text) => {
                                         class="fas fa-map-marker-alt text-gray-400 mt-0.5 mr-2 text-sm"
                                     ></i>
                                     <p
-                                        class="text-sm font-medium text-gray-800 dark:text-gray-200"
+                                        class="text-sm font-medium text-gray-800 dark:text-gray-200 capitalize"
                                     >
                                         {{ profile?.address_line_2 || "Not provided" }}
                                     </p>
@@ -601,7 +603,7 @@ const copyToClipboard = (text) => {
                                         class="fas fa-map-marker-alt text-gray-400 mt-0.5 mr-2 text-sm"
                                     ></i>
                                     <p
-                                        class="text-sm font-medium text-gray-800 dark:text-gray-200"
+                                        class="text-sm font-medium text-gray-800 dark:text-gray-200 capitalize"
                                     >
                                         {{ profile?.city || "Not provided" }}
                                     </p>
@@ -618,7 +620,7 @@ const copyToClipboard = (text) => {
                                         class="fas fa-map-marker-alt text-gray-400 mt-0.5 mr-2 text-sm"
                                     ></i>
                                     <p
-                                        class="text-sm font-medium text-gray-800 dark:text-gray-200"
+                                        class="text-sm font-medium text-gray-800 dark:text-gray-200 capitalize"
                                     >
                                         {{ profile?.state || "Not provided" }}
                                     </p>
@@ -635,7 +637,7 @@ const copyToClipboard = (text) => {
                                         class="fas fa-map-marker-alt text-gray-400 mt-0.5 mr-2 text-sm"
                                     ></i>
                                     <p
-                                        class="text-sm font-medium text-gray-800 dark:text-gray-200"
+                                        class="text-sm font-medium text-gray-800 dark:text-gray-200 capitalize"
                                     >
                                         {{ profile?.country || "Not provided" }}
                                     </p>
@@ -665,9 +667,9 @@ const copyToClipboard = (text) => {
                                         class="fas fa-city text-gray-400 mr-2 text-sm"
                                     ></i>
                                     <p
-                                        class="text-sm font-medium text-gray-800 dark:text-gray-200"
+                                        class="text-sm font-medium text-gray-800 dark:text-gray-200 capitalize"
                                     >
-                                        {{ profile?.citizen?.county?.name || "Not provided" }}
+                                        {{ citizen?.county?.name || "Not provided" }}
                                     </p>
                                 </div>
                             </div>
@@ -682,9 +684,9 @@ const copyToClipboard = (text) => {
                                         class="fas fa-map-pin text-gray-400 mr-2 text-sm"
                                     ></i>
                                     <p
-                                        class="text-sm font-medium text-gray-800 dark:text-gray-200"
+                                        class="text-sm font-medium text-gray-800 dark:text-gray-200 capitalize"
                                     >
-                                        {{ profile?.citizen?.sub_county?.name || "Not provided" }}
+                                        {{ citizen?.sub_county?.name || "Not provided" }}
                                     </p>
                                 </div>
                             </div>
@@ -699,9 +701,9 @@ const copyToClipboard = (text) => {
                                         class="fas fa-map-signs text-gray-400 mr-2 text-sm"
                                     ></i>
                                     <p
-                                        class="text-sm font-medium text-gray-800 dark:text-gray-200"
+                                        class="text-sm font-medium text-gray-800 dark:text-gray-200 capitalize"
                                     >
-                                        {{ profile?.citizen?.constituency?.name || "Not provided" }}
+                                        {{ citizen?.constituency?.name || "Not provided" }}
                                     </p>
                                 </div>
                             </div>
@@ -716,9 +718,9 @@ const copyToClipboard = (text) => {
                                         class="fas fa-map-marker text-gray-400 mr-2 text-sm"
                                     ></i>
                                     <p
-                                        class="text-sm font-medium text-gray-800 dark:text-gray-200"
+                                        class="text-sm font-medium text-gray-800 dark:text-gray-200 capitalize"
                                     >
-                                        {{ profile?.citizen?.ward?.name || "Not provided" }}
+                                        {{ citizen?.ward?.name || "Not provided" }}
                                     </p>
                                 </div>
                             </div>
@@ -733,9 +735,9 @@ const copyToClipboard = (text) => {
                                         class="fas fa-map-marker text-gray-400 mr-2 text-sm"
                                     ></i>
                                     <p
-                                        class="text-sm font-medium text-gray-800 dark:text-gray-200"
+                                        class="text-sm font-medium text-gray-800 dark:text-gray-200 capitalize"
                                     >
-                                        {{ profile?.citizen?.location?.name || "Not provided" }}
+                                        {{ citizen?.location?.name || "Not provided" }}
                                     </p>
                                 </div>
                             </div>
@@ -750,9 +752,9 @@ const copyToClipboard = (text) => {
                                         class="fas fa-map-marker text-gray-400 mr-2 text-sm"
                                     ></i>
                                     <p
-                                        class="text-sm font-medium text-gray-800 dark:text-gray-200"
+                                        class="text-sm font-medium text-gray-800 dark:text-gray-200 capitalize"
                                     >
-                                        {{ profile?.citizen?.village?.name || "Not provided" }}
+                                        {{ citizen?.village?.name || "Not provided" }}
                                     </p>
                                 </div>
                             </div>
@@ -767,9 +769,9 @@ const copyToClipboard = (text) => {
                                         class="fas fa-vote-yea text-gray-400 mr-2 text-sm"
                                     ></i>
                                     <p
-                                        class="text-sm font-medium text-gray-800 dark:text-gray-200"
+                                        class="text-sm font-medium text-gray-800 dark:text-gray-200 capitalize"
                                     >
-                                        {{ profile?.citizen?.polling_center?.name || "Not provided" }}
+                                        {{ citizen?.polling_center?.name || "Not provided" }}
                                     </p>
                                 </div>
                             </div>
@@ -784,9 +786,9 @@ const copyToClipboard = (text) => {
                                         class="fas fa-vote-yea text-gray-400 mr-2 text-sm"
                                     ></i>
                                     <p
-                                        class="text-sm font-medium text-gray-800 dark:text-gray-200"
+                                        class="text-sm font-medium text-gray-800 dark:text-gray-200 capitalize"
                                     >
-                                        {{ profile?.citizen?.polling_station?.name || "Not provided" }}
+                                        {{ citizen?.polling_station?.name || "Not provided" }}
                                     </p>
                                 </div>
                             </div>
@@ -801,9 +803,9 @@ const copyToClipboard = (text) => {
                                         class="fas fa-vote-yea text-gray-400 mr-2 text-sm"
                                     ></i>
                                     <p
-                                        class="text-sm font-medium text-gray-800 dark:text-gray-200"
+                                        class="text-sm font-medium text-gray-800 dark:text-gray-200 capitalize"
                                     >
-                                        {{ profile?.citizen?.polling_stream?.name || "Not provided" }}
+                                        {{ citizen?.polling_stream?.name || "Not provided" }}
                                     </p>
                                 </div>
                             </div>
