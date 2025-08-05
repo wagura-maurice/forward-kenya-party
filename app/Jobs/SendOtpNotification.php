@@ -2,12 +2,14 @@
 
 namespace App\Jobs;
 
+use Illuminate\Support\Str;
 use Illuminate\Bus\Queueable;
+use App\Models\OutboundTextMessage;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
-use Illuminate\Queue\InteractsWithQueue;
-use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
+use App\Services\IAN\AfricaIsTalkingServices;
 use Illuminate\Queue\Middleware\WithoutOverlapping;
 
 class SendOtpNotification implements ShouldQueue
@@ -73,25 +75,24 @@ class SendOtpNotification implements ShouldQueue
     public function handle()
     {
         try {
-            // Log the OTP for testing purposes
-            Log::info('OTP sent to ' . $this->telephone . ': ' . $this->otpCode);
-
-            // In a production environment, you would send the OTP via SMS
-            // For example, using Africa's Talking or another SMS service:
+            $message = "Your Forward Kenya Party application verification code is: " . $this->otpCode . ". Valid for 5 minutes.";
             
-            /*
-            $message = "Your verification code is: " . $this->otpCode . ". Valid for 5 minutes.";
+            // Send SMS using Africa's Talking service
+            $smsService = new AfricaIsTalkingServices();
+            $response = $smsService->send($this->telephone, $message);
             
-            // Send SMS using your preferred service
-            $smsService = new SmsService();
-            $smsService->send($this->telephone, $message);
-            */
-            
-            // For now, we'll just log it for testing
-            return true;
-        } catch (\Exception $e) {
-            Log::error('Failed to send OTP: ' . $e->getMessage());
-            return false;
+            // Create a record in outbound_text_messages
+            OutboundTextMessage::create([
+                'uuid' => Str::uuid()->toString(),
+                'content' => $message,
+                'telephone' => $this->telephone,
+                'message_id' => $response['transaction_id'] ?? null,
+                'sent_at' => now(),
+                'transaction_amount' => $response['transaction_amount'] ?? 0,
+                '_status' => $response['_status'] ?? OutboundTextMessage::STATUS_PENDING,
+            ]);
+        } catch (\Throwable $th) {
+            throw $th;
         }
     }
     
