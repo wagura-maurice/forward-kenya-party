@@ -14,7 +14,37 @@ export default defineConfig({
                     base: null,
                     includeAbsolute: false,
                 },
+                compilerOptions: {
+                    whitespace: 'condense',
+                },
             },
         }),
     ],
+    build: {
+        minify: 'esbuild',
+        sourcemap: true,
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    'vendor': [
+                        'vue',
+                        '@inertiajs/vue3',
+                        'sweetalert2',
+                        'axios'
+                    ]
+                }
+            }
+        },
+        commonjsOptions: {
+            transformMixedEsModules: true,
+        },
+    },
+    optimizeDeps: {
+        include: ['vue', '@inertiajs/vue3', 'sweetalert2', 'axios'],
+        esbuildOptions: {
+            define: {
+                global: 'globalThis',
+            },
+        },
+    },
 });
