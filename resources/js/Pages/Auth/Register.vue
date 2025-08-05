@@ -1138,8 +1138,8 @@ const canProceedToNextStep = computed(() => {
                                 Step 2: Account and Personal Information
                             </h2>
 
-                            <!-- Surname and Other Name (Half Width) -->
-                            <div class="grid grid-cols-2 gap-4">
+                            <!-- Surname and Other Name (Responsive Grid) -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div class="space-y-2">
                                     <div class="flex items-center">
                                         <InputLabel
@@ -1214,8 +1214,8 @@ const canProceedToNextStep = computed(() => {
                                 </div>
                             </div>
 
-                            <!-- Member's Mobile No. and Identification Type (Half Width) -->
-                            <div class="grid grid-cols-2 gap-4">
+                            <!-- Member's Mobile No. and Identification Type (Responsive Grid) -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div class="space-y-2">
                                     <div class="flex items-center">
                                         <InputLabel
@@ -1285,7 +1285,7 @@ const canProceedToNextStep = computed(() => {
                             </div>
 
                             <!-- National ID and Party Membership No. (Half Width, Party Read-Only) -->
-                            <div class="grid grid-cols-2 gap-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div class="space-y-2">
                                     <div class="flex items-center">
                                         <InputLabel
@@ -1361,8 +1361,8 @@ const canProceedToNextStep = computed(() => {
                                 </div>
                             </div>
 
-                            <!-- Date of Birth and Sex (Half Width) -->
-                            <div class="grid grid-cols-2 gap-4">
+                            <!-- Date of Birth and Sex (Responsive Grid) -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div class="space-y-2">
                                     <div class="flex items-center">
                                         <InputLabel
@@ -1423,8 +1423,8 @@ const canProceedToNextStep = computed(() => {
                                 </div>
                             </div>
 
-                            <!-- Ethnicity and Religion (Half Width) -->
-                            <div class="grid grid-cols-2 gap-4">
+                            <!-- Ethnicity and Religion (Responsive Grid) -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div class="space-y-2">
                                     <div class="flex items-center">
                                         <InputLabel
@@ -1489,8 +1489,8 @@ const canProceedToNextStep = computed(() => {
                                 </div>
                             </div>
 
-                            <!-- Disability Status and NCPWD Number (Half Width) -->
-                            <div class="grid grid-cols-2 gap-4">
+                            <!-- Disability Status and NCPWD Number (Responsive Grid) -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div class="space-y-2">
                                     <div class="flex items-center">
                                         <InputLabel
@@ -1575,8 +1575,8 @@ const canProceedToNextStep = computed(() => {
                             <h2 class="text-base font-medium text-gray-700">
                                 Step 3: Location and Enlisting Information
                             </h2>
-                            <!-- County, Constituency, and Ward (Half Width) -->
-                            <div class="grid grid-cols-2 gap-4">
+                            <!-- County, Constituency, and Ward (Responsive Grid) -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div class="space-y-2">
                                     <div class="flex items-center">
                                         <InputLabel
@@ -1664,8 +1664,8 @@ const canProceedToNextStep = computed(() => {
                                 </div>
                             </div>
 
-                            <!-- Ward and Enlisting Date (Half Width) -->
-                            <div class="grid grid-cols-2 gap-4">
+                            <!-- Ward and Enlisting Date (Responsive Grid) -->
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div class="space-y-2">
                                     <div class="flex items-center">
                                         <InputLabel
@@ -1773,7 +1773,7 @@ const canProceedToNextStep = computed(() => {
                                 >
                                     <dl class="space-y-4">
                                         <div
-                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
+                                            class="grid grid-cols-1 sm:grid-cols-3 gap-4"
                                         >
                                             <dt
                                                 class="text-sm font-medium text-gray-500"
@@ -1792,7 +1792,7 @@ const canProceedToNextStep = computed(() => {
                                             </dd>
                                         </div>
                                         <div
-                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
+                                            class="grid grid-cols-1 sm:grid-cols-3 gap-4"
                                         >
                                             <dt
                                                 class="text-sm font-medium text-gray-500"
@@ -1815,7 +1815,7 @@ const canProceedToNextStep = computed(() => {
                                             </dd>
                                         </div>
                                         <div
-                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
+                                            class="grid grid-cols-1 sm:grid-cols-3 gap-4"
                                         >
                                             <dt
                                                 class="text-sm font-medium text-gray-500"
@@ -1832,7 +1832,7 @@ const canProceedToNextStep = computed(() => {
                                             </dd>
                                         </div>
                                         <div
-                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
+                                            class="grid grid-cols-1 sm:grid-cols-3 gap-4"
                                         >
                                             <dt
                                                 class="text-sm font-medium text-gray-500"
@@ -1885,7 +1885,7 @@ const canProceedToNextStep = computed(() => {
                                 >
                                     <dl class="space-y-4">
                                         <div
-                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
+                                            class="grid grid-cols-1 sm:grid-cols-3 gap-4"
                                         >
                                             <dt
                                                 class="text-sm font-medium text-gray-500"
@@ -1902,7 +1902,7 @@ const canProceedToNextStep = computed(() => {
                                             </dd>
                                         </div>
                                         <div
-                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
+                                            class="grid grid-cols-1 sm:grid-cols-3 gap-4"
                                         >
                                             <dt
                                                 class="text-sm font-medium text-gray-500"
@@ -1921,7 +1921,7 @@ const canProceedToNextStep = computed(() => {
                                             </dd>
                                         </div>
                                         <div
-                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
+                                            class="grid grid-cols-1 sm:grid-cols-3 gap-4"
                                         >
                                             <dt
                                                 class="text-sm font-medium text-gray-500"
@@ -1940,7 +1940,7 @@ const canProceedToNextStep = computed(() => {
                                             </dd>
                                         </div>
                                         <div
-                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
+                                            class="grid grid-cols-1 sm:grid-cols-3 gap-4"
                                         >
                                             <dt
                                                 class="text-sm font-medium text-gray-500"
@@ -1976,7 +1976,7 @@ const canProceedToNextStep = computed(() => {
                                             </dd>
                                         </div>
                                         <div
-                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
+                                            class="grid grid-cols-1 sm:grid-cols-3 gap-4"
                                         >
                                             <dt
                                                 class="text-sm font-medium text-gray-500"
@@ -2030,7 +2030,7 @@ const canProceedToNextStep = computed(() => {
                                 >
                                     <dl class="space-y-4">
                                         <div
-                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
+                                            class="grid grid-cols-1 sm:grid-cols-3 gap-4"
                                         >
                                             <dt
                                                 class="text-sm font-medium text-gray-500"
@@ -2049,7 +2049,7 @@ const canProceedToNextStep = computed(() => {
                                             </dd>
                                         </div>
                                         <div
-                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
+                                            class="grid grid-cols-1 sm:grid-cols-3 gap-4"
                                         >
                                             <dt
                                                 class="text-sm font-medium text-gray-500"
@@ -2069,7 +2069,7 @@ const canProceedToNextStep = computed(() => {
                                             </dd>
                                         </div>
                                         <div
-                                            class="sm:grid sm:grid-cols-3 sm:gap-4"
+                                            class="grid grid-cols-1 sm:grid-cols-3 gap-4"
                                         >
                                             <dt
                                                 class="text-sm font-medium text-gray-500"
