@@ -742,7 +742,7 @@ const verifyOtp = async (otp) => {
             Swal.fire({
                 icon: "success",
                 title: "Telephone Verified",
-                text: "Your telephone number has been verified successfully.",
+                text: response.data.message,
                 confirmButtonColor: "#10b981",
             }).then(() => {
                 // Submit the form after OTP verification
