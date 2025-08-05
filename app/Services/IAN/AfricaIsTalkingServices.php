@@ -26,11 +26,28 @@ class AfricaIsTalkingServices
         // Validate if the response was successful
         if ($response->successful()) {
             $data = collect($response->json()['SMSMessageData']);
+            
             if (isset($data['Recipients']) && !empty($data['Recipients'])) {
+                $recipient = $data['Recipients'][0];
+                $statusCode = (int)($recipient['statusCode'] ?? 0);
+                
+                // Map Africa's Talking status codes to our application's status constants
+                $status = match($statusCode) {
+                    // Success codes
+                    100, 101, 102 => OutboundTextMessage::STATUS_SENT, // Processed, Sent, Queued
+                    
+                    // Error codes
+                    401, 402, 403, 404, 405, 406, 407, 409 => OutboundTextMessage::STATUS_FAILED, // Various failure cases
+                    500, 501, 502 => OutboundTextMessage::STATUS_FAILED, // Server/gateway errors
+                    
+                    // Default to pending for any other status
+                    default => OutboundTextMessage::STATUS_PENDING,
+                };
+
                 return array_filter([
-                    'transaction_amount' => (getOnlyNumbers(trim($data['Recipients'][0]['cost'])) + 0.2),
-                    'transaction_id' => optional($data['Recipients'][0])['messageId'] != 'None' ? trim($data['Recipients'][0]['messageId']) : NULL,
-                    '_status' => OutboundTextMessage::getStatusValueByLabel(OutboundTextMessage::getStatusOptions()[(int) trim($data['Recipients'][0]['statusCode'])]),
+                    'transaction_amount' => (getOnlyNumbers(trim($recipient['cost'])) + 0.2),
+                    'transaction_id' => ($recipient['messageId'] ?? null) !== 'None' ? trim($recipient['messageId']) : null,
+                    '_status' => $status,
                 ]);
             }
         }
