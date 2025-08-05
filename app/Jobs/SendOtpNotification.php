@@ -86,9 +86,9 @@ class SendOtpNotification implements ShouldQueue
                 'uuid' => Str::uuid()->toString(),
                 'content' => $message,
                 'telephone' => $this->telephone,
-                'message_id' => $response['transaction_id'] ?? null,
+                'session_id' => $response['transaction_id'] ?? null,
                 'sent_at' => now(),
-                'transaction_amount' => $response['transaction_amount'] ?? 0,
+                'session_amount' => $response['transaction_amount'] ?? 0,
                 '_status' => $response['_status'] ?? OutboundTextMessage::STATUS_PENDING,
             ]);
         } catch (\Throwable $th) {
