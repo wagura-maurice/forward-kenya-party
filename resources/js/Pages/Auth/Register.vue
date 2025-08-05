@@ -846,7 +846,7 @@ const submit = async () => {
             text: error.message || "An error occurred during registration.",
             confirmButtonColor: "#10b981",
         });
-    } finally {F
+    } finally {
         isSubmitting.value = false;
     }
 };
