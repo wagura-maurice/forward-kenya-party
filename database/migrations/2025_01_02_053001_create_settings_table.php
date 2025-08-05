@@ -16,6 +16,9 @@ return new class extends Migration
             $table->string('item')->unique()->comment('Unique identifier for the setting item');
             $table->text('default_value')->comment('Default value of the setting');
             $table->text('current_value')->nullable()->comment('Current value of the setting (can be modified)');
+            // $table->text('description')->nullable()->comment('Description of the setting');
+            // $table->text('type')->nullable()->comment('Type of the setting');
+            // $table->text('category')->nullable()->comment('Category of the setting');
             $table->softDeletes();
             $table->timestamps();
         });        
