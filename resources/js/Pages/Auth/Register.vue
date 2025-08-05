@@ -770,7 +770,7 @@ const verifyOtp = async (otp) => {
                 }</p>
                 ${
                     error.response?.data?.message?.includes("attempts exceeded")
-                        ? `<p class="mt-2 text-sm">You have exceeded the maximum of ${maxAttempts} attempts. Please request a new OTP.</p>`
+                        ? `<p class="mt-2 text-sm">You have exceeded the maximum of ${maxOtpAttempts.value} attempts. Please request a new OTP.</p>`
                         : ""
                 }
             `,
