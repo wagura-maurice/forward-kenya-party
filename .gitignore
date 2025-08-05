@@ -22,3 +22,4 @@ yarn-error.log
 /.zed
 create_migrations.sh
 .aider*
+.env.testing
