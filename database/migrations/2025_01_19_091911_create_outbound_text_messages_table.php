@@ -47,7 +47,6 @@ return new class extends Migration
             // Message content
             $table->text('content')->comment('Content of the outbound text message');
             $table->string('telephone')->comment('Phone number to which the text message will be sent');
-            $table->string('message_id')->nullable()->unique()->comment('Unique identifier from the SMS gateway');
             
             // Status and tracking
             $table->integer('_status')->default(OutboundTextMessage::STATUS_PENDING)
