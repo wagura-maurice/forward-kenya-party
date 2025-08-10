@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Spatie\Activitylog\LogOptions;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -92,11 +93,15 @@ class User extends Authenticatable implements MustVerifyEmail
 
     /**
      * Get the default log options for the model.
+     *
+     * @return \Spatie\Activitylog\LogOptions
      */
     protected function getDefaultLogOptions(): \Spatie\Activitylog\LogOptions
     {
-        return parent::getDefaultLogOptions()
+        return LogOptions::defaults()
             ->useLogName('users')
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
             ->dontLogIfAttributesChangedOnly([
                 'last_login_at',
                 'last_login_ip',
@@ -322,7 +327,10 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->belongsToMany(Role::class)->withTimestamps();
     }
 
-    public function profile(): HasOne
+    /**
+     * Get the profile associated with the user.
+     */
+    public function profile(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
         return $this->hasOne(Profile::class);
     }
