@@ -160,50 +160,59 @@ const toggleLibrary = () => {
 };
 
 // Get the page props
-const { data: pageData, auth } = usePage().props;
+const pageProps = usePage().props;
+const auth = pageProps.auth;
 
 // Access the nested data property from the Inertia response
-const data = pageData?.data || {};
+const data = pageProps.data || {};
 
 // Check if user has administrator role
 const hasAdminRole = computed(() => {
     return Array.isArray(auth?.user?.roles) && auth.user.roles.includes('administrator');
 });
 
-// Destructure the data with default values
-const {
-    stats = {
-        total_members: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
-        active_users: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
-        new_members_this_month: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
-        engagement_rate: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
-        donations: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
-        monthly_subscriptions: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
-        membership_fees: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
-        pending_approvals: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
-        candidates: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
-        nomination_papers: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
-        compliance_items: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
-        deadlines: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
-        departments: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
-        projects: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
-        services: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
-        press_releases: { count: 0, change: 0 },
-        social_media_reach: { count: 0, change: 0 },
-        upcoming_events: { count: 0, change: 0 },
-        meetings_this_week: { count: 0, change: 0 },
-        active_volunteers: { count: 0, change: 0 },
-        volunteer_hours: { count: 0, change: 0 },
-        youth_members: { count: 0, change: 0 },
-        women_members: { count: 0, change: 0 },
-    },
-    featuredServices = [],
-    featuredDepartments = [],
-    featuredProjects = [],
-    activities = [],
-    roles = [],
-    user: userData = null
-} = data;
+// Debug: Log the data structure
+console.log('Page props:', pageProps);
+console.log('Nested data:', data);
+
+// Get the stats from the data object, handling both direct and nested structures
+const stats = data?.stats || data?.data?.stats || {
+    total_members: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
+    active_users: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
+    new_members_this_month: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
+    engagement_rate: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
+    donations: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
+    monthly_subscriptions: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
+    membership_fees: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
+    pending_approvals: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
+    candidates: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
+    nomination_papers: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
+    compliance_items: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
+    deadlines: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
+    departments: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
+    projects: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
+    services: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
+    press_releases: { count: 0, change: 0 },
+    social_media_reach: { count: 0, change: 0 },
+    upcoming_events: { count: 0, change: 0 },
+    meetings_this_week: { count: 0, change: 0 },
+    active_volunteers: { count: 0, change: 0 },
+    volunteer_hours: { count: 0, change: 0 },
+    youth_members: { count: 0, change: 0 },
+    women_members: { count: 0, change: 0 },
+};
+
+// Get other data with proper fallbacks, using optional chaining for safety
+const featuredServices = data?.featuredServices || data?.data?.featuredServices || [];
+const featuredDepartments = data?.featuredDepartments || data?.data?.featuredDepartments || [];
+const featuredProjects = data?.featuredProjects || data?.data?.featuredProjects || [];
+const activities = data?.activities || data?.data?.activities || [];
+const roles = data?.roles || data?.data?.roles || [];
+const userData = data?.user || data?.data?.user || null;
+
+// Debug: Log the activities data
+console.log('Activities:', activities);
+console.log('Has admin role:', hasAdminRole.value);
 
 // Get icon class based on activity type
 const getActivityIcon = (iconType) => {
