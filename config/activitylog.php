@@ -34,6 +34,11 @@ return [
     'activity_model' => \App\Models\Activity::class,
 
     /*
+     * When set to true, the route, ip, and user agent on which the activity occurred will be logged.
+     */
+    'log_web_requests' => true,
+
+    /*
      * This is the database connection that will be used by the migration and
      * the Activity model shipped with this package. In case it's not set
      * Laravel's database.default will be used instead.
