@@ -160,10 +160,15 @@ const toggleLibrary = () => {
 };
 
 // Get the page props
-const { data: pageData } = usePage().props;
+const { data: pageData, auth } = usePage().props;
 
 // Access the nested data property from the Inertia response
 const data = pageData?.data || {};
+
+// Check if user has administrator role
+const hasAdminRole = computed(() => {
+    return Array.isArray(auth?.user?.roles) && auth.user.roles.includes('administrator');
+});
 
 // Destructure the data with default values
 const {
@@ -409,10 +414,10 @@ const formatChange = (change) => {
                     </template>
                 </div>
 
-                <!-- Latest Activities Section -->
+                <!-- Latest Activities Section - Only visible to administrators -->
                 <div
                     class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10"
-                    v-if="role === 'administrator'"
+                    v-if="hasAdminRole"
                 >
                     <div
                         class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700"
@@ -435,11 +440,13 @@ const formatChange = (change) => {
                             </p>
                             <div class="space-y-4">
                                 <div
-                                    v-if="activities.length === 0"
-                                    class="text-center py-4 text-gray-500"
+                                    v-if="!activities || activities.length === 0"
+                                    class="text-center py-8 text-gray-500 dark:text-gray-400"
                                 >
-                                    No recent activities found.
+                                    <i class="fas fa-inbox text-4xl mb-2 opacity-50"></i>
+                                    <p>No recent activities found</p>
                                 </div>
+                                <template v-else>
                                 <div
                                     v-for="activity in activities"
                                     :key="activity.id"
@@ -488,9 +495,10 @@ const formatChange = (change) => {
                                         </div>
                                     </div>
                                 </div>
+                                </template>
                             </div>
                             <div
-                                v-if="latestActivities.length > 0"
+                                v-if="activities && activities.length > 0"
                                 class="mt-4 text-right"
                             >
                                 <a
@@ -534,7 +542,7 @@ const formatChange = (change) => {
                                     <i
                                         class="fas fa-file-import text-blue-500 w-5 mr-3"
                                     ></i>
-                                    <span>Import Data</span>
+                                    <span>Import Members</span>
                                 </a>
                                 <a
                                     href="#"
@@ -543,7 +551,7 @@ const formatChange = (change) => {
                                     <i
                                         class="fas fa-file-export text-purple-500 w-5 mr-3"
                                     ></i>
-                                    <span>Export Reports</span>
+                                    <span>Export Members</span>
                                 </a>
                                 <Link
                                     :href="route('settings')"

@@ -25,16 +25,20 @@ const navigationData = computed(() => ({
 
 const props = defineProps({
     title: String,
-    role: {
-        type: String,
-        default: 'member',
-    },
     navigation: {
         type: Object,
         default: () => ({
             departments: [],
         }),
     },
+});
+
+// Get authenticated user from Inertia
+const user = computed(() => usePage().props.auth?.user || null);
+
+// Check if user has administrator role
+const isAdmin = computed(() => {
+    return Array.isArray(user.value?.roles) && user.value.roles.includes('administrator');
 });
 
 const switchToTeam = (team) => {
@@ -506,7 +510,7 @@ onUnmounted(() => {
                                         <!-- System Settings -->
                                         <DropdownLink
                                             :href="route('settings')"
-                                            v-if="props.role === 'administrator'"
+                                            v-if="isAdmin"
                                         >
                                             System Settings
                                         </DropdownLink>

@@ -66,6 +66,7 @@ class HandleInertiaRequests extends Middleware
                     'profile_photo_path' => optional($request->user())->profile_photo_path ?? $request->user()->defaultProfilePhotoPath(),
                     'profile' => $request->user()->profile ? $request->user()->profile->load('ethnicity', 'religion')->toArray() : null,
                     'citizen' => $request->user()->citizen ? $request->user()->citizen->load('county', 'sub_county', 'constituency', 'ward', 'location', 'village', 'polling_center', 'polling_station', 'polling_stream')->toArray() : null,
+                    'roles' => $request->user()->roles->pluck('name')->toArray(),
                 ] : null,
             ],
         ];
