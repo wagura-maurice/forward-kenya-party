@@ -5,18 +5,12 @@ namespace App\Models;
 use App\Models\Media;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
-use Illuminate\Validation\Rule;
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Support\Facades\DB;
-use Spatie\Activitylog\LogOptions;
-use libphonenumber\PhoneNumberUtil;
-use libphonenumber\PhoneNumberFormat;
 use Laravel\Jetstream\HasProfilePhoto;
 use Illuminate\Support\Facades\Storage;
+use App\Traits\LogsActivityWithMetadata;
 use Illuminate\Notifications\Notifiable;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Laravel\Fortify\TwoFactorAuthenticatable;
-use Spatie\Activitylog\Traits\CausesActivity;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -24,69 +18,97 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
-class User extends Authenticatable /* implements MustVerifyEmail */
+class User extends Authenticatable implements MustVerifyEmail
 {
-    use HasApiTokens, HasFactory, Notifiable, TwoFactorAuthenticatable, LogsActivity, CausesActivity;
-    
-    // We'll implement our own profile photo handling
+    use HasApiTokens;
+    use HasFactory;
     use HasProfilePhoto;
+    use Notifiable;
+    use TwoFactorAuthenticatable;
+    use LogsActivityWithMetadata;
 
-    // status
+    // Status constants
     const PENDING = 0;
     const ACTIVE = 1;
     const INACTIVE = 2;
 
     /**
-     * The attributes that should be logged for the user.
+     * The attributes that are mass assignable.
      *
-     * @return array
+     * @var array<int, string>
      */
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+        'phone',
+        'phone_country',
+        'status',
+        'last_login_at',
+        'last_login_ip',
+        'email_verified_at',
+        'two_factor_secret',
+        'two_factor_recovery_codes',
+        'two_factor_confirmed_at',
+        'profile_photo_path',
+        'timezone',
+        'language',
+        'metadata',
+    ];
+
     /**
-     * Get the activity log options for the model.
+     * The attributes that should be hidden for serialization.
+     *
+     * @var array<int, string>
      */
-    public function getActivitylogOptions(): LogOptions
+    protected $hidden = [
+        'password',
+        'remember_token',
+        'two_factor_recovery_codes',
+        'two_factor_secret',
+    ];
+
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array<int, string>
+     */
+    protected $appends = [
+        'profile_photo_url',
+        'profile_photo_path',
+    ];
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'last_login_at' => 'datetime',
+        'two_factor_confirmed_at' => 'datetime',
+        'metadata' => 'array',
+    ];
+
+    /**
+     * Get the default log options for the model.
+     */
+    protected function getDefaultLogOptions(): \Spatie\Activitylog\LogOptions
     {
-        $options = LogOptions::defaults()
+        return parent::getDefaultLogOptions()
             ->useLogName('users')
-            ->logOnly(['name', 'email', 'status', 'phone_number'])
-            ->logOnlyDirty()
-            ->dontSubmitEmptyLogs()
             ->dontLogIfAttributesChangedOnly([
-                'last_login_at', 
-                'last_login_ip', 
-                'updated_at',
-                'two_factor_confirmed_at'
-            ])
-            ->logExcept([
-                'password', 
-                'remember_token', 
-                'two_factor_recovery_codes', 
-                'two_factor_secret',
-                'email_verified_at',
-                'current_team_id',
-                'profile_photo_path',
                 'last_login_at',
                 'last_login_ip',
-                'last_login_user_agent',
-                'last_login_os',
-                'last_login_device',
-                'last_login_location',
+                'remember_token',
+                'two_factor_secret',
+                'two_factor_recovery_codes',
                 'two_factor_confirmed_at',
+                'profile_photo_path',
+                'updated_at',
+                'created_at',
+                'deleted_at'
             ]);
-            
-        // Add description for events
-        $options->setDescriptionForEvent(function(string $eventName) {
-            return match($eventName) {
-                'created' => 'User #'.$this->id.' account was created',
-                'updated' => 'User #'.$this->id.' account was updated',
-                'deleted' => 'User #'.$this->id.' account was deleted',
-                'restored' => 'User #'.$this->id.' account was restored',
-                'forceDeleted' => 'User #'.$this->id.' account was permanently deleted',
-                default => "User #'.$this->id.' {$eventName}",
-            };
-        });
-        
-        return $options;
     }
 
     /**
@@ -116,12 +138,6 @@ class User extends Authenticatable /* implements MustVerifyEmail */
     
     /**
      * Log a custom activity for this user.
-     *
-     * @param string $action
-     * @param string $description
-     * @param array $properties
-     * @param string|null $logName
-     * @return \Spatie\Activitylog\Models\Activity
      */
     public function logActivity(string $action, string $description, array $properties = [], ?string $logName = null)
     {
@@ -134,9 +150,6 @@ class User extends Authenticatable /* implements MustVerifyEmail */
     
     /**
      * Update the user's profile photo from a file upload.
-     *
-     * @param  mixed  $photo
-     * @return void
      */
     public function updateProfilePhoto($photo)
     {
@@ -155,91 +168,54 @@ class User extends Authenticatable /* implements MustVerifyEmail */
             'uuid' => Str::uuid()->toString(),
             'name' => ucwords(strtolower("{$this->name} profile photo at " . Carbon::parse(REQUEST_TIMESTAMP)->format('F j, Y, g:i a'))),
             'slug' => Str::slug("{$this->name} profile photo at " . Carbon::parse(REQUEST_TIMESTAMP)->format('YmdHis')),
-            'description' => 'Profile photo for user; ' . $this->name,
-            'type_id' => $mediaType->id,
-            'category_id' => $mediaCategory->id,
+            'description' => 'Profile photo for user: ' . $this->name,
             'file_path' => $filePath,
-            'file_name' => $photo->hashName(),
-            'file_extension' => $photo->extension(),
+            'file_name' => $photo->getClientOriginalName(),
+            'file_extension' => $photo->getClientOriginalExtension(),
             'file_size' => $photo->getSize(),
-            'metadata' => [
-                'upload_source' => 'profile_photo',
-                'user_id' => $this->id,
-                'original_name' => $photo->getClientOriginalName(),
-                'mime_type' => $photo->getMimeType(),
-            ]
+            'file_type' => $photo->getMimeType(),
+            'media_type_id' => $mediaType->id,
+            'media_category_id' => $mediaCategory->id,
+            'user_id' => $this->id,
+            'is_public' => true,
         ]);
-        
-        // Generate the correct URL without the /storage prefix
-        $publicPath = str_replace('storage/', 'uploads/', $filePath);
+
+        // Update the user's profile photo path
         $this->forceFill([
-            'profile_photo_path' => '/' . $publicPath,
+            'profile_photo_path' => $media->file_path,
         ])->save();
+
+        return $media;
     }
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array<int, string>
-     */
-    protected $fillable = [
-        'name',
-        'email',
-        'email_verified_at',
-        'password',
-        'remember_token', 
-        'current_team_id',
-        'profile_photo_path',
-        'two_factor_secret',
-        'two_factor_recovery_codes',
-        'two_factor_confirmed_at',
-        'last_login_at', // Add last login timestamp
-        'last_login_ip', // Add last login IP address
-        'last_login_device', // Add last login device
-        'last_login_user_agent', // Add last login user agent
-        'last_login_os', // Add last login operating system
-        'last_login_location', // Add last login location
-        
-    ];
-
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-        'two_factor_recovery_codes',
-        'two_factor_secret',
-    ];
-    
-    /**
-     * Get all of the activity notifications for the user.
-     */
-    public function activityNotifications(): HasMany
-    {
-        return $this->hasMany(ActivityNotification::class);
-    }
-
-    /**
-     * The accessors to append to the model's array form.
-     *
-     * @var array<int, string>
-     */
     /**
      * Get the URL to the user's profile photo.
-     *
-     * @return string
      */
     public function getProfilePhotoPathAttribute($value)
     {
-        // If we have a profile photo path, return it
-        if ($value) {
+        if (empty($value)) {
+            return $this->defaultProfilePhotoUrl();
+        }
+
+        // Check if the path is a full URL
+        if (filter_var($value, FILTER_VALIDATE_URL)) {
             return $value;
         }
 
-        // Generate default avatar URL
+        // Check if the file exists in storage
+        if (Storage::disk('public')->exists($value)) {
+            return Storage::disk('public')->url($value);
+        }
+
+        // Fallback to default if file doesn't exist
+        return $this->defaultProfilePhotoUrl();
+    }
+
+    /**
+     * Get the default profile photo URL if no profile photo has been uploaded.
+     */
+    protected function defaultProfilePhotoUrl(): string
+    {
         $name = trim(collect(explode(' ', $this->name))->map(function ($segment) {
             return mb_substr($segment, 0, 1);
         })->join(' '));
@@ -248,210 +224,147 @@ class User extends Authenticatable /* implements MustVerifyEmail */
     }
 
     /**
-     * The attributes that should be appended to the model's array form.
-     *
-     * @var array<int, string>
+     * Get the validation rules for creating a new user.
      */
-    protected $appends = [
-        'profile_photo_path',
-    ];
-
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
-
-    public function hasVerifiedEmail()
-    {
-        // Only check if the email is present
-        if ($this->email) {
-            return ! is_null($this->email_verified_at);
-        }
-        
-        // If email is not provided, return true or handle as required
-        return true; // Email verification is considered "not required"
-    }
-
     public static function createRules(): array
     {
         return [
-            'name' => 'required|string',
-            'email' => 'nullable|email|unique:users',
-            'email_verified_at' => 'nullable|string|confirmed',
-            'password' => 'required|string|min:8|confirmed',
-            'remember_token' => 'nullable|string',
-            'current_team_id' => 'nullable|exists:teams,id',
-            'profile_photo_path' => 'nullable|string',
-            'two_factor_secret' => 'nullable|string',
-            'two_factor_recovery_codes' => 'nullable|string',
-            'two_factor_confirmed_at' => 'nullable|string',
-            'last_login_at' => 'nullable|string',
-            'last_login_ip' => 'nullable|string',
-            'last_login_device' => 'nullable|string',
-            'last_login_user_agent' => 'nullable|string',
-            'last_login_os' => 'nullable|string',
-            'last_login_location' => 'nullable|string',
+            'name' => ['required', 'string', 'max:255'],
+            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'phone_country' => ['nullable', 'string', 'max:2'],
+            'status' => ['nullable', 'integer', 'in:0,1,2'],
+            'timezone' => ['nullable', 'string', 'timezone'],
+            'language' => ['nullable', 'string', 'in:en,sw'],
         ];
     }
 
+    /**
+     * Get the validation rules for updating a user.
+     */
     public static function updateRules(int $id): array
     {
         return [
-            'name' => 'nullable|string',
-            'email' => 'nullable|email|' . Rule::unique('users', 'email')->ignore($id),
-            'email_verified_at' => 'nullable|string',
-            'password' => 'nullable|string',
-            'remember_token' => 'nullable|string',
-            'current_team_id' => 'nullable|exists:teams,id',
-            'profile_photo_path' => 'nullable|string',
-            'two_factor_secret' => 'nullable|string',
-            'two_factor_recovery_codes' => 'nullable|string',
-            'two_factor_confirmed_at' => 'nullable|string',
-            'last_login_at' => 'nullable|string',
-            'last_login_ip' => 'nullable|string',
-            'last_login_device' => 'nullable|string',
-            'last_login_user_agent' => 'nullable|string',
-            'last_login_os' => 'nullable|string',
-            'last_login_location' => 'nullable|string',
+            'name' => ['sometimes', 'required', 'string', 'max:255'],
+            'email' => ['sometimes', 'required', 'string', 'email', 'max:255', 'unique:users,email,' . $id],
+            'password' => ['nullable', 'string', 'min:8', 'confirmed'],
+            'phone' => ['nullable', 'string', 'max:20'],
+            'phone_country' => ['nullable', 'string', 'max:2'],
+            'status' => ['nullable', 'integer', 'in:0,1,2'],
+            'timezone' => ['nullable', 'string', 'timezone'],
+            'language' => ['nullable', 'string', 'in:en,sw'],
         ];
     }
 
+    /**
+     * Scope a query to search users.
+     */
     public function scopeSearch($query, $value)
     {
-        return $query->where(function ($query) use ($value) {
-            $queryTelephoneUtil = PhoneNumberUtil::getInstance();
-            $queryTelephoneValue = null;
-
-            // Validate phone number as a Kenyan number
-            try {
-                $queryTelephoneProto = $queryTelephoneUtil->parse($value, 'KE'); // 'KE' is the country code for Kenya
-                if ($queryTelephoneUtil->isValidNumberForRegion($queryTelephoneProto, 'KE')) {
-                    $queryTelephoneValue = $queryTelephoneUtil->format($queryTelephoneProto, PhoneNumberFormat::E164);
-                }
-            } catch (\libphonenumber\NumberParseException $e) {
-                // If parsing fails, $queryTelephoneValue will remain null
-            }
-
-            // Main table searches
-            $query->where('name', 'like', "%{$value}%")
-                ->orWhere('email', 'like', "%{$value}%");
-
-            // Profile-related search (use formatted phone number with '+' symbol)
-            $query->orWhereHas('profile', function ($profileQuery) use ($value, $queryTelephoneValue) {
-                $profileQuery->where(function ($q) use ($value, $queryTelephoneValue) {
-                    $q->where('telephone', 'like', "%" . (isset($queryTelephoneValue) ? $queryTelephoneValue : $value) . "%")
-                        ->orWhere('uuid', 'like', "%{$value}%")
-                        ->orWhere('first_name', 'like', "%{$value}%")
-                        ->orWhere('middle_name', 'like', "%{$value}%")
-                        ->orWhere('last_name', 'like', "%{$value}%")
-                        ->orWhere('address_line_1', 'like', "%{$value}%")
-                        ->orWhere('address_line_2', 'like', "%{$value}%")
-                        ->orWhere('city', 'like', "%{$value}%")
-                        ->orWhere('state', 'like', "%{$value}%")
-                        ->orWhere('country', 'like', "%{$value}%")
-                        ->orWhere('passport_number', 'like', "%{$value}%")
-                        ->orWhere('national_identification_number', 'like', "%{$value}%")
-                        ->orWhere('driver_license_number', 'like', "%{$value}%")
-                        ->orWhere('employer_details', 'like', "%{$value}%")
-                        ->orWhere('proof_of_address', 'like', "%{$value}%")
-                        ->orWhere('proof_of_identity', 'like', "%{$value}%");
-                });
-            });
-        });
+        return $query->where('name', 'like', "%{$value}%")
+            ->orWhere('email', 'like', "%{$value}%")
+            ->orWhere('phone', 'like', "%{$value}%");
     }
 
+    /**
+     * Get the user's abilities.
+     */
     public function getAbilitiesAttribute()
     {
-        return $this->roles->map->abilities->flatten()->pluck('slug')->unique();
+        return $this->roles->flatMap->permissions->pluck('name')->unique()->values();
     }
 
+    /**
+     * Check if the user has a specific role.
+     */
     public function hasRole($role): bool
     {
         if (is_string($role)) {
-            return $this->roles->contains('slug', $role);
+            return $this->roles->contains('name', $role);
         }
 
-        if (is_array($role)) {
-            return count($this->roles->whereIn('slug', $role)) > 0;
-        }
-
-        return false;
+        return (bool) $role->intersect($this->roles)->count();
     }
 
+    /**
+     * Assign a role to the user.
+     */
     public function assignRole($role)
     {
         if (is_string($role)) {
-            $role = Role::where('slug', $role)->firstOrFail();
+            $role = Role::whereName($role)->firstOrFail();
         }
 
-        return $this->roles()->sync($role, false);
+        return $this->roles()->syncWithoutDetaching([$role->id]);
     }
 
+    /**
+     * Remove a role from the user.
+     */
     public function unAssignRole($role)
     {
         if (is_string($role)) {
-            $role = Role::where('slug', $role)->firstOrFail();
+            $role = Role::whereName($role)->firstOrFail();
         }
 
         return $this->roles()->detach($role);
     }
+
+    /*
+    |--------------------------------------------------------------------------
+    | Relationships
+    |--------------------------------------------------------------------------
+    */
 
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class)->withTimestamps();
     }
 
-    public function profile(): BelongsTo
+    public function profile(): HasOne
     {
-        return $this->belongsTo(Profile::class, 'id', 'user_id');
+        return $this->hasOne(Profile::class);
     }
 
     public function administrator(): BelongsTo
     {
-        return $this->belongsTo(Administrator::class, 'id', 'user_id');
+        return $this->belongsTo(Role::where('name', 'administrator')->firstOrFail());
     }
 
     public function manager(): BelongsTo
     {
-        return $this->belongsTo(Manager::class, 'id', 'user_id');
+        return $this->belongsTo(Role::where('name', 'manager')->firstOrFail());
     }
 
     public function citizen(): BelongsTo
     {
-        return $this->belongsTo(Citizen::class, 'id', 'user_id');
+        return $this->belongsTo(Role::where('name', 'citizen')->firstOrFail());
     }
 
     public function resident(): BelongsTo
     {
-        return $this->belongsTo(Resident::class, 'id', 'user_id');
+        return $this->belongsTo(Role::where('name', 'resident')->firstOrFail());
     }
 
     public function refugee(): BelongsTo
     {
-        return $this->belongsTo(Refugee::class, 'id', 'user_id');
+        return $this->belongsTo(Role::where('name', 'refugee')->firstOrFail());
     }
 
     public function diplomat(): BelongsTo
     {
-        return $this->belongsTo(Diplomat::class, 'id', 'user_id');
+        return $this->belongsTo(Role::where('name', 'diplomat')->firstOrFail());
     }
 
     public function foreigner(): BelongsTo
     {
-        return $this->belongsTo(Foreigner::class, 'id', 'user_id');
+        return $this->belongsTo(Role::where('name', 'foreigner')->firstOrFail());
     }
 
     public function guest(): BelongsTo
     {
-        return $this->belongsTo(Guest::class, 'id', 'user_id');
+        return $this->belongsTo(Role::where('name', 'guest')->firstOrFail());
     }
 
     public function receipts(): HasMany

@@ -2,16 +2,15 @@
 
 namespace App\Models;
 
-use Spatie\Activitylog\LogOptions;
+use App\Traits\LogsActivityWithMetadata;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Spatie\Activitylog\Traits\CausesActivity;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Citizen extends Model
 {
-    use HasFactory, SoftDeletes, LogsActivity, CausesActivity;
+    use HasFactory, SoftDeletes, LogsActivityWithMetadata;
     
     // Registration point constants
     const ONLINE = 0;
@@ -23,231 +22,6 @@ class Citizen extends Model
     const PROCESSED = 2;
     const ACCEPTED = 3;
     const REJECTED = 4;
-    
-    /**
-     * The attributes that should be logged for the citizen.
-     *
-     * @return LogOptions
-     */
-    public function getActivitylogOptions(): LogOptions
-    {
-        $options = LogOptions::defaults()
-            ->useLogName('citizens')
-            ->logAll()
-            ->logOnlyDirty()
-            ->dontSubmitEmptyLogs()
-            ->dontLogIfAttributesChangedOnly(['last_updated_at', 'updated_at', 'last_verified_at'])
-            ->logExcept([
-                'created_at', 
-                'updated_at', 
-                'deleted_at',
-                'user_id',
-                'profile_id',
-                'ward_id',
-                'constituency_id',
-                'county_id',
-                'registration_point',
-                'registration_latitude',
-                'registration_longitude',
-                'registration_accuracy',
-                'registration_altitude',
-                'registration_photo_path',
-                'registration_device_info'
-            ]);
-            
-        // Add properties to all logged activities
-        $options->properties = array_merge($options->properties ?? [], [
-            'type_id' => 1,
-            'category_id' => 1,
-        ]);
-        
-        // Set description for events
-        $options->setDescriptionForEvent(function(string $eventName) {
-            return match($eventName) {
-                'created' => 'Citizen #'.$this->uuid.' registration was created',
-                'updated' => 'Citizen #'.$this->uuid.' registration was updated',
-                'deleted' => 'Citizen #'.$this->uuid.' registration was deleted',
-                'restored' => 'Citizen #'.$this->uuid.' registration was restored',
-                'forceDeleted' => 'Citizen #'.$this->uuid.' record was permanently deleted',
-                'status_updated' => 'Citizen #'.$this->uuid.' registration status was updated',
-                default => "Citizen registration was {$eventName}",
-            };
-        });
-        
-        return $options;
-    }
-
-    /**
-     * Get all activities for this citizen.
-     */
-    public function activities()
-    {
-        return $this->morphMany(Activity::class, 'subject');
-    }
-
-    /**
-     * Get activities where this citizen was affected.
-     */
-    public function affectedActivities()
-    {
-        return Activity::where('subject_type', self::class)
-            ->where('subject_id', $this->id);
-    }
-    
-    /**
-     * Log a custom activity for this citizen.
-     *
-     * @param string $action
-     * @param string $description
-     * @param array $properties
-     * @param string|null $logName
-     * @return \Spatie\Activitylog\Models\Activity
-     */
-    public function logActivity(string $action, string $description, array $properties = [], ?string $logName = null)
-    {
-        $causer = auth()->user() ?? $this->user ?? null;
-        
-        $activity = activity($logName ?? 'citizens')
-            ->performedOn($this)
-            ->withProperties($properties);
-            
-        if ($causer) {
-            $activity->causedBy($causer);
-        }
-            
-        return $activity->log($description);
-    }
-    
-    /**
-     * Boot the model.
-     */
-    protected static function booted()
-    {
-        static::created(function ($citizen) {
-            // Log citizen creation with additional context
-            $citizen->logActivity(
-                'created',
-                'Citizen registration was created',
-                [
-                    'status' => $citizen->status,
-                    'registration_point' => $citizen->registration_point,
-                    'ward_id' => $citizen->ward_id
-                ]
-            );
-        });
-        
-        static::updating(function ($citizen) {
-            // Log status changes
-            if ($citizen->isDirty('status')) {
-                $citizen->logActivity(
-                    'status_updated',
-                    'Citizen registration status was updated',
-                    [
-                        'from' => $citizen->getOriginal('status'),
-                        'to' => $citizen->status,
-                        'status_label' => self::statusLabels()[$citizen->status] ?? 'Unknown'
-                    ]
-                );
-            }
-            
-            // Log when important fields are updated
-            $importantFields = ['first_name', 'last_name', 'id_number', 'phone_number', 'email'];
-            if (count(array_intersect($importantFields, array_keys($citizen->getDirty()))) > 0) {
-                $citizen->logActivity(
-                    'details_updated',
-                    'Citizen details were updated',
-                    ['changed' => array_intersect_key($citizen->getDirty(), array_flip($importantFields))]
-                );
-            }
-        });
-        
-        static::deleted(function ($citizen) {
-            // Log deletion with soft delete status
-            $citizen->logActivity(
-                $citizen->isForceDeleting() ? 'force_deleted' : 'deleted',
-                'Citizen registration was ' . ($citizen->isForceDeleting() ? 'permanently deleted' : 'soft deleted')
-            );
-        });
-        
-        static::restored(function ($citizen) {
-            // Log restoration
-            $citizen->logActivity('restored', 'Citizen registration was restored');
-        });
-    }
-    
-    /**
-     * Get all status options with their labels"
-     */
-    public static function statusLabels(): array
-    {
-        return [
-            self::PENDING => 'Pending',
-            self::PROCESSING => 'Processing',
-            self::PROCESSED => 'Processed',
-            self::ACCEPTED => 'Accepted',
-            self::REJECTED => 'Rejected',
-        ];
-    }
-
-    /**
-     * Get all registration point options with their labels
-     */
-    public static function registrationPointLabels(): array
-    {
-        return [
-            self::ONLINE => 'Online',
-            self::OFFLINE => 'Offline',
-        ];
-    }
-    
-    /**
-     * Get status value by label
-     */
-    public static function getStatusValueByLabel(string $label): int|false
-    {
-        return self::getValueByLabel(self::statusLabels(), $label);
-    }
-
-    /**
-     * Get registration point value by label
-     */
-    public static function getRegistrationPointValueByLabel(string $label): int|false
-    {
-        return self::getValueByLabel(self::registrationPointLabels(), $label);
-    }
-    
-    /**
-     * Helper method to get value by label from an options array
-     */
-    protected static function getValueByLabel(array $options, string $label): int|false
-    {
-        $lowerLabel = strtolower($label);
-        
-        foreach ($options as $key => $value) {
-            if (strpos(strtolower($value), $lowerLabel) !== false) {
-                return $key;
-            }
-        }
-        
-        return false;
-    }
-
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'registration_point' => 'integer',
-        'is_featured' => 'boolean',
-        'configuration' => 'array',
-        'metadata' => 'array',
-        '_status' => 'integer',
-        'last_verified_at' => 'datetime',
-        'created_at' => 'datetime',
-        'updated_at' => 'datetime',
-        'deleted_at' => 'datetime',
-    ];
 
     /**
      * The attributes that are mass assignable.
@@ -293,26 +67,102 @@ class Citizen extends Model
         'last_verified_at',
         'verified_by',
     ];
-    
-    protected function getRequestClass(): string
+
+    /**
+     * The attributes that should be cast.
+     *
+     * @var array<string, string>
+     */
+    protected $casts = [
+        'configuration' => 'array',
+        'metadata' => 'array',
+        'is_featured' => 'boolean',
+        'last_verified_at' => 'datetime',
+    ];
+
+    /**
+     * Get the default log options for the model.
+     */
+    protected function getDefaultLogOptions(): \Spatie\Activitylog\LogOptions
     {
-        return \App\Http\Requests\API\CitizenRequest::class;
+        return parent::getDefaultLogOptions()
+            ->useLogName('citizens')
+            ->dontLogIfAttributesChangedOnly([
+                'last_updated_at',
+                'updated_at',
+                'last_verified_at',
+                'last_modified_by',
+                'last_modified_ip',
+                'last_verified_by',
+                'last_verified_ip',
+                'created_at',
+                'deleted_at'
+            ]);
+    }
+
+    /**
+     * Get all status options with their labels
+     *
+     * @return array
+     */
+    public static function statusLabels(): array
+    {
+        return [
+            self::PENDING => 'Pending',
+            self::PROCESSING => 'Processing',
+            self::PROCESSED => 'Processed',
+            self::ACCEPTED => 'Accepted',
+            self::REJECTED => 'Rejected',
+        ];
+    }
+
+    /**
+     * Get all registration point options with their labels
+     *
+     * @return array
+     */
+    public static function registrationPointLabels(): array
+    {
+        return [
+            self::ONLINE => 'Online',
+            self::OFFLINE => 'Offline',
+        ];
     }
     
-    protected function getResourceClass(): string
+    /**
+     * Get status value by label
+     */
+    public static function getStatusValueByLabel(string $label): ?int
     {
-        return \App\Http\Resources\API\CitizenResource::class;
+        return array_search($label, self::statusLabels()) ?: null;
+    }
+
+    /**
+     * Get registration point value by label
+     */
+    public static function getRegistrationPointValueByLabel(string $label): ?int
+    {
+        return array_search($label, self::registrationPointLabels()) ?: null;
     }
     
+    /**
+     * Helper method to get value by label from an options array
+     */
+    protected static function getValueByLabel(array $options, string $label)
+    {
+        $value = array_search($label, $options);
+        return $value !== false ? $value : null;
+    }
+
     /**
      * Get the validation rules for creating a new citizen.
      */
     public static function createRules(): array
     {
         return [
-            'uuid' => 'required|uuid|unique:citizens,uuid',
+            'uuid' => 'required|uuid|unique:citizens',
             'user_id' => 'required|exists:users,id',
-            'country_id' => 'required|exists:countries,id',
+            'country_id' => 'nullable|exists:countries,id',
             'region_id' => 'nullable|exists:regions,id',
             'county_id' => 'nullable|exists:counties,id',
             'sub_county_id' => 'nullable|exists:sub_counties,id',
@@ -324,21 +174,21 @@ class Citizen extends Model
             'consulate_id' => 'nullable|exists:consulates,id',
             'refugee_center_id' => 'nullable|exists:refugee_centers,id',
             'nearest_school' => 'nullable|string|max:255',
-            'registration_number' => 'nullable|string|max:100|unique:citizens,registration_number',
-            'passport_number' => 'nullable|string|max:100|unique:citizens,passport_number',
-            'national_identification_number' => 'nullable|string|max:100|unique:citizens,national_identification_number',
-            'driver_license_number' => 'nullable|string|max:100|unique:citizens,driver_license_number',
-            'kra_pin_number' => 'nullable|string|max:50|unique:citizens,kra_pin_number',
-            'nhif_number' => 'nullable|string|max:50|unique:citizens,nhif_number',
-            'nssf_number' => 'nullable|string|max:50|unique:citizens,nssf_number',
-            'shif_number' => 'nullable|string|max:50|unique:citizens,shif_number',
-            'sha_number' => 'nullable|string|max:50|unique:citizens,sha_number',
+            'registration_number' => 'nullable|string|max:100|unique:citizens',
+            'passport_number' => 'nullable|string|max:100|unique:citizens',
+            'national_identification_number' => 'nullable|string|max:100|unique:citizens',
+            'driver_license_number' => 'nullable|string|max:100|unique:citizens',
+            'kra_pin_number' => 'nullable|string|max:50|unique:citizens',
+            'nhif_number' => 'nullable|string|max:50|unique:citizens',
+            'nssf_number' => 'nullable|string|max:50|unique:citizens',
+            'shif_number' => 'nullable|string|max:50|unique:citizens',
+            'sha_number' => 'nullable|string|max:50|unique:citizens',
             'bank_code' => 'nullable|string|max:20',
             'bank_branch_code' => 'nullable|string|max:20',
-            'bank_account_number' => 'nullable|string|max:50|unique:citizens,bank_account_number',
+            'bank_account_number' => 'nullable|string|max:50|unique:citizens',
             'bank_account_name' => 'nullable|string|max:255',
             'mobile_money_provider_code' => 'nullable|string|max:20',
-            'mobile_money_account_number' => 'nullable|string|max:50|unique:citizens,mobile_money_account_number',
+            'mobile_money_account_number' => 'nullable|string|max:50|unique:citizens',
             'mobile_money_account_name' => 'nullable|string|max:255',
             'registration_point' => 'nullable|integer|in:' . implode(',', array_keys(self::registrationPointLabels())),
             'configuration' => 'nullable|array',
@@ -395,84 +245,74 @@ class Citizen extends Model
             'verified_by' => 'nullable|exists:users,id',
         ];
     }
-    
+
     /*
     |--------------------------------------------------------------------------
     | Relationships
     |--------------------------------------------------------------------------
     */
 
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
     }
     
-    public function country()
+    public function country(): BelongsTo
     {
         return $this->belongsTo(Country::class);
     }
     
-    public function region()
+    public function region(): BelongsTo
     {
         return $this->belongsTo(Region::class);
     }
     
-    public function county()
+    public function county(): BelongsTo
     {
         return $this->belongsTo(County::class);
     }
     
-    public function sub_county()
+    public function subCounty(): BelongsTo
     {
         return $this->belongsTo(SubCounty::class);
     }
     
-    public function constituency()
+    public function constituency(): BelongsTo
     {
         return $this->belongsTo(Constituency::class);
     }
     
-    public function ward()
+    public function ward(): BelongsTo
     {
         return $this->belongsTo(Ward::class);
     }
 
-    public function location()
+    public function location(): BelongsTo
     {
         return $this->belongsTo(Location::class);
     }
     
-    public function village()
+    public function village(): BelongsTo
     {
-        return $this->belongsTo(Village::class);
+        return $this->belongsTo(Village::class, 'village_id');
     }
 
-    public function polling_center()
+    public function pollingStation(): BelongsTo
     {
-        return $this->belongsTo(PollingCenter::class);
-    }
-    
-    public function polling_station()
-    {
-        return $this->belongsTo(PollingStation::class);
+        return $this->belongsTo(PollingStation::class, 'polling_station_id');
     }
 
-    public function polling_stream()
+    public function consulate(): BelongsTo
     {
-        return $this->belongsTo(PollingStream::class);
+        return $this->belongsTo(Consulate::class, 'consulate_id');
+    }
+
+    public function refugeeCenter(): BelongsTo
+    {
+        return $this->belongsTo(RefugeeCenter::class, 'refugee_center_id');
     }
     
-    public function consulate()
-    {
-        return $this->belongsTo(Consulate::class);
-    }
-    
-    public function refugee_center()
-    {
-        return $this->belongsTo(RefugeeCenter::class);
-    }
-    
-    public function verifiedBy()
+    public function verifiedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'verified_by');
     }

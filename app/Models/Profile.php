@@ -2,20 +2,22 @@
 
 namespace App\Models;
 
+use App\Traits\LogsActivityWithMetadata;
+use App\Enums\Gender;
+use App\Enums\Salutation;
 use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
-use Spatie\Activitylog\LogOptions;
 use Illuminate\Database\Eloquent\Model;
-use Spatie\Activitylog\Traits\LogsActivity;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Spatie\Activitylog\Traits\CausesActivity;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Profile extends Model
 {
-    use HasFactory, SoftDeletes, LogsActivity, CausesActivity;
+    use HasFactory, SoftDeletes, LogsActivityWithMetadata;
     
     // Constants for marital status
     const MARITAL_STATUS_SINGLE = 0;
@@ -31,135 +33,6 @@ class Profile extends Model
     const HIGHEST_LEVEL_OF_EDUCATION_UNIVERSITY = 3;
     const HIGHEST_LEVEL_OF_EDUCATION_OTHER = 4;
 
-    /**
-     * The attributes that should be logged for the profile.
-     *
-     * @return LogOptions
-     */
-    public function getActivitylogOptions(): LogOptions
-    {
-        $options = LogOptions::defaults()
-            ->useLogName('profiles')
-            ->logAll()
-            ->logOnlyDirty()
-            ->dontSubmitEmptyLogs()
-            ->dontLogIfAttributesChangedOnly(['last_updated_at', 'updated_at'])
-            ->logExcept([
-                'created_at', 
-                'updated_at', 
-                'deleted_at',
-                'user_id',
-                'id_number_verified_at',
-                'email_verified_at',
-                'phone_verified_at'
-            ]);
-            
-        // Add properties to all logged activities
-        $options->properties = array_merge($options->properties ?? [], [
-            'type_id' => 1,
-            'category_id' => 1,
-        ]);
-        
-        // Set description for events
-        $options->setDescriptionForEvent(function(string $eventName) {
-            return match($eventName) {
-                'created' => 'Profile #'.$this->uuid.' was created',
-                'updated' => 'Profile #'.$this->uuid.' was updated',
-                'deleted' => 'Profile #'.$this->uuid.' was deleted',
-                'restored' => 'Profile #'.$this->uuid.' was restored',
-                'forceDeleted' => 'Profile #'.$this->uuid.' was permanently deleted',
-                default => "Profile #'.$this->uuid.' was {$eventName}",
-            };
-        });
-        
-        return $options;
-    }
-    
-    /**
-     * Log a custom activity for this profile.
-     *
-     * @param string $action
-     * @param string $description
-     * @param array $properties
-     * @param string|null $logName
-     * @return \Spatie\Activitylog\Models\Activity
-     */
-    public function logActivity(string $action, string $description, array $properties = [], ?string $logName = null)
-    {
-        $causer = auth()->user() ?? $this->user ?? null;
-        
-        $activity = activity($logName ?? 'profiles')
-            ->performedOn($this)
-            ->withProperties($properties);
-            
-        if ($causer) {
-            $activity->causedBy($causer);
-        }
-            
-        return $activity->log($description);
-    }
-
-    /**
-     * Get all activities for this profile.
-     */
-    public function activities()
-    {
-        return $this->morphMany(Activity::class, 'subject');
-    }
-    
-    /**
-     * Get activities related to this profile.
-     */
-    public function profileActivities()
-    {
-        return Activity::where('subject_type', self::class)
-            ->where('subject_id', $this->id);
-    }
-    
-    /**
-     * Boot the model.
-     */
-    protected static function booted()
-    {
-        static::updating(function ($profile) {
-            // Log when sensitive information is updated
-            if ($profile->isDirty(['id_number', 'date_of_birth', 'gender'])) {
-                $profile->logActivity(
-                    'sensitive_update',
-                    'Updated sensitive profile information',
-                    [
-                        'changed' => $profile->getDirty(),
-                        'old' => array_intersect_key($profile->getOriginal(), $profile->getDirty())
-                    ]
-                );
-            }
-        });
-        
-        static::created(function ($profile) {
-            // Log profile creation with additional context
-            $profile->logActivity(
-                'created',
-                'Profile was created',
-                ['user_id' => $profile->user_id]
-            );
-        });
-        
-        static::deleted(function ($profile) {
-            // Log profile deletion with soft delete status
-            $profile->logActivity(
-                $profile->isForceDeleting() ? 'force_deleted' : 'deleted',
-                'Profile was ' . ($profile->isForceDeleting() ? 'permanently deleted' : 'soft deleted')
-            );
-        });
-        
-        static::restored(function ($profile) {
-            // Log profile restoration
-            $profile->logActivity('restored', 'Profile was restored');
-        });
-    }
-
-
-
     // Constants for employment status
     const EMPLOYMENT_STATUS_EMPLOYED = 0;
     const EMPLOYMENT_STATUS_UNEMPLOYED = 1;
@@ -174,110 +47,10 @@ class Profile extends Model
     const INCOME_SOURCE_PENSION = 3;
     const INCOME_SOURCE_OTHER = 4;
 
-    public static function maritalStatusLabels()
-    {
-        return [
-            self::MARITAL_STATUS_SINGLE => 'Single',
-            self::MARITAL_STATUS_MARRIED => 'Married',
-            self::MARITAL_STATUS_DIVORCED => 'Divorced',
-            self::MARITAL_STATUS_SEPARATED => 'Separated',
-            self::MARITAL_STATUS_WIDOWED => 'Widowed',
-        ];
-    }
-
-    public static function highestLevelOfEducationLabels()
-    {
-        return [
-            self::HIGHEST_LEVEL_OF_EDUCATION_PRIMARY => 'Primary',
-            self::HIGHEST_LEVEL_OF_EDUCATION_SECONDARY => 'Secondary',
-            self::HIGHEST_LEVEL_OF_EDUCATION_HIGH_SCHOOL => 'High School',
-            self::HIGHEST_LEVEL_OF_EDUCATION_UNIVERSITY => 'University',
-            self::HIGHEST_LEVEL_OF_EDUCATION_OTHER => 'Other',
-        ];
-    }
-
-    public static function employmentStatusLabels()
-    {
-        return [
-            self::EMPLOYMENT_STATUS_EMPLOYED => 'Employed',
-            self::EMPLOYMENT_STATUS_UNEMPLOYED => 'Unemployed',
-            self::EMPLOYMENT_STATUS_SELF_EMPLOYED => 'Self-employed',
-            self::EMPLOYMENT_STATUS_RETIRED => 'Retired',
-            self::EMPLOYMENT_STATUS_STUDENT => 'Student',
-        ];
-    }
-
-    public static function incomeSourceLabels()
-    {
-        return [
-            self::INCOME_SOURCE_SALARY => 'Salary',
-            self::INCOME_SOURCE_BUSINESS => 'Business',
-            self::INCOME_SOURCE_INVESTMENT => 'Investment',
-            self::INCOME_SOURCE_PENSION => 'Pension',
-            self::INCOME_SOURCE_OTHER => 'Other',
-        ];
-    }
-
-    public static function getMaritalStatusValueByLabel(string $label)
-    {
-        $maritalStatusOptions = self::maritalStatusLabels();
-        $lowerLabel = strtolower($label);
-
-        foreach ($maritalStatusOptions as $key => $value) {
-            if (strpos(strtolower($value), $lowerLabel) !== false) {
-                return $key;
-            }
-        }
-
-        return false;
-    }
-
-    public static function getHighestLevelOfEducationValueByLabel(string $label)
-    {
-        $highestLevelOfEducationOptions = self::highestLevelOfEducationLabels();
-        $lowerLabel = strtolower($label);
-
-        foreach ($highestLevelOfEducationOptions as $key => $value) {
-            if (strpos(strtolower($value), $lowerLabel) !== false) {
-                return $key;
-            }
-        }
-
-        return false;
-    }
-
-    public static function getEmploymentStatusValueByLabel(string $label)
-    {
-        $employmentStatusOptions = self::employmentStatusLabels();
-        $lowerLabel = strtolower($label);
-
-        foreach ($employmentStatusOptions as $key => $value) {
-            if (strpos(strtolower($value), $lowerLabel) !== false) {
-                return $key;
-            }
-        }
-
-        return false;
-    }
-
-    public static function getIncomeSourceValueByLabel(string $label)
-    {
-        $incomeSourceOptions = self::incomeSourceLabels();
-        $lowerLabel = strtolower($label);
-
-        foreach ($incomeSourceOptions as $key => $value) {
-            if (strpos(strtolower($value), $lowerLabel) !== false) {
-                return $key;
-            }
-        }
-
-        return false;
-    }
-
     /**
      * The attributes that are mass assignable.
      *
-     * @var array
+     * @var array<int, string>
      */
     protected $fillable = [
         'uuid',
@@ -300,7 +73,6 @@ class Profile extends Model
         'country',
         'date_of_birth',
         'disability_status',
-        'ncpwd_number',
         'ethnicity_id',
         'language_id',
         'religion_id',
@@ -339,6 +111,23 @@ class Profile extends Model
         'kyc_verified' => 'boolean',
         'metadata' => 'array',
     ];
+
+    /**
+     * Get the default log options for the model.
+     */
+    protected function getDefaultLogOptions(): \Spatie\Activitylog\LogOptions
+    {
+        return parent::getDefaultLogOptions()
+            ->useLogName('profiles')
+            ->dontLogIfAttributesChangedOnly([
+                'last_updated_at',
+                'updated_at',
+                'last_modified_by',
+                'last_modified_ip',
+                'created_at',
+                'deleted_at'
+            ]);
+    }
 
     protected function getRequestClass(): string
     {
@@ -385,7 +174,6 @@ class Profile extends Model
                 },
             ],
             'disability_status' => 'nullable|string',
-            'ncpwd_number' => 'nullable|string|unique:profiles,ncpwd_number',
             'ethnicity_id' => 'nullable|exists:ethnicities,id',
             'language_id' => 'nullable|exists:languages,id',
             'religion_id' => 'nullable|exists:religions,id',
@@ -449,7 +237,6 @@ class Profile extends Model
                 },
             ],
             'disability_status' => 'nullable|string',
-            'ncpwd_number' => ['nullable', 'string', 'unique:profiles,ncpwd_number', Rule::unique('profiles')->ignore($id)],
             'ethnicity_id' => 'nullable|exists:ethnicities,id',
             'language_id' => 'nullable|exists:languages,id',
             'religion_id' => 'nullable|exists:religions,id',
@@ -478,7 +265,7 @@ class Profile extends Model
         ];
     }
 
-    public function user(): BelongsTo
+    public function users(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
@@ -496,10 +283,5 @@ class Profile extends Model
     public function religion(): BelongsTo
     {
         return $this->belongsTo(Religion::class, 'religion_id');
-    }
-
-    public function citizen(): BelongsTo
-    {
-        return $this->belongsTo(Citizen::class, 'user_id', 'user_id');
     }
 }
