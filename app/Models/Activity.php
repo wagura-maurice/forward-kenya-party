@@ -188,6 +188,14 @@ class Activity extends BaseActivity
     }
     
     /**
+     * Get the service associated with the activity.
+     */
+    public function service()
+    {
+        return $this->belongsTo(Service::class);
+    }
+    
+    /**
      * Get the department associated with the activity.
      */
     public function department()
