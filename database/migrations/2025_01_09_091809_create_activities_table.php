@@ -111,15 +111,6 @@ return new class extends Migration
                   ->nullable()
                   ->comment('Additional data stored in JSON format');
             
-            // Activity log specific fields
-            $table->string('log_name')
-                  ->nullable()
-                  ->comment('The log name for filtering activities');
-                  
-            $table->string('event')
-                  ->nullable()
-                  ->comment('The event that triggered the activity');
-            
             // Subject (polymorphic relationship)
             $table->string('subject_type')->nullable();
             $table->unsignedBigInteger('subject_id')->nullable();
@@ -127,15 +118,6 @@ return new class extends Migration
             // Causer (polymorphic relationship)
             $table->string('causer_type')->nullable();
             $table->unsignedBigInteger('causer_id')->nullable();
-            
-            // Properties and batch
-            $table->json('properties')
-                  ->nullable()
-                  ->comment('Additional properties for the activity');
-                  
-            $table->uuid('batch_uuid')
-                  ->nullable()
-                  ->comment('Batch UUID for grouping related activities');
             
             // Timestamps
             $table->timestamps();
@@ -149,8 +131,6 @@ return new class extends Migration
             $table->index(['causer_type', 'causer_id'], 'activities_causer_index');
             
             // Other indexes for better performance
-            $table->index('log_name', 'activities_log_name_index');
-            $table->index('batch_uuid', 'activities_batch_uuid_index');
             $table->index('action', 'activities_action_index');
             $table->index('scheduled_for', 'activities_scheduled_for_index');
             $table->index('_status', 'activities_status_index');
