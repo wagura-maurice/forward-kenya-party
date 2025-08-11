@@ -434,8 +434,13 @@ class BackendController extends Controller
             'name' => $user->name,
             'email' => $user->email,
             'email_verified_at' => $user->email_verified_at,
+            'profile_photo_path' => $user->profile_photo_path,
+            'created_at' => $user->created_at,
+            'updated_at' => $user->updated_at,
             'profile' => null
         ];
+
+        // dd($userData);
 
         if ($user->profile) {
             $profile = $user->profile->toArray();
@@ -451,7 +456,9 @@ class BackendController extends Controller
             ] : null;
 
             $profile['citizen'] = $user->profile->citizen ? [
+                'uuid' => $user->profile->citizen->uuid,
                 'national_identification_number' => $user->profile->citizen->national_identification_number,
+                'passport_number' => $user->profile->citizen->passport_number,
                 'county' => $user->profile->citizen->county ? [
                     'id' => $user->profile->citizen->county->id,
                     'name' => $user->profile->citizen->county->name
@@ -514,6 +521,110 @@ class BackendController extends Controller
 
     public function viewProfile(Request $request, $user_id)
     {
+        // Get the user with their profile and relationships
+        $user = User::findOrFail($user_id);
+        $user->load([
+            'profile' => function($query) {
+                $query->with([
+                    'religion',
+                    'ethnicity',
+                    'citizen' => function($query) {
+                        $query->with([
+                            'county',
+                            'subCounty',
+                            'constituency',
+                            'ward',
+                            'location',
+                            'village',
+                            'pollingCenter',
+                            'pollingStation',
+                            'pollingStream',
+                            'consulate',
+                            'refugeeCenter'
+                        ]);
+                    }
+                ]);
+            }
+        ]);
+
+        // Prepare the user data for the frontend
+        $userData = [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'email_verified_at' => $user->email_verified_at,
+            'profile_photo_path' => $user->profile_photo_path,
+            'created_at' => $user->created_at,
+            'updated_at' => $user->updated_at,
+            'profile' => null
+        ];
+
+        if ($user->profile) {
+            $profile = $user->profile->toArray();
+            
+            $profile['religion'] = $user->profile->religion ? [
+                'id' => $user->profile->religion->id,
+                'name' => $user->profile->religion->name
+            ] : null;
+
+            $profile['ethnicity'] = $user->profile->ethnicity ? [
+                'id' => $user->profile->ethnicity->id,
+                'name' => $user->profile->ethnicity->name
+            ] : null;
+
+            $profile['citizen'] = $user->profile->citizen ? [
+                'uuid' => $user->profile->citizen->uuid,
+                'national_identification_number' => $user->profile->citizen->national_identification_number,
+                'passport_number' => $user->profile->citizen->passport_number,
+                'county' => $user->profile->citizen->county ? [
+                    'id' => $user->profile->citizen->county->id,
+                    'name' => $user->profile->citizen->county->name
+                ] : null,
+                'sub_county' => $user->profile->citizen->subCounty ? [
+                    'id' => $user->profile->citizen->subCounty->id,
+                    'name' => $user->profile->citizen->subCounty->name
+                ] : null,
+                'constituency' => $user->profile->citizen->constituency ? [
+                    'id' => $user->profile->citizen->constituency->id,
+                    'name' => $user->profile->citizen->constituency->name
+                ] : null,
+                'ward' => $user->profile->citizen->ward ? [
+                    'id' => $user->profile->citizen->ward->id,
+                    'name' => $user->profile->citizen->ward->name
+                ] : null,
+                'location' => $user->profile->citizen->location ? [
+                    'id' => $user->profile->citizen->location->id,
+                    'name' => $user->profile->citizen->location->name
+                ] : null,
+                'village' => $user->profile->citizen->village ? [
+                    'id' => $user->profile->citizen->village->id,
+                    'name' => $user->profile->citizen->village->name
+                ] : null,
+                'polling_center' => $user->profile->citizen->pollingCenter ? [
+                    'id' => $user->profile->citizen->pollingCenter->id,
+                    'name' => $user->profile->citizen->pollingCenter->name
+                ] : null,
+                'polling_station' => $user->profile->citizen->pollingStation ? [
+                    'id' => $user->profile->citizen->pollingStation->id,
+                    'name' => $user->profile->citizen->pollingStation->name
+                ] : null,
+                'polling_stream' => $user->profile->citizen->pollingStream ? [
+                    'id' => $user->profile->citizen->pollingStream->id,
+                    'name' => $user->profile->citizen->pollingStream->name
+                ] : null,
+                'consulate' => $user->profile->citizen->consulate ? [
+                    'id' => $user->profile->citizen->consulate->id,
+                    'name' => $user->profile->citizen->consulate->name
+                ] : null,
+                'refugee_center' => $user->profile->citizen->refugeeCenter ? [
+                    'id' => $user->profile->citizen->refugeeCenter->id,
+                    'name' => $user->profile->citizen->refugeeCenter->name
+                ] : null,
+            ] : null;
+
+            $userData['profile'] = $profile;
+        }
+
         return Inertia::render('Profile/View', [
             'title' => 'View Profile',
             'breadcrumbs' => [
@@ -523,25 +634,37 @@ class BackendController extends Controller
                 ]
             ],
                 'data' => [
-                'user' => User::find($user_id)
+                'user' => $userData
             ],
         ]);
     }
 
     public function activity(Request $request)
     {
-        // Get the current page from the request, default to 1
+        // Get pagination parameters
+        $perPage = $request->query('per_page', 5);
         $page = $request->query('page', 1);
+        $search = $request->query('search');
         
-        // Get recent activities with relationships
-        $activities = Activity::select('*')
-            ->with([
-                'user',
-                'service',
-                'department'
-            ])
-            ->latest()
-            ->paginate(5, ['*'], 'page', $page);
+        // Base query
+        $query = Activity::query()
+            ->with(['user', 'service', 'department'])
+            ->latest();
+        
+        // Apply search filter if search term exists
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhere('details', 'like', "%{$search}%")
+                  ->orWhereHas('user', function($q) use ($search) {
+                      $q->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+        
+        // Get paginated results
+        $activities = $query->paginate($perPage, ['*'], 'page', $page);
 
         // Transform the paginated collection
         $transformedActivities = $activities->getCollection()->map(function ($activity) {
