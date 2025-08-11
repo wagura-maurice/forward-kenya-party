@@ -530,6 +530,9 @@ class BackendController extends Controller
 
     public function activity(Request $request)
     {
+        // Get the current page from the request, default to 1
+        $page = $request->query('page', 1);
+        
         // Get recent activities with relationships
         $activities = Activity::select('*')
             ->with([
@@ -538,31 +541,40 @@ class BackendController extends Controller
                 'department'
             ])
             ->latest()
-            ->paginate(5)
-            ->through(function ($activity) {
-                return [
-                    'id' => $activity->id,
-                    'user_id' => $activity->user ? $activity->user->id : NULL,
-                    'user_name' => $activity->user ? $activity->user->name : 'System',
-                    'user_avatar' => $activity->user ? $activity->user->profile_photo_path : null,
-                    'title' => $activity->title,
-                    'action' => $activity->action,
-                    'description' => $activity->description,
-                    'details' => $activity->details,
-                    'status' => $this->getStatusText($activity->_status),
-                    'status_class' => $this->getStatusClass($activity->_status),
-                    'created_at' => $activity->created_at->diffForHumans(),
-                    'started_at' => $activity->started_at?->format('M d, Y H:i'),
-                    'completed_at' => $activity->completed_at?->format('M d, Y H:i'),
-                    'scheduled_for' => $activity->scheduled_for?->format('M d, Y H:i'),
-                    'service_name' => $activity->service?->name,
-                    'department_name' => $activity->department?->name,
-                    'icon' => $this->getActivityIcon($activity->action),
-                    'color' => $this->getActivityColor($activity->action)
-                ];
-            });
+            ->paginate(5, ['*'], 'page', $page);
 
-        // dd($activities);
+        // Transform the paginated collection
+        $transformedActivities = $activities->getCollection()->map(function ($activity) {
+            return [
+                'id' => $activity->id,
+                'user_id' => $activity->user ? $activity->user->id : null,
+                'user_name' => $activity->user ? $activity->user->name : 'System',
+                'user_avatar' => $activity->user ? $activity->user->profile_photo_path : null,
+                'title' => $activity->title,
+                'action' => $activity->action,
+                'description' => $activity->description,
+                'details' => $activity->details,
+                'status' => $this->getStatusText($activity->_status),
+                'status_class' => $this->getStatusClass($activity->_status),
+                'created_at' => $activity->created_at->diffForHumans(),
+                'started_at' => $activity->started_at?->format('M d, Y H:i'),
+                'completed_at' => $activity->completed_at?->format('M d, Y H:i'),
+                'scheduled_for' => $activity->scheduled_for?->format('M d, Y H:i'),
+                'service_name' => $activity->service?->name,
+                'department_name' => $activity->department?->name,
+                'icon' => $this->getActivityIcon($activity->action),
+                'color' => $this->getActivityColor($activity->action)
+            ];
+        });
+
+        // Create a new paginator with the transformed collection
+        $paginatedResponse = new \Illuminate\Pagination\LengthAwarePaginator(
+            $transformedActivities,
+            $activities->total(),
+            $activities->perPage(),
+            $activities->currentPage(),
+            ['path' => \Illuminate\Support\Facades\URL::current()]
+        );
         
         return Inertia::render('Activity', [
             'title' => 'Activity',
@@ -574,7 +586,7 @@ class BackendController extends Controller
             ],
             'data' => [
                 'user' => $request->user(),
-                'activities' => $activities
+                'activities' => $paginatedResponse
             ]
         ]);
     }
