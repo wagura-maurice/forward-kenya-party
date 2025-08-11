@@ -21,19 +21,19 @@ class BackendController extends Controller
     protected function getActivityIcon($description)
     {
         if (str_contains(strtolower($description), 'created')) {
-            return 'plus';
+            return 'fa-solid fa-plus';
         } elseif (str_contains(strtolower($description), 'updated')) {
-            return 'pencil-alt';
+            return 'fa-solid fa-pen';
         } elseif (str_contains(strtolower($description), 'deleted')) {
-            return 'trash';
+            return 'fa-solid fa-trash';
         } elseif (str_contains(strtolower($description), 'login')) {
-            return 'sign-in-alt';
+            return 'fa-solid fa-sign-in-alt';
         } elseif (str_contains(strtolower($description), 'logout')) {
-            return 'sign-out-alt';
+            return 'fa-solid fa-sign-out-alt';
         } elseif (str_contains(strtolower($description), 'registered')) {
-            return 'user-plus';
+            return 'fa-solid fa-user-plus';
         } else {
-            return 'bell';
+            return 'fa-solid fa-bell';
         }
     }
 
@@ -105,8 +105,9 @@ class BackendController extends Controller
             ->map(function ($activity) {
                 return [
                     'id' => $activity->id,
+                    'user_id' => $activity->user ? $activity->user->id : NULL,
                     'user_name' => $activity->user ? $activity->user->name : 'System',
-                    'user_avatar' => $activity->user ? $activity->user->profile_photo_url : null,
+                    'user_avatar' => $activity->user ? $activity->user->profile_photo_path : null,
                     'title' => $activity->title,
                     'action' => $activity->action,
                     'description' => $activity->description,
@@ -375,33 +376,6 @@ class BackendController extends Controller
             ->orderBy('name')
             ->take(4)
             ->get();
-            
-        // Get recent activities with relationships
-        $activities = Activity::with(['user', 'service', 'department'])
-            ->latest()
-            ->take(5)
-            ->get()
-            ->map(function ($activity) {
-                return [
-                    'id' => $activity->id,
-                    'user_name' => $activity->user ? $activity->user->name : 'System',
-                    'user_avatar' => $activity->user ? $activity->user->profile_photo_url : null,
-                    'title' => $activity->title,
-                    'action' => $activity->action,
-                    'description' => $activity->description,
-                    'details' => $activity->details,
-                    'status' => $this->getStatusText($activity->_status),
-                    'status_class' => $this->getStatusClass($activity->_status),
-                    'created_at' => $activity->created_at->diffForHumans(),
-                    'started_at' => $activity->started_at?->format('M d, Y H:i'),
-                    'completed_at' => $activity->completed_at?->format('M d, Y H:i'),
-                    'scheduled_for' => $activity->scheduled_for?->format('M d, Y H:i'),
-                    'service_name' => $activity->service?->name,
-                    'department_name' => $activity->department?->name,
-                    'icon' => $this->getActivityIcon($activity->action),
-                    'color' => $this->getActivityColor($activity->action)
-                ];
-            });
 
         return Inertia::render('Dashboard', [
             'title' => ucwords($roles[0]) . ' Dashboard',
@@ -438,16 +412,16 @@ class BackendController extends Controller
                     'citizen' => function($query) {
                         $query->with([
                             'county',
-                            'sub_county',
+                            'subCounty',
                             'constituency',
                             'ward',
                             'location',
                             'village',
-                            'polling_center',
-                            'polling_station',
-                            'polling_stream',
+                            'pollingCenter',
+                            'pollingStation',
+                            'pollingStream',
                             'consulate',
-                            'refugee_center'
+                            'refugeeCenter'
                         ]);
                     }
                 ]);
@@ -482,9 +456,9 @@ class BackendController extends Controller
                     'id' => $user->profile->citizen->county->id,
                     'name' => $user->profile->citizen->county->name
                 ] : null,
-                'sub_county' => $user->profile->citizen->sub_county ? [
-                    'id' => $user->profile->citizen->sub_county->id,
-                    'name' => $user->profile->citizen->sub_county->name
+                'sub_county' => $user->profile->citizen->subCounty ? [
+                    'id' => $user->profile->citizen->subCounty->id,
+                    'name' => $user->profile->citizen->subCounty->name
                 ] : null,
                 'constituency' => $user->profile->citizen->constituency ? [
                     'id' => $user->profile->citizen->constituency->id,
@@ -502,25 +476,25 @@ class BackendController extends Controller
                     'id' => $user->profile->citizen->village->id,
                     'name' => $user->profile->citizen->village->name
                 ] : null,
-                'polling_center' => $user->profile->citizen->polling_center ? [
-                    'id' => $user->profile->citizen->polling_center->id,
-                    'name' => $user->profile->citizen->polling_center->name
+                'polling_center' => $user->profile->citizen->pollingCenter ? [
+                    'id' => $user->profile->citizen->pollingCenter->id,
+                    'name' => $user->profile->citizen->pollingCenter->name
                 ] : null,
-                'polling_station' => $user->profile->citizen->polling_station ? [
-                    'id' => $user->profile->citizen->polling_station->id,
-                    'name' => $user->profile->citizen->polling_station->name
+                'polling_station' => $user->profile->citizen->pollingStation ? [
+                    'id' => $user->profile->citizen->pollingStation->id,
+                    'name' => $user->profile->citizen->pollingStation->name
                 ] : null,
-                'polling_stream' => $user->profile->citizen->polling_stream ? [
-                    'id' => $user->profile->citizen->polling_stream->id,
-                    'name' => $user->profile->citizen->polling_stream->name
+                'polling_stream' => $user->profile->citizen->pollingStream ? [
+                    'id' => $user->profile->citizen->pollingStream->id,
+                    'name' => $user->profile->citizen->pollingStream->name
                 ] : null,
                 'consulate' => $user->profile->citizen->consulate ? [
                     'id' => $user->profile->citizen->consulate->id,
                     'name' => $user->profile->citizen->consulate->name
                 ] : null,
-                'refugee_center' => $user->profile->citizen->refugee_center ? [
-                    'id' => $user->profile->citizen->refugee_center->id,
-                    'name' => $user->profile->citizen->refugee_center->name
+                'refugee_center' => $user->profile->citizen->refugeeCenter ? [
+                    'id' => $user->profile->citizen->refugeeCenter->id,
+                    'name' => $user->profile->citizen->refugeeCenter->name
                 ] : null,
             ] : null;
 
@@ -552,6 +526,67 @@ class BackendController extends Controller
                 'user' => User::find($user_id)
             ],
         ]);
+    }
+
+    public function activity(Request $request)
+    {
+        // Get recent activities with relationships
+        $activities = Activity::select('*')
+            ->with([
+                'user',
+                'service',
+                'department'
+            ])
+            ->latest()
+            ->paginate(5)
+            ->through(function ($activity) {
+                return [
+                    'id' => $activity->id,
+                    'user_id' => $activity->user ? $activity->user->id : NULL,
+                    'user_name' => $activity->user ? $activity->user->name : 'System',
+                    'user_avatar' => $activity->user ? $activity->user->profile_photo_path : null,
+                    'title' => $activity->title,
+                    'action' => $activity->action,
+                    'description' => $activity->description,
+                    'details' => $activity->details,
+                    'status' => $this->getStatusText($activity->_status),
+                    'status_class' => $this->getStatusClass($activity->_status),
+                    'created_at' => $activity->created_at->diffForHumans(),
+                    'started_at' => $activity->started_at?->format('M d, Y H:i'),
+                    'completed_at' => $activity->completed_at?->format('M d, Y H:i'),
+                    'scheduled_for' => $activity->scheduled_for?->format('M d, Y H:i'),
+                    'service_name' => $activity->service?->name,
+                    'department_name' => $activity->department?->name,
+                    'icon' => $this->getActivityIcon($activity->action),
+                    'color' => $this->getActivityColor($activity->action)
+                ];
+            });
+
+        // dd($activities);
+        
+        return Inertia::render('Activity', [
+            'title' => 'Activity',
+            'breadcrumbs' => [
+                [
+                    'label' => 'Activity',
+                    'url' => route('activity')
+                ]
+            ],
+            'data' => [
+                'user' => $request->user(),
+                'activities' => $activities
+            ]
+        ]);
+    }
+
+    public function deleteActivity(Request $request, $id)
+    {
+        $activity = Activity::find($id);
+        if ($activity) {
+            $activity->delete();
+            return redirect()->route('activity')->with('success', 'Activity deleted successfully.');
+        }
+        return redirect()->route('activity')->with('error', 'Activity not found.');
     }
 
     public function settings(Request $request)
