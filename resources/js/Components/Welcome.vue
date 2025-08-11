@@ -482,7 +482,7 @@ const formatChange = (change) => {
                                             </span> -->
                                         <!-- </p> -->
                                         <div class="flex flex-wrap items-center mt-1 text-xs text-gray-500 dark:text-gray-400 gap-1">
-                                            <div class="flex items-center">
+                                            <div class="flex items-center capitalize">
                                                 <i class="far fa-user mr-1"></i>
                                                 <span>
                                                     <Link v-if="activity.user_id" :href="route('profile.view', { user_id: activity.user_id })" class="text-green-600 hover:underline underline-offset-4">
