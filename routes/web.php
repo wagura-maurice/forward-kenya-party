@@ -37,6 +37,10 @@ Route::middleware([
     Route::get('/profile', [BackendController::class, 'profile'])->name('profile');
     Route::get('/profile/{user_id}/view', [BackendController::class, 'viewProfile'])->name('profile.view');
 
+    // Activity
+    Route::get('/activity', [BackendController::class, 'activity'])->name('activity');
+    Route::delete('/activity/{id}/delete', [BackendController::class, 'deleteActivity'])->name('activity.delete');
+
     // Settings
     Route::get('/settings', [BackendController::class, 'settings'])->name('settings');
 });
