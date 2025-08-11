@@ -22,18 +22,13 @@ const activeTab = ref("personal");
 const showToast = ref(false);
 const toastMessage = ref("");
 
-// Access authenticated user data
-// const user = computed(() => props.auth?.user || null);
-// const profile = computed(() => user.value?.profile || {});
-// const citizen = computed(() => user.value?.citizen || {});
-
 // Access user data passed from the backend
 const user = computed(() => props.data?.user || null);
 const profile = computed(() => user.value?.profile || {});
 const citizen = computed(() => profile.value?.citizen || {});
 
 // console.log(user.value);
-// console.log(citizen);
+console.log(citizen);
 
 // Computed properties
 const fullName = computed(() => {
@@ -205,7 +200,7 @@ const copyToClipboard = (text) => {
                                         <img
                                             class="h-full w-full rounded-full object-cover"
                                             :src="
-                                                user?.profile_photo_path
+                                                user?.profile_photo_path || '/images/default-avatar.jpg'
                                             "
                                             :alt="user?.name"
                                         />
@@ -216,12 +211,16 @@ const copyToClipboard = (text) => {
                             </div>
                             
                             <!-- Edit Button - Top Right -->
-                            <a :href="route('profile.show')" class="mt-2">
+                            <a v-if="$page.props.auth.user && $page.props.auth.user.id === user.id" :href="route('profile.show')" class="mt-2">
                                 <button class="inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 rounded-md text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
                                     <i class="fas fa-edit mr-1"></i>
                                     Edit
                                 </button>
                             </a>
+                            <button v-else class="mt-2 inline-flex items-center px-4 py-2 bg-white dark:bg-gray-700 border border-gray-300 rounded-md text-xs text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-600">
+                                <i class="fas fa-user-plus mr-1"></i>
+                                Follow
+                            </button>
                         </div>
 
                         <!-- Name and Membership Info -->
@@ -245,7 +244,7 @@ const copyToClipboard = (text) => {
                                         :disabled="!citizen?.uuid"
                                         title="Copy membership number"
                                     >
-                                        <i class="fas fa-copy text-md"></i>
+                                        <i class="fas fa-copy text-xs"></i>
                                     </button>
                                 </div>
                             </div>
@@ -422,11 +421,15 @@ const copyToClipboard = (text) => {
                                     ></i>
                                     <p
                                         class="text-sm font-medium text-gray-800 dark:text-gray-200"
+                                        v-if="$page.props.auth.user && $page.props.auth.user.id === user.id" 
                                     >
                                         {{
                                             citizen?.national_identification_number ||
                                             "Not provided"
                                         }}
+                                    </p>
+                                    <p v-else class="text-sm font-medium text-red-800 dark:text-red-200">
+                                        Redacted
                                     </p>
                                 </div>
                             </div>
@@ -442,11 +445,15 @@ const copyToClipboard = (text) => {
                                     ></i>
                                     <p
                                         class="text-sm font-medium text-gray-800 dark:text-gray-200"
+                                        v-if="$page.props.auth.user && $page.props.auth.user.id === user.id" 
                                     >
                                         {{
                                             citizen?.passport_number ||
                                             "Not provided"
                                         }}
+                                    </p>
+                                    <p v-else class="text-sm font-medium text-red-800 dark:text-red-200">
+                                        Redacted
                                     </p>
                                 </div>
                             </div>
@@ -478,9 +485,12 @@ const copyToClipboard = (text) => {
                                         class="fas fa-id-card text-gray-400 mr-2 text-sm"
                                     ></i>
                                     <p
-                                        class="text-sm font-medium text-gray-800 dark:text-gray-200"
+                                        class="text-sm font-medium text-gray-800 dark:text-gray-200" v-if="$page.props.auth.user && $page.props.auth.user.id === user.id"
                                     >
                                         {{ profile?.ncpwd_number || "Not provided" }}
+                                    </p>
+                                    <p v-else class="text-sm font-medium text-red-800 dark:text-red-200">
+                                        Redacted
                                     </p>
                                 </div>
                             </div>
@@ -540,9 +550,12 @@ const copyToClipboard = (text) => {
                                         class="fas fa-envelope text-gray-400 mr-2 text-sm"
                                     ></i>
                                     <p
-                                        class="text-sm font-medium text-gray-800 dark:text-gray-200"
+                                        class="text-sm font-medium text-gray-800 dark:text-gray-200" v-if="$page.props.auth.user && $page.props.auth.user.id === user.id"
                                     >
                                         {{ user.email || "Not provided" }}
+                                    </p>
+                                    <p v-else class="text-sm font-medium text-red-800 dark:text-red-200">
+                                        Redacted
                                     </p>
                                 </div>
                             </div>
@@ -557,9 +570,12 @@ const copyToClipboard = (text) => {
                                         class="fas fa-phone-alt text-gray-400 mr-2 text-sm"
                                     ></i>
                                     <p
-                                        class="text-sm font-medium text-gray-800 dark:text-gray-200"
+                                        class="text-sm font-medium text-gray-800 dark:text-gray-200" v-if="$page.props.auth.user && $page.props.auth.user.id === user.id"
                                     >
                                         {{ profile?.telephone || "Not provided" }}
+                                    </p>
+                                    <p v-else class="text-sm font-medium text-red-800 dark:text-red-200">
+                                        Redacted
                                     </p>
                                 </div>
                             </div>
@@ -740,9 +756,12 @@ const copyToClipboard = (text) => {
                                         class="fas fa-map-marker text-gray-400 mr-2 text-sm"
                                     ></i>
                                     <p
-                                        class="text-sm font-medium text-gray-800 dark:text-gray-200 capitalize"
+                                        class="text-sm font-medium text-gray-800 dark:text-gray-200" v-if="$page.props.auth.user && $page.props.auth.user.id === user.id"
                                     >
                                         {{ citizen?.location?.name || "Not provided" }}
+                                    </p>
+                                    <p v-else class="text-sm font-medium text-red-800 dark:text-red-200">
+                                        Redacted
                                     </p>
                                 </div>
                             </div>
@@ -757,9 +776,12 @@ const copyToClipboard = (text) => {
                                         class="fas fa-map-marker text-gray-400 mr-2 text-sm"
                                     ></i>
                                     <p
-                                        class="text-sm font-medium text-gray-800 dark:text-gray-200 capitalize"
+                                        class="text-sm font-medium text-gray-800 dark:text-gray-200" v-if="$page.props.auth.user && $page.props.auth.user.id === user.id"
                                     >
                                         {{ citizen?.village?.name || "Not provided" }}
+                                    </p>
+                                    <p v-else class="text-sm font-medium text-red-800 dark:text-red-200">
+                                        Redacted
                                     </p>
                                 </div>
                             </div>
@@ -774,9 +796,12 @@ const copyToClipboard = (text) => {
                                         class="fas fa-vote-yea text-gray-400 mr-2 text-sm"
                                     ></i>
                                     <p
-                                        class="text-sm font-medium text-gray-800 dark:text-gray-200 capitalize"
+                                        class="text-sm font-medium text-gray-800 dark:text-gray-200" v-if="$page.props.auth.user && $page.props.auth.user.id === user.id"
                                     >
                                         {{ citizen?.polling_center?.name || "Not provided" }}
+                                    </p>
+                                    <p v-else class="text-sm font-medium text-red-800 dark:text-red-200">
+                                        Redacted
                                     </p>
                                 </div>
                             </div>
@@ -791,9 +816,12 @@ const copyToClipboard = (text) => {
                                         class="fas fa-vote-yea text-gray-400 mr-2 text-sm"
                                     ></i>
                                     <p
-                                        class="text-sm font-medium text-gray-800 dark:text-gray-200 capitalize"
+                                        class="text-sm font-medium text-gray-800 dark:text-gray-200" v-if="$page.props.auth.user && $page.props.auth.user.id === user.id"
                                     >
                                         {{ citizen?.polling_station?.name || "Not provided" }}
+                                    </p>
+                                    <p v-else class="text-sm font-medium text-red-800 dark:text-red-200">
+                                        Redacted
                                     </p>
                                 </div>
                             </div>
@@ -808,9 +836,12 @@ const copyToClipboard = (text) => {
                                         class="fas fa-vote-yea text-gray-400 mr-2 text-sm"
                                     ></i>
                                     <p
-                                        class="text-sm font-medium text-gray-800 dark:text-gray-200 capitalize"
+                                        class="text-sm font-medium text-gray-800 dark:text-gray-200" v-if="$page.props.auth.user && $page.props.auth.user.id === user.id"
                                     >
                                         {{ citizen?.polling_stream?.name || "Not provided" }}
+                                    </p>
+                                    <p v-else class="text-sm font-medium text-red-800 dark:text-red-200">
+                                        Redacted
                                     </p>
                                 </div>
                             </div>
