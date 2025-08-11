@@ -240,36 +240,6 @@ const getActivityColor = (color) => {
     return colors[color] || "text-gray-500";
 };
 
-// Format relative time (e.g., '2 hours ago')
-const formatRelativeTime = (dateString) => {
-    if (!dateString) return "";
-
-    const date = new Date(dateString);
-    const now = new Date();
-    const seconds = Math.floor((now - date) / 1000);
-
-    const intervals = {
-        year: 31536000,
-        month: 2592000,
-        week: 604800,
-        day: 86400,
-        hour: 3600,
-        minute: 60,
-        second: 1,
-    };
-
-    for (const [unit, secondsInUnit] of Object.entries(intervals)) {
-        const interval = Math.floor(seconds / secondsInUnit);
-        if (interval >= 1) {
-            return interval === 1
-                ? `${interval} ${unit} ago`
-                : `${interval} ${unit}s ago`;
-        }
-    }
-
-    return "just now";
-};
-
 // Format percentage change with appropriate styling
 const formatChange = (change) => {
     if (change === undefined || change === null)
@@ -447,7 +417,7 @@ const formatChange = (change) => {
                                 models in the database using the Laravel Spatie
                                 Audit Trail package.
                             </p>
-                            <div class="space-y-4">
+                            <div class="space-y-2">
                                 <div
                                     v-if="!activities || activities.length === 0"
                                     class="text-center py-8 text-gray-500 dark:text-gray-400"
@@ -459,48 +429,87 @@ const formatChange = (change) => {
                                 <div
                                     v-for="activity in activities"
                                     :key="activity.id"
-                                    class="flex items-start"
+                                    class="flex items-start group hover:bg-gray-50 dark:hover:bg-gray-700/50 p-2 rounded-lg transition-colors duration-200"
                                 >
                                     <div class="flex-shrink-0">
                                         <div
-                                            class="h-10 w-10 rounded-full bg-gray-100 dark:bg-gray-700 flex items-center justify-center"
+                                            class="h-10 w-10 rounded-full flex items-center justify-center"
+                                            :class="[
+                                                'bg-opacity-10',
+                                                activity.color === 'blue' ? 'bg-blue-500' :
+                                                activity.color === 'green' ? 'bg-green-500' :
+                                                activity.color === 'red' ? 'bg-red-500' :
+                                                activity.color === 'yellow' ? 'bg-yellow-500' :
+                                                activity.color === 'purple' ? 'bg-purple-500' : 'bg-gray-500'
+                                            ]"
                                         >
                                             <i
                                                 :class="[
                                                     'fas',
-                                                    getActivityIcon(
-                                                        activity.icon
-                                                    ),
+                                                    activity.icon || 'fa-info-circle',
                                                     'text-lg',
-                                                    getActivityColor(
-                                                        activity.color
-                                                    ),
+                                                    activity.color === 'blue' ? 'text-blue-500' :
+                                                    activity.color === 'green' ? 'text-green-500' :
+                                                    activity.color === 'red' ? 'text-red-500' :
+                                                    activity.color === 'yellow' ? 'text-yellow-500' :
+                                                    activity.color === 'purple' ? 'text-purple-500' : 'text-gray-500'
                                                 ]"
+                                                :title="activity.action || 'Activity'"
                                             ></i>
                                         </div>
                                     </div>
                                     <div class="ml-4 flex-1 min-w-0">
-                                        <p
-                                            class="text-sm font-medium text-gray-900 dark:text-white"
-                                        >
-                                            {{ activity.description }}
-                                        </p>
-                                        <div
-                                            class="flex items-center mt-1 text-xs text-gray-500 dark:text-gray-400"
-                                        >
-                                            <span>{{
-                                                activity.user_name
-                                            }}</span>
-                                            <span class="mx-1">•</span>
-                                            <span>{{
-                                                activity.created_at
-                                            }}</span>
-                                            <span
-                                                v-if="activity.subject_type"
-                                                class="ml-2 px-2 py-0.5 text-xs rounded-full bg-gray-100 dark:bg-gray-700"
+                                        <div class="flex items-center justify-between">
+                                            <p class="text-sm font-medium text-gray-900 dark:text-white">
+                                                {{ activity.title || 'System Activity' }}
+                                            </p>
+                                            <span 
+                                                class="text-xs px-2 py-0.5 rounded-full"
+                                                :class="[
+                                                    activity.status_class === 'success' ? 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300' :
+                                                    activity.status_class === 'warning' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300' :
+                                                    activity.status_class === 'danger' ? 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300' :
+                                                    'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300'
+                                                ]"
                                             >
-                                                {{ activity.subject_type }}
+                                                {{ activity.status || 'Completed' }}
                                             </span>
+                                        </div>
+                                        <!-- <p class="text-sm text-gray-600 dark:text-gray-300 mt-1"> -->
+                                            <!-- {{ activity.description || 'No description available' }} -->
+                                            <!-- <span v-if="activity.details" class="text-xs text-gray-500 block mt-1">
+                                                {{ activity.details }}
+                                            </span> -->
+                                        <!-- </p> -->
+                                        <div class="flex flex-wrap items-center mt-1 text-xs text-gray-500 dark:text-gray-400 gap-1">
+                                            <div class="flex items-center">
+                                                <i class="far fa-user mr-1"></i>
+                                                <span>
+                                                    <Link v-if="activity.user_id" :href="route('profile.view', { user_id: activity.user_id })" class="text-green-600 hover:underline underline-offset-4">
+                                                        {{ activity.user_name }}
+                                                    </Link>
+                                                    <span v-else>System</span>
+                                                </span>
+                                            </div>
+                                            <span>•</span>
+                                            <div class="flex items-center" :title="'Created ' + activity.created_at">
+                                                <i class="far fa-clock mr-1"></i>
+                                                <span>{{ activity.created_at }}</span>
+                                            </div>
+                                            <template v-if="activity.service_name">
+                                                <span>•</span>
+                                                <div class="flex items-center">
+                                                    <i class="fas fa-cog mr-1"></i>
+                                                    <span>{{ activity.service_name }}</span>
+                                                </div>
+                                            </template>
+                                            <template v-if="activity.department_name">
+                                                <span>•</span>
+                                                <div class="flex items-center">
+                                                    <i class="fas fa-building mr-1"></i>
+                                                    <span>{{ activity.department_name }}</span>
+                                                </div>
+                                            </template>
                                         </div>
                                     </div>
                                 </div>
@@ -510,13 +519,13 @@ const formatChange = (change) => {
                                 v-if="activities && activities.length > 0"
                                 class="mt-4 text-right"
                             >
-                                <a
-                                    href="#"
+                                <Link
+                                    :href="route('activity')"
                                     class="text-sm font-medium text-primary-600 hover:text-green-700 dark:text-primary-400 dark:hover:text-primary-300 hover:underline underline-offset-4"
                                 >
                                     View all activities
                                     <i class="fas fa-arrow-right ml-1"></i>
-                                </a>
+                                </Link>
                             </div>
                         </div>
                     </div>
@@ -534,13 +543,18 @@ const formatChange = (change) => {
                                 ></i>
                                 Quick Actions
                             </h3>
+                            <p
+                                class="text-sm font-normal text-gray-500 dark:text-gray-400 mb-4"
+                            >
+                                These are some quick actions to help you get started.
+                            </p>
                             <div class="space-y-2">
                                 <a
                                     href="#"
                                     class="flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300"
                                 >
                                     <i
-                                        class="fas fa-plus-circle text-green-500 w-5 mr-3"
+                                        class="fas fa-plus-circle text-green-500 w-5 h-5 mr-3"
                                     ></i>
                                     <span>Add New Member</span>
                                 </a>
@@ -549,7 +563,7 @@ const formatChange = (change) => {
                                     class="flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300"
                                 >
                                     <i
-                                        class="fas fa-file-import text-blue-500 w-5 mr-3"
+                                        class="fas fa-file-import text-blue-500 w-5 h-5 mr-3"
                                     ></i>
                                     <span>Import Members</span>
                                 </a>
@@ -558,16 +572,25 @@ const formatChange = (change) => {
                                     class="flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300"
                                 >
                                     <i
-                                        class="fas fa-file-export text-purple-500 w-5 mr-3"
+                                        class="fas fa-file-export text-purple-500 w-5 h-5 mr-3"
                                     ></i>
                                     <span>Export Members</span>
+                                </a>
+                                <a
+                                    href="#"
+                                    class="flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300"
+                                >
+                                    <i
+                                        class="fas fa-pen-nib text-yellow-500 w-5 h-5 mr-3"
+                                    ></i>
+                                    <span>Update Member</span>
                                 </a>
                                 <Link
                                     :href="route('settings')"
                                     class="flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300"
                                 >
                                     <i
-                                        class="fas fa-cog text-gray-500 w-5 mr-3"
+                                        class="fas fa-cog text-gray-500 w-5 h-5 mr-3"
                                     ></i>
                                     <span>Settings</span>
                                 </Link>
