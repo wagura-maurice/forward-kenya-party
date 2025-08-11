@@ -27,9 +27,6 @@ const user = computed(() => props.data?.user || null);
 const profile = computed(() => user.value?.profile || {});
 const citizen = computed(() => profile.value?.citizen || {});
 
-// console.log(user.value);
-console.log(citizen);
-
 // Computed properties
 const fullName = computed(() => {
     return (
