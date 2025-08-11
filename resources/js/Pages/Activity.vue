@@ -15,7 +15,22 @@ const props = defineProps({
     },
 });
 
-const activities = ref(props.data.activities || []);
+const activities = ref({
+    data: props.data.activities?.data || [],
+    current_page: props.data.activities?.current_page || 1,
+    first_page_url: props.data.activities?.first_page_url || '',
+    from: props.data.activities?.from || 0,
+    last_page: props.data.activities?.last_page || 1,
+    last_page_url: props.data.activities?.last_page_url || '',
+    links: props.data.activities?.links || [],
+    next_page_url: props.data.activities?.next_page_url || null,
+    path: props.data.activities?.path || '',
+    per_page: props.data.activities?.per_page || 5,
+    prev_page_url: props.data.activities?.prev_page_url || null,
+    to: props.data.activities?.to || 0,
+    total: props.data.activities?.total || 0
+});
+
 const user = ref(props.data.user || null);
 const isLoading = ref(false);
 
@@ -75,15 +90,33 @@ const handlePageChange = (url) => {
     closeAllDropdowns();
     isLoading.value = true;
     
-    // Extract the page number from the URL
-    const page = new URL(url).searchParams.get('page');
-    
+    // Use Inertia's get method to handle the page change
     router.get(url, {}, {
         preserveState: true,
         preserveScroll: true,
-        only: ['activities'],
-        onSuccess: () => {
+        only: ['data'],
+        onSuccess: (page) => {
+            // Update the activities ref with the new pagination data
+            const newActivities = page.props.data.activities;
+            activities.value = {
+                ...activities.value,
+                data: newActivities.data,
+                current_page: newActivities.current_page,
+                first_page_url: newActivities.first_page_url,
+                from: newActivities.from,
+                last_page: newActivities.last_page,
+                last_page_url: newActivities.last_page_url,
+                links: newActivities.links,
+                next_page_url: newActivities.next_page_url,
+                path: newActivities.path,
+                per_page: newActivities.per_page,
+                prev_page_url: newActivities.prev_page_url,
+                to: newActivities.to,
+                total: newActivities.total
+            };
+            
             isLoading.value = false;
+            
             // Smooth scroll to top of the table
             const table = document.querySelector('.activity-table');
             if (table) {
@@ -92,6 +125,7 @@ const handlePageChange = (url) => {
         },
         onError: () => {
             isLoading.value = false;
+            showToast('Error', 'Failed to load activities', 'error');
         }
     });
 };
@@ -311,7 +345,12 @@ const handleDelete = (activityId) => {
                                         </tr>
                                     </thead>
                                     <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
-                                        <tr v-for="activity in activities.data" :key="activity.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
+                                        <tr v-if="activities.data && activities.data.length === 0">
+                                            <td colspan="6" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                                                No activities found.
+                                            </td>
+                                        </tr>
+                                        <tr v-else v-for="activity in activities.data" :key="activity.id" class="hover:bg-gray-50 dark:hover:bg-gray-700">
                                             <td class="pl-6 pr-2 py-4 whitespace-nowrap">
                                                 <div class="text-sm font-medium text-gray-900 dark:text-white">
                                                     #{{ activity.id }}
@@ -327,7 +366,7 @@ const handleDelete = (activityId) => {
                                                     </div>
                                                     <div class="ml-4">
                                                         <div class="text-sm font-medium text-gray-900 dark:text-white">
-                                                            <Link v-if="activity.user_id" :href="route('profile.view', { user_id: activity.user_id })" class="text-green-600 hover:underline capitalize">
+                                                            <Link v-if="activity.user_id" :href="route('profile.view', { user_id: activity.user_id })" class="text-green-600 hover:underline underline-offset-4 capitalize">
                                                                 {{ activity.user_name }}
                                                             </Link>
                                                             <span v-else>System</span>
@@ -464,19 +503,21 @@ const handleDelete = (activityId) => {
                                         <button 
                                             v-if="activities.prev_page_url"
                                             @click="handlePageChange(activities.prev_page_url)"
-                                            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                                            :disabled="!activities.prev_page_url || isLoading"
+                                            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600"
+                                            :disabled="isLoading"
                                         >
                                             Previous
                                         </button>
-                                        <span class="text-sm text-gray-700 dark:text-gray-300">
-                                            Page {{ activities.current_page }} of {{ activities.last_page }}
-                                        </span>
+                                        <div class="flex-1 flex justify-center">
+                                            <span class="text-sm text-gray-700 dark:text-gray-300">
+                                                Page {{ activities.current_page }} of {{ activities.last_page }}
+                                            </span>
+                                        </div>
                                         <button 
                                             v-if="activities.next_page_url"
                                             @click="handlePageChange(activities.next_page_url)"
-                                            class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white dark:bg-gray-800 dark:border-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
-                                            :disabled="!activities.next_page_url || isLoading"
+                                            class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-200 dark:hover:bg-gray-600"
+                                            :disabled="isLoading"
                                         >
                                             Next
                                         </button>
@@ -486,31 +527,33 @@ const handleDelete = (activityId) => {
                                     <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
                                         <div>
                                             <p class="text-sm text-gray-700 dark:text-gray-300">
-                                                Showing <span class="font-medium">{{ activities.from || 0 }}</span> to 
-                                                <span class="font-medium">{{ activities.to || 0 }}</span> of 
-                                                <span class="font-medium">{{ activities.total || 0 }}</span> results
+                                                Showing
+                                                <span class="font-medium">{{ activities.from || 0 }}</span>
+                                                to
+                                                <span class="font-medium">{{ activities.to || 0 }}</span>
+                                                of
+                                                <span class="font-medium">{{ activities.total }}</span>
+                                                results
                                             </p>
                                         </div>
                                         <div>
                                             <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                                                <Link 
-                                                    v-for="(link, key) in activities.links" 
-                                                    :key="key"
-                                                    :href="link.url || '#'"
-                                                    v-html="link.label"
-                                                    @click.prevent="link.url ? handlePageChange(link.url) : null"
-                                                    class="relative inline-flex items-center px-4 py-2 border text-sm font-medium transition-colors duration-150"
-                                                    :class="{
-                                                        'z-10 bg-green-50 border-green-500 text-green-600 dark:bg-green-900/30 dark:border-green-600 dark:text-green-300': link.active,
-                                                        'bg-white dark:bg-gray-800 border-gray-300 text-gray-500 hover:bg-gray-50 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700': !link.active && link.url,
-                                                        'text-gray-400 cursor-not-allowed dark:text-gray-500 border-gray-200 dark:border-gray-600': !link.url,
-                                                        'rounded-l-md': key === 0,
-                                                        'rounded-r-md': key === activities.links.length - 1
-                                                    }"
+                                                <button 
+                                                    v-for="(link, index) in activities.links" 
+                                                    :key="index"
+                                                    @click="link.url ? handlePageChange(link.url) : null"
+                                                    :class="[
+                                                        'relative inline-flex items-center px-4 py-2 border text-sm font-medium',
+                                                        link.active 
+                                                            ? 'z-10 bg-green-50 border-green-500 text-green-600 dark:bg-green-900/30 dark:border-green-700 dark:text-green-300' 
+                                                            : 'bg-white border-gray-300 text-gray-500 hover:bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-600',
+                                                        index === 0 ? 'rounded-l-md' : '',
+                                                        index === activities.links.length - 1 ? 'rounded-r-md' : '',
+                                                        !link.url ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
+                                                    ]"
                                                     :disabled="!link.url || isLoading"
-                                                    :aria-current="link.active ? 'page' : undefined"
-                                                    preserve-scroll
-                                                />
+                                                    v-html="link.label"
+                                                ></button>
                                             </nav>
                                         </div>
                                     </div>
