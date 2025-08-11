@@ -1,8 +1,9 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue';
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
 import { Link, usePage, router } from '@inertiajs/vue3';
 import Swal from 'sweetalert2';
+import { debounce } from 'lodash';
 
 const props = defineProps({
     title: {
@@ -15,6 +16,13 @@ const props = defineProps({
     },
 });
 
+// Reactive state
+const searchQuery = ref('');
+const perPage = ref(props.data.activities?.per_page || 5);
+const user = ref(props.data.user || null);
+const isLoading = ref(false);
+
+// Initialize activities with pagination data
 const activities = ref({
     data: props.data.activities?.data || [],
     current_page: props.data.activities?.current_page || 1,
@@ -31,8 +39,46 @@ const activities = ref({
     total: props.data.activities?.total || 0
 });
 
-const user = ref(props.data.user || null);
-const isLoading = ref(false);
+// Get page instance for accessing URL parameters
+const page = usePage();
+
+// Initialize from URL params
+onMounted(() => {
+    // Get search and per_page from URL params
+    const search = new URLSearchParams(window.location.search).get('search');
+    const perPageParam = new URLSearchParams(window.location.search).get('per_page');
+    
+    if (search) {
+        searchQuery.value = search;
+    }
+    if (perPageParam) {
+        perPage.value = parseInt(perPageParam) || 5;
+    }
+    
+    // Set up debounced search
+    debouncedSearch.value = debounce(() => {
+        applyFilters(true);
+    }, 500);
+    
+    // Clean up on unmount
+    return () => {
+        if (debouncedSearch.value) {
+            debouncedSearch.value.cancel();
+        }
+    };
+});
+
+// Debounced search function
+const debouncedSearch = ref(null);
+
+// Watch for search query changes
+watch(searchQuery, (newVal, oldVal) => {
+    if (newVal !== oldVal) {
+        if (debouncedSearch.value) {
+            debouncedSearch.value();
+        }
+    }
+});
 
 const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
@@ -84,19 +130,24 @@ onUnmounted(() => {
     document.removeEventListener('click', handleClickOutside);
 });
 
-const handlePageChange = (url) => {
-    if (!url || isLoading.value) return;
-    
+// Apply filters and update the activities list
+const applyFilters = (resetPage = false) => {
     closeAllDropdowns();
     isLoading.value = true;
     
-    // Use Inertia's get method to handle the page change
-    router.get(url, {}, {
+    // Build query parameters
+    const query = {
+        page: resetPage ? 1 : activities.value.current_page,
+        per_page: perPage.value,
+        ...(searchQuery.value && { search: searchQuery.value })
+    };
+    
+    // Update URL with current filters
+    router.get(route('activity'), query, {
         preserveState: true,
         preserveScroll: true,
         only: ['data'],
         onSuccess: (page) => {
-            // Update the activities ref with the new pagination data
             const newActivities = page.props.data.activities;
             activities.value = {
                 ...activities.value,
@@ -117,6 +168,16 @@ const handlePageChange = (url) => {
             
             isLoading.value = false;
             
+            // Update URL in the browser
+            const url = new URL(window.location.href);
+            if (searchQuery.value) {
+                url.searchParams.set('search', searchQuery.value);
+            } else {
+                url.searchParams.delete('search');
+            }
+            url.searchParams.set('per_page', perPage.value);
+            window.history.pushState({}, '', url);
+            
             // Smooth scroll to top of the table
             const table = document.querySelector('.activity-table');
             if (table) {
@@ -128,6 +189,73 @@ const handlePageChange = (url) => {
             showToast('Error', 'Failed to load activities', 'error');
         }
     });
+};
+
+// Handle page change from pagination
+const handlePageChange = (url) => {
+    if (!url || isLoading.value) return;
+    
+    closeAllDropdowns();
+    isLoading.value = true;
+    
+    // Parse the URL to get the page number
+    const urlObj = new URL(url);
+    const page = urlObj.searchParams.get('page');
+    
+    // Update the URL with current filters and new page
+    const query = {
+        page: page || 1,
+        per_page: perPage.value,
+        ...(searchQuery.value && { search: searchQuery.value })
+    };
+    
+    router.get(route('activity'), query, {
+        preserveState: true,
+        preserveScroll: true,
+        only: ['data'],
+        onSuccess: (page) => {
+            const newActivities = page.props.data.activities;
+            activities.value = {
+                ...activities.value,
+                data: newActivities.data,
+                current_page: newActivities.current_page,
+                first_page_url: newActivities.first_page_url,
+                from: newActivities.from,
+                last_page: newActivities.last_page,
+                last_page_url: newActivities.last_page_url,
+                links: newActivities.links,
+                next_page_url: newActivities.next_page_url,
+                path: newActivities.path,
+                per_page: newActivities.per_page,
+                prev_page_url: newActivities.prev_page_url,
+                to: newActivities.to,
+                total: newActivities.total
+            };
+            
+            isLoading.value = false;
+            
+            // Update URL in the browser
+            const url = new URL(window.location.href);
+            url.searchParams.set('page', newActivities.current_page);
+            window.history.pushState({}, '', url);
+            
+            // Smooth scroll to top of the table
+            const table = document.querySelector('.activity-table');
+            if (table) {
+                table.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        },
+        onError: () => {
+            isLoading.value = false;
+            showToast('Error', 'Failed to load activities', 'error');
+        }
+    });
+};
+
+// Clear search and reset filters
+const clearSearch = () => {
+    searchQuery.value = '';
+    applyFilters(true);
 };
 
 const copyActivityDetails = async (activity) => {
@@ -319,6 +447,48 @@ const handleDelete = (activityId) => {
                                 <div v-if="isLoading" class="absolute inset-0 bg-white/70 dark:bg-gray-800/70 z-10 flex items-center justify-center">
                                     <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-green-500"></div>
                                 </div>
+                                <!-- Search and Per Page Controls -->
+                                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 space-y-4 sm:space-y-0">
+                                    <!-- Items Per Page Selector -->
+                                    <div class="flex items-center space-x-2">
+                                        <label for="perPage" class="text-sm text-gray-600 dark:text-gray-300">Show:</label>
+                                        <select
+                                            id="perPage"
+                                            v-model="perPage"
+                                            @change="applyFilters"
+                                            class="block w-20 pl-3 pr-10 py-2 text-base border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                                        >
+                                            <option value="5">5</option>
+                                            <option value="10">10</option>
+                                            <option value="25">25</option>
+                                            <option value="50">50</option>
+                                            <option value="100">100</option>
+                                        </select>
+                                        <span class="text-sm text-gray-600 dark:text-gray-300">entries</span>
+                                    </div>
+
+                                    <!-- Search Bar -->
+                                    <div class="relative w-full sm:w-64">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <i class="fas fa-search text-gray-400"></i>
+                                        </div>
+                                        <input
+                                            v-model="searchQuery"
+                                            @keyup.enter="applyFilters"
+                                            type="text"
+                                            class="block w-full pl-10 pr-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md leading-5 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                                            placeholder="Search activities..."
+                                        >
+                                        <button 
+                                            v-if="searchQuery" 
+                                            @click="clearSearch"
+                                            class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                                        >
+                                            <i class="fas fa-times"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
                                 <!-- Desktop Table -->
                                 <div class="overflow-x-auto">
                                     <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700 hidden md:table">
