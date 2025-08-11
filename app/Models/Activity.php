@@ -72,6 +72,13 @@ class Activity extends BaseActivity
      * @var array
      */
     protected $fillable = [
+        'log_name',
+        'description',
+        'subject_id',
+        'subject_type',
+        'causer_id',
+        'causer_type',
+        'properties',
         'type_id',
         'category_id',
         'uuid',
@@ -91,7 +98,9 @@ class Activity extends BaseActivity
         'ip_address',
         'user_agent',
         'metadata',
-        'uuid'
+        'created_at',
+        'updated_at',
+        'deleted_at'
     ];
 
     protected $casts = [
@@ -115,7 +124,8 @@ class Activity extends BaseActivity
      */
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class);
+        // return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'causer_id', 'id');
     }
 
     /**

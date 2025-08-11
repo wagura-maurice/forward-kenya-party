@@ -27,6 +27,20 @@ class User extends Authenticatable implements MustVerifyEmail
     use Notifiable;
     use TwoFactorAuthenticatable;
     use LogsActivityWithMetadata;
+    
+    /**
+     * Get the options for the activity logger.
+     *
+     * @return LogOptions
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly($this->fillable)
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs()
+            ->dontLogIfAttributesChangedOnly(['last_login_at', 'last_login_ip', 'updated_at']);
+    }
 
     // Status constants
     const PENDING = 0;
@@ -74,10 +88,10 @@ class User extends Authenticatable implements MustVerifyEmail
      *
      * @var array<int, string>
      */
-    protected $appends = [
-        'profile_photo_url',
-        'profile_photo_path',
-    ];
+    // protected $appends = [
+    //     'profile_photo_url',
+    //     'profile_photo_path',
+    // ];
 
     /**
      * The attributes that should be cast.
@@ -179,15 +193,15 @@ class User extends Authenticatable implements MustVerifyEmail
             'file_extension' => $photo->getClientOriginalExtension(),
             'file_size' => $photo->getSize(),
             'file_type' => $photo->getMimeType(),
-            'media_type_id' => $mediaType->id,
-            'media_category_id' => $mediaCategory->id,
+            'type_id' => $mediaType->id,
+            'category_id' => $mediaCategory->id,
             'user_id' => $this->id,
             'is_public' => true,
         ]);
 
         // Update the user's profile photo path
         $this->forceFill([
-            'profile_photo_path' => $media->file_path,
+            'profile_photo_path' => asset('storage/' . $media->file_path),
         ])->save();
 
         return $media;
@@ -335,44 +349,76 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->hasOne(Profile::class);
     }
 
-    public function administrator(): BelongsTo
+    /**
+     * Get the citizen record associated with the user.
+     */
+    public function citizen(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
-        return $this->belongsTo(Role::where('name', 'administrator')->firstOrFail());
+        return $this->hasOne(Citizen::class);
     }
 
-    public function manager(): BelongsTo
+    /**
+     * Check if the user has the administrator role.
+     */
+    public function isAdministrator(): bool
     {
-        return $this->belongsTo(Role::where('name', 'manager')->firstOrFail());
+        return $this->hasRole('administrator');
     }
 
-    public function citizen(): BelongsTo
+    /**
+     * Check if the user has the manager role.
+     */
+    public function isManager(): bool
     {
-        return $this->belongsTo(Role::where('name', 'citizen')->firstOrFail());
+        return $this->hasRole('manager');
     }
 
-    public function resident(): BelongsTo
+    /**
+     * Check if the user has the citizen role.
+     */
+    public function isCitizen(): bool
     {
-        return $this->belongsTo(Role::where('name', 'resident')->firstOrFail());
+        return $this->hasRole('citizen');
     }
 
-    public function refugee(): BelongsTo
+    /**
+     * Check if the user has the resident role.
+     */
+    public function isResident(): bool
     {
-        return $this->belongsTo(Role::where('name', 'refugee')->firstOrFail());
+        return $this->hasRole('resident');
     }
 
-    public function diplomat(): BelongsTo
+    /**
+     * Check if the user has the refugee role.
+     */
+    public function isRefugee(): bool
     {
-        return $this->belongsTo(Role::where('name', 'diplomat')->firstOrFail());
+        return $this->hasRole('refugee');
     }
 
-    public function foreigner(): BelongsTo
+    /**
+     * Check if the user has the diplomat role.
+     */
+    public function isDiplomat(): bool
     {
-        return $this->belongsTo(Role::where('name', 'foreigner')->firstOrFail());
+        return $this->hasRole('diplomat');
     }
 
-    public function guest(): BelongsTo
+    /**
+     * Check if the user has the foreigner role.
+     */
+    public function isForeigner(): bool
     {
-        return $this->belongsTo(Role::where('name', 'guest')->firstOrFail());
+        return $this->hasRole('foreigner');
+    }
+
+    /**
+     * Check if the user has the guest role.
+     */
+    public function isGuest(): bool
+    {
+        return $this->hasRole('guest');
     }
 
     public function receipts(): HasMany

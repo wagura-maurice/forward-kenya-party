@@ -14,10 +14,24 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Spatie\Activitylog\LogOptions;
 
 class Profile extends Model
 {
     use HasFactory, SoftDeletes, LogsActivityWithMetadata;
+    
+    /**
+     * Get the options for the activity logger.
+     *
+     * @return LogOptions
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly($this->fillable)
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
+    }
     
     // Constants for marital status
     const MARITAL_STATUS_SINGLE = 0;
@@ -73,6 +87,7 @@ class Profile extends Model
         'country',
         'date_of_birth',
         'disability_status',
+        'ncpwd_number',
         'ethnicity_id',
         'language_id',
         'religion_id',
@@ -174,6 +189,7 @@ class Profile extends Model
                 },
             ],
             'disability_status' => 'nullable|string',
+            'ncpwd_number' => 'nullable|string',
             'ethnicity_id' => 'nullable|exists:ethnicities,id',
             'language_id' => 'nullable|exists:languages,id',
             'religion_id' => 'nullable|exists:religions,id',
@@ -237,6 +253,7 @@ class Profile extends Model
                 },
             ],
             'disability_status' => 'nullable|string',
+            'ncpwd_number' => 'nullable|string',
             'ethnicity_id' => 'nullable|exists:ethnicities,id',
             'language_id' => 'nullable|exists:languages,id',
             'religion_id' => 'nullable|exists:religions,id',
@@ -283,5 +300,10 @@ class Profile extends Model
     public function religion(): BelongsTo
     {
         return $this->belongsTo(Religion::class, 'religion_id');
+    }
+
+    public function citizen(): BelongsTo
+    {
+        return $this->belongsTo(Citizen::class, 'user_id', 'user_id');
     }
 }

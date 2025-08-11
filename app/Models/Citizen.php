@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Spatie\Activitylog\LogOptions;
 
 class Citizen extends Model
 {
@@ -22,6 +23,24 @@ class Citizen extends Model
     const PROCESSED = 2;
     const ACCEPTED = 3;
     const REJECTED = 4;
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    /**
+     * Get the options for the activity logger.
+     *
+     * @return LogOptions
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logOnly($this->fillable)
+            ->logOnlyDirty()
+            ->dontSubmitEmptyLogs();
+    }
 
     /**
      * The attributes that are mass assignable.
@@ -297,9 +316,19 @@ class Citizen extends Model
         return $this->belongsTo(Village::class, 'village_id');
     }
 
+    public function pollingCenter(): BelongsTo
+    {
+        return $this->belongsTo(PollingCenter::class, 'polling_center_id');
+    }
+
     public function pollingStation(): BelongsTo
     {
         return $this->belongsTo(PollingStation::class, 'polling_station_id');
+    }
+
+    public function pollingStream(): BelongsTo
+    {
+        return $this->belongsTo(PollingStream::class, 'polling_stream_id');
     }
 
     public function consulate(): BelongsTo
