@@ -22,11 +22,9 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
      */
     public function update(User $user, array $input)
     {
-        // dd($input);
-
         // Get the profile and citizen IDs if they exist
         $profileId = $user->profile?->id;
-        $citizenId = $user->profile?->citizen?->id;
+        $citizenId = $user->citizen?->id;
 
         // Validate the input
         $rules = [
@@ -142,8 +140,7 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
 
         try {
             // Start database transaction
-            DB::transaction(function () use ($user, $input) {
-                // Update user data
+            DB::transaction(function () use ($user, $input) {                
                 if ($input['profile']['email'] !== $user->email && $user instanceof MustVerifyEmail) {
                     $this->updateVerifiedUser($user, $input);
                 } else {
@@ -154,11 +151,12 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
                 }
 
                 // Update or create profile
+                $nameParts = explode(' ', $input['profile']['other_name'], 2);
                 $profileData = [
-                    'uuid' => Str::uuid()->toString(),
+                    'uuid' => $user->profile->uuid ?? Str::uuid()->toString(),
                     'user_id' => $user->id,
-                    'first_name' => explode(' ', $input['profile']['other_name'])[0],
-                    'middle_name' => explode(' ', $input['profile']['other_name'])[1],
+                    'first_name' => $nameParts[0],
+                    'middle_name' => $nameParts[1] ?? null,
                     'last_name' => $input['profile']['surname'],
                     'date_of_birth' => Carbon::parse($input['profile']['date_of_birth'])->format('Y-m-d'),
                     'gender' => $input['profile']['gender'],
@@ -216,7 +214,8 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
                 'status' => 'error',
                 'message' => 'Profile update failed!',
             ], 500);
-        } catch (\Throwable $th) {            
+        } catch (\Throwable $th) {  
+            // throw $th;
             return response()->json([
                 'status' => 'error',
                 'message' => $th->getMessage(),
