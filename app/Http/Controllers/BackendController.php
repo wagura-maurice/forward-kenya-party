@@ -201,168 +201,6 @@ class BackendController extends Controller
             
         $engagementRate = round(($engagedUsers / $totalUsers) * 100);
         $previousEngagementRate = $previousEngaged > 0 ? round(($previousEngaged / max(1, $previousPeriodUsers)) * 100) : 0;
-        
-        $stats = [
-            // Membership & Users
-            'total_members' => [
-                'count' => $currentMembers,
-                'change' => $calculateChange($currentMembers, $previousMembers),
-                'previous_period' => $previousMembers,
-                'percentage_change' => $previousMembers > 0 ? 
-                    round((($currentMembers - $previousMembers) / $previousMembers) * 100, 1) : 
-                    ($currentMembers > 0 ? 100 : 0)
-            ],
-            'active_users' => [
-                'count' => $activeUsers,
-                'change' => $calculateChange($activeUsers, $previousActiveUsers),
-                'previous_period' => $previousActiveUsers,
-                'percentage_change' => $previousActiveUsers > 0 ? 
-                    round((($activeUsers - $previousActiveUsers) / $previousActiveUsers) * 100, 1) : 
-                    ($activeUsers > 0 ? 100 : 0)
-            ],
-            'new_members_this_month' => [
-                'count' => $newMembersThisMonth,
-                'change' => $calculateChange($newMembersThisMonth, $previousMonthMembers),
-                'previous_period' => $previousMonthMembers,
-                'percentage_change' => $previousMonthMembers > 0 ? 
-                    round((($newMembersThisMonth - $previousMonthMembers) / $previousMonthMembers) * 100, 1) : 
-                    ($newMembersThisMonth > 0 ? 100 : 0)
-            ],
-            'engagement_rate' => [
-                'count' => $engagementRate,
-                'change' => $calculateChange($engagementRate, $previousEngagementRate),
-                'previous_period' => $previousEngagementRate,
-                'percentage_change' => $previousEngagementRate > 0 ? 
-                    round((($engagementRate - $previousEngagementRate) / $previousEngagementRate) * 100, 1) : 
-                    ($engagementRate > 0 ? 100 : 0)
-            ],
-            
-            // Financials
-            'donations' => [
-                'count' => 0, // Kept for backward compatibility
-                'change' => 0,
-                'previous_period' => 0,
-                'percentage_change' => 0
-            ],
-            'monthly_subscriptions' => [
-                'count' => $currentMonthlyContributions,
-                'change' => $calculateChange($currentMonthlyContributions, $previousMonthlyContributions),
-                'previous_period' => $previousMonthlyContributions,
-                'percentage_change' => $previousMonthlyContributions > 0 ?
-                    round((($currentMonthlyContributions - $previousMonthlyContributions) / $previousMonthlyContributions) * 100, 1) :
-                    ($currentMonthlyContributions > 0 ? 100 : 0)
-            ],
-            'membership_fees' => [
-                'count' => $currentMembershipCollections,
-                'change' => $calculateChange($currentMembershipCollections, $previousMembershipCollections),
-                'previous_period' => $previousMembershipCollections,
-                'percentage_change' => $previousMembershipCollections > 0 ?
-                    round((($currentMembershipCollections - $previousMembershipCollections) / $previousMembershipCollections) * 100, 1) :
-                    ($currentMembershipCollections > 0 ? 100 : 0)
-            ],
-            'pending_approvals' => [
-                'count' => 0, // Implement actual query
-                'change' => 0,
-                'previous_period' => 0,
-                'percentage_change' => 0
-            ],
-            
-            // Election & Compliance
-            'candidates' => [
-                'count' => $currentCandidates,
-                'change' => $calculateChange($currentCandidates, $previousCandidates),
-                'previous_period' => $previousCandidates,
-                'percentage_change' => $previousCandidates > 0 ? 
-                    round((($currentCandidates - $previousCandidates) / $previousCandidates) * 100, 1) : 
-                    ($currentCandidates > 0 ? 100 : 0)
-            ],
-            'nomination_papers' => [
-                'count' => 0, // Implement actual query
-                'change' => 0,
-                'previous_period' => 0,
-                'percentage_change' => 0
-            ],
-            'compliance_items' => [
-                'count' => $currentComplianceItems,
-                'change' => $calculateChange($currentComplianceItems, $previousComplianceItems),
-                'previous_period' => $previousComplianceItems,
-                'percentage_change' => $previousComplianceItems > 0 ? 
-                    round((($currentComplianceItems - $previousComplianceItems) / $previousComplianceItems) * 100, 1) : 
-                    ($currentComplianceItems > 0 ? 100 : 0)
-            ],
-            'deadlines' => [
-                'count' => 0, // Implement actual query
-                'change' => 0,
-                'previous_period' => 0,
-                'percentage_change' => 0
-            ],
-            
-            // Additional Stats
-            'departments' => [
-                'count' => $currentDepartments,
-                'change' => $calculateChange($currentDepartments, $previousDepartments),
-                'previous_period' => $previousDepartments,
-                'percentage_change' => $previousDepartments > 0 ? 
-                    round((($currentDepartments - $previousDepartments) / $previousDepartments) * 100, 1) : 
-                    ($currentDepartments > 0 ? 100 : 0)
-            ],
-            'projects' => [
-                'count' => $currentProjects,
-                'change' => $calculateChange($currentProjects, $previousProjects),
-                'previous_period' => $previousProjects,
-                'percentage_change' => $previousProjects > 0 ? 
-                    round((($currentProjects - $previousProjects) / $previousProjects) * 100, 1) : 
-                    ($currentProjects > 0 ? 100 : 0)
-            ],
-            'services' => [
-                'count' => $currentServices,
-                'change' => $calculateChange($currentServices, $previousServices),
-                'previous_period' => $previousServices,
-                'percentage_change' => $previousServices > 0 ? 
-                    round((($currentServices - $previousServices) / $previousServices) * 100, 1) : 
-                    ($currentServices > 0 ? 100 : 0)
-            ],
-            
-            // Media & Communications
-            'press_releases' => [
-                'count' => 0, // Implement actual query
-                'change' => 0
-            ],
-            'social_media_reach' => [
-                'count' => 0, // Implement actual query
-                'change' => 0
-            ],
-            
-            // Events & Meetings
-            'upcoming_events' => [
-                'count' => 0, // To be implemented
-                'change' => 0
-            ],
-            'meetings_this_week' => [
-                'count' => 0, // Implement actual query
-                'change' => 0
-            ],
-            
-            // Volunteers
-            'active_volunteers' => [
-                'count' => 0, // Implement actual query
-                'change' => 0
-            ],
-            'volunteer_hours' => [
-                'count' => 0, // Implement actual query
-                'change' => 0
-            ],
-            
-            // Special Interest Groups
-            'youth_members' => [
-                'count' => 0, // Implement actual query
-                'change' => 0
-            ],
-            'women_members' => [
-                'count' => 0, // Implement actual query
-                'change' => 0
-            ]
-        ];
 
         // Get featured services and departments
         $featuredServices = Service::where('is_featured', true)
@@ -377,6 +215,253 @@ class BackendController extends Controller
             ->take(4)
             ->get();
 
+        $stats = [
+            // Membership & Users
+            'total_users' => [
+                'count' => $currentUsers,
+                'change' => $calculateChange($currentUsers, $previousPeriodUsers),
+                'previous_period' => $previousPeriodUsers,
+                'percentage_change' => $previousPeriodUsers > 0 ? 
+                    round((($currentUsers - $previousPeriodUsers) / $previousPeriodUsers) * 100, 1) : 
+                    ($currentUsers > 0 ? 100 : 0),
+                'title' => 'Total Users',
+                'icon' => 'fa fa-users',
+                'color' => 'blue'
+            ],
+            'active_users' => [
+                'count' => $activeUsers,
+                'change' => $calculateChange($activeUsers, $previousActiveUsers),
+                'previous_period' => $previousActiveUsers,
+                'percentage_change' => $previousActiveUsers > 0 ? 
+                    round((($activeUsers - $previousActiveUsers) / $previousActiveUsers) * 100, 1) : 
+                    ($activeUsers > 0 ? 100 : 0),
+                'title' => 'Active Members',
+                'icon' => 'fa fa-user-check',
+                'color' => 'green'
+            ],
+            'new_members_this_month' => [
+                'count' => $newMembersThisMonth,
+                'change' => $calculateChange($newMembersThisMonth, $previousMonthMembers),
+                'previous_period' => $previousMonthMembers,
+                'percentage_change' => $previousMonthMembers > 0 ? 
+                    round((($newMembersThisMonth - $previousMonthMembers) / $previousMonthMembers) * 100, 1) : 
+                    ($newMembersThisMonth > 0 ? 100 : 0),
+                'title' => 'New Members This Month',
+                'icon' => 'fa fa-user-plus',
+                'color' => 'teal'
+            ],
+            'engagement_rate' => [
+                'count' => $engagementRate,
+                'change' => $calculateChange($engagementRate, $previousEngagementRate),
+                'previous_period' => $previousEngagementRate,
+                'percentage_change' => $previousEngagementRate > 0 ? 
+                    round((($engagementRate - $previousEngagementRate) / $previousEngagementRate) * 100, 1) : 
+                    ($engagementRate > 0 ? 100 : 0),
+                'title' => 'Engagement Rate',
+                'icon' => 'fa fa-chart-line',
+                'color' => 'orange'
+            ],
+            
+            // Financials
+            'donations' => [
+                'count' => 0,
+                'change' => 0,
+                'previous_period' => 0,
+                'percentage_change' => 0,
+                'title' => 'Donations',
+                'icon' => 'fa fa-donate',
+                'color' => 'red'
+            ],
+            'monthly_subscriptions' => [
+                'count' => $currentMonthlyContributions,
+                'change' => $calculateChange($currentMonthlyContributions, $previousMonthlyContributions),
+                'previous_period' => $previousMonthlyContributions,
+                'percentage_change' => $previousMonthlyContributions > 0 ?
+                    round((($currentMonthlyContributions - $previousMonthlyContributions) / $previousMonthlyContributions) * 100, 1) :
+                    ($currentMonthlyContributions > 0 ? 100 : 0),
+                'title' => 'Monthly Subscriptions',
+                'icon' => 'fa fa-money-bill-wave',
+                'color' => 'green'
+            ],
+            'membership_fees' => [
+                'count' => $currentMembershipCollections,
+                'change' => $calculateChange($currentMembershipCollections, $previousMembershipCollections),
+                'previous_period' => $previousMembershipCollections,
+                'percentage_change' => $previousMembershipCollections > 0 ?
+                    round((($currentMembershipCollections - $previousMembershipCollections) / $previousMembershipCollections) * 100, 1) :
+                    ($currentMembershipCollections > 0 ? 100 : 0),
+                'title' => 'Membership Fees',
+                'icon' => 'fa fa-receipt',
+                'color' => 'blue'
+            ],
+            'pending_approvals' => [
+                'count' => 0,
+                'change' => 0,
+                'previous_period' => 0,
+                'percentage_change' => 0,
+                'title' => 'Pending Approvals',
+                'icon' => 'fa fa-clock',
+                'color' => 'yellow'
+            ],
+            
+            // Election & Compliance
+            'candidates' => [
+                'count' => $currentCandidates,
+                'change' => $calculateChange($currentCandidates, $previousCandidates),
+                'previous_period' => $previousCandidates,
+                'percentage_change' => $previousCandidates > 0 ? 
+                    round((($currentCandidates - $previousCandidates) / $previousCandidates) * 100, 1) : 
+                    ($currentCandidates > 0 ? 100 : 0),
+                'title' => 'Candidates',
+                'icon' => 'fa fa-user-tie',
+                'color' => 'purple'
+            ],
+            'nomination_papers' => [
+                'count' => 0,
+                'change' => 0,
+                'previous_period' => 0,
+                'percentage_change' => 0,
+                'title' => 'Nomination Papers',
+                'icon' => 'fa fa-file-signature',
+                'color' => 'indigo'
+            ],
+            'compliance_items' => [
+                'count' => $currentComplianceItems,
+                'change' => $calculateChange($currentComplianceItems, $previousComplianceItems),
+                'previous_period' => $previousComplianceItems,
+                'percentage_change' => $previousComplianceItems > 0 ? 
+                    round((($currentComplianceItems - $previousComplianceItems) / $previousComplianceItems) * 100, 1) : 
+                    ($currentComplianceItems > 0 ? 100 : 0),
+                'title' => 'Compliance Items',
+                'icon' => 'fa fa-tasks',
+                'color' => 'orange'
+            ],
+            'deadlines' => [
+                'count' => 0,
+                'change' => 0,
+                'previous_period' => 0,
+                'percentage_change' => 0,
+                'title' => 'Deadlines',
+                'icon' => 'fa fa-calendar-times',
+                'color' => 'red'
+            ],
+            
+            // Additional Stats
+            'departments' => [
+                'count' => $currentDepartments,
+                'change' => $calculateChange($currentDepartments, $previousDepartments),
+                'previous_period' => $previousDepartments,
+                'percentage_change' => $previousDepartments > 0 ? 
+                    round((($currentDepartments - $previousDepartments) / $previousDepartments) * 100, 1) : 
+                    ($currentDepartments > 0 ? 100 : 0),
+                'title' => 'Departments',
+                'icon' => 'fa fa-sitemap',
+                'color' => 'indigo'
+            ],
+            'services' => [
+                'count' => $currentServices,
+                'change' => $calculateChange($currentServices, $previousServices),
+                'previous_period' => $previousServices,
+                'percentage_change' => $previousServices > 0 ? 
+                    round((($currentServices - $previousServices) / $previousServices) * 100, 1) : 
+                    ($currentServices > 0 ? 100 : 0),
+                'title' => 'Services',
+                'icon' => 'fa fa-concierge-bell',
+                'color' => 'pink'
+            ],
+            'projects' => [
+                'count' => $currentProjects,
+                'change' => $calculateChange($currentProjects, $previousProjects),
+                'previous_period' => $previousProjects,
+                'percentage_change' => $previousProjects > 0 ? 
+                    round((($currentProjects - $previousProjects) / $previousProjects) * 100, 1) : 
+                    ($currentProjects > 0 ? 100 : 0),
+                'title' => 'Projects',
+                'icon' => 'fa fa-project-diagram',
+                'color' => 'red'
+            ],
+            
+            // Media & Communications
+            'press_releases' => [
+                'count' => 0,
+                'change' => 0,
+                'previous_period' => 0,
+                'percentage_change' => 0,
+                'title' => 'Press Releases',
+                'icon' => 'fa fa-newspaper',
+                'color' => 'blue'
+            ],
+            'social_media_reach' => [
+                'count' => 0,
+                'change' => 0,
+                'previous_period' => 0,
+                'percentage_change' => 0,
+                'title' => 'Social Media Reach',
+                'icon' => 'fa fa-share-alt',
+                'color' => 'purple'
+            ],
+            
+            // Events & Meetings
+            'upcoming_events' => [
+                'count' => 0,
+                'change' => 0,
+                'previous_period' => 0,
+                'percentage_change' => 0,
+                'title' => 'Upcoming Events',
+                'icon' => 'fa fa-calendar-alt',
+                'color' => 'pink'
+            ],
+            'meetings_this_week' => [
+                'count' => 0,
+                'change' => 0,
+                'previous_period' => 0,
+                'percentage_change' => 0,
+                'title' => 'Meetings This Week',
+                'icon' => 'fa fa-users',
+                'color' => 'teal'
+            ],
+            
+            // Volunteers
+            'active_volunteers' => [
+                'count' => 0,
+                'change' => 0,
+                'previous_period' => 0,
+                'percentage_change' => 0,
+                'title' => 'Active Volunteers',
+                'icon' => 'fa fa-hands-helping',
+                'color' => 'green'
+            ],
+            'volunteer_hours' => [
+                'count' => 0,
+                'change' => 0,
+                'previous_period' => 0,
+                'percentage_change' => 0,
+                'title' => 'Volunteer Hours',
+                'icon' => 'fa fa-clock',
+                'color' => 'orange'
+            ],
+            
+            // Special Interest Groups
+            'youth_members' => [
+                'count' => 0,
+                'change' => 0,
+                'previous_period' => 0,
+                'percentage_change' => 0,
+                'title' => 'Youth Members',
+                'icon' => 'fa fa-child',
+                'color' => 'yellow'
+            ],
+            'women_members' => [
+                'count' => 0,
+                'change' => 0,
+                'previous_period' => 0,
+                'percentage_change' => 0,
+                'title' => 'Women Members',
+                'icon' => 'fa fa-female',
+                'color' => 'pink'
+            ]
+        ];
+
         return Inertia::render('Dashboard', [
             'title' => ucwords($roles[0]) . ' Dashboard',
             'breadcrumbs' => [
@@ -384,18 +469,11 @@ class BackendController extends Controller
                     'label' => 'Dashboard',
                     'url' => route('dashboard')
                 ]
-            ],
+            ],  
             'data' => [
                 'stats' => $stats,
                 'activities' => $activities->toArray(),
-                'featuredServices' => $featuredServices,
-                'featuredDepartments' => $featuredDepartments,
-                'featuredProjects' => $featuredProjects,
                 'roles' => $roles,
-                'canLogin' => Route::has('login'),
-                'canRegister' => Route::has('register'),
-                'laravelVersion' => \Illuminate\Foundation\Application::VERSION,
-                'phpVersion' => PHP_VERSION,
                 'user' => $user
             ],
         ]);
