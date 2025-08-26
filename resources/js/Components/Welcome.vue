@@ -3,11 +3,20 @@
 import { Head, Link, usePage, router } from "@inertiajs/vue3";
 import { computed, onMounted, ref } from "vue";
 import ApplicationLogo from "@/Components/ApplicationLogo.vue";
+import MemberFormModal from '@/Components/MemberFormModal.vue';
 
 const { props } = usePage();
 
 // Tab state management
 const activeTab = ref("personal");
+
+// Modal state
+const showMemberModal = ref(false);
+
+// Toggle member modal
+const toggleMemberModal = () => {
+    showMemberModal.value = !showMemberModal.value;
+};
 
 // Access the authenticated user data
 const user = computed(() => props.auth?.user || null);
@@ -163,6 +172,13 @@ const toggleLibrary = () => {
 // Get the page props
 const pageProps = usePage().props;
 const auth = pageProps.auth;
+
+// Handle member save
+const handleSaveMember = () => {
+    // TODO: Implement member save logic
+    console.log('Saving member...');
+    showMemberModal.value = false;
+};
 
 // Access the nested data property from the Inertia response
 const data = pageProps.data || {};
@@ -464,15 +480,16 @@ const formatChange = (change) => {
                                 These are some quick actions to help you get started.
                             </p>
                             <div class="space-y-2">
-                                <a
-                                    href="#"
-                                    class="flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300"
+                                <button
+                                    type="button"
+                                    @click="toggleMemberModal"
+                                    class="w-full text-left flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300"
                                 >
                                     <i
                                         class="fas fa-plus-circle text-green-500 w-5 h-5 mr-3"
                                     ></i>
                                     <span>Add New Member</span>
-                                </a>
+                                </button>
                                 <a
                                     href="#"
                                     class="flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300"
@@ -799,5 +816,17 @@ const formatChange = (change) => {
                 </div>
             </div>
         </section>
+        
+        <!-- Member Form Modal -->
+        <MemberFormModal 
+            :show="showMemberModal" 
+            :counties="pageProps.locations?.counties || []"
+            :constituencies="pageProps.locations?.constituencies || []"
+            :wards="pageProps.locations?.wards || []"
+            :subCounties="pageProps.locations?.subCounties || []"
+            :subLocations="pageProps.locations?.subLocations || []"
+            @close="showMemberModal = false"
+            @save="handleSaveMember"
+        />
     </div>
 </template>
