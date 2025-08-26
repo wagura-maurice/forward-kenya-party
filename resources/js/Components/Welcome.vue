@@ -1,3 +1,4 @@
+<!-- resources/js/Components/Welcome.vue -->
 <script setup>
 import { Head, Link, usePage, router } from "@inertiajs/vue3";
 import { computed, onMounted, ref } from "vue";
@@ -177,35 +178,32 @@ console.log('Nested data:', data);
 
 // Get the stats from the data object, handling both direct and nested structures
 const stats = data?.stats || data?.data?.stats || {
-    total_members: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
-    active_users: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
-    new_members_this_month: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
-    engagement_rate: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
-    donations: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
-    monthly_subscriptions: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
-    membership_fees: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
-    pending_approvals: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
-    candidates: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
-    nomination_papers: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
-    compliance_items: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
-    deadlines: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
-    departments: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
-    projects: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
-    services: { count: 0, change: 0, previous_period: 0, percentage_change: 0 },
-    press_releases: { count: 0, change: 0 },
-    social_media_reach: { count: 0, change: 0 },
-    upcoming_events: { count: 0, change: 0 },
-    meetings_this_week: { count: 0, change: 0 },
-    active_volunteers: { count: 0, change: 0 },
-    volunteer_hours: { count: 0, change: 0 },
-    youth_members: { count: 0, change: 0 },
-    women_members: { count: 0, change: 0 },
+    total_users: { count: 0, change: 0, title: 'Total Users', icon: 'fa-users', color: 'blue' },
+    active_users: { count: 0, change: 0, title: 'Active Users', icon: 'fa-user-check', color: 'green' },
+    new_members_this_month: { count: 0, change: 0, title: 'New Members This Month', icon: 'fa-user-plus', color: 'purple' },
+    engagement_rate: { count: 0, change: 0, title: 'Engagement Rate', icon: 'fa-chart-line', color: 'yellow' },
+    donations: { count: 0, change: 0, title: 'Donations', icon: 'fa-donate', color: 'indigo' },
+    monthly_subscriptions: { count: 0, change: 0, title: 'Monthly Subscriptions', icon: 'fa-calendar-alt', color: 'pink' },
+    membership_fees: { count: 0, change: 0, title: 'Membership Fees', icon: 'fa-id-card', color: 'red' },
+    pending_approvals: { count: 0, change: 0, title: 'Pending Approvals', icon: 'fa-clock', color: 'orange' },
+    candidates: { count: 0, change: 0, title: 'Candidates', icon: 'fa-user-tie', color: 'teal' },
+    nomination_papers: { count: 0, change: 0, title: 'Nomination Papers', icon: 'fa-file-signature', color: 'blue' },
+    compliance_items: { count: 0, change: 0, title: 'Compliance Items', icon: 'fa-clipboard-check', color: 'green' },
+    deadlines: { count: 0, change: 0, title: 'Deadlines', icon: 'fa-clock', color: 'red' },
+    departments: { count: 0, change: 0, title: 'Departments', icon: 'fa-building', color: 'indigo' },
+    services: { count: 0, change: 0, title: 'Services', icon: 'fa-concierge-bell', color: 'purple' },
+    projects: { count: 0, change: 0, title: 'Projects', icon: 'fa-project-diagram', color: 'yellow' },
+    press_releases: { count: 0, change: 0, title: 'Press Releases', icon: 'fa-newspaper', color: 'blue' },
+    social_media_reach: { count: 0, change: 0, title: 'Social Media Reach', icon: 'fa-share-alt', color: 'pink' },
+    upcoming_events: { count: 0, change: 0, title: 'Upcoming Events', icon: 'fa-calendar-alt', color: 'green' },
+    meetings_this_week: { count: 0, change: 0, title: 'Meetings This Week', icon: 'fa-users', color: 'indigo' },
+    active_volunteers: { count: 0, change: 0, title: 'Active Volunteers', icon: 'fa-hands-helping', color: 'orange' },
+    volunteer_hours: { count: 0, change: 0, title: 'Volunteer Hours', icon: 'fa-clock', color: 'teal' },
+    youth_members: { count: 0, change: 0, title: 'Youth Members', icon: 'fa-user-graduate', color: 'blue' },
+    women_members: { count: 0, change: 0, title: 'Women Members', icon: 'fa-female', color: 'pink' }
 };
 
 // Get other data with proper fallbacks, using optional chaining for safety
-const featuredServices = data?.featuredServices || data?.data?.featuredServices || [];
-const featuredDepartments = data?.featuredDepartments || data?.data?.featuredDepartments || [];
-const featuredProjects = data?.featuredProjects || data?.data?.featuredProjects || [];
 const activities = data?.activities || data?.data?.activities || [];
 const roles = data?.roles || data?.data?.roles || [];
 const userData = data?.user || data?.data?.user || null;
@@ -266,126 +264,43 @@ const formatChange = (change) => {
                     class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10"
                 >
                     <!-- Stat Card Component -->
-                    <template
-                        v-for="(stat, key) in [
-                            {
-                                key: 'total_users',
-                                title: 'Total Users',
-                                icon: 'users',
-                                color: 'blue',
-                                iconClass: 'fas fa-users',
-                            },
-                            {
-                                key: 'active_users',
-                                title: 'Active Members',
-                                icon: 'user-check',
-                                color: 'green',
-                                iconClass: 'fas fa-user-check',
-                            },
-                            {
-                                key: 'branches',
-                                title: 'Branches',
-                                icon: 'code-branch',
-                                color: 'purple',
-                                iconClass: 'fas fa-code-branch',
-                            },
-                            {
-                                key: 'partnerships',
-                                title: 'Partnerships',
-                                icon: 'handshake',
-                                color: 'yellow',
-                                iconClass: 'fas fa-handshake',
-                            },
-                            {
-                                key: 'departments',
-                                title: 'Departments',
-                                icon: 'sitemap',
-                                color: 'indigo',
-                                iconClass: 'fas fa-sitemap',
-                            },
-                            {
-                                key: 'services',
-                                title: 'Services',
-                                icon: 'concierge-bell',
-                                color: 'pink',
-                                iconClass: 'fas fa-concierge-bell',
-                            },
-                            {
-                                key: 'projects',
-                                title: 'Projects',
-                                icon: 'project-diagram',
-                                color: 'red',
-                                iconClass: 'fas fa-project-diagram',
-                            },
-                            {
-                                key: 'upcoming_events',
-                                title: 'Upcoming Events',
-                                icon: 'calendar-alt',
-                                color: 'pink',
-                                iconClass: 'fas fa-calendar-alt',
-                            },
-                        ]"
-                        :key="stat.key"
-                    >
+                    <template v-for="(stat, key) in Object.entries(stats)" :key="key">
                         <div
                             class="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700 hover:shadow-lg transition-shadow duration-200"
                         >
                             <div class="p-6">
-                                <div class="flex items-start justify-between">
-                                    <div class="flex items-center">
-                                        <div
-                                            :class="[
-                                                'p-3 rounded-full',
-                                                `bg-${stat.color}-100 dark:bg-${stat.color}-900/30 text-${stat.color}-600 dark:text-${stat.color}-400`,
-                                            ]"
-                                        >
-                                            <i
-                                                :class="[
-                                                    stat.iconClass,
-                                                    'text-xl',
-                                                ]"
-                                            ></i>
-                                        </div>
-                                        <div class="ml-4">
-                                            <p
-                                                class="text-sm font-medium text-gray-500 dark:text-gray-400"
-                                            >
-                                                {{ stat.title }}
-                                            </p>
-                                            <p
-                                                class="text-2xl font-semibold text-gray-900 dark:text-white"
-                                            >
-                                                {{
-                                                    stats[stat.key]?.count || 0
-                                                }}
-                                            </p>
-                                        </div>
-                                    </div>
+                                <div class="flex items-center">
                                     <div
-                                        v-if="
-                                            stats[stat.key]?.change !==
-                                            undefined
-                                        "
-                                        class="ml-2 flex flex-col items-end"
+                                        class="p-3 rounded-lg mr-4"
+                                        :class="`bg-${stat[1].color}-50 dark:bg-${stat[1].color}-900/20`"
                                     >
-                                        <span
-                                            :class="[
-                                                'text-xs font-medium',
-                                                formatChange(
-                                                    stats[stat.key]?.change
-                                                ).class,
-                                            ]"
-                                        >
-                                            {{
-                                                formatChange(
-                                                    stats[stat.key]?.change
-                                                ).text
-                                            }}
-                                        </span>
-                                        <span
-                                            class="text-xs text-gray-400 mt-0.5"
-                                            >vs last month</span
-                                        >
+                                        <i
+                                            :class="`${stat[1].icon} text-${stat[1].color}-500 dark:text-${stat[1].color}-400 text-xl`"
+                                        ></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-medium text-gray-500 dark:text-gray-400">
+                                            {{ stat[1].title }}
+                                        </p>
+                                        <div class="flex items-center">
+                                            <p class="text-2xl font-semibold text-gray-900 dark:text-white">
+                                                {{ stat[1].count?.toLocaleString() }}
+                                            </p>
+                                            <span
+                                                v-if="stat[1].change !== undefined"
+                                                class="ml-2 text-sm font-medium"
+                                                :class="{
+                                                    'text-green-500 dark:text-green-400': stat[1].change > 0,
+                                                    'text-red-500 dark:text-red-400': stat[1].change < 0,
+                                                    'text-gray-500': stat[1].change === 0
+                                                }"
+                                            >
+                                                {{ stat[1].change > 0 ? '+' : '' }}{{ stat[1].change }}{{ stat[1].change !== 0 ? '%' : '' }}
+                                            </span>
+                                        </div>
+                                        <p v-if="stat[1].percentage_change !== undefined" class="text-xs text-gray-500 dark:text-gray-400">
+                                            {{ stat[1].percentage_change > 0 ? '+' : '' }}{{ stat[1].percentage_change }}% from last period
+                                        </p>
                                     </div>
                                 </div>
                             </div>

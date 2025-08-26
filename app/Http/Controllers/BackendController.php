@@ -1,5 +1,5 @@
 <?php
-
+// app/Http/Controllers/BackendController.php
 namespace App\Http\Controllers;
 
 use App\Models\User;
@@ -125,18 +125,15 @@ class BackendController extends Controller
                 ];
             });
 
-        // Get statistics with percentage changes
-        $oneMonthAgo = now()->subMonth();
+        // Calculate date ranges for 30-day comparison
+        $thirtyDaysAgo = now()->subDays(30);
+        $sixtyDaysAgo = now()->subDays(60);
         
         // Helper function to calculate percentage change
         $calculateChange = function($current, $previous) {
             if ($previous === 0) return $current > 0 ? 100 : 0;
             return round((($current - $previous) / $previous) * 100, 1);
         };
-        
-        // Calculate date ranges for 30-day comparison
-        $thirtyDaysAgo = now()->subDays(30);
-        $sixtyDaysAgo = now()->subDays(60);
         
         // User statistics
         $currentUsers = User::count();
@@ -179,8 +176,6 @@ class BackendController extends Controller
         // Monthly Contributions (recurring membership fees)
         $currentMonthlyContributions = 0; // TODO: Implement actual query
         $previousMonthlyContributions = 0; // TODO: Implement actual query
-        $currentMembers = $currentUsers; // Using users as members for now
-        $previousMembers = $previousPeriodUsers;
         $currentCandidates = 0; // Implement actual query
         $previousCandidates = 0;
         $currentComplianceItems = 0; // Implement actual query
@@ -221,9 +216,7 @@ class BackendController extends Controller
                 'count' => $currentUsers,
                 'change' => $calculateChange($currentUsers, $previousPeriodUsers),
                 'previous_period' => $previousPeriodUsers,
-                'percentage_change' => $previousPeriodUsers > 0 ? 
-                    round((($currentUsers - $previousPeriodUsers) / $previousPeriodUsers) * 100, 1) : 
-                    ($currentUsers > 0 ? 100 : 0),
+                'percentage_change' => $calculateChange($currentUsers, $previousPeriodUsers),
                 'title' => 'Total Users',
                 'icon' => 'fa fa-users',
                 'color' => 'blue'
@@ -232,9 +225,7 @@ class BackendController extends Controller
                 'count' => $activeUsers,
                 'change' => $calculateChange($activeUsers, $previousActiveUsers),
                 'previous_period' => $previousActiveUsers,
-                'percentage_change' => $previousActiveUsers > 0 ? 
-                    round((($activeUsers - $previousActiveUsers) / $previousActiveUsers) * 100, 1) : 
-                    ($activeUsers > 0 ? 100 : 0),
+                'percentage_change' => $calculateChange($activeUsers, $previousActiveUsers),
                 'title' => 'Active Members',
                 'icon' => 'fa fa-user-check',
                 'color' => 'green'
@@ -243,9 +234,7 @@ class BackendController extends Controller
                 'count' => $newMembersThisMonth,
                 'change' => $calculateChange($newMembersThisMonth, $previousMonthMembers),
                 'previous_period' => $previousMonthMembers,
-                'percentage_change' => $previousMonthMembers > 0 ? 
-                    round((($newMembersThisMonth - $previousMonthMembers) / $previousMonthMembers) * 100, 1) : 
-                    ($newMembersThisMonth > 0 ? 100 : 0),
+                'percentage_change' => $calculateChange($newMembersThisMonth, $previousMonthMembers),
                 'title' => 'New Members This Month',
                 'icon' => 'fa fa-user-plus',
                 'color' => 'teal'
@@ -254,9 +243,7 @@ class BackendController extends Controller
                 'count' => $engagementRate,
                 'change' => $calculateChange($engagementRate, $previousEngagementRate),
                 'previous_period' => $previousEngagementRate,
-                'percentage_change' => $previousEngagementRate > 0 ? 
-                    round((($engagementRate - $previousEngagementRate) / $previousEngagementRate) * 100, 1) : 
-                    ($engagementRate > 0 ? 100 : 0),
+                'percentage_change' => $calculateChange($engagementRate, $previousEngagementRate),
                 'title' => 'Engagement Rate',
                 'icon' => 'fa fa-chart-line',
                 'color' => 'orange'
@@ -276,9 +263,7 @@ class BackendController extends Controller
                 'count' => $currentMonthlyContributions,
                 'change' => $calculateChange($currentMonthlyContributions, $previousMonthlyContributions),
                 'previous_period' => $previousMonthlyContributions,
-                'percentage_change' => $previousMonthlyContributions > 0 ?
-                    round((($currentMonthlyContributions - $previousMonthlyContributions) / $previousMonthlyContributions) * 100, 1) :
-                    ($currentMonthlyContributions > 0 ? 100 : 0),
+                'percentage_change' => $calculateChange($currentMonthlyContributions, $previousMonthlyContributions),
                 'title' => 'Monthly Subscriptions',
                 'icon' => 'fa fa-money-bill-wave',
                 'color' => 'green'
@@ -287,9 +272,7 @@ class BackendController extends Controller
                 'count' => $currentMembershipCollections,
                 'change' => $calculateChange($currentMembershipCollections, $previousMembershipCollections),
                 'previous_period' => $previousMembershipCollections,
-                'percentage_change' => $previousMembershipCollections > 0 ?
-                    round((($currentMembershipCollections - $previousMembershipCollections) / $previousMembershipCollections) * 100, 1) :
-                    ($currentMembershipCollections > 0 ? 100 : 0),
+                'percentage_change' => $calculateChange($currentMembershipCollections, $previousMembershipCollections),
                 'title' => 'Membership Fees',
                 'icon' => 'fa fa-receipt',
                 'color' => 'blue'
@@ -309,9 +292,7 @@ class BackendController extends Controller
                 'count' => $currentCandidates,
                 'change' => $calculateChange($currentCandidates, $previousCandidates),
                 'previous_period' => $previousCandidates,
-                'percentage_change' => $previousCandidates > 0 ? 
-                    round((($currentCandidates - $previousCandidates) / $previousCandidates) * 100, 1) : 
-                    ($currentCandidates > 0 ? 100 : 0),
+                'percentage_change' => $calculateChange($currentCandidates, $previousCandidates),
                 'title' => 'Candidates',
                 'icon' => 'fa fa-user-tie',
                 'color' => 'purple'
@@ -329,9 +310,7 @@ class BackendController extends Controller
                 'count' => $currentComplianceItems,
                 'change' => $calculateChange($currentComplianceItems, $previousComplianceItems),
                 'previous_period' => $previousComplianceItems,
-                'percentage_change' => $previousComplianceItems > 0 ? 
-                    round((($currentComplianceItems - $previousComplianceItems) / $previousComplianceItems) * 100, 1) : 
-                    ($currentComplianceItems > 0 ? 100 : 0),
+                'percentage_change' => $calculateChange($currentComplianceItems, $previousComplianceItems),
                 'title' => 'Compliance Items',
                 'icon' => 'fa fa-tasks',
                 'color' => 'orange'
@@ -351,9 +330,7 @@ class BackendController extends Controller
                 'count' => $currentDepartments,
                 'change' => $calculateChange($currentDepartments, $previousDepartments),
                 'previous_period' => $previousDepartments,
-                'percentage_change' => $previousDepartments > 0 ? 
-                    round((($currentDepartments - $previousDepartments) / $previousDepartments) * 100, 1) : 
-                    ($currentDepartments > 0 ? 100 : 0),
+                'percentage_change' => $calculateChange($currentDepartments, $previousDepartments),
                 'title' => 'Departments',
                 'icon' => 'fa fa-sitemap',
                 'color' => 'indigo'
@@ -362,9 +339,7 @@ class BackendController extends Controller
                 'count' => $currentServices,
                 'change' => $calculateChange($currentServices, $previousServices),
                 'previous_period' => $previousServices,
-                'percentage_change' => $previousServices > 0 ? 
-                    round((($currentServices - $previousServices) / $previousServices) * 100, 1) : 
-                    ($currentServices > 0 ? 100 : 0),
+                'percentage_change' => $calculateChange($currentServices, $previousServices),
                 'title' => 'Services',
                 'icon' => 'fa fa-concierge-bell',
                 'color' => 'pink'
@@ -373,9 +348,7 @@ class BackendController extends Controller
                 'count' => $currentProjects,
                 'change' => $calculateChange($currentProjects, $previousProjects),
                 'previous_period' => $previousProjects,
-                'percentage_change' => $previousProjects > 0 ? 
-                    round((($currentProjects - $previousProjects) / $previousProjects) * 100, 1) : 
-                    ($currentProjects > 0 ? 100 : 0),
+                'percentage_change' => $calculateChange($currentProjects, $previousProjects),
                 'title' => 'Projects',
                 'icon' => 'fa fa-project-diagram',
                 'color' => 'red'
@@ -461,6 +434,22 @@ class BackendController extends Controller
                 'color' => 'pink'
             ]
         ];
+
+        // dd([
+        //     'title' => ucwords($roles[0]) . ' Dashboard',
+        //     'breadcrumbs' => [
+        //         [
+        //             'label' => 'Dashboard',
+        //             'url' => route('dashboard')
+        //         ]
+        //     ],  
+        //     'data' => [
+        //         'stats' => $stats,
+        //         'activities' => $activities->toArray(),
+        //         'roles' => $roles,
+        //         'user' => $user
+        //     ],
+        // ]);
 
         return Inertia::render('Dashboard', [
             'title' => ucwords($roles[0]) . ' Dashboard',
