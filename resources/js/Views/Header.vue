@@ -22,36 +22,36 @@
                         class="flex flex-col md:flex-row space-y-2 md:space-y-0 md:space-x-8 p-4 md:p-0"
                     >
                         <li>
-                            <a
+                            <Link
                                 href="#"
                                 class="block py-2 px-4 text-gray-900 dark:text-white hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 dark:hover:bg-gray-700"
                             >
                                 Home
-                            </a>
+                            </Link>
                         </li>
                         <li>
-                            <a
+                            <Link
                                 href="#"
                                 class="block py-2 px-4 text-gray-900 dark:text-white hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 dark:hover:bg-gray-700"
                             >
                                 About
-                            </a>
+                            </Link>
                         </li>
                         <li>
-                            <a
+                            <Link
                                 href="#"
                                 class="block py-2 px-4 text-gray-900 dark:text-white hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 dark:hover:bg-gray-700"
                             >
                                 Services
-                            </a>
+                            </Link>
                         </li>
                         <li>
-                            <a
+                            <Link
                                 href="#"
                                 class="block py-2 px-4 text-gray-900 dark:text-white hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 dark:hover:bg-gray-700"
                             >
                                 Contact
-                            </a>
+                            </Link>
                         </li>
                     </ul>
                 </nav>

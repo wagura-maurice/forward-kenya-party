@@ -133,32 +133,59 @@ const exportData = () => {
                     <!-- Modal content -->
                     <div class="mt-4">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Export Format -->
-                            <div>
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                    Export Format
-                                </label>
-                                <select
-                                    v-model="form.format"
-                                    class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                                >
-                                    <option value="excel">Excel (.xlsx)</option>
-                                    <option value="csv">CSV (.csv)</option>
-                                    <option value="pdf">PDF (.pdf)</option>
-                                </select>
-                            </div>
+                            <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- Export Format -->
+                                <div class="flex items-center">
+                                    <div class="flex flex-col md:flex-row items-center md:items-stretch">
+                                        <input
+                                            id="format-excel"
+                                            v-model="form.format"
+                                            type="radio"
+                                            value="excel"
+                                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded"
+                                        />
+                                        <label for="format-excel" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                                            Excel (.xlsx)
+                                        </label>
+                                    </div>
+                                    <div class="flex flex-col md:flex-row items-center md:items-stretch">
+                                        <input
+                                            id="format-csv"
+                                            v-model="form.format"
+                                            type="radio"
+                                            value="csv"
+                                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded"
+                                        />
+                                        <label for="format-csv" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                                            CSV (.csv)
+                                        </label>
+                                    </div>
+                                    <div class="flex flex-col md:flex-row items-center md:items-stretch">
+                                        <input
+                                            id="format-pdf"
+                                            v-model="form.format"
+                                            type="radio"
+                                            value="pdf"
+                                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded"
+                                        />
+                                        <label for="format-pdf" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                                            PDF (.pdf)
+                                        </label>
+                                    </div>
+                                </div>
 
-                            <!-- Include Headers -->
-                            <div class="flex items-center">
-                                <input
-                                    id="include-headers"
-                                    v-model="form.include_headers"
-                                    type="checkbox"
-                                    class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded"
-                                />
-                                <label for="include-headers" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
-                                    Include Headers
-                                </label>
+                                <!-- Include Headers -->
+                                <div class="flex items-center">
+                                    <input
+                                        id="include-headers"
+                                        v-model="form.include_headers"
+                                        type="checkbox"
+                                        class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded"
+                                    />
+                                    <label for="include-headers" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
+                                        Include Headers
+                                    </label>
+                                </div>
                             </div>
 
                             <!-- Fields to Export -->
@@ -192,6 +219,8 @@ const exportData = () => {
                                             :value="field.value"
                                             type="checkbox"
                                             class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded"
+                                            :checked="form.fields.length === 1 && form.fields[0] === field.value"
+                                            @change="form.fields = [field.value]"
                                         />
                                         <label :for="`field-${field.value}`" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
                                             {{ field.label }}

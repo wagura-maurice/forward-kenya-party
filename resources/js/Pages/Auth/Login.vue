@@ -111,12 +111,12 @@ const submit = () => {
                 <!-- Sign Up Link -->
                 <p class="text-sm font-light text-gray-500 dark:text-gray-400">
                     Don’t have an account yet?
-                    <a
+                    <Link
                         :href="route('register')"
                         class="font-medium text-green-600 hover:underline hover:decoration-green-600 hover:dark:decoration-green-500 underline-offset-4 dark:text-green-500"
                     >
                         Sign Up
-                    </a>
+                    </Link>
                 </p>
             </form>
         </div>

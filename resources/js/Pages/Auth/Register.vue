@@ -2122,7 +2122,7 @@ const canProceedToNextStep = computed(() => {
                                                     in Kenya. By signing up, I
                                                     agree to the
                                                     <a
-                                                        :href="route('terms-and-conditions')"
+                                                        :href="route('frontend.terms-and-conditions')"
                                                         target="_blank"
                                                         class="text-emerald-600 hover:text-emerald-500 hover:underline underline-offset-4 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-emerald-500 rounded"
                                                     >
@@ -2132,7 +2132,7 @@ const canProceedToNextStep = computed(() => {
                                                         >and</span
                                                     >
                                                     <a
-                                                        :href="route('privacy-policy')"
+                                                        :href="route('frontend.privacy-policy')"
                                                         target="_blank"
                                                         class="text-emerald-600 hover:text-emerald-500 hover:underline underline-offset-4 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-emerald-500 rounded"
                                                     >

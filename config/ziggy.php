@@ -13,18 +13,52 @@ return [
     */
 
     'groups' => [
-        'default' => [
-            'login', 'register', 'logout', 'dashboard', 'otp.send', 'otp.verify',
+        'web' => [
+            'frontend.*',
+            'dashboard',
+            'profile.*',
+            'activity.*',
+            'settings',
+            'verification.*',
+            'frontend.terms-and-conditions',
+            'frontend.privacy-policy',
+            'frontend.help-and-support',
+            'frontend.frequently-asked-questions',
+            'frontend.services',
+            'frontend.show.service',
+            'frontend.departments',
+            'frontend.show.department',
+        ],
+        'auth' => [
+            'auth.*',
+            'verification.*',
+        ],
+        'api' => [
+            'api.*',
+            'light.of.guidances.*',
+            'setting.*',
+            'receipt.*',
+            'notifications.*',
         ],
     ],
 
+    // Exclude any routes that shouldn't be exposed to the frontend
     'except' => [
-        // 
+        'passport.*',
+        'ignition.*',
+        'sanctum.*',
+        'horizon.*',
+        'telescope.*',
     ],
 
-    'only' => [
-        // 
-    ],
+    // If you want to explicitly include only certain routes, uncomment and modify this
+    // 'only' => [
+    //     'frontend.*',
+    //     'dashboard',
+    //     'profile.*',
+    //     'auth.*',
+    //     'verification.*',
+    // ],
 
     'url' => env('APP_URL', 'http://localhost'),
 ];
