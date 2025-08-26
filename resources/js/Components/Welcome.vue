@@ -4,18 +4,30 @@ import { Head, Link, usePage, router } from "@inertiajs/vue3";
 import { computed, onMounted, ref } from "vue";
 import ApplicationLogo from "@/Components/ApplicationLogo.vue";
 import MemberFormModal from '@/Components/MemberFormModal.vue';
+import ImportMembersModal from '@/Components/ImportMembersModal.vue';
+import ExportMembersModal from '@/Components/ExportMembersModal.vue';
 
 const { props } = usePage();
 
 // Tab state management
 const activeTab = ref("personal");
 
-// Modal state
+// Modal states
 const showMemberModal = ref(false);
+const showImportModal = ref(false);
+const showExportModal = ref(false);
 
-// Toggle member modal
+// Toggle modals
 const toggleMemberModal = () => {
     showMemberModal.value = !showMemberModal.value;
+};
+
+const toggleImportModal = () => {
+    showImportModal.value = !showImportModal.value;
+};
+
+const toggleExportModal = () => {
+    showExportModal.value = !showExportModal.value;
 };
 
 // Access the authenticated user data
@@ -174,10 +186,21 @@ const pageProps = usePage().props;
 const auth = pageProps.auth;
 
 // Handle member save
-const handleSaveMember = () => {
-    // TODO: Implement member save logic
-    console.log('Saving member...');
+const handleSaveMember = (form) => {
+    // Handle member save logic here
     showMemberModal.value = false;
+};
+
+// Handle member import
+const handleImportMembers = () => {
+    // Handle import success logic
+    showImportModal.value = false;
+};
+
+// Handle member export
+const handleExportMembers = () => {
+    // Handle export success logic
+    showExportModal.value = false;
 };
 
 // Access the nested data property from the Inertia response
@@ -490,33 +513,26 @@ const formatChange = (change) => {
                                     ></i>
                                     <span>Add New Member</span>
                                 </button>
-                                <a
-                                    href="#"
-                                    class="flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300"
+                                <button
+                                    type="button"
+                                    @click="toggleImportModal"
+                                    class="w-full text-left flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300"
                                 >
                                     <i
                                         class="fas fa-file-import text-blue-500 w-5 h-5 mr-3"
                                     ></i>
                                     <span>Import Members</span>
-                                </a>
-                                <a
-                                    href="#"
-                                    class="flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300"
+                                </button>
+                                <button
+                                    type="button"
+                                    @click="toggleExportModal"
+                                    class="w-full text-left flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300"
                                 >
                                     <i
                                         class="fas fa-file-export text-purple-500 w-5 h-5 mr-3"
                                     ></i>
                                     <span>Export Members</span>
-                                </a>
-                                <a
-                                    href="#"
-                                    class="flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300"
-                                >
-                                    <i
-                                        class="fas fa-pen-nib text-yellow-500 w-5 h-5 mr-3"
-                                    ></i>
-                                    <span>Update Member</span>
-                                </a>
+                                </button>
                                 <Link
                                     :href="route('settings')"
                                     class="flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300"
@@ -825,8 +841,22 @@ const formatChange = (change) => {
             :wards="pageProps.locations?.wards || []"
             :subCounties="pageProps.locations?.subCounties || []"
             :subLocations="pageProps.locations?.subLocations || []"
-            @close="showMemberModal = false"
+            @close="toggleMemberModal"
             @save="handleSaveMember"
+        />
+
+        <!-- Import Members Modal -->
+        <ImportMembersModal 
+            :show="showImportModal" 
+            @close="toggleImportModal"
+            @import="handleImportMembers"
+        />
+
+        <!-- Export Members Modal -->
+        <ExportMembersModal 
+            :show="showExportModal" 
+            @close="toggleExportModal"
+            @export="handleExportMembers"
         />
     </div>
 </template>

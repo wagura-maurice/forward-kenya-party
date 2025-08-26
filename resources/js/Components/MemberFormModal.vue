@@ -11,19 +11,31 @@ const props = defineProps({
         type: Boolean,
         default: false
     },
-    onClose: {
-        type: Function,
-        default: () => {}
+    isEditMode: {
+        type: Boolean,
+        default: false
     },
-    onSave: {
-        type: Function,
-        default: () => {}
-    },
-    formData: {
+    memberData: {
         type: Object,
         default: () => ({})
     },
+    counties: {
+        type: Array,
+        default: () => []
+    },
+    constituencies: {
+        type: Array,
+        default: () => []
+    },
     wards: {
+        type: Array,
+        default: () => []
+    },
+    subCounties: {
+        type: Array,
+        default: () => []
+    },
+    subLocations: {
         type: Array,
         default: () => []
     }
@@ -31,8 +43,8 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'save']);
 
-// Form state
-const form = useForm({
+// Initialize form with default values
+const defaultFormData = {
     // Step 1: Personal Information
     surname: '',
     other_names: '',
@@ -48,18 +60,28 @@ const form = useForm({
     ward_id: null,
     polling_station: '',
     
-    // Step 3: Additional Information
+    // Initialize other form fields with default values
     occupation: '',
     education_level: '',
-    is_pwd: false,
-    pwd_disability: '',
-    ncpwd_number: ''
-});
+    disability_status: false,
+    disability_description: '',
+    next_of_kin_name: '',
+    next_of_kin_phone: '',
+    next_of_kin_relationship: ''
+};
+
+// Initialize form with member data if in edit mode
+const initializeForm = () => {
+    if (props.isEditMode && props.memberData) {
+        return { ...defaultFormData, ...props.memberData };
+    }
+    return { ...defaultFormData };
+};
+
+// Form state
+const form = useForm(initializeForm());
 
 // Location data and loading states
-const counties = computed(() => props.formData?.locations?.counties || []);
-const constituencies = computed(() => props.formData?.locations?.constituencies || []);
-const wards = computed(() => props.formData?.locations?.wards || []);
 const isLoadingConstituencies = ref(false);
 const isLoadingWards = ref(false);
 
@@ -72,7 +94,7 @@ const filteredConstituencies = computed(() => {
 // Filter wards based on selected constituency
 const filteredWards = computed(() => {
     if (!form.constituency_id) return [];
-    return wards.value.filter(w => w.constituency_id == form.constituency_id);
+    return props.wards.filter(w => w.constituency_id == form.constituency_id);
 });
 
 // Watch for county changes to reset dependent fields
@@ -102,8 +124,25 @@ const close = () => {
 
 // Save form data
 const save = () => {
-    emit('save', form);
-    close();
+    if (props.isEditMode) {
+        // Handle update
+        form.put(route('members.update', form.id), {
+            preserveScroll: true,
+            onSuccess: () => {
+                emit('save', form);
+                close();
+            },
+        });
+    } else {
+        // Handle create
+        form.post(route('members.store'), {
+            preserveScroll: true,
+            onSuccess: () => {
+                emit('save', form);
+                close();
+            },
+        });
+    }
 };
 
 // Navigation functions
@@ -180,6 +219,7 @@ const validateStep = (step) => {
 // Reset form
 const resetForm = () => {
     form.reset();
+    form.fill(initializeForm());
     currentStep.value = 1;
 };
 
@@ -210,17 +250,24 @@ onBeforeUnmount(() => {
 
             <!-- Modal panel -->
             <div class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg px-6 pt-5 pb-6 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-2xl sm:w-full sm:p-8 relative">
-                <!-- Close button -->
-                <button 
-                    type="button" 
-                    @click="close"
-                    class="absolute top-4 right-4 text-gray-400 hover:text-gray-500 focus:outline-none"
-                >
-                    <span class="sr-only">Close</span>
-                    <i class="fas fa-times h-6 w-6"></i>
-                </button>
-
                 <div class="w-full">
+                    <!-- Modal header -->
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                            {{ isEditMode ? 'Update Member' : 'Add New Member' }}
+                        </h3>
+                        <button 
+                            type="button" 
+                            @click="close"
+                            class="text-gray-400 hover:text-gray-500 focus:outline-none"
+                        >
+                            <span class="sr-only">Close</span>
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
                     <!-- Progress Steps -->
                     <div class="mb-6">
                         <div class="flex justify-between mb-2">
