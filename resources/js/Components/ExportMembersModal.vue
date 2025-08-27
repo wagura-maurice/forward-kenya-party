@@ -1,6 +1,6 @@
 <script setup>
-import { ref } from 'vue';
-import { useForm } from '@inertiajs/vue3';
+import { ref, computed, watch } from 'vue';
+import { useForm, usePage } from '@inertiajs/vue3';
 
 defineProps({
     show: {
@@ -24,25 +24,100 @@ const isFieldsExpanded = ref(true);
 const isLocationFiltersExpanded = ref(true);
 const isDateFiltersExpanded = ref(true);
 
+// Location data handling
+const constituencies = ref([]);
+const wards = ref([]);
+const pollingStations = ref([]);
+const isLoadingConstituencies = ref(false);
+const isLoadingWards = ref(false);
+const isLoadingPollingStations = ref(false);
+
+// Get location data from the page props
+const page = usePage();
+// console.log('Page props:', page.props.formData.locations.counties);
+
+// Use the form data from props
+const counties = computed(() => page.props.formData.locations.counties || []);
+
+// Initialize form
 const form = useForm({
     format: 'excel',
     include_headers: true,
-    fields: ['surname', 'other_names', 'id_number', 'phone', 'email', 'county', 'constituency', 'ward', 'polling_station'],
+    fields: ['surname', 'other_names', 'id_number', 'telephone', 'email', 'gender', 'date_of_birth', 'county', 'constituency', 'ward', 'polling_station', 'occupation', 'education_level', 'disability_status', 'ncpwd_number', 'created_at'],
     filters: {
         county_id: null,
         constituency_id: null,
         ward_id: null,
-        polling_station: null,
+        polling_station_id: null,
         date_from: '',
         date_to: ''
     }
 });
 
+// Watch for county changes to filter constituencies
+watch(
+    () => form.filters.county_id,
+    (newCountyId) => {
+        if (newCountyId) {
+            const filtered = page.props.formData.locations?.constituencies?.filter(
+                (c) => c.county_id == newCountyId
+            ) || [];
+            constituencies.value = filtered;
+        } else {
+            constituencies.value = [];
+        }
+        // Reset dependent fields
+        form.filters.constituency_id = null;
+        form.filters.ward_id = null;
+        form.filters.polling_station_id = null;
+        wards.value = [];
+        pollingStations.value = [];
+    },
+    { immediate: true }
+);
+
+// Watch for constituency changes to filter wards
+watch(
+    () => form.filters.constituency_id,
+    (newConstituencyId) => {
+        if (newConstituencyId) {
+            const filtered = page.props.formData.locations?.wards?.filter(
+                (w) => w.constituency_id == newConstituencyId
+            ) || [];
+            wards.value = filtered;
+        } else {
+            wards.value = [];
+        }
+        // Reset dependent field
+        form.filters.ward_id = null;
+        form.filters.polling_station_id = null;
+        pollingStations.value = [];
+    },
+    { immediate: true }
+);
+
+// Watch for ward changes to filter polling stations
+watch(
+    () => form.filters.ward_id,
+    (newWardId) => {
+        if (newWardId) {
+            const filtered = page.props.formData.locations?.polling_stations?.filter(
+                (ps) => ps.ward_id == newWardId
+            ) || [];
+            pollingStations.value = filtered;
+        } else {
+            pollingStations.value = [];
+            form.filters.polling_station_id = null;
+        }
+    },
+    { immediate: true }
+);
+
 const availableFields = [
     { value: 'surname', label: 'Surname' },
     { value: 'other_names', label: 'Other Names' },
     { value: 'id_number', label: 'ID Number' },
-    { value: 'phone', label: 'Phone' },
+    { value: 'telephone', label: 'Telephone' },
     { value: 'email', label: 'Email' },
     { value: 'gender', label: 'Gender' },
     { value: 'date_of_birth', label: 'Date of Birth' },
@@ -52,8 +127,7 @@ const availableFields = [
     { value: 'polling_station', label: 'Polling Station' },
     { value: 'occupation', label: 'Occupation' },
     { value: 'education_level', label: 'Education Level' },
-    { value: 'is_pwd', label: 'Is PWD' },
-    { value: 'pwd_disability', label: 'PWD Disability' },
+    { value: 'disability_status', label: 'Disability Status' },
     { value: 'ncpwd_number', label: 'NCPWD Number' },
     { value: 'created_at', label: 'Date Registered' }
 ];
@@ -133,44 +207,49 @@ const exportData = () => {
                     <!-- Modal content -->
                     <div class="mt-4">
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="md:col-span-2 space-y-4">
                                 <!-- Export Format -->
-                                <div class="flex items-center">
-                                    <div class="flex flex-col md:flex-row items-center md:items-stretch">
-                                        <input
-                                            id="format-excel"
-                                            v-model="form.format"
-                                            type="radio"
-                                            value="excel"
-                                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded"
-                                        />
-                                        <label for="format-excel" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
-                                            Excel (.xlsx)
-                                        </label>
-                                    </div>
-                                    <div class="flex flex-col md:flex-row items-center md:items-stretch">
-                                        <input
-                                            id="format-csv"
-                                            v-model="form.format"
-                                            type="radio"
-                                            value="csv"
-                                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded"
-                                        />
-                                        <label for="format-csv" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
-                                            CSV (.csv)
-                                        </label>
-                                    </div>
-                                    <div class="flex flex-col md:flex-row items-center md:items-stretch">
-                                        <input
-                                            id="format-pdf"
-                                            v-model="form.format"
-                                            type="radio"
-                                            value="pdf"
-                                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded"
-                                        />
-                                        <label for="format-pdf" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
-                                            PDF (.pdf)
-                                        </label>
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                                        Export Format
+                                    </label>
+                                    <div class="flex flex-wrap items-center gap-6">
+                                        <div class="flex items-center space-x-2">
+                                            <input
+                                                id="format-excel"
+                                                v-model="form.format"
+                                                type="radio"
+                                                value="excel"
+                                                class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600"
+                                            />
+                                            <label for="format-excel" class="text-sm text-gray-700 dark:text-gray-300">
+                                                Excel (.xlsx)
+                                            </label>
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            <input
+                                                id="format-csv"
+                                                v-model="form.format"
+                                                type="radio"
+                                                value="csv"
+                                                class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600"
+                                            />
+                                            <label for="format-csv" class="text-sm text-gray-700 dark:text-gray-300">
+                                                CSV (.csv)
+                                            </label>
+                                        </div>
+                                        <div class="flex items-center space-x-2">
+                                            <input
+                                                id="format-pdf"
+                                                v-model="form.format"
+                                                type="radio"
+                                                value="pdf"
+                                                class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600"
+                                            />
+                                            <label for="format-pdf" class="text-sm text-gray-700 dark:text-gray-300">
+                                                PDF (.pdf)
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -179,8 +258,10 @@ const exportData = () => {
                                     <input
                                         id="include-headers"
                                         v-model="form.include_headers"
+                                        :checked="true"
                                         type="checkbox"
                                         class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded"
+                                        :disabled="true"
                                     />
                                     <label for="include-headers" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
                                         Include Headers
@@ -219,8 +300,6 @@ const exportData = () => {
                                             :value="field.value"
                                             type="checkbox"
                                             class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded"
-                                            :checked="form.fields.length === 1 && form.fields[0] === field.value"
-                                            @change="form.fields = [field.value]"
                                         />
                                         <label :for="`field-${field.value}`" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
                                             {{ field.label }}
@@ -253,6 +332,7 @@ const exportData = () => {
                                     </svg>
                                 </button>
                                 <div v-if="isLocationFiltersExpanded" class="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <!-- County -->
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                             County
@@ -260,48 +340,64 @@ const exportData = () => {
                                         <select
                                             v-model="form.filters.county_id"
                                             class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                                            :class="{ 'opacity-50': isLoadingConstituencies }"
+                                            :disabled="isLoadingConstituencies"
                                         >
-                                            <option :value="null">All Counties</option>
-                                            <!-- Add county options here if needed -->
+                                            <option :value="null">Select County</option>
+                                            <option v-for="county in counties" :key="county.id" :value="county.id" :capitalize>
+                                                {{ county.name }}
+                                            </option>
                                         </select>
                                     </div>
+
+                                    <!-- Constituency -->
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                             Constituency
                                         </label>
                                         <select
                                             v-model="form.filters.constituency_id"
-                                            :disabled="!form.filters.county_id"
+                                            :disabled="!form.filters.county_id || isLoadingWards"
                                             class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md disabled:opacity-50"
                                         >
-                                            <option :value="null">All Constituencies</option>
-                                            <!-- Add constituency options here if needed -->
+                                            <option :value="null">Select Constituency</option>
+                                            <option v-for="constituency in constituencies" :key="constituency.id" :value="constituency.id" :capitalize>
+                                                {{ constituency.name }}
+                                            </option>
                                         </select>
                                     </div>
+
+                                    <!-- Ward -->
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                             Ward
                                         </label>
                                         <select
                                             v-model="form.filters.ward_id"
-                                            :disabled="!form.filters.constituency_id"
+                                            :disabled="!form.filters.constituency_id || isLoadingPollingStations"
                                             class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md disabled:opacity-50"
                                         >
-                                            <option :value="null">All Wards</option>
-                                            <!-- Add ward options here if needed -->
+                                            <option :value="null">Select Ward</option>
+                                            <option v-for="ward in wards" :key="ward.id" :value="ward.id" :capitalize>
+                                                {{ ward.name }}
+                                            </option>
                                         </select>
                                     </div>
+
+                                    <!-- Polling Station -->
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                             Polling Station
                                         </label>
                                         <select
-                                            v-model="form.filters.polling_station"
-                                            :disabled="!form.filters.ward_id"
+                                            v-model="form.filters.polling_station_id"
+                                            :disabled="!form.filters.ward_id || pollingStations.length === 0"
                                             class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md disabled:opacity-50"
                                         >
-                                            <option :value="null">All Polling Stations</option>
-                                            <!-- Add polling station options here if needed -->
+                                            <option :value="null">Select Polling Station</option>
+                                            <option v-for="station in pollingStations" :key="station.id" :value="station.id" :capitalize>
+                                                {{ station.name }}
+                                            </option>
                                         </select>
                                     </div>
                                 </div>

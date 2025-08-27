@@ -259,7 +259,7 @@
     ]
   },
   "resources/js/Pages/Auth/Login.vue": {
-    "file": "assets/Login-Dqn1Sazt.js",
+    "file": "assets/Login-Bg4oprPU.js",
     "name": "Login",
     "src": "resources/js/Pages/Auth/Login.vue",
     "isDynamicEntry": true,
@@ -276,7 +276,7 @@
     ]
   },
   "resources/js/Pages/Auth/Register.vue": {
-    "file": "assets/Register-BtxkslvW.js",
+    "file": "assets/Register-D9kAEfWR.js",
     "name": "Register",
     "src": "resources/js/Pages/Auth/Register.vue",
     "isDynamicEntry": true,
@@ -336,7 +336,7 @@
     ]
   },
   "resources/js/Pages/Dashboard.vue": {
-    "file": "assets/Dashboard-Cehx6BOH.js",
+    "file": "assets/Dashboard-BHQkBzh2.js",
     "name": "Dashboard",
     "src": "resources/js/Pages/Dashboard.vue",
     "isDynamicEntry": true,
@@ -664,7 +664,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-kAniATSu.js",
+    "file": "assets/app-BNJBNUAY.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -709,7 +709,7 @@
       "resources/js/Pages/Welcome.vue"
     ],
     "css": [
-      "assets/app-OrpOkwNz.css"
+      "assets/app-BOQvq616.css"
     ],
     "assets": [
       "assets/fa-brands-400-D_cYUPeE.woff2",
