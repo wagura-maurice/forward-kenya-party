@@ -55,11 +55,11 @@ return new class extends Migration
                   ->constrained('villages')
                   ->nullOnDelete()
                   ->comment('Reference to the villages table');
-            $table->foreignId('polling_station_id')
+            $table->foreignId('polling_center_id')
                   ->nullable()
-                  ->constrained('polling_stations')
+                  ->constrained('polling_centers')
                   ->nullOnDelete()
-                  ->comment('Reference to the polling_stations table');
+                  ->comment('Reference to the polling_centers table');
             $table->foreignId('consulate_id')
                   ->nullable()
                   ->constrained('consulates')
