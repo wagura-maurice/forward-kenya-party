@@ -5,6 +5,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Request;
 use App\Http\Controllers\BackendController;
+use App\Http\Controllers\ExportController;
+use App\Http\Controllers\ImportController;
 use App\Http\Controllers\FrontendController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
@@ -36,6 +38,12 @@ Route::middleware([
     // Profile
     Route::get('/profile', [BackendController::class, 'profile'])->name('profile');
     Route::get('/profile/{user_id}/view', [BackendController::class, 'viewProfile'])->name('profile.view');
+
+    // Import
+    Route::get('/import/membership', [ImportController::class, 'importMembership'])->name('import.membership');
+
+    // Export
+    Route::get('/export/membership', [ExportController::class, 'exportMembership'])->name('export.membership');
 
     // Activity
     Route::get('/activity', [BackendController::class, 'activity'])->name('activity');
