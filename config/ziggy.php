@@ -29,6 +29,9 @@ return [
             'frontend.departments',
             'frontend.show.department',
         ],
+        'export' => [
+            'export.*',
+        ],
         'auth' => [
             'auth.*',
             'verification.*',
