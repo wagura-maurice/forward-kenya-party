@@ -336,7 +336,7 @@
     ]
   },
   "resources/js/Pages/Dashboard.vue": {
-    "file": "assets/Dashboard-BHQkBzh2.js",
+    "file": "assets/Dashboard-C5XYOjgA.js",
     "name": "Dashboard",
     "src": "resources/js/Pages/Dashboard.vue",
     "isDynamicEntry": true,
@@ -344,7 +344,11 @@
       "_vendor-DmCWM84H.js",
       "_AppLayout-9Uk9vfcH.js",
       "_vue-select-DxqfLbiP.js",
-      "_InputError-CfRDvhJ1.js"
+      "_InputError-CfRDvhJ1.js",
+      "__plugin-vue_export-helper-DlAUqK2U.js"
+    ],
+    "css": [
+      "assets/Dashboard-u50cMBlP.css"
     ]
   },
   "resources/js/Pages/Frontend/AboutUs.vue": {
@@ -664,7 +668,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-BNJBNUAY.js",
+    "file": "assets/app-CodLi8Kd.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -709,7 +713,7 @@
       "resources/js/Pages/Welcome.vue"
     ],
     "css": [
-      "assets/app-BOQvq616.css"
+      "assets/app-0ln7PpSs.css"
     ],
     "assets": [
       "assets/fa-brands-400-D_cYUPeE.woff2",
