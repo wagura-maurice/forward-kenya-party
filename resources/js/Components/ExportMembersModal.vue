@@ -27,10 +27,10 @@ const isDateFiltersExpanded = ref(true);
 // Location data handling
 const constituencies = ref([]);
 const wards = ref([]);
-const pollingStations = ref([]);
+const pollingCenters = ref([]);
 const isLoadingConstituencies = ref(false);
 const isLoadingWards = ref(false);
-const isLoadingPollingStations = ref(false);
+const isLoadingPollingCenters = ref(false);
 
 // Get location data from the page props
 const page = usePage();
@@ -43,12 +43,12 @@ const counties = computed(() => page.props.formData.locations.counties || []);
 const form = useForm({
     format: 'excel',
     include_headers: true,
-    fields: ['surname', 'other_names', 'id_number', 'telephone', 'email', 'gender', 'date_of_birth', 'county', 'constituency', 'ward', 'polling_station', 'occupation', 'education_level', 'disability_status', 'ncpwd_number', 'created_at'],
+    fields: ['surname', 'other_names', 'id_number', 'telephone', 'email', 'gender', 'date_of_birth', 'county', 'constituency', 'ward', 'polling_center', 'occupation', 'education_level', 'disability_status', 'ncpwd_number', 'created_at'],
     filters: {
         county_id: null,
         constituency_id: null,
         ward_id: null,
-        polling_station_id: null,
+        polling_center_id: null,
         date_from: '',
         date_to: ''
     }
@@ -69,9 +69,9 @@ watch(
         // Reset dependent fields
         form.filters.constituency_id = null;
         form.filters.ward_id = null;
-        form.filters.polling_station_id = null;
+        form.filters.polling_center_id = null;
         wards.value = [];
-        pollingStations.value = [];
+        pollingCenters.value = [];
     },
     { immediate: true }
 );
@@ -90,24 +90,24 @@ watch(
         }
         // Reset dependent field
         form.filters.ward_id = null;
-        form.filters.polling_station_id = null;
-        pollingStations.value = [];
+        form.filters.polling_center_id = null;
+        pollingCenters.value = [];
     },
     { immediate: true }
 );
 
-// Watch for ward changes to filter polling stations
+// Watch for ward changes to filter polling centers
 watch(
     () => form.filters.ward_id,
     (newWardId) => {
         if (newWardId) {
-            const filtered = page.props.formData.locations?.polling_stations?.filter(
+            const filtered = page.props.formData.locations?.polling_centers?.filter(
                 (ps) => ps.ward_id == newWardId
             ) || [];
-            pollingStations.value = filtered;
+            pollingCenters.value = filtered;
         } else {
-            pollingStations.value = [];
-            form.filters.polling_station_id = null;
+            pollingCenters.value = [];
+            form.filters.polling_center_id = null;
         }
     },
     { immediate: true }
@@ -124,7 +124,7 @@ const availableFields = [
     { value: 'county', label: 'County' },
     { value: 'constituency', label: 'Constituency' },
     { value: 'ward', label: 'Ward' },
-    { value: 'polling_station', label: 'Polling Station' },
+    { value: 'polling_center', label: 'Polling Center' },
     { value: 'occupation', label: 'Occupation' },
     { value: 'education_level', label: 'Education Level' },
     { value: 'disability_status', label: 'Disability Status' },
@@ -170,7 +170,7 @@ const exportData = () => {
     });
     
     // Trigger download
-    window.location.href = route('members.export') + '?' + queryParams.toString();
+    window.location.href = route('export.membership') + '?' + queryParams.toString();
     
     // Emit event and close
     emit('export');
@@ -213,8 +213,8 @@ const exportData = () => {
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                                         Export Format
                                     </label>
-                                    <div class="flex flex-wrap items-center gap-6">
-                                        <div class="flex items-center space-x-2">
+                                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                        <div class="flex items-center p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                                             <input
                                                 id="format-excel"
                                                 v-model="form.format"
@@ -222,11 +222,12 @@ const exportData = () => {
                                                 value="excel"
                                                 class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600"
                                             />
-                                            <label for="format-excel" class="text-sm text-gray-700 dark:text-gray-300">
-                                                Excel (.xlsx)
+                                            <label for="format-excel" class="ml-3 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                <span class="block">Excel</span>
+                                                <span class="text-xs text-gray-500 dark:text-gray-400">.xlsx</span>
                                             </label>
                                         </div>
-                                        <div class="flex items-center space-x-2">
+                                        <div class="flex items-center p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                                             <input
                                                 id="format-csv"
                                                 v-model="form.format"
@@ -234,11 +235,12 @@ const exportData = () => {
                                                 value="csv"
                                                 class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600"
                                             />
-                                            <label for="format-csv" class="text-sm text-gray-700 dark:text-gray-300">
-                                                CSV (.csv)
+                                            <label for="format-csv" class="ml-3 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                <span class="block">CSV</span>
+                                                <span class="text-xs text-gray-500 dark:text-gray-400">.csv</span>
                                             </label>
                                         </div>
-                                        <div class="flex items-center space-x-2">
+                                        <div class="flex items-center p-3 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                                             <input
                                                 id="format-pdf"
                                                 v-model="form.format"
@@ -246,25 +248,27 @@ const exportData = () => {
                                                 value="pdf"
                                                 class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600"
                                             />
-                                            <label for="format-pdf" class="text-sm text-gray-700 dark:text-gray-300">
-                                                PDF (.pdf)
+                                            <label for="format-pdf" class="ml-3 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                <span class="block">PDF</span>
+                                                <span class="text-xs text-gray-500 dark:text-gray-400">.pdf</span>
                                             </label>
                                         </div>
                                     </div>
                                 </div>
 
                                 <!-- Include Headers -->
-                                <div class="flex items-center">
+                                <div class="flex items-center p-3 bg-gray-50 dark:bg-gray-700 rounded-md border border-gray-200 dark:border-gray-600">
                                     <input
                                         id="include-headers"
                                         v-model="form.include_headers"
-                                        :checked="true"
                                         type="checkbox"
+                                        checked
+                                        disabled
                                         class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded"
-                                        :disabled="true"
                                     />
-                                    <label for="include-headers" class="ml-2 block text-sm text-gray-700 dark:text-gray-300">
-                                        Include Headers
+                                    <label for="include-headers" class="ml-3 block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        <span class="block">Include Headers</span>
+                                        <span class="text-xs text-gray-500 dark:text-gray-400">Column headers will be included in the export</span>
                                     </label>
                                 </div>
                             </div>
@@ -292,18 +296,22 @@ const exportData = () => {
                                         <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
                                     </svg>
                                 </button>
-                                <div v-if="isFieldsExpanded" class="mt-3 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-                                    <div v-for="field in availableFields" :key="field.value" class="flex items-center">
-                                        <input
-                                            :id="`field-${field.value}`"
-                                            v-model="form.fields"
-                                            :value="field.value"
-                                            type="checkbox"
-                                            class="h-4 w-4 text-indigo-600 focus:ring-indigo-500 border-gray-300 dark:border-gray-600 rounded"
-                                        />
-                                        <label :for="`field-${field.value}`" class="ml-2 text-sm text-gray-700 dark:text-gray-300">
-                                            {{ field.label }}
-                                        </label>
+                                <div v-if="isFieldsExpanded" class="mt-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+                                    <div v-for="field in availableFields" :key="field.value" class="relative flex items-start">
+                                        <div class="flex items-center h-5">
+                                            <input
+                                                :id="`field-${field.value}`"
+                                                v-model="form.fields"
+                                                :value="field.value"
+                                                type="checkbox"
+                                                class="focus:ring-indigo-500 h-4 w-4 text-indigo-600 border-gray-300 dark:border-gray-600 rounded"
+                                            />
+                                        </div>
+                                        <div class="ml-3 text-sm">
+                                            <label :for="`field-${field.value}`" class="font-medium text-gray-700 dark:text-gray-300">
+                                                {{ field.label }}
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -339,12 +347,12 @@ const exportData = () => {
                                         </label>
                                         <select
                                             v-model="form.filters.county_id"
-                                            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
+                                            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md capitalize"
                                             :class="{ 'opacity-50': isLoadingConstituencies }"
                                             :disabled="isLoadingConstituencies"
                                         >
                                             <option :value="null">Select County</option>
-                                            <option v-for="county in counties" :key="county.id" :value="county.id" :capitalize>
+                                            <option v-for="county in counties" :key="county.id" :value="county.id" class="location-option">
                                                 {{ county.name }}
                                             </option>
                                         </select>
@@ -358,10 +366,10 @@ const exportData = () => {
                                         <select
                                             v-model="form.filters.constituency_id"
                                             :disabled="!form.filters.county_id || isLoadingWards"
-                                            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md disabled:opacity-50"
+                                            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md disabled:opacity-50 capitalize"
                                         >
                                             <option :value="null">Select Constituency</option>
-                                            <option v-for="constituency in constituencies" :key="constituency.id" :value="constituency.id" :capitalize>
+                                            <option v-for="constituency in constituencies" :key="constituency.id" :value="constituency.id" class="location-option">
                                                 {{ constituency.name }}
                                             </option>
                                         </select>
@@ -374,29 +382,29 @@ const exportData = () => {
                                         </label>
                                         <select
                                             v-model="form.filters.ward_id"
-                                            :disabled="!form.filters.constituency_id || isLoadingPollingStations"
-                                            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md disabled:opacity-50"
+                                            :disabled="!form.filters.constituency_id || isLoadingPollingCenters"
+                                            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md disabled:opacity-50 capitalize"
                                         >
                                             <option :value="null">Select Ward</option>
-                                            <option v-for="ward in wards" :key="ward.id" :value="ward.id" :capitalize>
+                                            <option v-for="ward in wards" :key="ward.id" :value="ward.id" class="location-option">
                                                 {{ ward.name }}
                                             </option>
                                         </select>
                                     </div>
 
-                                    <!-- Polling Station -->
+                                    <!-- Polling Center -->
                                     <div>
                                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                            Polling Station
+                                            Polling Center
                                         </label>
                                         <select
-                                            v-model="form.filters.polling_station_id"
-                                            :disabled="!form.filters.ward_id || pollingStations.length === 0"
-                                            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md disabled:opacity-50"
+                                            v-model="form.filters.polling_center_id"
+                                            :disabled="!form.filters.ward_id || pollingCenters.length === 0"
+                                            class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md disabled:opacity-50 capitalize"
                                         >
-                                            <option :value="null">Select Polling Station</option>
-                                            <option v-for="station in pollingStations" :key="station.id" :value="station.id" :capitalize>
-                                                {{ station.name }}
+                                            <option :value="null">Select Polling Center</option>
+                                            <option v-for="center in pollingCenters" :key="center.id" :value="center.id" class="location-option">
+                                                {{ center.name }}
                                             </option>
                                         </select>
                                     </div>
@@ -473,3 +481,15 @@ const exportData = () => {
         </div>
     </div>
 </template>
+
+<style scoped>
+/* Location dropdown options */
+select option.location-option {
+    text-transform: capitalize;
+}
+
+/* Ensure the select element itself doesn't inherit text-transform */
+select {
+    text-transform: none;
+}
+</style>
