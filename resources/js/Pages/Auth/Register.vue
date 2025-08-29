@@ -13,6 +13,7 @@ import PrimaryButton from "@/Components/PrimaryButton.vue";
 import TextInput from "@/Components/TextInput.vue";
 import VueSelect from "vue-select";
 import "vue-select/dist/vue-select.css";
+import ReCaptcha from '@/Components/ReCaptcha.vue';
 
 const props = defineProps({
     formData: Object,
@@ -149,10 +150,17 @@ const form = useForm({
 
     // OTP verification
     otpVerified: false,
+
+    // ReCaptcha response
+    'g-recaptcha-response': '',
 });
 
 const isLoading = ref(false);
 const isSubmitting = ref(false);
+
+const setCaptchaResponse = (response) => {
+    form['g-recaptcha-response'] = response;
+};
 
 // Watch for county changes to filter constituencies
 watch(
@@ -2155,6 +2163,19 @@ const canProceedToNextStep = computed(() => {
                                 </div>
                                 <InputError
                                     :message="form.errors.terms"
+                                    class="mt-1 text-sm text-red-600"
+                                />
+                            </div>
+
+                            <!-- reCAPTCHA Component -->
+                            <div class="mt-6">
+                                <ReCaptcha 
+                                    action="register" 
+                                    :site-key="$page.props.recaptchaSiteKey" 
+                                    @captcha-response="setCaptchaResponse" 
+                                />
+                                <InputError 
+                                    :message="form.errors['g-recaptcha-response']" 
                                     class="mt-1 text-sm text-red-600"
                                 />
                             </div>
