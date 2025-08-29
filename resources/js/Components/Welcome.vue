@@ -9,6 +9,18 @@ import ExportMembersModal from '@/Components/ExportMembersModal.vue';
 
 const { props } = usePage();
 
+// Get the page props
+const pageProps = usePage().props;
+const auth = pageProps.auth;
+
+// Access the nested data property from the Inertia response
+const data = pageProps.data || {};
+
+// Check if user has administrator role
+const hasAdminRole = computed(() => {
+    return Array.isArray(auth?.user?.roles) && auth.user.roles.includes('administrator');
+});
+
 // Tab state management
 const activeTab = ref("personal");
 
@@ -174,16 +186,12 @@ const showNotification = (message, isSuccess = true) => {
 };
 
 // Library section state
-const isLibraryExpanded = ref(false);
+const isLibraryExpanded = ref(hasAdminRole.value ? false : true);
 
 // Toggle library section
 const toggleLibrary = () => {
     isLibraryExpanded.value = !isLibraryExpanded.value;
 };
-
-// Get the page props
-const pageProps = usePage().props;
-const auth = pageProps.auth;
 
 // Handle member save
 const handleSaveMember = (form) => {
@@ -202,14 +210,6 @@ const handleExportMembers = () => {
     // Handle export success logic
     showExportModal.value = false;
 };
-
-// Access the nested data property from the Inertia response
-const data = pageProps.data || {};
-
-// Check if user has administrator role
-const hasAdminRole = computed(() => {
-    return Array.isArray(auth?.user?.roles) && auth.user.roles.includes('administrator');
-});
 
 // Debug: Log the data structure
 console.log('Page props:', pageProps);
@@ -300,7 +300,7 @@ const formatChange = (change) => {
         <section class="py-6 sm:py-8">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div
-                    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10"
+                    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10" v-if="hasAdminRole"
                 >
                     <!-- Stat Card Component -->
                     <template v-for="(stat, key) in Object.entries(stats)" :key="key">
