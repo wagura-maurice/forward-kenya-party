@@ -34,7 +34,7 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
                     $fail('The other name must be at least two strings.');
                 }
             }],
-            'profile.email' => ['required', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+            'profile.email' => ['nullable', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
             'profile.photo' => ['nullable', 'mimes:jpg,jpeg,png', 'max:2048'],
             'profile.date_of_birth' => ['required', 'date', 'before:today', function ($attribute, $value, $fail) {
                 $age = Carbon::parse($value)->age;

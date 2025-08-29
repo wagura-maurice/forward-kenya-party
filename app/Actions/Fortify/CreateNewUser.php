@@ -64,7 +64,7 @@ class CreateNewUser implements CreatesNewUsers
      */
     public function create(array $input)
     {      
-        dd($input);
+        // dd($input);
 
         // Add this
         app(CaptchaValidation::class)->validate($input['g-recaptcha-response']);
