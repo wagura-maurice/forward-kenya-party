@@ -58,6 +58,7 @@ class HandleInertiaRequests extends Middleware
                 'success' => $request->session()->get('success'),
                 'error' => $request->session()->get('error'),
             ],
+            'recaptchaSiteKey' => config('services.recaptcha.site_key'),
             'auth' => [
                 'user' => $request->user() ? [
                     'id' => $request->user()->id,
