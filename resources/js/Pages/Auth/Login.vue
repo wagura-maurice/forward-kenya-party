@@ -7,6 +7,7 @@ import InputError from "@/Components/InputError.vue";
 import InputLabel from "@/Components/InputLabel.vue";
 import PrimaryButton from "@/Components/PrimaryButton.vue";
 import TextInput from "@/Components/TextInput.vue";
+import ReCaptcha from '@/Components/ReCaptcha.vue';
 
 defineProps({
     canResetPassword: Boolean,
@@ -17,7 +18,12 @@ const form = useForm({
     login: "", // Changed from email to login to support both email and phone
     password: "",
     remember: false,
+    'g-recaptcha-response': '',
 });
+
+const setCaptchaResponse = (response) => {
+    form['g-recaptcha-response'] = response;
+};
 
 const submit = () => {
     form.transform((data) => ({
@@ -92,10 +98,35 @@ const submit = () => {
                 </div>
 
                 <!-- Remember Me -->
-                <label class="flex items-center">
-                    <Checkbox v-model:checked="form.remember" name="remember" />
-                    <span class="ms-2 text-sm text-gray-600">Remember me</span>
-                </label>
+                <div class="flex items-center justify-between">
+                    <label for="remember" class="flex items-center">
+                        <Checkbox
+                            id="remember"
+                            name="remember"
+                            v-model:checked="form.remember"
+                        />
+                        <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">
+                            {{ $page.props.rememberMe ? $page.props.rememberMe : 'Remember me' }}
+                        </span>
+                    </label>
+
+                    <Link
+                        v-if="canResetPassword"
+                        :href="route('password.request')"
+                        class="text-sm text-blue-600 dark:text-blue-500 hover:underline"
+                    >
+                        Forgot your password?
+                    </Link>
+                </div>
+
+                <!-- reCAPTCHA Component -->
+                <div class="mt-4">
+                    <ReCaptcha 
+                        action="login" 
+                        :site-key="$page.props.recaptchaSiteKey" 
+                        @captcha-response="setCaptchaResponse" 
+                    />
+                </div>
 
                 <!-- Sign In Button -->
                 <div class="mt-4">
