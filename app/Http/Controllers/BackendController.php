@@ -452,7 +452,7 @@ class BackendController extends Controller
         // ]);
 
         return Inertia::render('Dashboard', [
-            'title' => ucwords($roles[0]) . ' Dashboard',
+            'title' => ucwords($roles[0] == 'citizen' ? 'Member' : $roles[0]) . ' Dashboard',
             'breadcrumbs' => [
                 [
                     'label' => 'Dashboard',
