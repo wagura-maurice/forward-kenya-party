@@ -1,9 +1,9 @@
-<!-- resources/js/Pages/Frontend/HelpSupport.vue -->
 <script setup>
+import { ref, onMounted } from 'vue';
 import GuestLayout from "@/Layouts/GuestLayout.vue";
 
 // Define props passed from the backend
-defineProps({
+const props = defineProps({
     title: {
         type: String,
         required: true,
@@ -13,6 +13,28 @@ defineProps({
         required: true,
     },
 });
+
+// Form data refs
+const form = ref(null);
+const name = ref('');
+const email = ref('');
+const message = ref('');
+
+// Form submission handler
+const handleSubmit = (e) => {
+    e.preventDefault();
+    
+    if (name.value && email.value && message.value) {
+        alert('Thank you for your feedback! We will respond within 48 hours.');
+        form.value.reset();
+        // Clear form data
+        name.value = '';
+        email.value = '';
+        message.value = '';
+    } else {
+        alert('Please fill in all required fields.');
+    }
+};
 </script>
 
 <template>
@@ -31,100 +53,257 @@ defineProps({
             </p>
 
             <!-- Showcase Section -->
-            <div class="bg-white dark:bg-gray-900 mt-8 rounded-lg shadow-md overflow-hidden">
-                <div class="py-8 px-4 mx-auto max-w-screen-xl lg:py-12 lg:px-6">
-                    <div class="grid md:grid-cols-2 gap-8">
-                        <!-- Contact Information -->
-                        <div class="space-y-6">
-                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white">Get in Touch</h3>
-                            <p class="text-gray-600 dark:text-gray-300">
-                                We're here to help and answer any questions you might have. Reach out to us through any of these channels:
-                            </p>
-                            
-                            <div class="space-y-4">
-                                <div class="flex items-start">
-                                    <div class="flex-shrink-0 bg-blue-100 dark:bg-blue-900 p-3 rounded-lg">
-                                        <svg class="w-6 h-6 text-blue-600 dark:text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
-                                        </svg>
-                                    </div>
-                                    <div class="ml-4">
-                                        <h4 class="text-lg font-medium text-gray-900 dark:text-white">Email Us</h4>
-                                        <p class="text-gray-600 dark:text-gray-300">forwardkenyaparty@gmail.com</p>
-                                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">We'll respond within 24 hours</p>
-                                    </div>
+            <div class="bg-white dark:bg-gray-900 mt-8">
+                <div class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">                    
+                    <div class="grid md:grid-cols-2 gap-8 mb-12">
+                        <!-- Contact Information Card -->
+                        <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 section-container">
+                            <div class="flex items-center mb-4">
+                                <div class="bg-green-100 dark:bg-green-900/30 p-3 rounded-full mr-4">
+                                    <i class="fas fa-phone-alt text-green-600 dark:text-green-400 text-xl"></i>
                                 </div>
-
-                                <div class="flex items-start">
-                                    <div class="flex-shrink-0 bg-green-100 dark:bg-green-900 p-3 rounded-lg">
-                                        <svg class="w-6 h-6 text-green-600 dark:text-green-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
-                                        </svg>
-                                    </div>
-                                    <div class="ml-4">
-                                        <h4 class="text-lg font-medium text-gray-900 dark:text-white">Call Us</h4>
-                                        <p class="text-gray-600 dark:text-gray-300">+254 700 000 000</p>
-                                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Mon-Fri, 8:00 AM - 5:00 PM EAT</p>
-                                    </div>
-                                </div>
-
-                                <div class="flex items-start">
-                                    <div class="flex-shrink-0 bg-purple-100 dark:bg-purple-900 p-3 rounded-lg">
-                                        <svg class="w-6 h-6 text-purple-600 dark:text-purple-300" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        </svg>
-                                    </div>
-                                    <div class="ml-4">
-                                        <h4 class="text-lg font-medium text-gray-900 dark:text-white">Visit Us</h4>
-                                        <p class="text-gray-600 dark:text-gray-300">View Park Towers</p>
-                                        <p class="text-gray-600 dark:text-gray-300">P.O. Box 27999-00100</p>
-                                        <p class="text-gray-600 dark:text-gray-300">Nairobi, Kenya</p>
-                                    </div>
-                                </div>
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Contact Information</h3>
+                            </div>
+                            <ul class="space-y-3 text-gray-600 dark:text-gray-300">
+                                <li class="flex items-start">
+                                    <i class="fas fa-map-marker-alt text-green-600 mt-1 mr-3"></i>
+                                    <span>View Park Towers, P.O. Box 27999-00100 Nairobi</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-envelope text-green-600 mt-1 mr-3"></i>
+                                    <span>forwardkenyaparty@gmail.com</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-globe text-green-600 mt-1 mr-3"></i>
+                                    <span>www.forwardkenyaparty.com</span>
+                                </li>
+                                <li class="flex items-start">
+                                    <i class="fas fa-phone text-green-600 mt-1 mr-3"></i>
+                                    <span>[Party Contact Number]</span>
+                                </li>
+                            </ul>
+                            <div class="mt-6">
+                                <a href="#" class="inline-flex items-center text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 font-medium">
+                                    <i class="fas fa-list mr-2"></i> View County Office Contacts
+                                </a>
                             </div>
                         </div>
-
-                        <!-- Contact Form -->
-                        <div class="bg-gray-50 dark:bg-gray-800 p-6 rounded-lg">
-                            <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Send Us a Message</h3>
-                            <form class="space-y-6">
-                                <div>
-                                    <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Your Name</label>
-                                    <input type="text" id="name" class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" required>
+                        
+                        <!-- Support Options Card -->
+                        <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 section-container">
+                            <div class="flex items-center mb-4">
+                                <div class="bg-blue-100 dark:bg-blue-900/30 p-3 rounded-full mr-4">
+                                    <i class="fas fa-headset text-blue-600 dark:text-blue-400 text-xl"></i>
                                 </div>
-                                <div>
-                                    <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Your Email</label>
-                                    <input type="email" id="email" class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" required>
-                                </div>
-                                <div>
-                                    <label for="subject" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Subject</label>
-                                    <input type="text" id="subject" class="bg-white border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" required>
-                                </div>
-                                <div>
-                                    <label for="message" class="block mb-2 text-sm font-medium text-gray-900 dark:text-gray-300">Your Message</label>
-                                    <textarea id="message" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-white rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" placeholder="How can we help you?"></textarea>
-                                </div>
-                                <button type="submit" class="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                                    Send Message
-                                </button>
-                            </form>
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white">Support Options</h3>
+                            </div>
+                            <div class="grid grid-cols-2 gap-4">
+                                <a href="#" class="p-4 bg-white dark:bg-gray-700 rounded-lg text-center hover:shadow-md transition-shadow">
+                                    <div class="bg-green-100 dark:bg-green-900/20 p-3 rounded-full inline-flex mb-2">
+                                        <i class="fas fa-users text-green-600 dark:text-green-400"></i>
+                                    </div>
+                                    <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Membership Support</p>
+                                </a>
+                                <a href="#" class="p-4 bg-white dark:bg-gray-700 rounded-lg text-center hover:shadow-md transition-shadow">
+                                    <div class="bg-blue-100 dark:bg-blue-900/20 p-3 rounded-full inline-flex mb-2">
+                                        <i class="fas fa-vote-yea text-blue-600 dark:text-blue-400"></i>
+                                    </div>
+                                    <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Election Support</p>
+                                </a>
+                                <a href="#" class="p-4 bg-white dark:bg-gray-700 rounded-lg text-center hover:shadow-md transition-shadow">
+                                    <div class="bg-purple-100 dark:bg-purple-900/20 p-3 rounded-full inline-flex mb-2">
+                                        <i class="fas fa-exclamation-triangle text-purple-600 dark:text-purple-400"></i>
+                                    </div>
+                                    <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Report Issues</p>
+                                </a>
+                                <a href="#" class="p-4 bg-white dark:bg-gray-700 rounded-lg text-center hover:shadow-md transition-shadow">
+                                    <div class="bg-yellow-100 dark:bg-yellow-900/20 p-3 rounded-full inline-flex mb-2">
+                                        <i class="fas fa-file-download text-yellow-600 dark:text-yellow-400"></i>
+                                    </div>
+                                    <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Resources</p>
+                                </a>
+                            </div>
                         </div>
                     </div>
-
-                    <!-- FAQ Section Link -->
-                    <div class="mt-12 text-center">
-                        <h3 class="text-2xl font-bold text-gray-900 dark:text-white mb-4">Need Help?</h3>
-                        <p class="text-gray-600 dark:text-gray-300 mb-6">Check out our <a href="/faq" class="text-blue-600 hover:underline dark:text-blue-400">Frequently Asked Questions</a> for quick answers to common inquiries.</p>
-                        <a href="/faq" class="inline-flex items-center px-5 py-2.5 text-sm font-medium text-center text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">
-                            Visit FAQ Section
-                            <svg class="ml-2 -mr-1 w-4 h-4" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg">
-                                <path fill-rule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clip-rule="evenodd"></path>
-                            </svg>
-                        </a>
+                    
+                    <!-- Membership Support -->
+                    <div class="mb-8">
+                        <h3 class="text-2xl font-bold mb-6 text-gray-900 dark:text-white border-b pb-2 border-gray-200 dark:border-gray-700 flex items-center">
+                            <i class="fas fa-users mr-3 text-green-600"></i>
+                            Membership Support
+                        </h3>
+                        
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-5">
+                                <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Becoming a Member</h4>
+                                <p class="text-gray-600 dark:text-gray-300 mb-4">Learn how to join Forward Kenya Party and participate in our democratic processes.</p>
+                                <ul class="list-disc pl-5 space-y-2 text-gray-600 dark:text-gray-300">
+                                    <li>Eligibility requirements</li>
+                                    <li>Membership application process</li>
+                                    <li>Membership fee structure</li>
+                                    <li>Membership card information</li>
+                                </ul>
+                                <a href="#" class="inline-flex items-center mt-4 text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 font-medium">
+                                    Learn more <i class="fas fa-arrow-right ml-1 text-sm"></i>
+                                </a>
+                            </div>
+                            
+                            <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-5">
+                                <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Member Resources</h4>
+                                <p class="text-gray-600 dark:text-gray-300 mb-4">Access important documents and resources for party members.</p>
+                                <ul class="list-disc pl-5 space-y-2 text-gray-600 dark:text-gray-300">
+                                    <li>Party Constitution</li>
+                                    <li>Code of Conduct</li>
+                                    <li>Election guidelines</li>
+                                    <li>Membership forms</li>
+                                </ul>
+                                <a href="#" class="inline-flex items-center mt-4 text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 font-medium">
+                                    Download resources <i class="fas fa-download ml-1 text-sm"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Dispute Resolution -->
+                    <div class="mb-8">
+                        <h3 class="text-2xl font-bold mb-6 text-gray-900 dark:text-white border-b pb-2 border-gray-200 dark:border-gray-700 flex items-center">
+                            <i class="fas fa-gavel mr-3 text-blue-600"></i>
+                            Dispute Resolution
+                        </h3>
+                        
+                        <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6 mb-6">
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">Forward Kenya Party has established procedures for resolving disputes in accordance with our Constitution (Articles 29, 32, 41).</p>
+                            
+                            <div class="grid md:grid-cols-3 gap-4 mt-6">
+                                <div class="bg-white dark:bg-gray-700 p-4 rounded-lg">
+                                    <div class="bg-blue-100 dark:bg-blue-900/20 p-2 rounded-full inline-flex mb-3">
+                                        <i class="fas fa-balance-scale text-blue-600 dark:text-blue-400"></i>
+                                    </div>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Disciplinary Issues</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-300">Report violations of the Code of Conduct</p>
+                                </div>
+                                
+                                <div class="bg-white dark:bg-gray-700 p-4 rounded-lg">
+                                    <div class="bg-green-100 dark:bg-green-900/20 p-2 rounded-full inline-flex mb-3">
+                                        <i class="fas fa-vote-yea text-green-600 dark:text-green-400"></i>
+                                    </div>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Election Disputes</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-300">Challenge nomination or election results</p>
+                                </div>
+                                
+                                <div class="bg-white dark:bg-gray-700 p-4 rounded-lg">
+                                    <div class="bg-purple-100 dark:bg-purple-900/20 p-2 rounded-full inline-flex mb-3">
+                                        <i class="fas fa-handshake text-purple-600 dark:text-purple-400"></i>
+                                    </div>
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Internal Disputes</h4>
+                                    <p class="text-sm text-gray-600 dark:text-gray-300">Resolve conflicts between members</p>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-6">
+                                <a href="#" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700">
+                                    <i class="fas fa-file-alt mr-2"></i> File a Complaint
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Technical Support -->
+                    <div class="mb-8">
+                        <h3 class="text-2xl font-bold mb-6 text-gray-900 dark:text-white border-b pb-2 border-gray-200 dark:border-gray-700 flex items-center">
+                            <i class="fas fa-laptop mr-3 text-purple-600"></i>
+                            Technical Support
+                        </h3>
+                        
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-5">
+                                <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Website Assistance</h4>
+                                <p class="text-gray-600 dark:text-gray-300 mb-4">Get help with our online platforms and digital services.</p>
+                                <ul class="list-disc pl-5 space-y-2 text-gray-600 dark:text-gray-300">
+                                    <li>Account access issues</li>
+                                    <li>Password reset</li>
+                                    <li>Online registration help</li>
+                                    <li>Website navigation</li>
+                                </ul>
+                                <a href="#" class="inline-flex items-center mt-4 text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 font-medium">
+                                    Get technical support <i class="fas fa-arrow-right ml-1 text-sm"></i>
+                                </a>
+                            </div>
+                            
+                            <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-5">
+                                <h4 class="font-semibold text-gray-900 dark:text-white mb-3">Event Registration</h4>
+                                <p class="text-gray-600 dark:text-gray-300 mb-4">Support for registering and managing event participation.</p>
+                                <ul class="list-disc pl-5 space-y-2 text-gray-600 dark:text-gray-300">
+                                    <li>Event registration issues</li>
+                                    <li>Virtual meeting access</li>
+                                    <li>Payment processing</li>
+                                    <li>Confirmation and tickets</li>
+                                </ul>
+                                <a href="#" class="inline-flex items-center mt-4 text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300 font-medium">
+                                    Event support <i class="fas fa-calendar-check ml-1 text-sm"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Emergency Contact -->
+                    <div class="bg-red-50 dark:bg-red-900/20 p-6 rounded-lg mb-8">
+                        <div class="flex items-start">
+                            <div class="bg-red-100 dark:bg-red-900/30 p-3 rounded-full mr-4">
+                                <i class="fas fa-exclamation-circle text-red-600 dark:text-red-400 text-xl"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-2">Emergency Contact</h3>
+                                <p class="text-gray-600 dark:text-gray-300 mb-4">For urgent matters that require immediate attention outside regular business hours.</p>
+                                <div class="flex items-center">
+                                    <i class="fas fa-phone-alt text-red-600 dark:text-red-400 mr-2"></i>
+                                    <span class="font-semibold text-gray-900 dark:text-white">[Emergency Contact Number]</span>
+                                </div>
+                                <p class="text-sm text-gray-500 dark:text-gray-400 mt-2">Available for critical issues only</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Feedback Section -->
+                    <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-6">
+                        <h3 class="text-xl font-bold text-gray-900 dark:text-white mb-4">Submit Feedback</h3>
+                        <p class="text-gray-600 dark:text-gray-300 mb-4">We value your input. Share your suggestions, comments, or concerns to help us improve our services.</p>
+                        
+                        <form @submit.prevent="handleSubmit" class="space-y-4">
+                            <div>
+                                <label for="name" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Name</label>
+                                <input v-model="name" type="text" id="name" name="name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Your name" required>
+                            </div>
+                            
+                            <div>
+                                <label for="email" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
+                                <input v-model="email" type="email" id="email" name="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Your email" required>
+                            </div>
+                            
+                            <div>
+                                <label for="category" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Category</label>
+                                <select id="category" class="w-full px-4 py-2 border border-gray-300 rounded-lg dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-2 focus:ring-green-500 focus:border-transparent">
+                                    <option>General Feedback</option>
+                                    <option>Complaint</option>
+                                    <option>Suggestion</option>
+                                    <option>Member Support</option>
+                                    <option>Technical Issue</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label for="message" class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Message</label>
+                                <textarea v-model="message" id="message" name="message" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Your message..."></textarea>
+                            </div>
+                            
+                            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700">
+                                <i class="fas fa-paper-plane mr-2"></i> Submit Feedback
+                            </button>
+                        </form>
                     </div>
                 </div>
             </div>
+
         </section>
     </GuestLayout>
 </template>
