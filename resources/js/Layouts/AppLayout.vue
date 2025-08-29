@@ -189,14 +189,14 @@ onUnmounted(() => {
                                     @mouseenter="onDropdownEnter"
                                     @mouseleave="onDropdownLeave"
                                 >
-                                    <button
+                                    <!-- <button
                                         class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition"
                                     >
                                         Our Work
                                         <i
                                             class="fas fa-chevron-down ml-2 -mr-0.5 h-4 w-4"
                                         ></i>
-                                    </button>
+                                    </button> -->
 
                                     <!-- Desktop Dropdown Panel -->
                                     <div
@@ -594,7 +594,7 @@ onUnmounted(() => {
 
                         <!-- Mobile Platform Dropdown -->
                         <div class="pt-2 pb-3 space-y-1">
-                            <button
+                            <!-- <button
                                 @click="
                                     isMobilePlatformDropdownOpen =
                                         !isMobilePlatformDropdownOpen
@@ -610,7 +610,7 @@ onUnmounted(() => {
                                             : 'fa-chevron-down'
                                     "
                                 ></i>
-                            </button>
+                            </button> -->
 
                             <div
                                 v-show="isMobilePlatformDropdownOpen"
