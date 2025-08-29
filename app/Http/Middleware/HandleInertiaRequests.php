@@ -73,7 +73,8 @@ class HandleInertiaRequests extends Middleware
         ];
 
         // Share all location and form data for the registration and profile pages
-        if (in_array($request->route()->getName(), ['register', 'profile.*', 'user.profile.*', 'dashboard'])) {
+        // if (in_array($request->route()->getName(), ['register', 'profile.*', 'user.profile.*', 'dashboard'])) {
+        if ($request->routeIs('register') || $request->routeIs('dashboard') || str_starts_with($request->path(), 'user/profile') || $request->routeIs('profile.*')) {
             // Import the OTP service constants
             $otpConstants = [
                 'ttl' => OneTimePasswordServices::TTL,
