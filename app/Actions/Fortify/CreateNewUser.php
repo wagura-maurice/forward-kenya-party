@@ -63,7 +63,12 @@ class CreateNewUser implements CreatesNewUsers
      * @throws \Illuminate\Validation\ValidationException
      */
     public function create(array $input)
-    {        
+    {      
+        dd($input);
+
+        // Add this
+        app(CaptchaValidation::class)->validate($input['g-recaptcha-response']);
+          
         // Validate the input
         $validated = Validator::make($input, [
             'surname' => ['required', 'string', 'max:255'],
