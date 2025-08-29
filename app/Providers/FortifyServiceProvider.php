@@ -12,6 +12,7 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Cache\RateLimiting\Limit;
 use App\Actions\Fortify\ResetUserPassword;
 use App\Actions\Fortify\UpdateUserPassword;
+use App\Rules\RecaptchaRule;
 use Illuminate\Support\Facades\RateLimiter;
 use App\Actions\Fortify\UpdateUserProfileInformation;
 
@@ -45,6 +46,7 @@ class FortifyServiceProvider extends ServiceProvider
             $request->validate([
                 'login' => 'required|string',
                 'password' => 'required|string',
+                // 'g-recaptcha-response' => ['required', new RecaptchaRule()],
             ]);
             
             $login = trim($request->input('login'));
