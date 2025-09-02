@@ -13,7 +13,7 @@ import PrimaryButton from "@/Components/PrimaryButton.vue";
 import TextInput from "@/Components/TextInput.vue";
 import VueSelect from "vue-select";
 import "vue-select/dist/vue-select.css";
-import ReCaptcha from '@/Components/ReCaptcha.vue';
+import ReCaptcha from "@/Components/ReCaptcha.vue";
 
 const props = defineProps({
     formData: Object,
@@ -36,28 +36,37 @@ const activeRegistrationSection = ref(null);
 const acknowledged = ref(false);
 
 const toggleSection = (section) => {
-    activeRegistrationSection.value = activeRegistrationSection.value === section ? null : section;
+    activeRegistrationSection.value =
+        activeRegistrationSection.value === section ? null : section;
 };
 
 // Handle USSD code interaction
 const handleUssdClick = () => {
     // For mobile devices, try to initiate a call
-    if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-        window.location.href = 'tel:*509%23';
+    if (
+        /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+            navigator.userAgent
+        )
+    ) {
+        window.location.href = "tel:*509%23";
     } else {
         // For desktop, show a helpful message
-        showToast('info', 'USSD Code', 'On your mobile device, dial *509#');
+        showToast("info", "USSD Code", "On your mobile device, dial *509#");
     }
 };
 
 // Handle IPPMS portal click
 const handleIppmsClick = () => {
-    window.open('https://ippms.orpp.or.ke', '_blank', 'noopener,noreferrer');
+    window.open("https://ippms.orpp.or.ke", "_blank", "noopener,noreferrer");
 };
 
 // Handle eCitizen portal click
 const handleECitizenClick = () => {
-    window.open('https://accounts.ecitizen.go.ke/en', '_blank', 'noopener,noreferrer');
+    window.open(
+        "https://accounts.ecitizen.go.ke/en",
+        "_blank",
+        "noopener,noreferrer"
+    );
 };
 
 const stepDescription = computed(() => {
@@ -124,12 +133,14 @@ const counties = computed(() => props.formData?.locations?.counties || []);
 
 // Format today's date for the form
 const today = new Date();
-const formattedDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+const formattedDate = `${today.getFullYear()}-${String(
+    today.getMonth() + 1
+).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
 
 const form = useForm({
     // Registration Instructions Confirmation
     understood_instructions: false,
-    
+
     // Step 2: Account and Personal Information
     surname: "",
     other_name: "",
@@ -157,14 +168,14 @@ const form = useForm({
     otpVerified: false,
 
     // ReCaptcha response
-    'g-recaptcha-response': '',
+    "g-recaptcha-response": "",
 });
 
 const isLoading = ref(false);
 const isSubmitting = ref(false);
 
 const setCaptchaResponse = (response) => {
-    form['g-recaptcha-response'] = response;
+    form["g-recaptcha-response"] = response;
 };
 
 // Watch for county changes to filter constituencies
@@ -222,9 +233,10 @@ const validateStep = (step) => {
     if (step === 1) {
         // Step 1: Party Registration Check - Only validate the acknowledgment
         if (!form.understood_instructions) {
-            return { 
-                isValid: false, 
-                message: "You must acknowledge that you understand the registration process" 
+            return {
+                isValid: false,
+                message:
+                    "You must acknowledge that you understand the registration process",
             };
         }
         return { isValid: true };
@@ -232,10 +244,17 @@ const validateStep = (step) => {
 
     if (step === 2) {
         // Step 2: Account and Personal Information
-        if (!form.surname?.trim())
-            return { isValid: false, message: "Surname is required" };
-        if (!form.other_name?.trim())
-            return { isValid: false, message: "Other name is required" };
+        const nameRegex = /^([a-zA-Z]+)(\s[a-zA-Z]+)?(\s[a-zA-Z]+)?$/;
+        if (!form.surname?.trim().match(nameRegex))
+            return {
+                isValid: false,
+                message: "Surname must be a valid human name",
+            };
+        if (form.other_name?.trim().split(" ").length > 2)
+            return {
+                isValid: false,
+                message: "Other name must be a valid human name",
+            };
         if (!form.telephone?.trim())
             return {
                 isValid: false,
@@ -251,35 +270,37 @@ const validateStep = (step) => {
                 isValid: false,
                 message: "National ID/Passport Number is required",
             };
-            
+
         // Validate identification number length (exactly 8 characters)
         if (form.identification_number.length !== 8) {
             return {
                 isValid: false,
-                message: "Identification number must be exactly 8 characters long"
+                message:
+                    "Identification number must be exactly 8 characters long",
             };
         }
         if (!form.identification_number?.trim())
             return {
                 isValid: false,
                 message: `${
-                    form.identification_type === "national_identification_number"
+                    form.identification_type ===
+                    "national_identification_number"
                         ? "National Identification Number"
                         : "Passport Number"
                 } is required`,
             };
         if (!form.date_of_birth)
             return { isValid: false, message: "Date of birth is required" };
-        if (!form.gender) 
-            return { isValid: false, message: "Sex is required" };
+        if (!form.gender) return { isValid: false, message: "Sex is required" };
         if (!form.ethnicity_id)
             return { isValid: false, message: "Ethnicity is required" };
         if (!form.religion_id)
             return { isValid: false, message: "Religion is required" };
-        if (form.disability_status === true && !form.ncpwd_number?.trim())
+        if (form.disability_status === true && !/^NCPWD\/P\/[0-9]{5}$/.test(form.ncpwd_number?.trim()))
             return {
                 isValid: false,
-                message: "NCPWD number is required when a disability is selected",
+                message:
+                    "NCPWD number must be in the format NCPWD/P/12345",
             };
         return { isValid: true };
     }
@@ -373,7 +394,7 @@ const sendOtp = async () => {
 
         // Send OTP request
         const response = await axios.post(route("auth.request-otp"), {
-            telephone: form.telephone
+            telephone: form.telephone,
         });
 
         // console.log(response.data);
@@ -382,7 +403,9 @@ const sendOtp = async () => {
             // Show OTP verification modal
             showOtpVerificationModal();
         } else {
-            throw new Error(response.data.message || "Failed to send OTP. Please try again.");
+            throw new Error(
+                response.data.message || "Failed to send OTP. Please try again."
+            );
         }
     } catch (error) {
         // Check if it's a rate limit error
@@ -439,7 +462,8 @@ const sendOtp = async () => {
             showToast(
                 "error",
                 "OTP Error",
-                error.response?.data?.message || "Failed to send OTP. Please try again."
+                error.response?.data?.message ||
+                    "Failed to send OTP. Please try again."
             );
         }
     }
@@ -458,8 +482,8 @@ const formatTimeRemaining = (endTime) => {
     const minutes = Math.floor(diffInSeconds / 60);
     const seconds = diffInSeconds % 60;
     return {
-        formatted: `${minutes}:${seconds.toString().padStart(2, '0')}`,
-        isExpired: diffInSeconds <= 0
+        formatted: `${minutes}:${seconds.toString().padStart(2, "0")}`,
+        isExpired: diffInSeconds <= 0,
     };
 };
 
@@ -477,14 +501,14 @@ const showOtpVerificationModal = () => {
     let isResendDisabled = false;
     let resendCountdown = 0;
     let countdownInterval = null;
-    
+
     // Initialize or reuse existing expiration time
     if (!otpExpirationTime.value) {
         const expTime = new Date();
         expTime.setSeconds(expTime.getSeconds() + otpConfig.value.ttl);
         otpExpirationTime.value = expTime;
     }
-    
+
     // Clean up any existing timer
     cleanupOtpTimer();
 
@@ -499,17 +523,31 @@ const showOtpVerificationModal = () => {
                 <input id="swal-otp-input" class="swal2-input w-full text-center mb-1" placeholder="Enter 6-digit code" maxlength="6" type="text">
                 <div id="otp-timer-container" class="text-sm text-gray-600 mt-2">
                     <span id="otp-timer-message">Verification code expires in </span>
-                    <strong id="otp-timer" class="font-medium">${formatTimeRemaining(otpExpirationTime.value).formatted}</strong>
+                    <strong id="otp-timer" class="font-medium">${
+                        formatTimeRemaining(otpExpirationTime.value).formatted
+                    }</strong>
                     <span id="otp-expired-message" class="hidden">
                         <span class="text-red-500 font-medium">Verification code expired!</span>
                         <button id="resend-otp-btn" class="ml-1 font-medium text-green-600 hover:text-green-800 cursor-pointer bg-transparent border-none p-0">Resend OTP</button>
                     </span>
                 </div>
-                ${otpAttempts.value > 0 ? `
+                ${
+                    otpAttempts.value > 0
+                        ? `
                 <div class="text-sm text-red-500 mt-1">
-                    ${otpAttempts.value} failed attempt${otpAttempts.value > 1 ? 's' : ''}${otpAttempts.value === maxOtpAttempts.value - 1 ? ' (last attempt)' : otpAttempts.value >= maxOtpAttempts.value ? '. Maximum attempts reached' : ''}.
+                    ${otpAttempts.value} failed attempt${
+                              otpAttempts.value > 1 ? "s" : ""
+                          }${
+                              otpAttempts.value === maxOtpAttempts.value - 1
+                                  ? " (last attempt)"
+                                  : otpAttempts.value >= maxOtpAttempts.value
+                                  ? ". Maximum attempts reached"
+                                  : ""
+                          }.
                 </div>
-                ` : ''}
+                `
+                        : ""
+                }
             </div>
         `,
         showCancelButton: true,
@@ -532,71 +570,89 @@ const showOtpVerificationModal = () => {
         },
         didOpen: () => {
             const resendBtn = document.getElementById("resend-otp-btn");
-            const resendCountdownEl = document.getElementById("resend-countdown");
+            const resendCountdownEl =
+                document.getElementById("resend-countdown");
             // Update the timer display
             const updateTimerDisplay = () => {
                 const now = new Date();
-                const timeLeft = Math.max(0, Math.ceil((otpExpirationTime.value - now) / 1000));
+                const timeLeft = Math.max(
+                    0,
+                    Math.ceil((otpExpirationTime.value - now) / 1000)
+                );
                 const minutes = Math.floor(timeLeft / 60);
                 const seconds = timeLeft % 60;
-                
-                const otpTimerEl = document.getElementById('otp-timer');
-                const timerMessageEl = document.getElementById('otp-timer-message');
-                const expiredMessageEl = document.getElementById('otp-expired-message');
-                const otpInput = document.getElementById('swal-otp-input');
-                const confirmButton = document.querySelector('.swal2-confirm');
-                
+
+                const otpTimerEl = document.getElementById("otp-timer");
+                const timerMessageEl =
+                    document.getElementById("otp-timer-message");
+                const expiredMessageEl = document.getElementById(
+                    "otp-expired-message"
+                );
+                const otpInput = document.getElementById("swal-otp-input");
+                const confirmButton = document.querySelector(".swal2-confirm");
+
                 if (!otpTimerEl || !timerMessageEl || !expiredMessageEl) return;
-                
+
                 const isExpired = timeLeft <= 0;
-                const formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-                
+                const formattedTime = `${minutes}:${seconds
+                    .toString()
+                    .padStart(2, "0")}`;
+
                 // Only update DOM if the value has changed
                 if (otpTimerEl.textContent !== formattedTime) {
                     otpTimerEl.textContent = formattedTime;
                 }
-                
+
                 // Toggle visibility and states based on expiration
                 if (isExpired) {
-                    if (!expiredMessageEl.classList.contains('hidden')) return; // Already in correct state
-                    
-                    timerMessageEl.classList.add('hidden');
-                    otpTimerEl.classList.add('hidden');
-                    expiredMessageEl.classList.remove('hidden');
-                    
+                    if (!expiredMessageEl.classList.contains("hidden")) return; // Already in correct state
+
+                    timerMessageEl.classList.add("hidden");
+                    otpTimerEl.classList.add("hidden");
+                    expiredMessageEl.classList.remove("hidden");
+
                     // Disable input and button
                     if (otpInput) otpInput.disabled = true;
                     if (confirmButton) confirmButton.disabled = true;
                 } else {
-                    if (!timerMessageEl.classList.contains('hidden') && 
-                        !otpTimerEl.classList.contains('hidden') && 
-                        expiredMessageEl.classList.contains('hidden')) {
+                    if (
+                        !timerMessageEl.classList.contains("hidden") &&
+                        !otpTimerEl.classList.contains("hidden") &&
+                        expiredMessageEl.classList.contains("hidden")
+                    ) {
                         // Already in correct state, just update colors if needed
-                        otpTimerEl.classList.toggle('text-red-500', timeLeft <= 60);
-                        otpTimerEl.classList.toggle('text-gray-600', timeLeft > 60);
+                        otpTimerEl.classList.toggle(
+                            "text-red-500",
+                            timeLeft <= 60
+                        );
+                        otpTimerEl.classList.toggle(
+                            "text-gray-600",
+                            timeLeft > 60
+                        );
                         return;
                     }
-                    
+
                     // Update to show countdown
-                    timerMessageEl.textContent = 'Verification code expires in ';
-                    timerMessageEl.classList.remove('hidden');
-                    otpTimerEl.classList.remove('hidden');
-                    expiredMessageEl.classList.add('hidden');
-                    
+                    timerMessageEl.textContent =
+                        "Verification code expires in ";
+                    timerMessageEl.classList.remove("hidden");
+                    otpTimerEl.classList.remove("hidden");
+                    expiredMessageEl.classList.add("hidden");
+
                     // Update colors
-                    otpTimerEl.classList.toggle('text-red-500', timeLeft <= 60);
-                    otpTimerEl.classList.toggle('text-gray-600', timeLeft > 60);
-                    
+                    otpTimerEl.classList.toggle("text-red-500", timeLeft <= 60);
+                    otpTimerEl.classList.toggle("text-gray-600", timeLeft > 60);
+
                     // Enable input and button
                     if (otpInput) otpInput.disabled = false;
                     if (confirmButton) confirmButton.disabled = false;
                 }
             };
-            
+
             // Set up the timer interval with requestAnimationFrame for smoother updates
             let lastUpdate = 0;
             let animationFrameId = null;
-            
+
             const updateLoop = (timestamp) => {
                 if (!otpTimerInterval) {
                     if (animationFrameId) {
@@ -605,24 +661,24 @@ const showOtpVerificationModal = () => {
                     }
                     return;
                 }
-                
+
                 // Only update DOM at most every 500ms for better performance
                 if (timestamp - lastUpdate > 500) {
                     updateTimerDisplay();
                     lastUpdate = timestamp;
                 }
-                
+
                 // Continue the animation loop
                 animationFrameId = requestAnimationFrame(updateLoop);
             };
-            
+
             // Initial update
             updateTimerDisplay();
-            
+
             // Start the animation loop
             otpTimerInterval = true; // Use a truthy value as a flag
             animationFrameId = requestAnimationFrame(updateLoop);
-            
+
             // Cleanup function for when the modal is closed
             const cleanup = () => {
                 if (animationFrameId) {
@@ -631,7 +687,7 @@ const showOtpVerificationModal = () => {
                 }
                 otpTimerInterval = null;
             };
-            
+
             // Return cleanup function to be called when modal closes
             return cleanup;
 
@@ -639,22 +695,44 @@ const showOtpVerificationModal = () => {
             const updateResendButton = () => {
                 if (isResendDisabled) {
                     resendBtn.disabled = true;
-                    resendBtn.classList.remove("text-green-600", "hover:text-green-800");
-                    resendBtn.classList.add("text-gray-400", "cursor-not-allowed");
+                    resendBtn.classList.remove(
+                        "text-green-600",
+                        "hover:text-green-800"
+                    );
+                    resendBtn.classList.add(
+                        "text-gray-400",
+                        "cursor-not-allowed"
+                    );
                     resendCountdownEl.textContent = `(${resendCountdown}s)`;
                 } else {
                     // Only enable the button if the OTP has expired
-                    const isOtpExpired = formatTimeRemaining(otpExpirationTime.value).isExpired;
+                    const isOtpExpired = formatTimeRemaining(
+                        otpExpirationTime.value
+                    ).isExpired;
                     if (isOtpExpired) {
                         resendBtn.disabled = false;
-                        resendBtn.classList.add("text-green-600", "hover:text-green-800");
-                        resendBtn.classList.remove("text-gray-400", "cursor-not-allowed");
-                        resendCountdownEl.textContent = '';
+                        resendBtn.classList.add(
+                            "text-green-600",
+                            "hover:text-green-800"
+                        );
+                        resendBtn.classList.remove(
+                            "text-gray-400",
+                            "cursor-not-allowed"
+                        );
+                        resendCountdownEl.textContent = "";
                     } else {
                         resendBtn.disabled = true;
-                        resendBtn.classList.remove("text-green-600", "hover:text-green-800");
-                        resendBtn.classList.add("text-gray-400", "cursor-not-allowed");
-                        const timeLeft = formatTimeRemaining(otpExpirationTime.value).formatted;
+                        resendBtn.classList.remove(
+                            "text-green-600",
+                            "hover:text-green-800"
+                        );
+                        resendBtn.classList.add(
+                            "text-gray-400",
+                            "cursor-not-allowed"
+                        );
+                        const timeLeft = formatTimeRemaining(
+                            otpExpirationTime.value
+                        ).formatted;
                         resendCountdownEl.textContent = `(wait ${timeLeft})`;
                     }
                 }
@@ -719,24 +797,24 @@ const verifyOtp = async (otp) => {
     // If OTP is expired, don't proceed with verification
     if (otpExpirationTime.value && new Date() > otpExpirationTime.value) {
         Swal.fire({
-            icon: 'error',
-            title: 'OTP Expired',
-            text: 'The verification code has expired. Please request a new one.',
-            confirmButtonColor: '#10b981',
+            icon: "error",
+            title: "OTP Expired",
+            text: "The verification code has expired. Please request a new one.",
+            confirmButtonColor: "#10b981",
         });
         return;
     }
-    
+
     // Increment attempts counter
     otpAttempts.value += 1;
 
     // Check if max attempts reached
     if (otpAttempts.value >= maxOtpAttempts.value) {
         Swal.fire({
-            icon: 'error',
-            title: 'Maximum Attempts Reached',
+            icon: "error",
+            title: "Maximum Attempts Reached",
             text: `You've exceeded the maximum number of verification attempts. Please request a new OTP.`,
-            confirmButtonColor: '#10b981',
+            confirmButtonColor: "#10b981",
         });
         return;
     }
@@ -895,8 +973,8 @@ const toTitleCase = (str) => {
 const formatDate = (date) => {
     const d = new Date(date);
     const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, '0');
-    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
 };
 
@@ -910,7 +988,7 @@ const canProceedToNextStep = computed(() => {
     // For step 1, only check the acknowledgment checkbox
     if (currentStep.value === 1) {
         return form.understood_instructions;
-    } 
+    }
     // For step 2, check personal information fields
     else if (currentStep.value === 2) {
         return (
@@ -925,7 +1003,7 @@ const canProceedToNextStep = computed(() => {
             form.religion_id &&
             (form.disability_status === false || form.ncpwd_number)
         );
-    } 
+    }
     // For step 3, check location fields
     else if (currentStep.value === 3) {
         return form.county_id && form.constituency_id && form.ward_id;
@@ -970,15 +1048,26 @@ const canProceedToNextStep = computed(() => {
                             <h2 class="text-base font-medium text-gray-700">
                                 Step 1: Check Your Party Registration Status
                             </h2>
-                            
-                            <div class="bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500 p-4 mb-6">
+
+                            <div
+                                class="bg-blue-50 dark:bg-blue-900/30 border-l-4 border-blue-500 p-4 mb-6"
+                            >
                                 <div class="flex">
                                     <div class="flex-shrink-0">
-                                        <i class="fas fa-info-circle text-blue-500"></i>
+                                        <i
+                                            class="fas fa-info-circle text-blue-500"
+                                        ></i>
                                     </div>
                                     <div class="ml-3">
-                                        <p class="text-sm text-blue-700 dark:text-blue-300">
-                                            Before proceeding with your registration, you need to verify your current political party membership status with the Office of the Registrar of Political Parties (ORPP).
+                                        <p
+                                            class="text-sm text-blue-700 dark:text-blue-300"
+                                        >
+                                            Before proceeding with your
+                                            registration, you need to verify
+                                            your current political party
+                                            membership status with the Office of
+                                            the Registrar of Political Parties
+                                            (ORPP).
                                         </p>
                                     </div>
                                 </div>
@@ -986,63 +1075,160 @@ const canProceedToNextStep = computed(() => {
 
                             <div class="space-y-6">
                                 <!-- Check Registration Status - Collapsible -->
-                                <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg mb-4">
-                                    <button 
+                                <div
+                                    class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg mb-4"
+                                >
+                                    <button
                                         type="button"
                                         @click="toggleSection('checkStatus')"
                                         class="w-full px-4 py-5 sm:px-6 text-left bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 rounded-t-lg"
                                     >
-                                        <div class="flex items-center justify-between">
-                                            <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
-                                                How to Check Your Party Registration Status?
+                                        <div
+                                            class="flex items-center justify-between"
+                                        >
+                                            <h3
+                                                class="text-lg leading-6 font-medium text-gray-900 dark:text-white"
+                                            >
+                                                How to Check Your Party
+                                                Registration Status?
                                             </h3>
-                                            <i 
+                                            <i
                                                 :class="[
-                                                    activeRegistrationSection === 'checkStatus' ? 'fa-chevron-up' : 'fa-chevron-down',
+                                                    activeRegistrationSection ===
+                                                    'checkStatus'
+                                                        ? 'fa-chevron-up'
+                                                        : 'fa-chevron-down',
                                                     'fas',
                                                     'transition-transform',
                                                     'duration-200',
                                                     'text-gray-500',
-                                                    'text-lg'
+                                                    'text-lg',
                                                 ]"
                                             ></i>
                                         </div>
                                     </button>
-                                    <div v-show="activeRegistrationSection === 'checkStatus'" class="border-t border-gray-200 dark:border-gray-600 px-4 py-5 sm:p-6">
+                                    <div
+                                        v-show="
+                                            activeRegistrationSection ===
+                                            'checkStatus'
+                                        "
+                                        class="border-t border-gray-200 dark:border-gray-600 px-4 py-5 sm:p-6"
+                                    >
                                         <div class="space-y-4">
-                                            <p class="text-sm text-gray-700 dark:text-gray-300">
-                                                To check your current party registration status, use one of the following official ORPP channels:
+                                            <p
+                                                class="text-sm text-gray-700 dark:text-gray-300"
+                                            >
+                                                To check your current party
+                                                registration status, use one of
+                                                the following official ORPP
+                                                channels:
                                             </p>
-                                            
-                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+
+                                            <div
+                                                class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4"
+                                            >
                                                 <!-- Mobile Check -->
-                                                <div class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-100 dark:border-blue-800">
-                                                    <h4 class="font-medium text-purple-800 dark:text-purple-200 mb-3 flex items-center">
-                                                        <i class="fas fa-laptop mr-2 text-purple-600 dark:text-purple-400"></i>
+                                                <div
+                                                    class="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg border border-blue-100 dark:border-blue-800"
+                                                >
+                                                    <h4
+                                                        class="font-medium text-purple-800 dark:text-purple-200 mb-3 flex items-center"
+                                                    >
+                                                        <i
+                                                            class="fas fa-laptop mr-2 text-purple-600 dark:text-purple-400"
+                                                        ></i>
                                                         Mobile Check (USSD)
                                                     </h4>
-                                                    <ol class="list-decimal pl-5 space-y-1 text-sm text-blue-700 dark:text-blue-300">
-                                                        <li>Dial <button @click.stop="handleUssdClick" class="font-mono bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded text-sm hover:bg-blue-200 dark:hover:bg-blue-800/50 transition-colors">*509#</button> on your mobile phone</li>
-                                                        <li>If first time, register with your ID and name</li>
-                                                        <li>You'll receive an ORPP PIN via SMS</li>
-                                                        <li>Dial <button @click.stop="handleUssdClick" class="font-mono bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded text-sm hover:bg-blue-200 dark:hover:bg-blue-800/50 transition-colors">*509#</button> again and enter your PIN</li>
-                                                        <li>Select "Check Membership Status"</li>
-                                                        <li>View your current party affiliation</li>
+                                                    <ol
+                                                        class="list-decimal pl-5 space-y-1 text-sm text-blue-700 dark:text-blue-300"
+                                                    >
+                                                        <li>
+                                                            Dial
+                                                            <button
+                                                                @click.stop="
+                                                                    handleUssdClick
+                                                                "
+                                                                class="font-mono bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded text-sm hover:bg-blue-200 dark:hover:bg-blue-800/50 transition-colors"
+                                                            >
+                                                                *509#
+                                                            </button>
+                                                            on your mobile phone
+                                                        </li>
+                                                        <li>
+                                                            If first time,
+                                                            register with your
+                                                            ID and name
+                                                        </li>
+                                                        <li>
+                                                            You'll receive an
+                                                            ORPP PIN via SMS
+                                                        </li>
+                                                        <li>
+                                                            Dial
+                                                            <button
+                                                                @click.stop="
+                                                                    handleUssdClick
+                                                                "
+                                                                class="font-mono bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded text-sm hover:bg-blue-200 dark:hover:bg-blue-800/50 transition-colors"
+                                                            >
+                                                                *509#
+                                                            </button>
+                                                            again and enter your
+                                                            PIN
+                                                        </li>
+                                                        <li>
+                                                            Select "Check
+                                                            Membership Status"
+                                                        </li>
+                                                        <li>
+                                                            View your current
+                                                            party affiliation
+                                                        </li>
                                                     </ol>
                                                 </div>
-                                                
+
                                                 <!-- Online Check -->
-                                                <div class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-100 dark:border-purple-800">
-                                                    <h4 class="font-medium text-purple-800 dark:text-purple-200 mb-3 flex items-center">
-                                                        <i class="fas fa-laptop mr-2 text-purple-600 dark:text-purple-400"></i>
+                                                <div
+                                                    class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-100 dark:border-purple-800"
+                                                >
+                                                    <h4
+                                                        class="font-medium text-purple-800 dark:text-purple-200 mb-3 flex items-center"
+                                                    >
+                                                        <i
+                                                            class="fas fa-laptop mr-2 text-purple-600 dark:text-purple-400"
+                                                        ></i>
                                                         Online Check (IPPMS)
                                                     </h4>
-                                                    <ol class="list-decimal pl-5 space-y-1 text-sm text-purple-700 dark:text-purple-300">
-                                                        <li>Visit <button @click.stop="handleIppmsClick" class="text-purple-700 dark:text-purple-300 hover:underline underline-offset-4 font-medium">ippms.orpp.or.ke</button></li>
-                                                        <li>Click "Check Membership Status"</li>
-                                                        <li>Enter ID number and date of birth</li>
-                                                        <li>Complete CAPTCHA verification</li>
-                                                        <li>View your current party affiliation</li>
+                                                    <ol
+                                                        class="list-decimal pl-5 space-y-1 text-sm text-purple-700 dark:text-purple-300"
+                                                    >
+                                                        <li>
+                                                            Visit
+                                                            <button
+                                                                @click.stop="
+                                                                    handleIppmsClick
+                                                                "
+                                                                class="text-purple-700 dark:text-purple-300 hover:underline underline-offset-4 font-medium"
+                                                            >
+                                                                ippms.orpp.or.ke
+                                                            </button>
+                                                        </li>
+                                                        <li>
+                                                            Click "Check
+                                                            Membership Status"
+                                                        </li>
+                                                        <li>
+                                                            Enter ID number and
+                                                            date of birth
+                                                        </li>
+                                                        <li>
+                                                            Complete CAPTCHA
+                                                            verification
+                                                        </li>
+                                                        <li>
+                                                            View your current
+                                                            party affiliation
+                                                        </li>
                                                     </ol>
                                                 </div>
                                             </div>
@@ -1051,21 +1237,67 @@ const canProceedToNextStep = computed(() => {
                                 </div>
 
                                 <!-- If Registered with Another Party -->
-                                <div class="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 p-4">
+                                <div
+                                    class="bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-400 p-4"
+                                >
                                     <div class="flex">
                                         <div class="flex-shrink-0">
-                                            <i class="fas fa-exclamation-triangle text-yellow-400"></i>
+                                            <i
+                                                class="fas fa-exclamation-triangle text-yellow-400"
+                                            ></i>
                                         </div>
                                         <div class="ml-3">
-                                            <h3 class="text-sm font-medium text-yellow-800 dark:text-yellow-200">
-                                                If You're Registered with Another Party
+                                            <h3
+                                                class="text-sm font-medium text-yellow-800 dark:text-yellow-200"
+                                            >
+                                                If You're Registered with
+                                                Another Party
                                             </h3>
-                                            <div class="mt-2 text-sm text-yellow-700 dark:text-yellow-300">
-                                                <p>You must first resign from your current party before joining Forward Kenya Party. Here's how:</p>
-                                                <ol class="list-decimal pl-5 mt-2 space-y-1">
-                                                    <li>Use the USSD code <button @click.stop="handleUssdClick" class="font-mono bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded text-sm hover:bg-blue-200 dark:hover:bg-blue-800/50 transition-colors">*509#</button> or visit the <button @click.stop="handleIppmsClick" class="text-purple-700 dark:text-purple-300 hover:underline underline-offset-4 font-medium">IPPMS portal</button> to resign</li>
-                                                    <li>Wait for confirmation of your resignation (usually within 24 hours)</li>
-                                                    <li>Once confirmed, you can proceed with your Forward Kenya Party registration</li>
+                                            <div
+                                                class="mt-2 text-sm text-yellow-700 dark:text-yellow-300"
+                                            >
+                                                <p>
+                                                    You must first resign from
+                                                    your current party before
+                                                    joining Forward Kenya Party.
+                                                    Here's how:
+                                                </p>
+                                                <ol
+                                                    class="list-decimal pl-5 mt-2 space-y-1"
+                                                >
+                                                    <li>
+                                                        Use the USSD code
+                                                        <button
+                                                            @click.stop="
+                                                                handleUssdClick
+                                                            "
+                                                            class="font-mono bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded text-sm hover:bg-blue-200 dark:hover:bg-blue-800/50 transition-colors"
+                                                        >
+                                                            *509#
+                                                        </button>
+                                                        or visit the
+                                                        <button
+                                                            @click.stop="
+                                                                handleIppmsClick
+                                                            "
+                                                            class="text-purple-700 dark:text-purple-300 hover:underline underline-offset-4 font-medium"
+                                                        >
+                                                            IPPMS portal
+                                                        </button>
+                                                        to resign
+                                                    </li>
+                                                    <li>
+                                                        Wait for confirmation of
+                                                        your resignation
+                                                        (usually within 24
+                                                        hours)
+                                                    </li>
+                                                    <li>
+                                                        Once confirmed, you can
+                                                        proceed with your
+                                                        Forward Kenya Party
+                                                        registration
+                                                    </li>
                                                 </ol>
                                             </div>
                                         </div>
@@ -1073,62 +1305,163 @@ const canProceedToNextStep = computed(() => {
                                 </div>
 
                                 <!-- Official Registration Options - Collapsible -->
-                                <div class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg">
-                                    <button 
+                                <div
+                                    class="bg-white dark:bg-gray-800 shadow overflow-hidden sm:rounded-lg"
+                                >
+                                    <button
                                         type="button"
                                         @click="toggleSection('register')"
                                         class="w-full px-4 py-5 sm:px-6 text-left bg-gray-50 dark:bg-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 rounded-t-lg"
                                     >
-                                        <div class="flex items-center justify-between">
-                                            <h3 class="text-lg leading-6 font-medium text-gray-900 dark:text-white">
-                                                How to Register with Forward Kenya Party? (Official Channels)
+                                        <div
+                                            class="flex items-center justify-between"
+                                        >
+                                            <h3
+                                                class="text-lg leading-6 font-medium text-gray-900 dark:text-white"
+                                            >
+                                                How to Register with Forward
+                                                Kenya Party? (Official Channels)
                                             </h3>
-                                            <i 
+                                            <i
                                                 :class="[
-                                                    activeRegistrationSection === 'register' ? 'fa-chevron-up' : 'fa-chevron-down',
+                                                    activeRegistrationSection ===
+                                                    'register'
+                                                        ? 'fa-chevron-up'
+                                                        : 'fa-chevron-down',
                                                     'fas',
                                                     'transition-transform',
                                                     'duration-200',
                                                     'text-gray-500',
-                                                    'text-lg'
+                                                    'text-lg',
                                                 ]"
                                             ></i>
                                         </div>
                                     </button>
-                                    <div v-show="activeRegistrationSection === 'register'" class="border-t border-gray-200 dark:border-gray-600 px-4 py-5 sm:p-6">
+                                    <div
+                                        v-show="
+                                            activeRegistrationSection ===
+                                            'register'
+                                        "
+                                        class="border-t border-gray-200 dark:border-gray-600 px-4 py-5 sm:p-6"
+                                    >
                                         <div class="space-y-4">
-                                            <p class="text-sm text-gray-700 dark:text-gray-300">
-                                                To officially register with Forward Kenya Party, you must complete your registration through one of the following official ORPP channels:
+                                            <p
+                                                class="text-sm text-gray-700 dark:text-gray-300"
+                                            >
+                                                To officially register with
+                                                Forward Kenya Party, you must
+                                                complete your registration
+                                                through one of the following
+                                                official ORPP channels:
                                             </p>
-                                            
-                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4">
+
+                                            <div
+                                                class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-4"
+                                            >
                                                 <!-- Mobile Registration -->
-                                                <div class="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-100 dark:border-green-800">
-                                                    <h4 class="font-medium text-purple-800 dark:text-purple-200 mb-3 flex items-center">
-                                                        <i class="fas fa-laptop mr-2 text-purple-600 dark:text-purple-400"></i>
-                                                        Mobile Registration (USSD)
+                                                <div
+                                                    class="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-100 dark:border-green-800"
+                                                >
+                                                    <h4
+                                                        class="font-medium text-purple-800 dark:text-purple-200 mb-3 flex items-center"
+                                                    >
+                                                        <i
+                                                            class="fas fa-laptop mr-2 text-purple-600 dark:text-purple-400"
+                                                        ></i>
+                                                        Mobile Registration
+                                                        (USSD)
                                                     </h4>
-                                                    <ol class="list-decimal pl-5 space-y-1 text-sm text-green-700 dark:text-green-300">
-                                                        <li>Dial <button @click.stop="handleUssdClick" class="font-mono bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded text-sm hover:bg-blue-200 dark:hover:bg-blue-800/50 transition-colors">*509#</button> on your mobile phone</li>
-                                                        <li>Enter your ORPP PIN</li>
-                                                        <li>Select "Join a Party"</li>
-                                                        <li>Enter party code: <span class="font-mono bg-green-100 dark:bg-green-800 px-1.5 py-0.5 rounded">FKP</span> (Forward Kenya Party)</li>
-                                                        <li>Follow the prompts to complete your registration</li>
+                                                    <ol
+                                                        class="list-decimal pl-5 space-y-1 text-sm text-green-700 dark:text-green-300"
+                                                    >
+                                                        <li>
+                                                            Dial
+                                                            <button
+                                                                @click.stop="
+                                                                    handleUssdClick
+                                                                "
+                                                                class="font-mono bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded text-sm hover:bg-blue-200 dark:hover:bg-blue-800/50 transition-colors"
+                                                            >
+                                                                *509#
+                                                            </button>
+                                                            on your mobile phone
+                                                        </li>
+                                                        <li>
+                                                            Enter your ORPP PIN
+                                                        </li>
+                                                        <li>
+                                                            Select "Join a
+                                                            Party"
+                                                        </li>
+                                                        <li>
+                                                            Enter party code:
+                                                            <span
+                                                                class="font-mono bg-green-100 dark:bg-green-800 px-1.5 py-0.5 rounded"
+                                                                >FKP</span
+                                                            >
+                                                            (Forward Kenya
+                                                            Party)
+                                                        </li>
+                                                        <li>
+                                                            Follow the prompts
+                                                            to complete your
+                                                            registration
+                                                        </li>
                                                     </ol>
                                                 </div>
-                                                
+
                                                 <!-- Online Registration -->
-                                                <div class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-100 dark:border-purple-800">
-                                                    <h4 class="font-medium text-purple-800 dark:text-purple-200 mb-3 flex items-center">
-                                                        <i class="fas fa-laptop mr-2 text-purple-600 dark:text-purple-400"></i>
-                                                        Online Registration (IPPMS)
+                                                <div
+                                                    class="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg border border-purple-100 dark:border-purple-800"
+                                                >
+                                                    <h4
+                                                        class="font-medium text-purple-800 dark:text-purple-200 mb-3 flex items-center"
+                                                    >
+                                                        <i
+                                                            class="fas fa-laptop mr-2 text-purple-600 dark:text-purple-400"
+                                                        ></i>
+                                                        Online Registration
+                                                        (IPPMS)
                                                     </h4>
-                                                    <ol class="list-decimal pl-5 space-y-1 text-sm text-purple-700 dark:text-purple-300">
-                                                        <li>Visit <button @click.stop="handleIppmsClick" class="text-purple-700 dark:text-purple-300 hover:underline underline-offset-4 font-medium">ippms.orpp.or.ke</button> or log in via <button @click.stop="handleECitizenClick" class="text-purple-700 dark:text-purple-300 hover:underline underline-offset-4 font-medium">eCitizen</button></li>
-                                                        <li>Navigate to "Join a Party" section</li>
-                                                        <li>Search for "Forward Kenya Party"</li>
-                                                        <li>Complete the online registration form</li>
-                                                        <li>Submit and wait for confirmation</li>
+                                                    <ol
+                                                        class="list-decimal pl-5 space-y-1 text-sm text-purple-700 dark:text-purple-300"
+                                                    >
+                                                        <li>
+                                                            Visit
+                                                            <button
+                                                                @click.stop="
+                                                                    handleIppmsClick
+                                                                "
+                                                                class="text-purple-700 dark:text-purple-300 hover:underline underline-offset-4 font-medium"
+                                                            >
+                                                                ippms.orpp.or.ke
+                                                            </button>
+                                                            or log in via
+                                                            <button
+                                                                @click.stop="
+                                                                    handleECitizenClick
+                                                                "
+                                                                class="text-purple-700 dark:text-purple-300 hover:underline underline-offset-4 font-medium"
+                                                            >
+                                                                eCitizen
+                                                            </button>
+                                                        </li>
+                                                        <li>
+                                                            Navigate to "Join a
+                                                            Party" section
+                                                        </li>
+                                                        <li>
+                                                            Search for "Forward
+                                                            Kenya Party"
+                                                        </li>
+                                                        <li>
+                                                            Complete the online
+                                                            registration form
+                                                        </li>
+                                                        <li>
+                                                            Submit and wait for
+                                                            confirmation
+                                                        </li>
                                                     </ol>
                                                 </div>
                                             </div>
@@ -1141,17 +1474,41 @@ const canProceedToNextStep = computed(() => {
                                     <div class="flex items-center h-5">
                                         <Checkbox
                                             id="understood_instructions"
-                                            v-model:checked="form.understood_instructions"
+                                            v-model:checked="
+                                                form.understood_instructions
+                                            "
                                             required
                                             class="mt-0.5"
                                         />
                                     </div>
                                     <div class="ml-3 text-sm">
-                                        <label for="understood_instructions" class="font-medium text-gray-700 dark:text-gray-300">
-                                            I understand that I must complete my registration through the official ORPP channels (<button @click.stop="handleUssdClick" class="font-mono bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded text-sm hover:bg-blue-200 dark:hover:bg-blue-800/50 transition-colors">*509#</button> or <button @click.stop="handleIppmsClick" class="text-purple-700 dark:text-purple-300 hover:underline underline-offset-4 font-medium">IPPMS portal</button>) after submitting this form.
+                                        <label
+                                            for="understood_instructions"
+                                            class="font-medium text-gray-700 dark:text-gray-300"
+                                        >
+                                            I understand that I must complete my
+                                            registration through the official
+                                            ORPP channels (<button
+                                                @click.stop="handleUssdClick"
+                                                class="font-mono bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 px-1.5 py-0.5 rounded text-sm hover:bg-blue-200 dark:hover:bg-blue-800/50 transition-colors"
+                                            >
+                                                *509#
+                                            </button>
+                                            or
+                                            <button
+                                                @click.stop="handleIppmsClick"
+                                                class="text-purple-700 dark:text-purple-300 hover:underline underline-offset-4 font-medium"
+                                            >
+                                                IPPMS portal</button
+                                            >) after submitting this form.
                                         </label>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                            This form is for pre-registration only. Your membership will only be valid after completing the official ORPP registration process.
+                                        <p
+                                            class="text-xs text-gray-500 dark:text-gray-400 mt-1"
+                                        >
+                                            This form is for pre-registration
+                                            only. Your membership will only be
+                                            valid after completing the official
+                                            ORPP registration process.
                                         </p>
                                     </div>
                                 </div>
@@ -1263,6 +1620,7 @@ const canProceedToNextStep = computed(() => {
                                         autocomplete="tel"
                                         :disabled="isSubmitting"
                                         :aria-busy="isSubmitting"
+                                        pattern="\d{10}"
                                     />
                                     <InputError
                                         :message="form.errors.telephone"
@@ -1283,22 +1641,18 @@ const canProceedToNextStep = computed(() => {
                                     <select
                                         id="identification_type"
                                         v-model="form.identification_type"
-                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
+                                        class="block w-full rounded-md border-gray-300 bg-gray-200 text-gray-500 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
                                         required
+                                        :disabled="true"
                                         @change="
                                             form.identification_number = ''
                                         "
                                     >
-                                        <option value="">
-                                            Select Identification Type
-                                        </option>
                                         <option
                                             value="national_identification_number"
+                                            selected
                                         >
                                             National Identification Number
-                                        </option>
-                                        <option value="passport_number">
-                                            Passport Number
                                         </option>
                                     </select>
                                     <InputError
@@ -1341,7 +1695,7 @@ const canProceedToNextStep = computed(() => {
                                                 : 'passport_number'
                                         "
                                         v-model="form.identification_number"
-                                        type="text"
+                                        type="number"
                                         class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
                                         :placeholder="
                                             form.identification_type ===
@@ -1350,11 +1704,11 @@ const canProceedToNextStep = computed(() => {
                                                 : 'Enter Passport Number'
                                         "
                                         required
+                                        maxlength="8"
                                     />
                                     <InputError
                                         :message="
-                                            form.errors
-                                                .identification_number
+                                            form.errors.identification_number
                                         "
                                         class="mt-1 text-sm text-red-600"
                                     />
@@ -1407,7 +1761,15 @@ const canProceedToNextStep = computed(() => {
                                         class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
                                         required
                                         :max="
-                                            new Date()
+                                            new Date(
+                                                Date.now() -
+                                                    1000 *
+                                                        60 *
+                                                        60 *
+                                                        24 *
+                                                        365.25 *
+                                                        18
+                                            )
                                                 .toISOString()
                                                 .split('T')[0]
                                         "
@@ -1520,6 +1882,7 @@ const canProceedToNextStep = computed(() => {
                                 <div class="space-y-2">
                                     <div class="flex items-center">
                                         <InputLabel
+                                            for="are you a pwd?"
                                             value="Are you a PWD?"
                                             class="block text-sm font-medium text-gray-700"
                                         />
@@ -1595,7 +1958,7 @@ const canProceedToNextStep = computed(() => {
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Step 3: Location and Enlisting Information -->
                         <div v-if="currentStep === 3" class="space-y-4">
                             <h2 class="text-base font-medium text-gray-700">
@@ -1834,7 +2197,7 @@ const canProceedToNextStep = computed(() => {
                                                 }}
                                                 - ({{
                                                     form.identification_type ===
-                                                    'national_identification_number'
+                                                    "national_identification_number"
                                                         ? "National Identification Number"
                                                         : "Passport Number"
                                                 }})
@@ -2148,7 +2511,11 @@ const canProceedToNextStep = computed(() => {
                                                     in Kenya. By signing up, I
                                                     agree to the
                                                     <a
-                                                        :href="route('frontend.terms-and-conditions')"
+                                                        :href="
+                                                            route(
+                                                                'frontend.terms-and-conditions'
+                                                            )
+                                                        "
                                                         target="_blank"
                                                         class="text-emerald-600 hover:text-emerald-500 hover:underline underline-offset-4 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-emerald-500 rounded"
                                                     >
@@ -2158,7 +2525,11 @@ const canProceedToNextStep = computed(() => {
                                                         >and</span
                                                     >
                                                     <a
-                                                        :href="route('frontend.privacy-policy')"
+                                                        :href="
+                                                            route(
+                                                                'frontend.privacy-policy'
+                                                            )
+                                                        "
                                                         target="_blank"
                                                         class="text-emerald-600 hover:text-emerald-500 hover:underline underline-offset-4 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-emerald-500 rounded"
                                                     >
@@ -2187,13 +2558,15 @@ const canProceedToNextStep = computed(() => {
 
                             <!-- reCAPTCHA Component -->
                             <div class="mt-6">
-                                <ReCaptcha 
-                                    action="register" 
-                                    :site-key="$page.props.recaptchaSiteKey" 
-                                    @captcha-response="setCaptchaResponse" 
+                                <ReCaptcha
+                                    action="register"
+                                    :site-key="$page.props.recaptchaSiteKey"
+                                    @captcha-response="setCaptchaResponse"
                                 />
-                                <InputError 
-                                    :message="form.errors['g-recaptcha-response']" 
+                                <InputError
+                                    :message="
+                                        form.errors['g-recaptcha-response']
+                                    "
                                     class="mt-1 text-sm text-red-600"
                                 />
                             </div>
@@ -2222,7 +2595,9 @@ const canProceedToNextStep = computed(() => {
                             <button
                                 type="submit"
                                 class="inline-flex items-center px-4 py-2 bg-green-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-green-700 focus:bg-green-700 active:bg-green-900 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition ease-in-out duration-150 disabled:opacity-75 disabled:cursor-not-allowed"
-                                :disabled="!canProceedToNextStep || isSubmitting"
+                                :disabled="
+                                    !canProceedToNextStep || isSubmitting
+                                "
                                 :aria-busy="isSubmitting"
                             >
                                 <i
@@ -2235,12 +2610,12 @@ const canProceedToNextStep = computed(() => {
                                             currentStep === 4
                                                 ? "Submit Application"
                                                 : currentStep === 1
-                                                    ? "Start: With Personal Information"
-                                                    : "Next: " + nextStepDescription
+                                                ? "Start: With Personal Information"
+                                                : "Next: " + nextStepDescription
                                         }}
                                     </span>
                                     <span class="sm:hidden">{{
-                                        currentStep === 4 ? 'Submit' : 'Next'
+                                        currentStep === 4 ? "Submit" : "Next"
                                     }}</span>
                                     <i
                                         :class="
@@ -2257,7 +2632,8 @@ const canProceedToNextStep = computed(() => {
                         <div class="mt-6">
                             <div class="flex items-center justify-between mb-1">
                                 <span class="text-sm font-medium text-gray-700">
-                                    {{ Math.round((currentStep / 4) * 100) }}% Complete
+                                    {{ Math.round((currentStep / 4) * 100) }}%
+                                    Complete
                                 </span>
                             </div>
                             <div class="w-full bg-gray-200 rounded-full h-2.5">
