@@ -55,6 +55,11 @@ const handleIppmsClick = () => {
     window.open('https://ippms.orpp.or.ke', '_blank', 'noopener,noreferrer');
 };
 
+// Handle eCitizen portal click
+const handleECitizenClick = () => {
+    window.open('https://accounts.ecitizen.go.ke/en', '_blank', 'noopener,noreferrer');
+};
+
 const stepDescription = computed(() => {
     switch (currentStep.value) {
         case 1:
@@ -241,6 +246,19 @@ const validateStep = (step) => {
                 isValid: false,
                 message: "Identification type is required",
             };
+        if (!form.identification_number)
+            return {
+                isValid: false,
+                message: "National ID/Passport Number is required",
+            };
+            
+        // Validate identification number length (exactly 8 characters)
+        if (form.identification_number.length !== 8) {
+            return {
+                isValid: false,
+                message: "Identification number must be exactly 8 characters long"
+            };
+        }
         if (!form.identification_number?.trim())
             return {
                 isValid: false,
@@ -271,17 +289,17 @@ const validateStep = (step) => {
         if (!form.county_id)
             return {
                 isValid: false,
-                message: "County of voter registration is required",
+                message: "County of Member registration is required",
             };
         if (!form.constituency_id)
             return {
                 isValid: false,
-                message: "Constituency of voter registration is required",
+                message: "Constituency of Member registration is required",
             };
         if (!form.ward_id)
             return {
                 isValid: false,
-                message: "Ward of voter registration is required",
+                message: "Ward of Member registration is required",
             };
         return { isValid: true };
     }
@@ -1106,7 +1124,7 @@ const canProceedToNextStep = computed(() => {
                                                         Online Registration (IPPMS)
                                                     </h4>
                                                     <ol class="list-decimal pl-5 space-y-1 text-sm text-purple-700 dark:text-purple-300">
-                                                        <li>Visit <button @click.stop="handleIppmsClick" class="text-purple-700 dark:text-purple-300 hover:underline underline-offset-4 font-medium">ippms.orpp.or.ke</button> or log in via eCitizen</li>
+                                                        <li>Visit <button @click.stop="handleIppmsClick" class="text-purple-700 dark:text-purple-300 hover:underline underline-offset-4 font-medium">ippms.orpp.or.ke</button> or log in via <button @click.stop="handleECitizenClick" class="text-purple-700 dark:text-purple-300 hover:underline underline-offset-4 font-medium">eCitizen</button></li>
                                                         <li>Navigate to "Join a Party" section</li>
                                                         <li>Search for "Forward Kenya Party"</li>
                                                         <li>Complete the online registration form</li>
@@ -1336,7 +1354,7 @@ const canProceedToNextStep = computed(() => {
                                     <InputError
                                         :message="
                                             form.errors
-                                                .national_identification_number
+                                                .identification_number
                                         "
                                         class="mt-1 text-sm text-red-600"
                                     />
@@ -1589,7 +1607,7 @@ const canProceedToNextStep = computed(() => {
                                     <div class="flex items-center">
                                         <InputLabel
                                             for="county_id"
-                                            value="County of Voter Registration"
+                                            value="County of Member Registration"
                                             class="block text-sm font-medium text-gray-700"
                                         />
                                         <i
@@ -1630,7 +1648,7 @@ const canProceedToNextStep = computed(() => {
                                     <div class="flex items-center">
                                         <InputLabel
                                             for="constituency_id"
-                                            value="Constituency of Voter Registration"
+                                            value="Constituency of Member Registration"
                                             class="block text-sm font-medium text-gray-700"
                                         />
                                         <i
@@ -1678,7 +1696,7 @@ const canProceedToNextStep = computed(() => {
                                     <div class="flex items-center">
                                         <InputLabel
                                             for="ward_id"
-                                            value="Ward of Voter Registration"
+                                            value="Ward of Member Registration"
                                             class="block text-sm font-medium text-gray-700"
                                         />
                                         <i
@@ -1720,7 +1738,7 @@ const canProceedToNextStep = computed(() => {
                                     <div class="flex items-center">
                                         <InputLabel
                                             for="enlistment_date"
-                                            value="Enlistment Date"
+                                            value="Membership Enlistment Date"
                                             class="block text-sm font-medium text-gray-700"
                                         />
                                         <i
@@ -2043,7 +2061,7 @@ const canProceedToNextStep = computed(() => {
                                             <dt
                                                 class="text-sm font-medium text-gray-500"
                                             >
-                                                County of Voter Registration
+                                                County of Member Registration
                                             </dt>
                                             <dd
                                                 class="mt-1 text-sm text-gray-900 sm:col-span-2"
@@ -2062,7 +2080,7 @@ const canProceedToNextStep = computed(() => {
                                             <dt
                                                 class="text-sm font-medium text-gray-500"
                                             >
-                                                Constituency of Voter
+                                                Constituency of Member
                                                 Registration
                                             </dt>
                                             <dd
@@ -2082,7 +2100,7 @@ const canProceedToNextStep = computed(() => {
                                             <dt
                                                 class="text-sm font-medium text-gray-500"
                                             >
-                                                Ward of Voter Registration
+                                                Ward of Member Registration
                                             </dt>
                                             <dd
                                                 class="mt-1 text-sm text-gray-900 sm:col-span-2"
