@@ -376,25 +376,20 @@ class FrontendController extends Controller
      */
     public function showService($id)
     {
-        $service = Service::with([
-                'department',
-                'requirements',
-                'type',
-                'category',
-                'department.type',
-                'department.category'
-            ])
+        // First, get the service with its relationships
+        $service = Service::with(['departments', 'type', 'category'])
             ->where('is_featured', true)
             ->findOrFail($id);
 
-        // Get related services from the same department and category
+        // Get related services from the same departments or category
         $relatedServices = Service::where('id', '!=', $id)
             ->where('is_featured', true)
             ->where(function($query) use ($service) {
-                $query->where('department_id', $service->department_id)
-                      ->orWhere('category_id', $service->category_id);
+                $query->whereHas('departments', function($q) use ($service) {
+                    $q->whereIn('departments.id', $service->departments->pluck('id'));
+                })->orWhere('category_id', $service->category_id);
             })
-            ->with(['department', 'category'])
+            ->with(['departments', 'category'])
             ->inRandomOrder()
             ->limit(3)
             ->get();
@@ -404,7 +399,7 @@ class FrontendController extends Controller
             $additionalServices = Service::where('id', '!=', $id)
                 ->where('is_featured', true)
                 ->whereNotIn('id', $relatedServices->pluck('id'))
-                ->with(['department', 'category'])
+                ->with(['departments', 'category'])
                 ->inRandomOrder()
                 ->limit(3 - $relatedServices->count())
                 ->get();
@@ -465,9 +460,9 @@ class FrontendController extends Controller
                     ->orderBy('name', 'asc')
                     ->paginate(6, ['*'], 'services_page');
             },
-            'staff' => function($query) {
-                return $query->orderBy('name', 'asc');
-            }
+            // 'staff' => function($query) {
+            //     return $query->orderBy('name', 'asc');
+            // }
         ])->findOrFail($id);
 
         // Get related departments (same type or category)
