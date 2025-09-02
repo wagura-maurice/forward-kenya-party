@@ -19,18 +19,32 @@ const form = ref(null);
 const name = ref('');
 const email = ref('');
 const message = ref('');
+const agreeToTerms = ref(false);
 
 // Form submission handler
 const handleSubmit = (e) => {
     e.preventDefault();
     
+    if (!agreeToTerms.value) {
+        alert('Please agree to the Terms of Service and Privacy Policy before submitting.');
+        return;
+    }
+    
     if (name.value && email.value && message.value) {
+        // Here you would typically send the form data to your backend
+        console.log('Form submitted:', {
+            name: name.value,
+            email: email.value,
+            message: message.value
+        });
+        
         alert('Thank you for your feedback! We will respond within 48 hours.');
         form.value.reset();
         // Clear form data
         name.value = '';
         email.value = '';
         message.value = '';
+        agreeToTerms.value = false;
     } else {
         alert('Please fill in all required fields.');
     }
@@ -67,7 +81,8 @@ const handleSubmit = (e) => {
                             <ul class="space-y-3 text-gray-600 dark:text-gray-300">
                                 <li class="flex items-start">
                                     <i class="fas fa-map-marker-alt text-green-600 mt-1 mr-3"></i>
-                                    <span>View Park Towers, P.O. Box 27999-00100 Nairobi</span>
+                                    <span>Utalii Lane, Viewpark Towers, 19th Floor, Suite 19<br>
+                                    P.O. Box 27999–00100, GPO Nairobi</span>
                                 </li>
                                 <li class="flex items-start">
                                     <i class="fas fa-envelope text-green-600 mt-1 mr-3"></i>
@@ -79,7 +94,7 @@ const handleSubmit = (e) => {
                                 </li>
                                 <li class="flex items-start">
                                     <i class="fas fa-phone text-green-600 mt-1 mr-3"></i>
-                                    <span>[Party Contact Number]</span>
+                                    <span>+254 713 447 820</span>
                                 </li>
                             </ul>
                             <div class="mt-6">
@@ -296,9 +311,55 @@ const handleSubmit = (e) => {
                                 <textarea v-model="message" id="message" name="message" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-blue-500 focus:border-blue-500 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Your message..."></textarea>
                             </div>
                             
-                            <button type="submit" class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700">
-                                <i class="fas fa-paper-plane mr-2"></i> Submit Feedback
-                            </button>
+                            <div class="flex items-start">
+                                <div class="flex items-center h-5">
+                                    <input
+                                        type="checkbox"
+                                        id="agree_to_terms"
+                                        v-model="agreeToTerms"
+                                        class="w-4 h-4 text-green-600 bg-gray-100 rounded border-gray-300 focus:ring-green-500 dark:focus:ring-green-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                        required
+                                    />
+                                </div>
+                                <div class="ml-3 text-sm">
+                                    <label for="agree_to_terms" class="font-medium text-gray-700 dark:text-gray-300">
+                                        <div class="flex flex-wrap">
+                                            <span class="mr-1">
+                                                I agree to the
+                                                <a
+                                                    :href="route('frontend.terms-and-conditions')"
+                                                    target="_blank"
+                                                    class="text-emerald-600 hover:text-emerald-500 hover:underline underline-offset-4 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-emerald-500 rounded"
+                                                >
+                                                    Terms of Service
+                                                </a>
+                                                <span class="mx-1">and</span>
+                                                <a
+                                                    :href="route('frontend.privacy-policy')"
+                                                    target="_blank"
+                                                    class="text-emerald-600 hover:text-emerald-500 hover:underline underline-offset-4 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-emerald-500 rounded"
+                                                >
+                                                    Privacy Policy
+                                                </a>
+                                                and confirm that all information provided is accurate.
+                                            </span>
+                                        </div>
+                                    </label>
+                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                        You must agree to the terms of service and our privacy policy to submit feedback.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="pt-2">
+                                <button 
+                                    type="submit" 
+                                    class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50"
+                                    :disabled="!agreeToTerms"
+                                >
+                                    <i class="fas fa-paper-plane mr-2"></i> Submit Feedback
+                                </button>
+                            </div>
                         </form>
                     </div>
                 </div>

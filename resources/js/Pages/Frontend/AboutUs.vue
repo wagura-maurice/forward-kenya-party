@@ -3,6 +3,16 @@
 import GuestLayout from "@/Layouts/GuestLayout.vue";
 import { Head } from '@inertiajs/vue3';
 import { onMounted, ref, onUnmounted } from 'vue';
+import DonationModal from '@/Components/DonationModal.vue';
+import TeamSection from '@/Components/TeamSection.vue';
+
+// Show/hide donation modal
+const showDonationModal = ref(false);
+
+// Toggle donation modal
+const toggleDonationModal = () => {
+    showDonationModal.value = !showDonationModal.value;
+};
 
 // Image carousel for ideology section
 const currentImageIndex = ref(0);
@@ -119,19 +129,15 @@ defineProps({
                     <div class="flex flex-col lg:flex-row gap-12 items-center">
                         <div class="lg:w-1/2 text-white">
                             <h2 class="text-2xl md:text-3xl font-bold mb-4">Our Ideology</h2>
-                            <blockquote class="text-2xl font-semibold italic mb-8 border-l-4 border-white/50 pl-6 py-2 bg-white/10 rounded-r-lg">
-                                "OUR LIVES, OUR HERITAGE"
-                                <p class="text-base font-normal mt-2 italic">— Forward Kenya Party Slogan</p>
-                            </blockquote>
                             <p class="text-white/90 mb-8 text-lg leading-relaxed">
-                                Our political ideology is built on the foundation of safeguarding our collective future while honoring our rich heritage. This commitment is reflected in our five key pillars:
+                                Forward Kenya Party is grounded in civic egalitarianism, emphasizing equal rights, opportunities, and civic participation for all citizens regardless of background. We promote Pan-Africanism for continental solidarity, regional integration in East Africa for economic and political unity, and global engagement to advance Kenya's interests. Our ideology bridges center-left values of democratic participation, social equality, civic empowerment, and decentralization, ensuring inclusivity, transparency, and sustainable progress.
                             </p>
                             <ul class="list-disc pl-6 space-y-3 mb-8 text-white/90">
-                                <li>Progressive social policies that protect and uplift all Kenyans</li>
-                                <li>Economic systems that create shared prosperity</li>
-                                <li>Environmental stewardship for sustainable development</li>
-                                <li>Devolution of power and resources to grassroots levels</li>
-                                <li>National unity through inclusive governance</li>
+                                <li>Democratic Participation: Equal access to decision-making for all citizens</li>
+                                <li>Social Equality: Equitable access to education, healthcare, and opportunities</li>
+                                <li>Civic Education & Empowerment: Informing citizens for active engagement</li>
+                                <li>Decentralization and Localism: Devolving power for grassroots governance</li>
+                                <li>Pan-Africanism & Integration: Fostering African solidarity and regional unity</li>
                             </ul>
                         </div>
                         <div class="lg:w-1/2 flex items-center justify-center">
@@ -190,7 +196,7 @@ defineProps({
             </div>
 
             <!-- Core Values -->
-            <div class="bg-gray-50 dark:bg-gray-800 rounded-xl mb-16">
+            <div class="bg-gray-50 dark:bg-gray-800 rounded-xl py-16">
                 <h2 class="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">Our Core Values</h2>
                 <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
                     <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow">
@@ -241,7 +247,7 @@ defineProps({
             </div>
 
             <!-- Who We Are -->
-            <div class="bg-gray-50 dark:bg-gray-800 rounded-xl mb-16">
+            <div class="bg-gray-50 dark:bg-gray-800 rounded-xl py-16">
                 <h3 class="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">Who We Are</h3>
                 <div class="grid md:grid-cols-2 gap-8 items-center">
                     <div>
@@ -257,7 +263,7 @@ Established in 2020, the Forward Kenya Party emerged from a collective desire fo
                                     <img src="https://ui-avatars.com/api/?name=John+Doe&background=6366f1&color=fff&rounded=true&size=40" alt="Party Chairman" class="w-full h-full object-cover">
                                 </div>
                                 <div>
-                                    <p class="text-blue-600 dark:text-blue-200 text-sm font-medium">John Doe</p>
+                                    <!-- <p class="text-blue-600 dark:text-blue-200 text-sm font-medium">John Doe</p> -->
                                     <p class="text-blue-500 dark:text-blue-300 text-xs">Party Chairman, 2020</p>
                                 </div>
                             </div>
@@ -285,7 +291,7 @@ Established in 2020, the Forward Kenya Party emerged from a collective desire fo
             </div>
 
             <!-- Party History -->
-            <div class="bg-gray-50 dark:bg-gray-800 rounded-xl mb-16">
+            <div class="bg-gray-50 dark:bg-gray-800 rounded-xl py-16">
                 <h3 class="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">Our History</h3>
                 <div class="relative">
                     <!-- Timeline -->
@@ -405,12 +411,21 @@ Established in 2020, the Forward Kenya Party emerged from a collective desire fo
                         <i class="fas fa-user-plus"></i>
                         <span>Membership</span>
                     </a>
-                    <a href="#" class="bg-transparent border-2 border-white hover:bg-white/10 font-semibold px-8 py-3 rounded-full transition-colors flex items-center justify-center gap-2">
+                    <button @click="toggleDonationModal" class="bg-transparent border-2 border-white hover:bg-white/10 font-semibold px-8 py-3 rounded-full transition-colors flex items-center justify-center gap-2">
                         <i class="fas fa-hand-holding-heart"></i>
                         <span>Donation</span>
-                    </a>
+                    </button>
                 </div>
             </div>
+
+            <!-- Team Section -->
+            <TeamSection />
+            
+            <!-- Donation Modal -->
+            <DonationModal 
+                :show="showDonationModal" 
+                @close="toggleDonationModal" 
+            />
         </section>
     </GuestLayout>
 </template>

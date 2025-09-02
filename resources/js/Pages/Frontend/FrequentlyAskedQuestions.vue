@@ -2,6 +2,8 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import GuestLayout from "@/Layouts/GuestLayout.vue";
+import { Link } from '@inertiajs/vue3';
+import PdfViewer from '@/Components/PdfViewer.vue';
 
 // Define props passed from the backend
 const props = defineProps({
@@ -10,6 +12,22 @@ const props = defineProps({
         required: true,
     },
     logoUrl: {
+        type: String,
+        required: true,
+    },
+    ideologyUrl: {
+        type: String,
+        required: true,
+    },
+    manifestoUrl: {
+        type: String,
+        required: true,
+    },
+    constitutionUrl: {
+        type: String,
+        required: true,
+    },
+    nominationRulesUrl: {
         type: String,
         required: true,
     },
@@ -148,10 +166,10 @@ const toggleFaq = (index) => {
                                                     <div class="text-gray-600 dark:text-gray-300">
                                                         <p>We have different membership categories with varying fees:</p>
                                                         <ul class="list-disc pl-5 mt-2 space-y-1">
-                                                            <li>Ordinary Membership: KES 10 registration, KES 5 annual subscription</li>
-                                                            <li>Life Membership: KES 10,000 registration, KES 5,000 annual subscription</li>
-                                                            <li>Corporate Membership: KES 60,000 registration, KES 10,000 annual subscription</li>
-                                                            <li>Group Membership: KES 30,000 registration, KES 5,000 annual subscription</li>
+                                                            <li>Ordinary Membership: KES 0.00 registration, KES 0.00 annual subscription</li>
+                                                            <li>Life Membership: KES 0.00 registration, KES 0.00 annual subscription</li>
+                                                            <li>Corporate Membership: KES 0.00 registration, KES 0.00 annual subscription</li>
+                                                            <li>Group Membership: KES 0.00 registration, KES 0.00 annual subscription</li>
                                                         </ul>
                                                     </div>
                                                 </div>
@@ -446,12 +464,33 @@ const toggleFaq = (index) => {
                             <h3 class="text-xl font-semibold text-gray-900 dark:text-white mb-3">Still have questions?</h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">Can't find the answer you're looking for? Please reach out to our support team.</p>
                             <div class="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4">
-                                <a href="#" class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700">
+                                <Link :href="route('frontend.contact-us')" class="inline-flex items-center justify-center px-4 py-2 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700">
                                     <i class="fas fa-envelope mr-2"></i> Contact Us
-                                </a>
-                                <a href="#" class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 dark:border-gray-600 text-base font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 hover:bg-gray-50 dark:hover:bg-gray-700">
-                                    <i class="fas fa-file-alt mr-2"></i> View Constitution
-                                </a>
+                                </Link>
+                                <PdfViewer
+                                    :pdf-url="ideologyUrl"
+                                    title="Forward Kenya Party Ideology"
+                                    button-text="View Ideology"
+                                    v-if="ideologyUrl"
+                                />
+                                <PdfViewer
+                                    :pdf-url="manifestoUrl"
+                                    title="Forward Kenya Party Manifesto"
+                                    button-text="View Manifesto"
+                                    v-if="manifestoUrl"
+                                />
+                                <PdfViewer
+                                    :pdf-url="constitutionUrl"
+                                    title="Forward Kenya Party Constitution"
+                                    button-text="View Constitution"
+                                    v-if="constitutionUrl"
+                                />
+                                <PdfViewer
+                                    :pdf-url="nominationRulesUrl"
+                                    title="Forward Kenya Party Nomination Rules"
+                                    button-text="View Nomination Rules"
+                                    v-if="nominationRulesUrl"
+                                />
                             </div>
                         </div>
                     </div>

@@ -128,10 +128,10 @@ const submitForm = () => {
                         Telephone:
                     </p>
                     <a
-                        href="tel:+254000000000"
+                        href="tel:+254713447820"
                         class="ml-16 text-green-600 dark:text-green-400 font-semibold"
                     >
-                        +254 700 000 000
+                        +254 713 447820
                     </a>
                 </div>
 
@@ -302,32 +302,45 @@ const submitForm = () => {
 
                                 <!-- Privacy Policy Checkbox -->
                                 <div class="flex items-center">
-                                    <input
-                                        type="checkbox"
-                                        id="agree_to_privacy_policy"
-                                        v-model="form.agree_to_privacy_policy"
-                                        class="w-4 h-4 text-green-600 bg-gray-100 rounded border-gray-300 focus:ring-green-500 dark:focus:ring-green-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
-                                        required
-                                    />
-                                    <label
-                                        for="agree_to_privacy_policy"
-                                        class="ml-2 text-sm font-medium text-gray-900 dark:text-gray-300"
-                                    >
-                                        By contacting us, you agree to our
-                                        <a
-                                            href="/terms"
-                                            class="text-green-600 hover:underline underline-offset-4 dark:text-green-500 font-bold"
-                                        >
-                                            Terms and Conditions
-                                        </a>
-                                        and our
-                                        <a
-                                            href="/privacy-policy"
-                                            class="text-green-600 hover:underline underline-offset-4 dark:text-green-500 font-bold"
-                                        >
-                                            Privacy Policy</a
-                                        >.
-                                    </label>
+                                    <div class="flex items-start">
+                                        <div class="flex items-center h-5">
+                                            <input
+                                                type="checkbox"
+                                                id="agree_to_privacy_policy"
+                                                v-model="form.agree_to_privacy_policy"
+                                                class="w-4 h-4 text-green-600 bg-gray-100 rounded border-gray-300 focus:ring-green-500 dark:focus:ring-green-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
+                                                required
+                                            />
+                                        </div>
+                                        <div class="ml-3 text-sm">
+                                            <label for="agree_to_privacy_policy" class="font-medium text-gray-700 dark:text-gray-300">
+                                                <div class="flex flex-wrap">
+                                                    <span class="mr-1">
+                                                        By contacting us, you agree to the
+                                                        <a
+                                                            :href="route('frontend.terms-and-conditions')"
+                                                            target="_blank"
+                                                            class="text-emerald-600 hover:text-emerald-500 hover:underline underline-offset-4 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-emerald-500 rounded"
+                                                        >
+                                                            Terms of Service
+                                                        </a>
+                                                        <span class="mx-1">and</span>
+                                                        <a
+                                                            :href="route('frontend.privacy-policy')"
+                                                            target="_blank"
+                                                            class="text-emerald-600 hover:text-emerald-500 hover:underline underline-offset-4 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-emerald-500 rounded"
+                                                        >
+                                                            Privacy Policy
+                                                        </a>
+                                                        and affirm that all information provided is true and accurate.
+                                                    </span>
+                                                </div>
+                                            </label>
+                                            <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                                You must agree to the terms of service and our privacy policy to submit a contact form.
+                                            </p>
+                                        </div>
+                                    </div>
                                     <p
                                         v-if="
                                             form.errors.agree_to_privacy_policy
@@ -419,9 +432,8 @@ const submitForm = () => {
                                             <p
                                                 class="text-xs text-gray-600 dark:text-gray-400"
                                             >
-                                                View Park Towers<br>
-                                                P.O. Box 27999-00100<br>
-                                                Nairobi, Kenya
+                                                Utalii Lane, Viewpark Towers, 19th Floor, Suite 19<br>
+                                                P.O. Box: 27999 – 00100, GPO NAIROBI
                                             </p>
                                         </div>
                                     </div>

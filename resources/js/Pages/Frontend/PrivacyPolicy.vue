@@ -34,27 +34,68 @@ defineProps({
             <div class="bg-white dark:bg-gray-900 mt-8">
                 <div class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">    
                     <div class="space-y-8">
-                        <!-- Data Controller -->
+                        <!-- Your Rights -->
                         <div class="mb-8 p-6 bg-gray-50 dark:bg-gray-800 rounded-lg">
                             <h3 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white flex items-center">
                                 <span class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">1</span>
-                                Data Controller & Contact Information
+                                Your Rights
                             </h3>
-                            <div class="grid md:grid-cols-2 gap-4 text-gray-600 dark:text-gray-300">
+                            <p class="text-gray-600 dark:text-gray-300 mb-4">
+                                As a member, you have the following rights regarding your personal data, in accordance with Kenyan data protection laws:
+                            </p>
+                            <div class="grid md:grid-cols-2 gap-6">
                                 <div>
-                                    <p class="font-semibold">Party Information:</p>
-                                    <p><strong>Name:</strong> Forward Kenya Party (FKP)</p>
-                                    <p><strong>Address:</strong> View Park Towers, P.O. Box 27999-00100, Nairobi</p>
-                                    <p><strong>Email:</strong> forwardkenyaparty@gmail.com</p>
-                                    <p><strong>Website:</strong> www.forwardkenyaparty.com</p>
+                                    <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm mb-4">
+                                        <h4 class="font-semibold text-green-600 dark:text-green-400 mb-2">Right to Access</h4>
+                                        <p class="text-gray-600 dark:text-gray-300 text-sm">
+                                            You may request a copy of your personal data held by the party (Article 4.3.2 of our Party Constitution).
+                                        </p>
+                                    </div>
+                                    <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm mb-4">
+                                        <h4 class="font-semibold text-green-600 dark:text-green-400 mb-2">Right to Rectification</h4>
+                                        <p class="text-gray-600 dark:text-gray-300 text-sm">
+                                            You may request correction of inaccurate or incomplete data.
+                                        </p>
+                                    </div>
+                                    <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+                                        <h4 class="font-semibold text-green-600 dark:text-green-400 mb-2">Right to Withdraw Consent</h4>
+                                        <p class="text-gray-600 dark:text-gray-300 text-sm">
+                                            Where processing is based on consent, you may withdraw it at any time without affecting prior processing.
+                                        </p>
+                                    </div>
                                 </div>
                                 <div>
-                                    <p class="font-semibold">Data Protection Officer:</p>
-                                    <p>For privacy-related inquiries, please contact:</p>
-                                    <p><strong>The Secretary General</strong><br>
-                                    Email: forwardkenyaparty@gmail.com<br>
-                                    Phone: [Party Contact Number]</p>
+                                    <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm mb-4">
+                                        <h4 class="font-semibold text-green-600 dark:text-green-400 mb-2">Right to Object</h4>
+                                        <p class="text-gray-600 dark:text-gray-300 text-sm">
+                                            You may object to certain processing activities, such as direct marketing, by contacting the Secretary General.
+                                        </p>
+                                    </div>
+                                    <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm mb-4">
+                                        <h4 class="font-semibold text-green-600 dark:text-green-400 mb-2">Right to Erasure</h4>
+                                        <p class="text-gray-600 dark:text-gray-300 text-sm">
+                                            You may request deletion of your personal data upon termination of membership, as outlined in Article 4.5 of our Party Constitution, subject to legal retention requirements.
+                                        </p>
+                                    </div>
+                                    <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm mb-4">
+                                        <h4 class="font-semibold text-green-600 dark:text-green-400 mb-2">Right to Restriction</h4>
+                                        <p class="text-gray-600 dark:text-gray-300 text-sm">
+                                            You may request temporary restriction of processing in certain circumstances, such as when accuracy is contested.
+                                        </p>
+                                    </div>
+                                    <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+                                        <h4 class="font-semibold text-green-600 dark:text-green-400 mb-2">Right to Data Portability</h4>
+                                        <p class="text-gray-600 dark:text-gray-300 text-sm">
+                                            Where applicable, you may request a copy of your data in a structured, machine-readable format.
+                                        </p>
+                                    </div>
                                 </div>
+                            </div>
+                            <div class="mt-6 p-4 bg-green-50 dark:bg-green-900/30 rounded-lg">
+                                <p class="text-green-700 dark:text-green-300 text-sm flex items-start">
+                                    <i class="fas fa-lightbulb mt-1 mr-2"></i>
+                                    <span>To exercise any of these rights, please contact the Secretary General with your membership details and specific request. We will respond within 30 days as required by law.</span>
+                                </p>
                             </div>
                         </div>
 
@@ -65,7 +106,7 @@ defineProps({
                                 Personal Data We Collect
                             </h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                In accordance with Article 4.2.5 of our Constitution, we collect and process the following categories of personal data:
+                                In accordance with Article 4.2.5 of our Party Constitution, we collect and process the following categories of personal data:
                             </p>
                             <div class="grid md:grid-cols-2 gap-6">
                                 <div>
@@ -99,20 +140,20 @@ defineProps({
                                 Legal Basis for Processing
                             </h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                We process your personal data based on the following legal grounds as outlined in our Constitution and in compliance with data protection regulations:
+                                We process your personal data based on the following legal grounds as outlined in our Party Constitution and in compliance with data protection regulations:
                             </p>
                             <div class="grid md:grid-cols-2 gap-6">
                                 <div>
                                     <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm mb-4">
                                         <h4 class="font-semibold text-green-600 dark:text-green-400 mb-2">Performance of a Contract</h4>
                                         <p class="text-gray-600 dark:text-gray-300 text-sm">
-                                            Processing necessary for membership administration as outlined in Articles 4.1 and 4.2 of our Constitution, including maintaining your membership account and facilitating your participation in party activities.
+                                            Processing necessary for membership administration as outlined in Articles 4.1 and 4.2 of our Party Constitution, including maintaining your membership account and facilitating your participation in party activities.
                                         </p>
                                     </div>
                                     <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
                                         <h4 class="font-semibold text-green-600 dark:text-green-400 mb-2">Legitimate Interests</h4>
                                         <p class="text-gray-600 dark:text-gray-300 text-sm">
-                                            Processing necessary for internal administration, member communication, and conducting internal nominations and elections as authorized by Articles 3, 21, and 31 of our Constitution.
+                                            Processing necessary for internal administration, member communication, and conducting internal nominations and elections as authorized by Articles 3, 21, and 31 of our Party Constitution.
                                         </p>
                                     </div>
                                 </div>
@@ -120,7 +161,7 @@ defineProps({
                                     <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm mb-4">
                                         <h4 class="font-semibold text-green-600 dark:text-green-400 mb-2">Legal Obligation</h4>
                                         <p class="text-gray-600 dark:text-gray-300 text-sm">
-                                            Processing necessary to comply with legal requirements, including reporting to the Registrar of Political Parties as mandated by Article 4.5.4 of our Constitution.
+                                            Processing necessary to comply with legal requirements, including reporting to the Registrar of Political Parties as mandated by Article 4.5.4 of our Party Constitution.
                                         </p>
                                     </div>
                                     <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
@@ -140,149 +181,98 @@ defineProps({
                                 How We Use Your Data
                             </h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                We use your personal data for the following purposes in accordance with our Constitution:
+                                Your personal data is used exclusively for purposes related to party operations and membership management, as authorized by our Party Constitution:
                             </p>
-                            <div class="grid md:grid-cols-2 gap-4">
-                                <ul class="list-disc pl-6 space-y-2 text-gray-600 dark:text-gray-300">
-                                    <li>Create and manage your membership account (Article 4)</li>
-                                    <li>Maintain an accurate and continuously updated Membership Register (Articles 4.2.5, 4.2.6)</li>
-                                    <li>Communicate about party activities, meetings, and events</li>
-                                    <li>Administer internal party elections and nominations (Articles 21, 31)</li>
-                                </ul>
-                                <ul class="list-disc pl-6 space-y-2 text-gray-600 dark:text-gray-300">
-                                    <li>Facilitate your participation in party discussions and policy formulation (Article 4.3)</li>
-                                    <li>Manage party finances, including membership fees (Schedule IV, Article 35)</li>
-                                    <li>Comply with legal obligations, including reporting to the Registrar of Political Parties (Article 4.5.4)</li>
-                                    <li>Analyze member demographics to improve party outreach and representation</li>
-                                </ul>
+                            <div class="grid md:grid-cols-2 gap-6">
+                                <div class="space-y-4">
+                                    <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+                                        <h4 class="font-semibold text-green-600 dark:text-green-400 mb-2">Membership Management</h4>
+                                        <p class="text-gray-600 dark:text-gray-300 text-sm">
+                                            Processing membership applications and maintaining the membership register (Article 4.2 of our Party Constitution).
+                                        </p>
+                                    </div>
+                                    <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+                                        <h4 class="font-semibold text-green-600 dark:text-green-400 mb-2">Communication</h4>
+                                        <p class="text-gray-600 dark:text-gray-300 text-sm">
+                                            Sending updates about party activities, events, and policy developments (Article 4.3.1 of our Party Constitution).
+                                        </p>
+                                    </div>
+                                </div>
+                                <div class="space-y-4">
+                                    <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+                                        <h4 class="font-semibold text-green-600 dark:text-green-400 mb-2">Internal Elections</h4>
+                                        <p class="text-gray-600 dark:text-gray-300 text-sm">
+                                            Facilitating nominations and voting processes (Article 21 of our Party Constitution).
+                                        </p>
+                                    </div>
+                                    <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
+                                        <h4 class="font-semibold text-green-600 dark:text-green-400 mb-2">Legal Compliance</h4>
+                                        <p class="text-gray-600 dark:text-gray-300 text-sm">
+                                            Fulfilling reporting requirements to regulatory authorities (Article 4.5.4 of our Party Constitution).
+                                        </p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Data Sharing -->
+                        <!-- Changes to This Policy -->
                         <div class="mb-8 p-6 bg-gray-50 dark:bg-gray-800 rounded-lg">
                             <h3 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white flex items-center">
                                 <span class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">5</span>
-                                Data Sharing and Disclosure
+                                Changes to This Policy
                             </h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                We may share your personal data with the following parties under strict confidentiality agreements:
+                                The National Executive Committee (NEC) may update this policy as needed (Article 8.2.8 of our Party Constitution). When we make changes, we will:
                             </p>
-                            <div class="grid md:grid-cols-2 gap-6">
-                                <div>
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Internal Sharing:</h4>
-                                    <ul class="list-disc pl-6 space-y-2 text-gray-600 dark:text-gray-300">
-                                        <li>National Executive Committee for party administration</li>
-                                        <li>County Congress for regional coordination</li>
-                                        <li>National Elections Board for election processes</li>
-                                        <li>Other internal party organs as necessary for legitimate party functions</li>
-                                    </ul>
-                                </div>
-                                <div>
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">External Sharing:</h4>
-                                    <ul class="list-disc pl-6 space-y-2 text-gray-600 dark:text-gray-300">
-                                        <li>Regulatory bodies (e.g., Registrar of Political Parties - Article 4.5.4)</li>
-                                        <li>Service providers under strict contractual agreements (IT, communication platforms)</li>
-                                        <li>Law enforcement agencies when required by law or to protect our legal rights</li>
-                                        <li>Other political parties in case of coalitions, with appropriate safeguards</li>
-                                    </ul>
-                                </div>
-                            </div>
-                            <div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
-                                <p class="text-blue-700 dark:text-blue-300 text-sm flex items-start">
-                                    <i class="fas fa-info-circle mt-1 mr-2"></i>
-                                    <span>We never sell your personal data to third parties. Any sharing is done with appropriate safeguards and only for specific, legitimate purposes aligned with our Constitution.</span>
-                                </p>
-                            </div>
+                            <ul class="list-disc pl-6 space-y-2 text-gray-600 dark:text-gray-300">
+                                <li>Update the "Last updated" date at the bottom of this policy</li>
+                                <li>Notify members through appropriate channels (email, website notice, or official communications)</li>
+                                <li>Provide a summary of significant changes when appropriate</li>
+                            </ul>
+                            <p class="text-gray-600 dark:text-gray-300 mt-4">
+                                Continued use of your membership after changes constitutes acceptance of the updated policy.
+                            </p>
                         </div>
 
-                        <!-- Data Retention -->
+                        <!-- Data Sharing and Retention -->
                         <div class="mb-8 p-6 bg-gray-50 dark:bg-gray-800 rounded-lg">
                             <h3 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white flex items-center">
                                 <span class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">6</span>
-                                Data Retention
+                                Data Sharing & Retention
                             </h3>
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                We retain your personal data only for as long as necessary to fulfill the purposes outlined in this policy:
-                            </p>
                             <div class="grid md:grid-cols-2 gap-6">
                                 <div>
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Active Membership:</h4>
-                                    <p class="text-gray-600 dark:text-gray-300">
-                                        Your data will be retained for the duration of your membership with Forward Kenya Party.
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Data Sharing</h4>
+                                    <p class="text-gray-600 dark:text-gray-300 text-sm mb-4">
+                                        We may share your data in limited circumstances:
+                                    </p>
+                                    <ul class="list-disc pl-6 space-y-2 text-gray-600 dark:text-gray-300 text-sm">
+                                        <li>With party branches and organs as required for internal operations (Article 5 of our Party Constitution)</li>
+                                        <li>With regulatory authorities when legally required</li>
+                                        <li>With service providers bound by confidentiality agreements</li>
+                                    </ul>
+                                    <p class="text-gray-600 dark:text-gray-300 text-sm mt-4">
+                                        We do not sell or rent your personal data to third parties.
                                     </p>
                                 </div>
                                 <div>
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">After Membership Ends:</h4>
-                                    <p class="text-gray-600 dark:text-gray-300">
-                                        Upon termination of membership (Article 4.5), your name will be removed from the active register, but we may retain minimal data for historical, legal, or audit purposes for a period not exceeding 7 years, unless a longer retention period is required by law.
+                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Data Retention</h4>
+                                    <p class="text-gray-600 dark:text-gray-300 text-sm">
+                                        We retain your personal data only as long as necessary:
                                     </p>
+                                    <ul class="list-disc pl-6 space-y-2 text-gray-600 dark:text-gray-300 text-sm mt-2">
+                                        <li>Active membership data is retained throughout your membership period</li>
+                                        <li>Financial records are kept for 2 years as required by law</li>
+                                        <li>Terminated membership data is retained for 1 year or as required by law</li>
+                                    </ul>
                                 </div>
-                            </div>
-                        </div>
-
-                        <!-- Your Data Rights -->
-                        <div class="mb-8 p-6 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                            <h3 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white flex items-center">
-                                <span class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">7</span>
-                                Your Data Rights
-                            </h3>
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                As a member of Forward Kenya Party, you have the following rights regarding your personal data:
-                            </p>
-                            <div class="grid md:grid-cols-2 gap-6">
-                                <div>
-                                    <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm mb-4">
-                                        <h4 class="font-semibold text-green-600 dark:text-green-400 mb-2">Right of Access</h4>
-                                        <p class="text-gray-600 dark:text-gray-300 text-sm">
-                                            You have the right to inspect your personal data in the Party Register as provided in Article 4.3.1.6.5 of our Constitution.
-                                        </p>
-                                    </div>
-                                    <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm mb-4">
-                                        <h4 class="font-semibold text-green-600 dark:text-green-400 mb-2">Right to Rectification</h4>
-                                        <p class="text-gray-600 dark:text-gray-300 text-sm">
-                                            You may request correction of inaccurate or incomplete personal data, in line with our continuous update obligation under Article 4.2.6.
-                                        </p>
-                                    </div>
-                                    <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
-                                        <h4 class="font-semibold text-green-600 dark:text-green-400 mb-2">Right to Object</h4>
-                                        <p class="text-gray-600 dark:text-gray-300 text-sm">
-                                            You may object to certain processing activities, such as direct marketing, by contacting the Secretary General.
-                                        </p>
-                                    </div>
-                                </div>
-                                <div>
-                                    <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm mb-4">
-                                        <h4 class="font-semibold text-green-600 dark:text-green-400 mb-2">Right to Erasure</h4>
-                                        <p class="text-gray-600 dark:text-gray-300 text-sm">
-                                            You may request deletion of your personal data upon termination of membership, as outlined in Article 4.5 of our Constitution, subject to legal retention requirements.
-                                        </p>
-                                    </div>
-                                    <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm mb-4">
-                                        <h4 class="font-semibold text-green-600 dark:text-green-400 mb-2">Right to Restriction</h4>
-                                        <p class="text-gray-600 dark:text-gray-300 text-sm">
-                                            You may request temporary restriction of processing in certain circumstances, such as when accuracy is contested.
-                                        </p>
-                                    </div>
-                                    <div class="p-4 bg-white dark:bg-gray-700 rounded-lg shadow-sm">
-                                        <h4 class="font-semibold text-green-600 dark:text-green-400 mb-2">Right to Data Portability</h4>
-                                        <p class="text-gray-600 dark:text-gray-300 text-sm">
-                                            Where applicable, you may request a copy of your data in a structured, machine-readable format.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="mt-6 p-4 bg-green-50 dark:bg-green-900/30 rounded-lg">
-                                <p class="text-green-700 dark:text-green-300 text-sm flex items-start">
-                                    <i class="fas fa-lightbulb mt-1 mr-2"></i>
-                                    <span>To exercise any of these rights, please contact the Secretary General with your membership details and specific request. We will respond within 30 days as required by law.</span>
-                                </p>
                             </div>
                         </div>
 
                         <!-- Data Security -->
                         <div class="mb-8 p-6 bg-gray-50 dark:bg-gray-800 rounded-lg">
                             <h3 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white flex items-center">
-                                <span class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">8</span>
+                                <span class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">7</span>
                                 Data Security
                             </h3>
                             <p class="text-gray-600 dark:text-gray-300 mb-4">
@@ -297,58 +287,28 @@ defineProps({
                             </ul>
                         </div>
 
-                        <!-- Changes to This Policy -->
+                        <!-- Data Controller -->
                         <div class="mb-8 p-6 bg-gray-50 dark:bg-gray-800 rounded-lg">
                             <h3 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white flex items-center">
-                                <span class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">9</span>
-                                Changes to This Policy
+                                <span class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">8</span>
+                                Data Controller & Contact Information
                             </h3>
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                The National Executive Committee (NEC) may update this policy as needed (Article 8.2.8). When we make changes, we will:
-                            </p>
-                            <ul class="list-disc pl-6 space-y-2 text-gray-600 dark:text-gray-300">
-                                <li>Update the "Last updated" date at the bottom of this policy</li>
-                                <li>Notify members through appropriate channels (email, website notice, or official communications)</li>
-                                <li>Provide a summary of significant changes when appropriate</li>
-                            </ul>
-                            <p class="text-gray-600 dark:text-gray-300 mt-4">
-                                Continued use of your membership after changes constitutes acceptance of the updated policy.
-                            </p>
-                        </div>
-
-                        <!-- Contact Information -->
-                        <div class="mb-8 p-6 bg-gray-50 dark:bg-gray-800 rounded-lg">
-                            <h3 class="text-2xl font-bold mb-4 text-gray-900 dark:text-white flex items-center">
-                                <span class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center mr-3">10</span>
-                                Contact Information
-                            </h3>
-                            <p class="text-gray-600 dark:text-gray-300 mb-4">
-                                For any questions, concerns, or requests regarding this Privacy Policy or your personal data, please contact:
-                            </p>
-                            <div class="grid md:grid-cols-2 gap-6">
-                                <div class="bg-white dark:bg-gray-700 p-4 rounded-lg shadow-sm">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">The Secretary General</h4>
-                                    <address class="not-italic text-gray-600 dark:text-gray-300">
-                                        Forward Kenya Party<br>
-                                        View Park Towers<br>
-                                        P.O. Box 27999-00100<br>
-                                        Nairobi, Kenya<br>
-                                        Email: forwardkenyaparty@gmail.com<br>
-                                        Phone: [Party Contact Number]
-                                    </address>
+                            <div class="grid md:grid-cols-2 gap-4 text-gray-600 dark:text-gray-300">
+                                <div>
+                                    <p class="font-semibold">Party Information:</p>
+                                    <p><strong>Name:</strong> Forward Kenya Party (FKP)</p>
+                                    <p><strong>Address:</strong> Utalii Lane, Viewpark Towers, 19th Floor, Suite 19<br>
+                                    P.O. Box: 27999 – 00100, GPO NAIROBI</p>
+                                    <p><strong>Email:</strong> forwardkenyaparty@gmail.com</p>
+                                    <p><strong>Website:</strong> www.forwardkenyaparty.com</p>
                                 </div>
-                                <div class="bg-white dark:bg-gray-700 p-4 rounded-lg shadow-sm">
-                                    <h4 class="font-semibold text-gray-900 dark:text-white mb-2">Data Protection Officer</h4>
-                                    <p class="text-gray-600 dark:text-gray-300">
-                                        For specialized data protection inquiries, you may also contact our designated Data Protection Officer at the same address or email.
-                                    </p>
+                                <div>
+                                    <p class="font-semibold">Data Protection Officer:</p>
+                                    <p>For privacy-related inquiries, please contact:</p>
+                                    <p><strong>The Secretary General</strong><br>
+                                    Email: forwardkenyaparty@gmail.com<br>
+                                    Phone: +254 713 447820</p>
                                 </div>
-                            </div>
-                            <div class="mt-6 p-4 bg-blue-50 dark:bg-blue-900/30 rounded-lg">
-                                <p class="text-blue-700 dark:text-blue-300 text-sm">
-                                    <i class="fas fa-exclamation-circle mr-2"></i>
-                                    If you are not satisfied with our response, you have the right to lodge a complaint with the Office of the Data Protection Commissioner in Kenya.
-                                </p>
                             </div>
                         </div>
 
