@@ -6,6 +6,7 @@ import ApplicationLogo from "@/Components/ApplicationLogo.vue";
 import MemberFormModal from '@/Components/MemberFormModal.vue';
 import ImportMembersModal from '@/Components/ImportMembersModal.vue';
 import ExportMembersModal from '@/Components/ExportMembersModal.vue';
+import SyncMembersModal from '@/Components/SyncMembersModal.vue';
 
 const { props } = usePage();
 
@@ -28,6 +29,7 @@ const activeTab = ref("personal");
 const showMemberModal = ref(false);
 const showImportModal = ref(false);
 const showExportModal = ref(false);
+const showSyncModal = ref(false);
 
 // Toggle modals
 const toggleMemberModal = () => {
@@ -40,6 +42,10 @@ const toggleImportModal = () => {
 
 const toggleExportModal = () => {
     showExportModal.value = !showExportModal.value;
+};
+
+const toggleSyncModal = () => {
+    showSyncModal.value = !showSyncModal.value;
 };
 
 // Access the authenticated user data
@@ -216,31 +222,7 @@ console.log('Page props:', pageProps);
 console.log('Nested data:', data);
 
 // Get the stats from the data object, handling both direct and nested structures
-const stats = data?.stats || data?.data?.stats || {
-    total_users: { count: 0, change: 0, title: 'Total Users', icon: 'fa-users', color: 'blue' },
-    active_users: { count: 0, change: 0, title: 'Active Users', icon: 'fa-user-check', color: 'green' },
-    new_members_this_month: { count: 0, change: 0, title: 'New Members This Month', icon: 'fa-user-plus', color: 'purple' },
-    engagement_rate: { count: 0, change: 0, title: 'Engagement Rate', icon: 'fa-chart-line', color: 'yellow' },
-    donations: { count: 0, change: 0, title: 'Donations', icon: 'fa-donate', color: 'indigo' },
-    monthly_subscriptions: { count: 0, change: 0, title: 'Monthly Subscriptions', icon: 'fa-calendar-alt', color: 'pink' },
-    membership_fees: { count: 0, change: 0, title: 'Membership Fees', icon: 'fa-id-card', color: 'red' },
-    pending_approvals: { count: 0, change: 0, title: 'Pending Approvals', icon: 'fa-clock', color: 'orange' },
-    candidates: { count: 0, change: 0, title: 'Candidates', icon: 'fa-user-tie', color: 'teal' },
-    nomination_papers: { count: 0, change: 0, title: 'Nomination Papers', icon: 'fa-file-signature', color: 'blue' },
-    compliance_items: { count: 0, change: 0, title: 'Compliance Items', icon: 'fa-clipboard-check', color: 'green' },
-    deadlines: { count: 0, change: 0, title: 'Deadlines', icon: 'fa-clock', color: 'red' },
-    departments: { count: 0, change: 0, title: 'Departments', icon: 'fa-building', color: 'indigo' },
-    services: { count: 0, change: 0, title: 'Services', icon: 'fa-concierge-bell', color: 'purple' },
-    projects: { count: 0, change: 0, title: 'Projects', icon: 'fa-project-diagram', color: 'yellow' },
-    press_releases: { count: 0, change: 0, title: 'Press Releases', icon: 'fa-newspaper', color: 'blue' },
-    social_media_reach: { count: 0, change: 0, title: 'Social Media Reach', icon: 'fa-share-alt', color: 'pink' },
-    upcoming_events: { count: 0, change: 0, title: 'Upcoming Events', icon: 'fa-calendar-alt', color: 'green' },
-    meetings_this_week: { count: 0, change: 0, title: 'Meetings This Week', icon: 'fa-users', color: 'indigo' },
-    active_volunteers: { count: 0, change: 0, title: 'Active Volunteers', icon: 'fa-hands-helping', color: 'orange' },
-    volunteer_hours: { count: 0, change: 0, title: 'Volunteer Hours', icon: 'fa-clock', color: 'teal' },
-    youth_members: { count: 0, change: 0, title: 'Youth Members', icon: 'fa-user-graduate', color: 'blue' },
-    women_members: { count: 0, change: 0, title: 'Women Members', icon: 'fa-female', color: 'pink' }
-};
+const stats = data?.stats;
 
 // Get other data with proper fallbacks, using optional chaining for safety
 const activities = data?.activities || data?.data?.activities || [];
@@ -532,6 +514,16 @@ const formatChange = (change) => {
                                         class="fas fa-file-export text-purple-500 w-5 h-5 mr-3"
                                     ></i>
                                     <span>Export Members</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    @click="toggleSyncModal"
+                                    class="w-full text-left flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300"
+                                >
+                                    <i
+                                        class="fas fa-sync text-purple-500 w-5 h-5 mr-3"
+                                    ></i>
+                                    <span>Synchronize Members</span>
                                 </button>
                                 <Link
                                     :href="route('settings')"
@@ -857,6 +849,12 @@ const formatChange = (change) => {
             :show="showExportModal" 
             @close="toggleExportModal"
             @export="handleExportMembers"
+        />
+
+        <!-- Sync Members Modal -->
+        <SyncMembersModal 
+            :show="showSyncModal" 
+            @close="toggleSyncModal"
         />
     </div>
 </template>
