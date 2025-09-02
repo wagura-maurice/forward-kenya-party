@@ -57,6 +57,7 @@ return new class extends Migration
                   ->onDelete('cascade')
                   ->onUpdate('cascade')
                   ->comment('Foreign key referencing the users table with cascade delete and update');
+            $table->string('other_religion', 100)->nullable()->comment('User\'s other religion if any');
             $table->integer('marital_status')->default(Profile::MARITAL_STATUS_SINGLE)
                   ->comment('Marital status of the Profile: 0 = Single, 1 = Married, 2 = Divorced, 3 = Separated, 4 = Widowed');
             $table->integer('highest_level_of_education')->default(Profile::HIGHEST_LEVEL_OF_EDUCATION_PRIMARY)
