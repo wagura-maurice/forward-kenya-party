@@ -16,170 +16,153 @@ class EthnicityTypeSeeder extends Seeder
         // Delete all existing records in the ethnicity_types table
         \DB::table('ethnicity_types')->delete();
 
-        // Define ethnic groups with their categories and country-specific information
+        // Define ethnolinguistic/cultural types for mapping
         $types = [
-            // Kenyan Bantu Groups
             [
-                'name' => 'Kikuyu (Kenya)',
-                'slug' => Str::slug('Kikuyu Kenya'),
-                'description' => 'Bantu ethnic group native to Central Kenya, the largest ethnic group in Kenya.',
+                'name' => 'Bantu Agriculturalists',
+                'slug' => Str::slug('Bantu Agriculturalists'),
+                'description' => 'Bantu-speaking groups primarily engaged in farming and agro-pastoralism.',
                 'configuration' => json_encode([
                     'category' => 'Bantu',
-                    'language' => 'Gikuyu',
-                    'iso_code' => 'ki',
-                    'population' => '8.1 million',
-                    'regions' => ['Central Province', 'Nairobi', 'Rift Valley'],
-                    'traditional_occupation' => 'Agro-pastoralists, farmers',
-                    'country_specific' => ['country' => 'Kenya', 'official_recognition' => true]
+                    'language_family' => 'Niger-Congo',
+                    'primary_regions' => ['Central Kenya', 'Eastern Kenya', 'Western Kenya', 'Coastal Kenya'],
+                    'cultural_features' => ['Crop farming', 'Traditional dances', 'Craftsmanship'],
+                    'economic_activities' => ['Agriculture', 'Trade', 'Artisanry'],
+                    'external_ids' => ['ethnologue_family' => 'Niger-Congo'],
+                    'mapped_tribes' => ['Kikuyu', 'Luhya', 'Kamba', 'Kisii', 'Meru', 'Embu', 'Mijikenda', 'Pokomo', 'Kuria', 'Suba', 'Taita', 'Taveta', 'Tharaka', 'Mbeere', 'Bajuni', 'Swahili', 'Chuka', 'Gusii']
                 ]),
             ],
             [
-                'name' => 'Luhya (Kenya)',
-                'slug' => Str::slug('Luhya Kenya'),
-                'description' => 'Bantu ethnic group in western Kenya, the second largest ethnic group in the country.',
-                'configuration' => json_encode([
-                    'category' => 'Bantu',
-                    'language' => 'Luhya',
-                    'iso_code' => 'luy',
-                    'population' => '6.8 million',
-                    'subgroups' => ['Bukusu', 'Maragoli', 'Tiriki', 'Idakho', 'Isukha', 'Kabarasi', 'Marama', 'Tachoni', 'Tiriki'],
-                    'country_specific' => ['country' => 'Kenya', 'official_recognition' => true]
-                ]),
-            ],
-            
-            // Kenyan Nilotic Groups
-            [
-                'name' => 'Kalenjin (Kenya)',
-                'slug' => Str::slug('Kalenjin Kenya'),
-                'description' => 'Highland Nilotic ethnic group inhabiting the Rift Valley region of Kenya.',
+                'name' => 'Nilotic Pastoralists',
+                'slug' => Str::slug('Nilotic Pastoralists'),
+                'description' => 'Nilotic-speaking groups known for pastoralism and semi-nomadic lifestyles.',
                 'configuration' => json_encode([
                     'category' => 'Nilotic',
-                    'language' => 'Kalenjin',
-                    'iso_code' => 'kln',
-                    'population' => '6.4 million',
-                    'subgroups' => ['Kipsigis', 'Nandi', 'Keiyo', 'Marakwet', 'Sabaot', 'Pokot', 'Tugen', 'Terik'],
-                    'country_specific' => ['country' => 'Kenya', 'official_recognition' => true]
+                    'language_family' => 'Nilo-Saharan',
+                    'primary_regions' => ['Rift Valley', 'Northern Kenya'],
+                    'cultural_features' => ['Cattle herding', 'Warrior traditions', 'Beadwork'],
+                    'economic_activities' => ['Livestock rearing', 'Trade'],
+                    'external_ids' => ['ethnologue_family' => 'Nilo-Saharan'],
+                    'mapped_tribes' => ['Maasai', 'Turkana', 'Samburu', 'Njemps']
                 ]),
             ],
             [
-                'name' => 'Luo (Kenya)',
-                'slug' => Str::slug('Luo Kenya'),
-                'description' => 'Nilotic ethnic group in western Kenya, primarily residing in the Lake Victoria basin.',
+                'name' => 'Nilotic Agro-Pastoralists',
+                'slug' => Str::slug('Nilotic Agro-Pastoralists'),
+                'description' => 'Nilotic groups combining farming and pastoralism.',
                 'configuration' => json_encode([
                     'category' => 'Nilotic',
-                    'language' => 'Dholuo',
-                    'iso_code' => 'luo',
-                    'population' => '5.0 million',
-                    'country_specific' => ['country' => 'Kenya', 'official_recognition' => true]
-                ]),
-            ],
-            
-            // Kenyan Cushitic Groups
-            [
-                'name' => 'Somali (Kenya)',
-                'slug' => Str::slug('Somali Kenya'),
-                'description' => 'Cushitic ethnic group native to the North Eastern Province of Kenya.',
-                'configuration' => json_encode([
-                    'category' => 'Cushitic',
-                    'language' => 'Somali',
-                    'iso_code' => 'so',
-                    'population' => '2.8 million',
-                    'country_specific' => [
-                        'country' => 'Kenya', 
-                        'official_recognition' => true,
-                        'special_status' => 'Recognized as one of the national languages of Kenya'
-                    ]
-                ]),
-            ],
-            
-            // Cross-border Ethnic Groups (for comparison)
-            [
-                'name' => 'Somali (Somalia)',
-                'slug' => Str::slug('Somali Somalia'),
-                'description' => 'Majority ethnic group in Somalia, with significant populations in neighboring countries.',
-                'configuration' => json_encode([
-                    'category' => 'Cushitic',
-                    'language' => 'Somali',
-                    'iso_code' => 'so',
-                    'population' => '16 million',
-                    'country_specific' => [
-                        'country' => 'Somalia',
-                        'official_language' => true,
-                        'special_status' => 'Majority ethnic group and official language'
-                    ]
+                    'language_family' => 'Nilo-Saharan',
+                    'primary_regions' => ['Western Kenya', 'Rift Valley'],
+                    'cultural_features' => ['Farming', 'Fishing', 'Traditional music'],
+                    'economic_activities' => ['Agriculture', 'Livestock', 'Fishing'],
+                    'external_ids' => ['ethnologue_family' => 'Nilo-Saharan'],
+                    'mapped_tribes' => ['Kalenjin', 'Luo', 'Teso', 'Endorois']
                 ]),
             ],
             [
-                'name' => 'Somali (Ethiopia)',
-                'slug' => Str::slug('Somali Ethiopia'),
-                'description' => 'Somali ethnic group in the Somali Region of Ethiopia.',
-                'configuration' => json_encode([
-                    'category' => 'Cushitic',
-                    'language' => 'Somali',
-                    'iso_code' => 'so',
-                    'population' => '7.5 million',
-                    'country_specific' => [
-                        'country' => 'Ethiopia',
-                        'official_language' => true,
-                        'special_status' => 'One of the official working languages of Ethiopia'
-                    ]
-                ]),
-            ],
-            
-            // Other East African Ethnic Groups
-            [
-                'name' => 'Maasai (Kenya)',
-                'slug' => Str::slug('Maasai Kenya'),
-                'description' => 'Nilotic ethnic group inhabiting northern, central, and southern Kenya.',
+                'name' => 'Nilotic Hunter-Gatherers',
+                'slug' => Str::slug('Nilotic Hunter-Gatherers'),
+                'description' => 'Indigenous Nilotic groups with traditional hunting and gathering practices.',
                 'configuration' => json_encode([
                     'category' => 'Nilotic',
-                    'language' => 'Maa',
-                    'iso_code' => 'mas',
-                    'population' => '1.2 million',
-                    'lifestyle' => 'Semi-nomadic pastoralists',
-                    'country_specific' => ['country' => 'Kenya', 'official_recognition' => true]
+                    'language_family' => 'Nilo-Saharan',
+                    'primary_regions' => ['Rift Valley', 'Central Kenya'],
+                    'cultural_features' => ['Hunting', 'Honey harvesting', 'Forest-based rituals'],
+                    'economic_activities' => ['Hunting', 'Gathering', 'Beekeeping'],
+                    'external_ids' => ['ethnologue_family' => 'Nilo-Saharan'],
+                    'mapped_tribes' => ['Ogiek', 'Sengwer']
                 ]),
             ],
             [
-                'name' => 'Kamba (Kenya)',
-                'slug' => Str::slug('Kamba Kenya'),
-                'description' => 'Bantu ethnic group who live in the semi-arid Eastern Province of Kenya.',
+                'name' => 'Cushitic Pastoralists',
+                'slug' => Str::slug('Cushitic Pastoralists'),
+                'description' => 'Cushitic-speaking groups primarily engaged in nomadic pastoralism.',
                 'configuration' => json_encode([
-                    'category' => 'Bantu',
-                    'language' => 'Kamba',
-                    'iso_code' => 'kam',
-                    'population' => '4.7 million',
-                    'country_specific' => ['country' => 'Kenya', 'official_recognition' => true]
+                    'category' => 'Cushitic',
+                    'language_family' => 'Afro-Asiatic',
+                    'primary_regions' => ['Northern Kenya', 'Eastern Kenya'],
+                    'cultural_features' => ['Camel herding', 'Oral traditions', 'Nomadic lifestyle'],
+                    'economic_activities' => ['Livestock rearing', 'Trade'],
+                    'external_ids' => ['ethnologue_family' => 'Afro-Asiatic'],
+                    'mapped_tribes' => ['Somali', 'Borana', 'Rendille', 'Oromo', 'Walwana']
                 ]),
             ],
             [
-                'name' => 'Kisii (Kenya)',
-                'slug' => Str::slug('Kisii Kenya'),
-                'description' => 'Bantu ethnic group in the western part of Kenya, primarily in the Kisii and Nyamira counties.',
+                'name' => 'Cushitic Hunter-Gatherers',
+                'slug' => Str::slug('Cushitic Hunter-Gatherers'),
+                'description' => 'Small Cushitic groups with hunting and gathering traditions, often endangered.',
                 'configuration' => json_encode([
-                    'category' => 'Bantu',
-                    'language' => 'Ekegusii',
-                    'iso_code' => 'guz',
-                    'population' => '2.7 million',
-                    'country_specific' => ['country' => 'Kenya', 'official_recognition' => true]
+                    'category' => 'Cushitic',
+                    'language_family' => 'Afro-Asiatic',
+                    'primary_regions' => ['Northern Kenya', 'Coastal Kenya'],
+                    'cultural_features' => ['Hunting', 'Gathering', 'Traditional ecological knowledge'],
+                    'economic_activities' => ['Hunting', 'Gathering'],
+                    'external_ids' => ['ethnologue_family' => 'Afro-Asiatic'],
+                    'mapped_tribes' => ['Yaaku', 'Waata', 'Sanya', 'Boni']
                 ]),
             ],
             [
-                'name' => 'Mijikenda (Kenya)',
-                'slug' => Str::slug('Mijikenda Kenya'),
-                'description' => 'Group of nine Bantu ethnic groups in the coastal region of Kenya.',
+                'name' => 'Cushitic Agriculturalists',
+                'slug' => Str::slug('Cushitic Agriculturalists'),
+                'description' => 'Cushitic groups focused on farming and trade.',
                 'configuration' => json_encode([
-                    'category' => 'Bantu',
-                    'subgroups' => ['Digo', 'Duruma', 'Giriama', 'Jibana', 'Kambe', 'Kauma', 'Ribe', 'Rabai', 'Chonyi'],
-                    'population' => '2.5 million',
-                    'country_specific' => ['country' => 'Kenya', 'official_recognition' => true]
+                    'category' => 'Cushitic',
+                    'language_family' => 'Afro-Asiatic',
+                    'primary_regions' => ['Northern Kenya'],
+                    'cultural_features' => ['Crop farming', 'Market trade'],
+                    'economic_activities' => ['Agriculture', 'Trade'],
+                    'external_ids' => ['ethnologue_family' => 'Afro-Asiatic'],
+                    'mapped_tribes' => ['Konso', 'Burji']
                 ]),
-            ]
+            ],
+            [
+                'name' => 'Indigenous Minorities',
+                'slug' => Str::slug('Indigenous Minorities'),
+                'description' => 'Small indigenous groups with unique or endangered cultural practices.',
+                'configuration' => json_encode([
+                    'category' => 'Other',
+                    'language_family' => 'Mixed or endangered',
+                    'primary_regions' => ['Northern Kenya', 'Rift Valley'],
+                    'cultural_features' => ['Fishing', 'Unique rituals', 'Endangered languages'],
+                    'economic_activities' => ['Fishing', 'Hunting', 'Gathering'],
+                    'external_ids' => ['ethnologue_family' => 'Mixed'],
+                    'mapped_tribes' => ['El Molo']
+                ]),
+            ],
+            [
+                'name' => 'Coastal Swahili Communities',
+                'slug' => Str::slug('Coastal Swahili Communities'),
+                'description' => 'Coastal groups with Swahili cultural influence and maritime traditions.',
+                'configuration' => json_encode([
+                    'category' => 'Other',
+                    'language_family' => 'Niger-Congo (Swahili)',
+                    'primary_regions' => ['Coastal Kenya'],
+                    'cultural_features' => ['Maritime trade', 'Swahili poetry', 'Islamic traditions'],
+                    'economic_activities' => ['Fishing', 'Trade', 'Craftsmanship'],
+                    'external_ids' => ['ethnologue_family' => 'Niger-Congo'],
+                    'mapped_tribes' => ['Kore']
+                ]),
+            ],
+            [
+                'name' => 'Diaspora Communities',
+                'slug' => Str::slug('Diaspora Communities'),
+                'description' => 'Non-indigenous or recently recognized communities, including diaspora groups.',
+                'configuration' => json_encode([
+                    'category' => 'Other',
+                    'language_family' => 'Various',
+                    'primary_regions' => ['Urban Kenya', 'Nairobi', 'Mombasa'],
+                    'cultural_features' => ['Multicultural practices', 'Diverse languages'],
+                    'economic_activities' => ['Business', 'Professional services', 'Trade'],
+                    'external_ids' => ['ethnologue_family' => 'Various'],
+                    'mapped_tribes' => ['Nubians', 'Makonde', 'Kenyan Asians', 'Other']
+                ]),
+            ],
         ];
 
-        // Insert the ethnic groups into the database using Eloquent
+        // Insert the types into the database using Eloquent
         foreach ($types as $key => $type) {
-            EthnicityType::create(array_merge($type, ['id' => $key + 1, 'uuid' => (String) Str::uuid(), 'created_at' => now(), 'updated_at' => now()]));
+            EthnicityType::create(array_merge($type, ['id' => $key + 1, 'uuid' => (string) Str::uuid(), 'created_at' => now(), 'updated_at' => now()]));
         }
     }
 }

@@ -119,6 +119,16 @@ class ReligionCategoryTableSeeder extends Seeder
                     'features' => ['forums', 'workshops', 'cultural_exchanges']
                 ]),
             ],
+            [
+                'name' => 'Other',
+                'slug' => 'other',
+                'description' => 'Miscellaneous or uncategorized religious activities and services.',
+                'configuration' => json_encode([
+                    'custom' => true,
+                    'allow_user_defined' => true,
+                    'features' => ['custom_description', 'flexible_categorization']
+                ]),
+            ]
         ];
 
         // Insert the transaction categories into the database using Eloquent

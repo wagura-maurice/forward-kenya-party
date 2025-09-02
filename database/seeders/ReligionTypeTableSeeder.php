@@ -109,6 +109,16 @@ class ReligionTypeTableSeeder extends Seeder
                     'practices' => ['ancestral_rites', 'feng_shui', 'meditation']
                 ]),
             ],
+            [
+                'name' => 'Other',
+                'slug' => 'other',
+                'description' => 'Religious or spiritual traditions that do not fit into other defined categories.',
+                'configuration' => json_encode([
+                    'custom' => true,
+                    'user_defined' => true,
+                    'characteristics' => ['flexible', 'inclusive', 'eclectic']
+                ]),
+            ],
         ];
 
         // Insert the religion types into the database using Eloquent

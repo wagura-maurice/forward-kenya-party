@@ -88,6 +88,16 @@ class EthnicityCategoryTableSeeder extends Seeder
                     'region' => 'Eastern and Central Africa'
                 ]),
             ],
+            [
+                'name' => 'Other',
+                'slug' => Str::slug('Other'),
+                'description' => 'Ethnic groups in Kenya not fitting into Bantu, Nilotic, Cushitic, Semitic, Khoisan, or other Afro-Asiatic/Nilo-Saharan categories, including unique or recently recognized communities.',
+                'configuration' => json_encode([
+                    'language_family' => 'Mixed or non-aligned',
+                    'subgroups' => ['Indigenous minorities', 'Diaspora communities', 'Recently recognized tribes'],
+                    'region' => 'Kenya (various regions)'
+                ]),
+            ],
         ];
 
         // Insert the ethnicity categories into the database using Eloquent

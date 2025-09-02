@@ -172,6 +172,17 @@ class ReligionTableSeeder extends Seeder
                     'philosophies' => ['Secular humanism', 'Rationalism', 'Skepticism'],
                     'practices' => ['Critical thinking', 'Scientific inquiry', 'Ethical living']
                 ]),
+            ],
+            // Other (Uncategorized)
+            [
+                'type_id' => $types['Other'],
+                'category_id' => $categories['Other'],
+                'name' => 'Other',
+                'slug' => 'other',
+                'description' => 'For individuals whose religion is not listed or who prefer not to specify.',
+                'configuration' => json_encode([
+                    'note' => 'Users selecting this option can specify their religion in the other_religion field.'
+                ]),
             ]
         ];
 
