@@ -20,6 +20,17 @@
 
     <!-- intl-tel-input CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css" />
+    
+    <!-- PDF.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.15.349/pdf.min.js"></script>
+    <script>
+        // Initialize PDF.js worker after the library is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.pdfjsLib) {
+                window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.15.349/pdf.worker.min.js';
+            }
+        });
+    </script>
 
     <style>
         /* Preloader Styles */
@@ -191,22 +202,22 @@
                 };
                 
                 // Start the rotation
-                const logoInterval = setInterval(showNextImage, 1000);
+                const logoInterval = setInterval(showNextImage, 200); // Faster logo rotation (200ms per logo)
                 
-                // Hide preloader after 5 seconds (1 second per logo)
+                // Hide preloader after 1 second
                 setTimeout(() => {
                     clearInterval(animateDots);
                     clearInterval(logoInterval);
                     
                     // Fade out the preloader
-                    preloader.style.transition = 'opacity 0.5s ease-out';
+                    preloader.style.transition = 'opacity 0.3s ease-out';
                     preloader.style.opacity = '0';
                     
                     // Remove preloader from DOM after fade out
                     setTimeout(() => {
                         preloader.style.display = 'none';
-                    }, 500);
-                }, 5000); // 5 seconds total (5 logos × 1 second each)
+                    }, 300);
+                }, 1000); // 1 second total
             });
         });
     </script>
