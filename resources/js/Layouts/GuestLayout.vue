@@ -58,12 +58,16 @@ const handleScroll = () => {
 
 // Logout function
 const logout = () => {
-    router.post(route('logout'), {}, {
-        onSuccess: () => {
-            // Force a hard reload after logout to ensure all state is reset
-            window.location.href = route('frontend.welcome');
+    router.post(
+        route("logout"),
+        {},
+        {
+            onSuccess: () => {
+                // Force a hard reload after logout to ensure all state is reset
+                window.location.href = route("frontend.welcome");
+            },
         }
-    });
+    );
 };
 
 onMounted(() => {
@@ -297,12 +301,13 @@ onUnmounted(() => {
         <!-- Back to top button -->
         <button
             @click="scrollToTop"
-            class="fixed bottom-6 right-6 bg-green-600 hover:bg-green-700 text-white w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 transform hover:scale-110 z-50"
+            class="fixed bottom-6 left-6 bg-green-600 hover:bg-green-700 text-white w-12 h-12 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 transform hover:scale-110 z-40"
             :class="{
                 'opacity-0 invisible': !isScrolled,
                 'opacity-100 visible': isScrolled,
             }"
             aria-label="Back to top"
+            style="margin-left: 60px"
         >
             <i class="fas fa-arrow-up"></i>
         </button>
@@ -474,7 +479,8 @@ onUnmounted(() => {
                                         href="/contact-us"
                                         class="text-gray-700 dark:text-gray-200 text-sm hover:text-green-600 dark:hover:text-green-400"
                                     >
-                                    Utalii Lane, Viewpark Towers, 19th Floor, Suite 19, Nairobi, Kenya
+                                        Utalii Lane, Viewpark Towers, 19th
+                                        Floor, Suite 19, Nairobi, Kenya
                                     </a>
                                 </div>
                             </li>
@@ -617,10 +623,15 @@ onUnmounted(() => {
                                     <i class="fas fa-paper-plane text-sm"></i>
                                 </button>
                             </div>
-                            <p class="text-xs text-gray-400 dark:text-gray-300 mt-2 italic">
-                                We respect your right to privacy. By subscribing to our newsletter, you agree to our
+                            <p
+                                class="text-xs text-gray-400 dark:text-gray-300 mt-2 italic"
+                            >
+                                We respect your right to privacy. By subscribing
+                                to our newsletter, you agree to our
                                 <a
-                                    :href="route('frontend.terms-and-conditions')"
+                                    :href="
+                                        route('frontend.terms-and-conditions')
+                                    "
                                     target="_blank"
                                     class="text-emerald-600 hover:text-emerald-500 hover:underline underline-offset-4 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-emerald-500 rounded"
                                 >
@@ -632,8 +643,8 @@ onUnmounted(() => {
                                     target="_blank"
                                     class="text-emerald-600 hover:text-emerald-500 hover:underline underline-offset-4 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-emerald-500 rounded"
                                 >
-                                    Privacy Policy
-                                </a>.
+                                    Privacy Policy </a
+                                >.
                             </p>
                         </div>
                     </div>
@@ -655,7 +666,7 @@ onUnmounted(() => {
                                 class="text-gray-400 hover:text-green-500 dark:hover:text-green-400 transition-colors relative inline-block after:content-[''] after:absolute after:w-0 after:h-px after:bg-green-400 after:left-0 after:-bottom-0.5 after:transition-all hover:after:w-full"
                                 >{{ app?.name }}</a
                             >. All rights reserved.
-                        </p>    
+                        </p>
                         <div class="flex flex-wrap justify-center gap-4">
                             <a
                                 v-for="(link, index) in otherLinks"
