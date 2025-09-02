@@ -1523,22 +1523,24 @@ const toggleSection = (section) => {
                             </div>
 
                             <div class="col-span-6 sm:col-span-3">
-                                <InputLabel for="driver_license_number">
-                                    Driver's License Number
-                                    <span
-                                        class="text-xs text-gray-500 font-normal"
-                                        >(Optional)</span
-                                    >
+                                <InputLabel for="membership_number">
+                                    Membership Number
+                                    <i
+                                        class="fas fa-star text-red-500 text-xs ml-1"
+                                    ></i>
                                 </InputLabel>
                                 <TextInput
-                                    id="driver_license_number"
-                                    v-model="form.citizen.driver_license_number"
+                                    id="membership_number"
+                                    v-model="form.citizen.uuid"
                                     type="text"
-                                    class="mt-1 block w-full"
-                                    placeholder="e.g., DL12345678"
+                                    class="mt-1 block w-full bg-gray-200 text-gray-500 rounded-md border border-gray-300 py-2 px-3 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm opacity-50"
+                                    placeholder="e.g., FKP-2345678"
+                                    :required="true"
+                                    readonly
+                                    autocomplete="off"
                                 />
                                 <InputError
-                                    :message="form.errors['citizen.driver_license_number']"
+                                    :message="form.errors['citizen.uuid']"
                                     class="mt-2"
                                 />
                             </div>
@@ -1775,7 +1777,6 @@ const toggleSection = (section) => {
                                     type="text"
                                     class="mt-1 block w-full bg-gray-100 dark:bg-gray-800 cursor-not-allowed"
                                     placeholder="e.g., Kenya"
-                                    readonly
                                 />
                                 <InputError
                                     :message="form.errors['profile.country']"
@@ -1795,7 +1796,7 @@ const toggleSection = (section) => {
                         @click="toggleSection('location')"
                         class="w-full px-6 py-4 text-left font-medium text-gray-900 dark:text-gray-100 bg-gray-50 dark:bg-gray-800 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 flex justify-between items-center"
                     >
-                        <span>Location Information</span>
+                        <span>Voting Location Information</span>
                         <svg
                             class="w-5 h-5 transition-transform duration-200"
                             :class="{
