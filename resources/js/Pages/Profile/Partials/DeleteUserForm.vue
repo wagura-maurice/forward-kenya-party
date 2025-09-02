@@ -40,32 +40,46 @@ const closeModal = () => {
 <template>
     <ActionSection>
         <template #title>
-            Delete Account
+            Party Membership
         </template>
 
         <template #description>
-            Permanently delete your account.
+            Official process to leave Forward Kenya Party
         </template>
 
         <template #content>
-            <div class="max-w-xl text-sm text-gray-600">
-                Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.
+            <div class="max-w-xl text-sm text-gray-600 dark:text-gray-400 space-y-4">
+                <p>If you wish to officially leave the Forward Kenya Party, you can initiate the process here. This action will:</p>
+                <ul class="list-disc pl-5 space-y-2">
+                    <li>Remove your access to all party systems and platforms</li>
+                    <li>Withdraw your party membership</li>
+                    <li>Remove your personal information from our active member database</li>
+                </ul>
+                <p>Before proceeding, please ensure you have saved any important information you may need from your account.</p>
+                <p class="text-sm text-gray-500 italic">Note: Certain information may be retained as required by law or for record-keeping purposes.</p>
             </div>
 
             <div class="mt-5 flex items-center justify-end">
                 <DangerButton @click="confirmUserDeletion">
-                    Delete Account
+                    Party Membership
                 </DangerButton>
             </div>
 
             <!-- Delete Account Confirmation Modal -->
             <DialogModal :show="confirmingUserDeletion" @close="closeModal">
                 <template #title>
-                    Delete Account
+                    Party Membership
                 </template>
 
                 <template #content>
-                    Are you sure you want to delete your account? Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.
+                    You are about to initiate the process to leave Forward Kenya Party. This action will:
+                    <ul class="list-disc pl-5 mt-2 space-y-1">
+                        <li>Remove your access to all party systems and platforms</li>
+                        <li>Withdraw your party membership</li>
+                        <li>Remove your personal information from our active member database</li>
+                    </ul>
+                    <p class="mt-3">If you need any assistance or have questions, please contact us at <a href="mailto:forwardkenyaparty@gmail.com" class="text-green-600 hover:underline">forwardkenyaparty@gmail.com</a> before proceeding.</p>
+                    <p class="mt-2">To confirm, please enter your password:</p>
 
                     <div class="mt-4">
                         <TextInput
@@ -93,7 +107,7 @@ const closeModal = () => {
                         :disabled="form.processing"
                         @click="deleteUser"
                     >
-                        Delete Account
+                        Party Membership
                     </DangerButton>
                 </template>
             </DialogModal>
