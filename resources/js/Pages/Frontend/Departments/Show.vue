@@ -1,7 +1,7 @@
 <script setup>
 import GuestLayout from "@/Layouts/GuestLayout.vue";
 import { Head, Link, usePage } from "@inertiajs/vue3";
-import { computed, ref } from "vue";
+import { computed, ref, reactive } from "vue";
 
 const props = defineProps({
     title: {
@@ -34,13 +34,22 @@ const props = defineProps({
     },
 });
 
+// Format date for display
 const formatDate = (dateString) => {
     const options = { year: "numeric", month: "long", day: "numeric" };
     return new Date(dateString).toLocaleDateString(undefined, options);
 };
 
-// Get the current URL for sharing
-const currentUrl = ref(window.location.href);
+// Format currency for display
+const formatCurrency = (amount) => {
+    if (!amount) return 'Free';
+    return new Intl.NumberFormat('en-KE', {
+        style: 'currency',
+        currency: 'KES',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 0
+    }).format(amount);
+};
 
 // Format phone number for display
 const formatPhone = (phone) => {
@@ -51,9 +60,92 @@ const formatPhone = (phone) => {
     return match ? `(${match[1]}) ${match[2]}-${match[3]}` : phone;
 };
 
+// Get the current URL for sharing
+const currentUrl = ref(window.location.href);
+
 // Team section functionality
 const activeTeamTab = ref("all");
 const showAllTeamMembers = ref(false);
+const isServiceFilterOpen = ref(false);
+
+// Filters
+const filters = reactive({
+    search: "",
+    category: "all",
+    freeOnly: false,
+    processingTime: ""
+});
+
+// Computed properties
+const hasContactInfo = computed(() => {
+    return props.department.contact_email || props.department.contact_phone || props.department.address;
+});
+
+const hasServices = computed(() => {
+    return (props.services.data && props.services.data.length > 0) || 
+           (props.department.services && props.department.services.length > 0);
+});
+
+const hasTeam = computed(() => {
+    return (props.team && props.team.length > 0) || 
+           (props.department.staff && props.department.staff.length > 0);
+});
+
+const filteredTeam = computed(() => {
+    const team = props.team || props.department.staff || [];
+    if (!team.length) return [];
+    
+    if (activeTeamTab.value === 'all') {
+        return team;
+    }
+    return team.filter(member => member.role === activeTeamTab.value);
+});
+
+const filteredServices = computed(() => {
+    const services = props.services.data || props.department.services || [];
+    if (!services.length) return [];
+    
+    let result = [...services];
+    
+    if (filters.search) {
+        const search = filters.search.toLowerCase();
+        result = result.filter(service => 
+            service.name.toLowerCase().includes(search) || 
+            (service.description && service.description.toLowerCase().includes(search))
+        );
+    }
+    
+    if (filters.category && filters.category !== 'all') {
+        result = result.filter(service => service.category === filters.category);
+    }
+    
+    if (filters.freeOnly) {
+        result = result.filter(service => !service.fee_amount || service.fee_amount === 0);
+    }
+    
+    if (filters.processingTime) {
+        result = result.filter(service => service.processing_time === filters.processingTime);
+    }
+    
+    return result;
+});
+
+// Expose functions and refs to template
+defineExpose({
+    formatCurrency,
+    formatPhone,
+    formatDate,
+    currentUrl,
+    activeTeamTab,
+    showAllTeamMembers,
+    isServiceFilterOpen,
+    filters,
+    hasContactInfo,
+    hasServices,
+    hasTeam,
+    filteredTeam,
+    filteredServices
+});
 
 // Get initials from name for avatar
 const getInitials = (name) => {
@@ -66,12 +158,13 @@ const getInitials = (name) => {
         .substring(0, 2);
 };
 
-// Filter team members based on active tab
-const filteredTeam = computed(() => {
-    if (!props.department.staff) return [];
-
-    let filtered = [...props.department.staff];
-
+// Team filtering with role-based filtering
+const teamFiltered = computed(() => {
+    const team = props.team || props.department.staff || [];
+    if (!team.length) return [];
+    
+    let filtered = [...team];
+    
     // Filter by tab
     if (activeTeamTab.value === "leadership") {
         filtered = filtered.filter((member) => member.is_leadership);
@@ -85,40 +178,6 @@ const filteredTeam = computed(() => {
     }
 
     return filtered;
-});
-
-// Service filtering
-const isServiceFilterOpen = ref(false);
-const filters = reactive({
-    freeOnly: false,
-    processingTime: "",
-});
-
-// Filter services based on active filters
-const filteredServices = computed(() => {
-    if (!props.department.services) return [];
-
-    return props.department.services.filter((service) => {
-        // Filter by free only
-        if (filters.freeOnly && !service.is_free) return false;
-
-        // Filter by processing time (simplified example)
-        if (filters.processingTime) {
-            if (
-                filters.processingTime === "same-day" &&
-                service.processing_time !== "Same Day"
-            )
-                return false;
-            if (
-                filters.processingTime === "1-3" &&
-                !service.processing_time?.includes("1-3")
-            )
-                return false;
-            // Add more processing time filters as needed
-        }
-
-        return true;
-    });
 });
 
 // Reset all service filters
@@ -136,25 +195,7 @@ const getFirstParagraph = (html) => {
     return div.textContent || div.innerText || "";
 };
 
-// Check if department has contact info
-const hasContactInfo = computed(() => {
-    return (
-        props.department.contact_email ||
-        props.department.contact_phone ||
-        props.department.office_location ||
-        props.department.working_hours
-    );
-});
-
-// Check if department has team members
-const hasTeam = computed(() => {
-    return props.department.staff && props.department.staff.length > 0;
-});
-
-// Check if department has services
-const hasServices = computed(() => {
-    return props.department.services && props.department.services.length > 0;
-});
+// These computed properties are already defined above with enhanced functionality
 </script>
 
 <template>
@@ -543,7 +584,7 @@ const hasServices = computed(() => {
                                             <Link
                                                 :href="
                                                     route(
-                                                        'services.show',
+                                                        'frontend.show.service',
                                                         service.slug
                                                     )
                                                 "
@@ -618,7 +659,7 @@ const hasServices = computed(() => {
                                         <Link
                                             :href="
                                                 route(
-                                                    'services.show',
+                                                    'frontend.show.service',
                                                     service.slug
                                                 )
                                             "
