@@ -217,9 +217,9 @@ const submitForm = () => {
                                         type="email"
                                         id="email"
                                         v-model="form.email"
-                                        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-green-500 dark:focus:border-green-500 dark:shadow-sm-light"
-                                        placeholder="name@flowbite.com"
                                         required
+                                        class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-green-500 dark:focus:border-green-500 dark:shadow-sm-light"
+                                        placeholder="name@forwardkenyaparty.com"
                                     />
                                     <p
                                         v-if="form.errors.email"
@@ -241,8 +241,11 @@ const submitForm = () => {
                                         type="tel"
                                         id="phone"
                                         v-model="form.phone"
+                                        required
+                                        pattern="[0-9+\-\s()]{10,20}"
+                                        title="Please enter a valid phone number"
                                         class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-green-500 dark:focus:border-green-500 dark:shadow-sm-light"
-                                        placeholder="+123 456 7890"
+                                        placeholder="+254 700 000 000"
                                     />
                                     <p
                                         v-if="form.errors.phone"
@@ -356,12 +359,15 @@ const submitForm = () => {
                                 <!-- Submit Button -->
                                 <button
                                     type="submit"
-                                    :disabled="form.processing"
-                                    class="text-gray-900 bg-gradient-to-r from-teal-200 to-lime-200 hover:bg-gradient-to-l hover:from-teal-200 hover:to-lime-200 focus:ring-4 focus:outline-none focus:ring-lime-200 dark:focus:ring-teal-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2"
+                                    :disabled="!form.agree_to_privacy_policy || form.processing || !form.email || !form.phone || !form.subject || !form.message"
+                                    :class="[
+                                        'font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2',
+                                        form.agree_to_privacy_policy && form.email && form.phone && form.subject && form.message && !form.processing
+                                            ? 'text-gray-900 bg-gradient-to-r from-teal-200 to-lime-200 hover:bg-gradient-to-l hover:from-teal-200 hover:to-lime-200 focus:ring-4 focus:outline-none focus:ring-lime-200 dark:focus:ring-teal-700 cursor-pointer'
+                                            : 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400 cursor-not-allowed'
+                                    ]"
                                 >
-                                    <span v-if="form.processing"
-                                        >Sending...</span
-                                    >
+                                    <span v-if="form.processing">Sending...</span>
                                     <span v-else>Send message</span>
                                 </button>
                             </form>
