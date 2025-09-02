@@ -296,7 +296,7 @@ const copyToClipboard = (text) => {
                                 class="whitespace-nowrap py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0"
                                 aria-label="Personal Information"
                             >
-                                <i class="fas fa-user-circle mr-2"></i>Personal
+                                <i class="fas fa-user-circle mr-2"></i>Personal Information
                             </button>
                             <button
                                 @click="activeTab = 'contact'"
@@ -307,7 +307,7 @@ const copyToClipboard = (text) => {
                                 class="whitespace-nowrap py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0"
                                 aria-label="Contact Information"
                             >
-                                <i class="fas fa-address-book mr-2"></i>Contact
+                                <i class="fas fa-address-book mr-2"></i>Contact Information
                             </button>
                             <button
                                 @click="activeTab = 'location'"
@@ -316,9 +316,9 @@ const copyToClipboard = (text) => {
                                     'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 dark:text-gray-400 dark:hover:text-gray-300': activeTab !== 'location'
                                 }"
                                 class="whitespace-nowrap py-4 px-4 sm:px-6 border-b-2 font-medium text-sm flex-shrink-0"
-                                aria-label="Location Information"
+                                aria-label="Voting Location Information"
                             >
-                                <i class="fas fa-map-marker-alt mr-2"></i>Location
+                                <i class="fas fa-map-marker-alt mr-2"></i>Voting Location Information
                             </button>
                         </nav>
                     </div>
@@ -326,7 +326,7 @@ const copyToClipboard = (text) => {
                         <div class="bg-green-50 dark:bg-green-900/30 border-l-4 border-green-500 p-4 mb-6 rounded">
                             <div class="flex">
                                 <p class="text-sm text-green-700 dark:text-green-300 ml-3">
-                                    Personal helps us maintain accurate membership records and ensure proper identification. This data is securely stored and only used for official party communications and verification purposes as per our data protection policy.
+                                    Personal information helps us maintain accurate membership records and ensure proper identification. This data is securely stored and only used for official party communications and verification purposes as per our data protection policy.
                                 </p>
                             </div>
                         </div>
@@ -654,7 +654,7 @@ const copyToClipboard = (text) => {
                         <div class="bg-green-50 dark:bg-green-900/30 border-l-4 border-green-500 p-4 mb-6 rounded">
                             <div class="flex">
                                 <p class="text-sm text-green-700 dark:text-green-300 ml-3">
-                                    Your location information helps us organize local events, coordinate activities in your area, and ensure proper representation. This data is used to connect you with nearby party activities and keep you informed about developments in your region.
+                                    Your voting location information helps us organize local events, coordinate activities in your area, and ensure proper representation. This data is used to connect you with nearby party activities and keep you informed about developments in your region.
                                 </p>
                             </div>
                         </div>
@@ -733,7 +733,7 @@ const copyToClipboard = (text) => {
                                 <p
                                     class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
                                 >
-                                    Location
+                                    Voting Location
                                 </p>
                                 <div class="flex items-center">
                                     <i
