@@ -87,7 +87,7 @@ if (!function_exists('generateUniqueMembershipNumber')) {
     {
         do {
             // Generate a 10-digit number
-            $number = 'FKP-' . strtoupper(Str::random(2)) . '-' . str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
+            $number = 'FKP-' . str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
         } while (\App\Models\Citizen::where('uuid', $number)->exists());
 
         return $number;
