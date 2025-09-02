@@ -10,6 +10,8 @@ use App\Models\Department;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Response;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Foundation\Application;
 
 class FrontendController extends Controller
@@ -180,20 +182,20 @@ class FrontendController extends Controller
             'phpVersion' => PHP_VERSION,
             'heroSlides' => [
                 [
-                    'file_path' => asset('assets/img/hero-home-1.jpg'),
-                    'name' => 'Forward Kenya Party',
-                    'description' => 'Championing progressive leadership and sustainable development for all Kenyans.',
-                ],
-                [
                     'file_path' => asset('assets/img/eCitizen-hero-banner-3.jpg'),
-                    'name' => 'Our Lives, Our Heritage',
-                    'description' => 'Safeguarding our collective future while honoring our rich heritage.',
+                    'name' => 'Forward Kenya Party',
+                    'description' => 'Our Lives, Our Heritage.',
                 ],
-                [
-                    'file_path' => asset('assets/img/eCitizen-hero-banner-8.jpg'),
-                    'name' => 'Inclusive Governance',
-                    'description' => 'Empowering communities through transparent and accountable leadership.',
-                ],
+                // [
+                //     'file_path' => asset('assets/img/hero-home-1.jpg'),
+                //     'name' => 'Our Lives, Our Heritage',
+                //     'description' => 'Safeguarding our collective future while honoring our rich heritage.',
+                // ],
+                // [
+                //     'file_path' => asset('assets/img/eCitizen-hero-banner-8.jpg'),
+                //     'name' => 'Inclusive Governance',
+                //     'description' => 'Empowering communities through transparent and accountable leadership.',
+                // ],
             ],
             'stats' => [
                 'users' => User::count(),
@@ -241,7 +243,11 @@ class FrontendController extends Controller
         return Inertia::render('Frontend/FrequentlyAskedQuestions', [
             'canLogin' => Route::has('login'),
             'canRegister' => Route::has('register'),
-            'logoUrl' => asset('assets/FKP COLLATERALS/FKP PNG/Secondary logo/Asset 5FKP.png'), // asset('assets/img/logo.svg'),
+            'logoUrl' => asset('assets/FKP COLLATERALS/FKP PNG/Secondary logo/Asset 5FKP.png'),
+            'ideologyUrl' => route('frontend.party-ideology'),
+            'manifestoUrl' => route('frontend.party-manifesto'),
+            'constitutionUrl' => route('frontend.party-constitution'),
+            'nominationRulesUrl' => route('frontend.party-nomination-rules'),
             'title' => "Frequently Asked Questions",
         ]);
     }
@@ -259,9 +265,107 @@ class FrontendController extends Controller
     public function privacyPolicy()
     {
         return Inertia::render('Frontend/PrivacyPolicy', [
-            'title' => 'Privacy Policy',
-            'logoUrl' => asset('assets/FKP COLLATERALS/FKP PNG/Secondary logo/Asset 5FKP.png'),
+            'canLogin' => Route::has('login'),
+            'canRegister' => Route::has('register'),
+            'logoUrl' => asset('assets/FKP COLLATERALS/FKP PNG/Secondary logo/Asset 5FKP.png'), // asset('assets/img/logo.svg'),
+            'title' => "Privacy Policy",
         ]);
+    }
+
+    /**
+     * Display the party ideology PDF in the browser
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function viewPartyIdeology()
+    {
+        $filePath = public_path('assets/FKP_Documents/FKP IDEOLOGY.pdf');
+        
+        if (!file_exists($filePath)) {
+            abort(404, 'The party ideology document could not be found.');
+        }
+
+        return $this->createPdfResponse($filePath, 'FKP Party Ideology');
+    }
+
+    /**
+     * Display the party manifesto PDF in the browser
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function viewPartyManifesto()
+    {
+        $filePath = public_path('assets/FKP_Documents/FKP MANIFESTO (1).pdf');
+        
+        if (!file_exists($filePath)) {
+            abort(404, 'The party manifesto document could not be found.');
+        }
+
+        return $this->createPdfResponse($filePath, 'FKP Party Manifesto');
+    }
+
+    /**
+     * Display the party constitution PDF in the browser
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function viewPartyConstitution()
+    {
+        $filePath = public_path('assets/FKP_Documents/FORWARD KENYA PARTY CONSTITUTION.pdf');
+        
+        if (!file_exists($filePath)) {
+            abort(404, 'The party constitution document could not be found.');
+        }
+
+        return $this->createPdfResponse($filePath, 'FKP Party Constitution');
+    }
+
+    /**
+     * Display the party nomination rules PDF in the browser
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function viewPartyNominationRules()
+    {
+        $filePath = public_path('assets/FKP_Documents/NOMINATION_RULES_AMMENDED 12.5.25.pdf');
+        
+        if (!file_exists($filePath)) {
+            abort(404, 'The party nomination rules document could not be found.');
+        }
+
+        return $this->createPdfResponse($filePath, 'FKP Party Nomination Rules');
+    }
+
+    /**
+     * Create a PDF response
+     *
+     * @param string $filePath
+     * @param string $filename
+     * @return \Illuminate\Http\Response
+     */
+    private function createPdfResponse($filePath, $filename)
+    {
+        // Read the PDF file
+        $fileContent = file_get_contents($filePath);
+        
+        // Create response with the PDF
+        $response = Response::make($fileContent, 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename="' . basename($filename) . '"',
+            'Cache-Control' => 'public, max-age=3600',
+            'Pragma' => 'public',
+            'Expires' => gmdate('D, d M Y H:i:s', time() + 3600) . ' GMT',
+            'Last-Modified' => gmdate('D, d M Y H:i:s', filemtime($filePath)) . ' GMT',
+            'Content-Length' => filesize($filePath),
+            'X-Content-Type-Options' => 'nosniff',
+            'X-Frame-Options' => 'SAMEORIGIN',
+            'X-XSS-Protection' => '1; mode=block',
+            'Referrer-Policy' => 'strict-origin-when-cross-origin',
+            'Permissions-Policy' => 'fullscreen=*, geolocation=()',
+            'Content-Security-Policy' => "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; connect-src 'self';",
+        ]);
+
+        return $response;
     }
 
     /**

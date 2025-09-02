@@ -277,15 +277,6 @@ class BackendController extends Controller
                 'icon' => 'fa fa-receipt',
                 'color' => 'blue'
             ],
-            'pending_approvals' => [
-                'count' => 0,
-                'change' => 0,
-                'previous_period' => 0,
-                'percentage_change' => 0,
-                'title' => 'Pending Approvals',
-                'icon' => 'fa fa-clock',
-                'color' => 'yellow'
-            ],
             
             // Election & Compliance
             'candidates' => [
@@ -314,15 +305,6 @@ class BackendController extends Controller
                 'title' => 'Compliance Items',
                 'icon' => 'fa fa-tasks',
                 'color' => 'orange'
-            ],
-            'deadlines' => [
-                'count' => 0,
-                'change' => 0,
-                'previous_period' => 0,
-                'percentage_change' => 0,
-                'title' => 'Deadlines',
-                'icon' => 'fa fa-calendar-times',
-                'color' => 'red'
             ],
             
             // Additional Stats
@@ -383,15 +365,6 @@ class BackendController extends Controller
                 'title' => 'Upcoming Events',
                 'icon' => 'fa fa-calendar-alt',
                 'color' => 'pink'
-            ],
-            'meetings_this_week' => [
-                'count' => 0,
-                'change' => 0,
-                'previous_period' => 0,
-                'percentage_change' => 0,
-                'title' => 'Meetings This Week',
-                'icon' => 'fa fa-users',
-                'color' => 'teal'
             ],
             
             // Volunteers
