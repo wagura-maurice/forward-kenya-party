@@ -24,6 +24,13 @@ Route::get('/frequently-asked-questions', [FrontendController::class, 'frequentl
 Route::get('/terms-and-conditions', [FrontendController::class, 'termsConditions'])->name('frontend.terms-and-conditions');
 Route::get('/privacy-policy', [FrontendController::class, 'privacyPolicy'])->name('frontend.privacy-policy');
 
+
+// Party Documents
+Route::get('/party-ideology', [FrontendController::class, 'viewPartyIdeology'])->name('frontend.party-ideology');
+Route::get('/party-manifesto', [FrontendController::class, 'viewPartyManifesto'])->name('frontend.party-manifesto');
+Route::get('/party-constitution', [FrontendController::class, 'viewPartyConstitution'])->name('frontend.party-constitution');
+Route::get('/party-nomination-rules', [FrontendController::class, 'viewPartyNominationRules'])->name('frontend.party-nomination-rules');
+
 // Platform Routes
 Route::middleware([
     'auth:sanctum',
