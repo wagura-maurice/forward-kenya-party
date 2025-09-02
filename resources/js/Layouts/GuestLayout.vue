@@ -185,7 +185,7 @@ onUnmounted(() => {
                                     :href="route('register')"
                                     class="text-gray-900 bg-gradient-to-r from-teal-200 to-lime-200 hover:bg-gradient-to-l hover:from-teal-200 hover:to-lime-200 focus:ring-4 focus:outline-none focus:ring-lime-200 dark:focus:ring-teal-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                                 >
-                                    Join the Movement
+                                    Register
                                 </a>
                             </template>
                         </div>
@@ -282,7 +282,7 @@ onUnmounted(() => {
                             :href="route('register')"
                             class="block text-gray-900 bg-gradient-to-r from-teal-200 to-lime-200 hover:bg-gradient-to-l hover:from-teal-200 hover:to-lime-200 focus:ring-4 focus:outline-none focus:ring-lime-200 dark:focus:ring-teal-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                         >
-                            Join the Movement
+                            Register
                         </a>
                     </template>
                 </div>
@@ -474,7 +474,7 @@ onUnmounted(() => {
                                         href="/contact-us"
                                         class="text-gray-700 dark:text-gray-200 text-sm hover:text-green-600 dark:hover:text-green-400"
                                     >
-                                        Nairobi, Kenya
+                                    Utalii Lane, Viewpark Towers, 19th Floor, Suite 19, Nairobi, Kenya
                                     </a>
                                 </div>
                             </li>
@@ -498,7 +498,7 @@ onUnmounted(() => {
                                         href="tel:+254000000000"
                                         class="text-gray-700 dark:text-gray-200 text-sm hover:text-green-600 dark:hover:text-green-400"
                                     >
-                                        +254 000 000 000
+                                        +254 713 447 820
                                     </a>
                                 </div>
                             </li>
@@ -617,10 +617,23 @@ onUnmounted(() => {
                                     <i class="fas fa-paper-plane text-sm"></i>
                                 </button>
                             </div>
-                            <p
-                                class="text-xs text-gray-400 dark:text-gray-300 mt-2"
-                            >
-                                We respect your privacy.
+                            <p class="text-xs text-gray-400 dark:text-gray-300 mt-2 italic">
+                                We respect your right to privacy. By subscribing to our newsletter, you agree to our
+                                <a
+                                    :href="route('frontend.terms-and-conditions')"
+                                    target="_blank"
+                                    class="text-emerald-600 hover:text-emerald-500 hover:underline underline-offset-4 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-emerald-500 rounded"
+                                >
+                                    Terms of Service
+                                </a>
+                                and
+                                <a
+                                    :href="route('frontend.privacy-policy')"
+                                    target="_blank"
+                                    class="text-emerald-600 hover:text-emerald-500 hover:underline underline-offset-4 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-emerald-500 rounded"
+                                >
+                                    Privacy Policy
+                                </a>.
                             </p>
                         </div>
                     </div>
@@ -641,13 +654,7 @@ onUnmounted(() => {
                                 href="/"
                                 class="text-gray-400 hover:text-green-500 dark:hover:text-green-400 transition-colors relative inline-block after:content-[''] after:absolute after:w-0 after:h-px after:bg-green-400 after:left-0 after:-bottom-0.5 after:transition-all hover:after:w-full"
                                 >{{ app?.name }}</a
-                            >. All rights reserved. <s>Developed and Maintained by
-                            <a
-                                href="https://www.waguramaurice.com"
-                                target="_blank"
-                                class="text-gray-400 hover:text-green-500 dark:hover:text-green-400 transition-colors relative inline-block after:content-[''] after:absolute after:w-0 after:h-px after:bg-green-400 after:left-0 after:-bottom-0.5 after:transition-all hover:after:w-full"
-                                >Wagura Maurice</a
-                            ></s>
+                            >. All rights reserved.
                         </p>    
                         <div class="flex flex-wrap justify-center gap-4">
                             <a
