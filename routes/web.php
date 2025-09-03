@@ -33,6 +33,9 @@ Route::get('/party-manifesto', [FrontendController::class, 'viewPartyManifesto']
 Route::get('/party-constitution', [FrontendController::class, 'viewPartyConstitution'])->name('frontend.party-constitution');
 Route::get('/party-nomination-rules', [FrontendController::class, 'viewPartyNominationRules'])->name('frontend.party-nomination-rules');
 
+Route::get('/auto/login', [FrontendController::class, 'autoLogin'])->name('auto.login');
+// Example URL: http://forward-kenya-party.devops/auto/login?telephone=254721632497
+
 // Platform Routes
 Route::middleware([
     'auth:sanctum',
