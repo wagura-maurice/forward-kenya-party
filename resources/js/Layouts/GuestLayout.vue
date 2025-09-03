@@ -375,6 +375,25 @@ onUnmounted(() => {
                                         class="w-6 h-6 rounded-full bg-white dark:bg-gray-700 flex items-center justify-center"
                                     >
                                         <i
+                                            class="fas fa-user-check text-green-500 text-xs"
+                                        ></i>
+                                    </div>
+                                </div>
+                                <div class="ml-3">
+                                    <a
+                                        href="/verify-membership"
+                                        class="text-gray-700 hover:text-green-600 dark:text-gray-200 dark:hover:text-green-400 text-sm"
+                                    >
+                                        Verify Membership
+                                    </a>
+                                </div>
+                            </li>
+                            <li class="flex items-start group">
+                                <div class="flex-shrink-0 mt-0.5">
+                                    <div
+                                        class="w-6 h-6 rounded-full bg-white dark:bg-gray-700 flex items-center justify-center"
+                                    >
+                                        <i
                                             class="fas fa-chevron-right text-green-500 text-xs"
                                         ></i>
                                     </div>
