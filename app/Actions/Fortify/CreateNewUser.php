@@ -8,6 +8,7 @@ use App\Models\Citizen;
 use App\Models\Profile;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
+use App\Models\SpecialInterestGroup;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
@@ -63,7 +64,8 @@ class CreateNewUser implements CreatesNewUsers
      * @throws \Illuminate\Validation\ValidationException
      */
     public function create(array $input)
-    {      
+    {
+        $input['telephone'] = phoneNumberPrefix(str_replace(' ', '', $input['telephone']));
         // dd($input);
 
         // Add this
@@ -71,20 +73,35 @@ class CreateNewUser implements CreatesNewUsers
           
         // Validate the input
         $validated = Validator::make($input, [
-            'surname' => ['required', 'string', 'max:255'],
-            'other_name' => ['required', 'string', 'max:255'],
-            'telephone' => ['required', 'string', 'max:20', 'telephone'],
-            'identification_type' => ['required', 'string', 'in:national_identification_number,passport_number'],
-            'identification_number' => ['required', 'string', 'max:50'],
-            'party_membership_number' => ['required', 'string', 'max:50', function ($attribute, $value, $fail) {
-                if (Citizen::where('uuid', $value)->exists()) {
-                    $fail('The party membership number has already been taken.');
+            'surname' => ['required', 'string', 'max:255', function ($attribute, $value, $fail) {
+                if (!preg_match('/^[A-Z][a-z]+$/', $value)) {
+                    $fail('The ' . $attribute . ' must be a human surname.');
                 }
             }],
+            'other_name' => ['required', 'string', 'max:255', function ($attribute, $value, $fail) {
+                $names = explode(' ', $value);
+                if (count($names) < 1 || count($names) > 3) {
+                    $fail('The ' . $attribute . ' must be a human name in one to three parts.');
+                }
+                foreach ($names as $name) {
+                    if (!preg_match('/^[A-Z][a-z]+$/', $name)) {
+                        $fail('The ' . $attribute . ' must be a human name in one to three parts.');
+                    }
+                }
+            }],
+            'telephone' => ['required', 'string', 'max:20', 'telephone', 'unique:profiles,telephone'],
+            'identification_type' => ['required', 'string', 'in:national_identification_number,passport_number'],
+            'identification_number' => ['required', 'string', 'max:50', 'unique:citizens,national_identification_number'],
+            'party_membership_number' => ['required', 'string', 'max:50', 'unique:citizens,uuid'],
             'date_of_birth' => ['required', 'date', 'before:today', function ($attribute, $value, $fail) {
                 $age = Carbon::parse($value)->age;
                 if ($age < 18 || $age > 120) {
                     $fail('The date of birth must be between 18 and 120 years ago.');
+                }
+            }],
+            'special_interest_groups' => ['nullable', 'array', function ($attribute, $value, $fail) {
+                if (!is_array($value) || !empty(array_diff($value, array_keys(SpecialInterestGroup::getSpecialInterestGroupOptions())))) {
+                    $fail('The special interest groups must be an array and must only contain valid options.');
                 }
             }],
             'gender' => ['required', 'string', 'in:' . implode(',', array_keys(Gender::getGenderOptions()))],
@@ -142,6 +159,7 @@ class CreateNewUser implements CreatesNewUsers
                     'last_name' => $input['surname'],
                     'gender' => $input['gender'],
                     'date_of_birth' => Carbon::parse($input['date_of_birth'])->format('Y-m-d'),
+                    'special_interest_groups' => json_encode($input['special_interest_groups']),
                     'disability_status' => (bool)$input['disability_status'],
                     'ncpwd_number' => (bool)$input['disability_status'] ? $input['ncpwd_number'] : null,
                     'ethnicity_id' => $input['ethnicity_id'],
