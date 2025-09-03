@@ -1,0 +1,2 @@
+import{i as s,o as t,e as o,w as i,x as n,d as r,r as c,H as l,E as d}from"./vendor-Bxre9-EX.js";const _={class:"text-sm text-gray-600"},m={__name:"ActionMessage",props:{on:Boolean},setup(e){return(a,p)=>(t(),s("div",null,[o(d,{"leave-active-class":"transition ease-in duration-1000","leave-from-class":"opacity-100","leave-to-class":"opacity-0"},{default:i(()=>[n(r("div",_,[c(a.$slots,"default")],512),[[l,e.on]])]),_:3})]))}};export{m as _};
+//# sourceMappingURL=ActionMessage-CwIGW79N.js.map
