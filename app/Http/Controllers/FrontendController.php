@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Profile;
 use Inertia\Inertia;
 use App\Models\Service;
 use App\Models\Citizen;
@@ -593,6 +594,21 @@ class FrontendController extends Controller
                 'last_verified' => $citizen->last_verified_at ? $citizen->last_verified_at->format('d/m/Y H:i') : 'Just now',
             ]
         ]);
+    }
+
+    public function autoLogin(Request $request)
+    {
+        $request['telephone'] = phoneNumberPrefix($request->input('telephone'));
+
+        $validated = $request->validate([
+            'telephone' => 'required|string|telephone|exists:profiles,telephone',
+        ]);
+
+        $profile = Profile::where('telephone', $validated['telephone'])->with('user')->firstOrFail();
+
+        \Auth::login($profile->user);
+
+        return redirect()->route('dashboard');
     }
 
     private function getStatusText($status)
