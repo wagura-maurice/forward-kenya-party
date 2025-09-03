@@ -115,7 +115,7 @@ onUnmounted(() => {
                                 :key="index"
                                 class="relative group"
                             >
-                                <a
+                                <h4><a
                                     :href="link.href"
                                     class="text-gray-700 dark:text-gray-200 hover:text-green-600 transition relative"
                                     :class="{
@@ -134,7 +134,7 @@ onUnmounted(() => {
                                                 !isActivePage(link.href),
                                         }"
                                     ></span>
-                                </a>
+                                </a></h4>
                             </div>
                         </nav>
 
