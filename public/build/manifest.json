@@ -266,7 +266,7 @@
     ]
   },
   "resources/js/Pages/Auth/Login.vue": {
-    "file": "assets/Login-DwDdJuzd.js",
+    "file": "assets/Login-BJHHVGtj.js",
     "name": "Login",
     "src": "resources/js/Pages/Auth/Login.vue",
     "isDynamicEntry": true,
@@ -700,7 +700,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-CsOVZPU0.js",
+    "file": "assets/app-BAwLmYKc.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -746,7 +746,7 @@
       "resources/js/Pages/Welcome.vue"
     ],
     "css": [
-      "assets/app-CtyrSGC0.css"
+      "assets/app--RrhzB-r.css"
     ],
     "assets": [
       "assets/fa-brands-400-D_cYUPeE.woff2",
