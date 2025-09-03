@@ -19,6 +19,9 @@ Route::get('/service/{id}/show', [FrontendController::class, 'showService'])->na
 Route::get('/departments', [FrontendController::class, 'departments'])->name('frontend.departments');
 Route::get('/department/{id}/show', [FrontendController::class, 'showDepartment'])->name('frontend.show.department');
 
+Route::get('/verify-membership', [FrontendController::class, 'verifyMembership'])->name('frontend.verify.membership');
+Route::post('/verify-membership-request', [FrontendController::class, 'verifyMembershipRequest'])->name('frontend.verify.membership.request');
+
 Route::get('/help-and-support', [FrontendController::class, 'helpSupport'])->name('frontend.help-and-support');
 Route::get('/frequently-asked-questions', [FrontendController::class, 'frequentlyAskedQuestions'])->name('frontend.frequently-asked-questions');
 Route::get('/terms-and-conditions', [FrontendController::class, 'termsConditions'])->name('frontend.terms-and-conditions');
