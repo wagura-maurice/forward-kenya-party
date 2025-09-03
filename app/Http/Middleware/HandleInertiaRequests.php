@@ -18,6 +18,7 @@ use Illuminate\Http\Request;
 use App\Models\PollingCenter;
 use App\Models\PollingStream;
 use App\Models\PollingStation;
+use App\Models\SpecialInterestGroup;
 use App\Services\OTP\OneTimePasswordServices;
 
 class HandleInertiaRequests extends Middleware
@@ -83,6 +84,11 @@ class HandleInertiaRequests extends Middleware
             ];
             
             $sharedData['formData'] = [
+                'special_interest_groups' => array_map(
+                    fn($name, $id) => ['id' => $id, 'name' => $name],
+                    array_values(SpecialInterestGroup::getSpecialInterestGroupOptions()),
+                    array_keys(SpecialInterestGroup::getSpecialInterestGroupOptions())
+                ),
                 'genders' => array_map(
                     fn($name, $id) => ['id' => $id, 'name' => $name],
                     array_values(Gender::getGenderOptions()),
