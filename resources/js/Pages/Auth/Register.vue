@@ -13,7 +13,7 @@ import PrimaryButton from "@/Components/PrimaryButton.vue";
 import TextInput from "@/Components/TextInput.vue";
 import VueSelect from "vue-select";
 import "vue-select/dist/vue-select.css";
-import ReCaptcha from "@/Components/ReCaptcha.vue";
+import ReCaptcha from '@/Components/ReCaptcha.vue';
 
 const props = defineProps({
     formData: Object,
@@ -36,37 +36,28 @@ const activeRegistrationSection = ref(null);
 const acknowledged = ref(false);
 
 const toggleSection = (section) => {
-    activeRegistrationSection.value =
-        activeRegistrationSection.value === section ? null : section;
+    activeRegistrationSection.value = activeRegistrationSection.value === section ? null : section;
 };
 
 // Handle USSD code interaction
 const handleUssdClick = () => {
     // For mobile devices, try to initiate a call
-    if (
-        /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
-            navigator.userAgent
-        )
-    ) {
-        window.location.href = "tel:*509%23";
+    if (/Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
+        window.location.href = 'tel:*509%23';
     } else {
         // For desktop, show a helpful message
-        showToast("info", "USSD Code", "On your mobile device, dial *509#");
+        showToast('info', 'USSD Code', 'On your mobile device, dial *509#');
     }
 };
 
 // Handle IPPMS portal click
 const handleIppmsClick = () => {
-    window.open("https://ippms.orpp.or.ke", "_blank", "noopener,noreferrer");
+    window.open('https://ippms.orpp.or.ke', '_blank', 'noopener,noreferrer');
 };
 
 // Handle eCitizen portal click
 const handleECitizenClick = () => {
-    window.open(
-        "https://accounts.ecitizen.go.ke/en",
-        "_blank",
-        "noopener,noreferrer"
-    );
+    window.open('https://accounts.ecitizen.go.ke/en', '_blank', 'noopener,noreferrer');
 };
 
 const stepDescription = computed(() => {
@@ -126,6 +117,7 @@ const isLoadingConstituencies = ref(false);
 const isLoadingWards = ref(false);
 
 // Use the form data from props
+const special_interest_groups = computed(() => props.formData?.special_interest_groups || []);
 const genders = computed(() => props.formData?.genders || []);
 const ethnicities = computed(() => props.formData?.ethnicities || []);
 const religions = computed(() => props.formData?.religions || []);
@@ -133,14 +125,12 @@ const counties = computed(() => props.formData?.locations?.counties || []);
 
 // Format today's date for the form
 const today = new Date();
-const formattedDate = `${today.getFullYear()}-${String(
-    today.getMonth() + 1
-).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`;
+const formattedDate = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
 const form = useForm({
     // Registration Instructions Confirmation
     understood_instructions: false,
-
+    
     // Step 2: Account and Personal Information
     surname: "",
     other_name: "",
@@ -149,6 +139,7 @@ const form = useForm({
     identification_number: "",
     party_membership_number: props.formData?.membership_number || "",
     date_of_birth: "",
+    special_interest_groups: [],
     gender: "",
     ethnicity_id: null,
     religion_id: null,
@@ -168,14 +159,14 @@ const form = useForm({
     otpVerified: false,
 
     // ReCaptcha response
-    "g-recaptcha-response": "",
+    'g-recaptcha-response': '',
 });
 
 const isLoading = ref(false);
 const isSubmitting = ref(false);
 
 const setCaptchaResponse = (response) => {
-    form["g-recaptcha-response"] = response;
+    form['g-recaptcha-response'] = response;
 };
 
 // Watch for county changes to filter constituencies
@@ -233,10 +224,9 @@ const validateStep = (step) => {
     if (step === 1) {
         // Step 1: Party Registration Check - Only validate the acknowledgment
         if (!form.understood_instructions) {
-            return {
-                isValid: false,
-                message:
-                    "You must acknowledge that you understand the registration process",
+            return { 
+                isValid: false, 
+                message: "You must acknowledge that you understand the registration process" 
             };
         }
         return { isValid: true };
@@ -246,15 +236,9 @@ const validateStep = (step) => {
         // Step 2: Account and Personal Information
         const nameRegex = /^([a-zA-Z]+)(\s[a-zA-Z]+)?(\s[a-zA-Z]+)?$/;
         if (!form.surname?.trim().match(nameRegex))
-            return {
-                isValid: false,
-                message: "Surname must be a valid human name",
-            };
+            return { isValid: false, message: "Surname must be a valid human name" };
         if (form.other_name?.trim().split(" ").length > 2)
-            return {
-                isValid: false,
-                message: "Other name must be a valid human name",
-            };
+            return { isValid: false, message: "Other name must be a valid human name" };
         if (!form.telephone?.trim())
             return {
                 isValid: false,
@@ -270,37 +254,37 @@ const validateStep = (step) => {
                 isValid: false,
                 message: "National ID/Passport Number is required",
             };
-
+            
         // Validate identification number length (exactly 8 characters)
         if (form.identification_number.length !== 8) {
             return {
                 isValid: false,
-                message:
-                    "Identification number must be exactly 8 characters long",
+                message: "Identification number must be exactly 8 characters long"
             };
         }
         if (!form.identification_number?.trim())
             return {
                 isValid: false,
                 message: `${
-                    form.identification_type ===
-                    "national_identification_number"
+                    form.identification_type === "national_identification_number"
                         ? "National Identification Number"
                         : "Passport Number"
                 } is required`,
             };
         if (!form.date_of_birth)
             return { isValid: false, message: "Date of birth is required" };
-        if (!form.gender) return { isValid: false, message: "Sex is required" };
+        if (!form.gender) 
+            return { isValid: false, message: "Sex is required" };
+        if (!form.special_interest_groups.length)
+            return { isValid: false, message: "Special interest group is required" };
         if (!form.ethnicity_id)
             return { isValid: false, message: "Ethnicity is required" };
         if (!form.religion_id)
             return { isValid: false, message: "Religion is required" };
-        if (form.disability_status === true && !/^NCPWD\/P\/[0-9]{5}$/.test(form.ncpwd_number?.trim()))
+        if (form.disability_status === true && !form.ncpwd_number?.trim())
             return {
                 isValid: false,
-                message:
-                    "NCPWD number must be in the format NCPWD/P/12345",
+                message: "NCPWD number is required when a disability is selected",
             };
         return { isValid: true };
     }
@@ -394,7 +378,7 @@ const sendOtp = async () => {
 
         // Send OTP request
         const response = await axios.post(route("auth.request-otp"), {
-            telephone: form.telephone,
+            telephone: form.telephone
         });
 
         // console.log(response.data);
@@ -403,9 +387,7 @@ const sendOtp = async () => {
             // Show OTP verification modal
             showOtpVerificationModal();
         } else {
-            throw new Error(
-                response.data.message || "Failed to send OTP. Please try again."
-            );
+            throw new Error(response.data.message || "Failed to send OTP. Please try again.");
         }
     } catch (error) {
         // Check if it's a rate limit error
@@ -462,8 +444,7 @@ const sendOtp = async () => {
             showToast(
                 "error",
                 "OTP Error",
-                error.response?.data?.message ||
-                    "Failed to send OTP. Please try again."
+                error.response?.data?.message || "Failed to send OTP. Please try again."
             );
         }
     }
@@ -482,8 +463,8 @@ const formatTimeRemaining = (endTime) => {
     const minutes = Math.floor(diffInSeconds / 60);
     const seconds = diffInSeconds % 60;
     return {
-        formatted: `${minutes}:${seconds.toString().padStart(2, "0")}`,
-        isExpired: diffInSeconds <= 0,
+        formatted: `${minutes}:${seconds.toString().padStart(2, '0')}`,
+        isExpired: diffInSeconds <= 0
     };
 };
 
@@ -501,14 +482,14 @@ const showOtpVerificationModal = () => {
     let isResendDisabled = false;
     let resendCountdown = 0;
     let countdownInterval = null;
-
+    
     // Initialize or reuse existing expiration time
     if (!otpExpirationTime.value) {
         const expTime = new Date();
         expTime.setSeconds(expTime.getSeconds() + otpConfig.value.ttl);
         otpExpirationTime.value = expTime;
     }
-
+    
     // Clean up any existing timer
     cleanupOtpTimer();
 
@@ -523,31 +504,17 @@ const showOtpVerificationModal = () => {
                 <input id="swal-otp-input" class="swal2-input w-full text-center mb-1" placeholder="Enter 6-digit code" maxlength="6" type="text">
                 <div id="otp-timer-container" class="text-sm text-gray-600 mt-2">
                     <span id="otp-timer-message">Verification code expires in </span>
-                    <strong id="otp-timer" class="font-medium">${
-                        formatTimeRemaining(otpExpirationTime.value).formatted
-                    }</strong>
+                    <strong id="otp-timer" class="font-medium">${formatTimeRemaining(otpExpirationTime.value).formatted}</strong>
                     <span id="otp-expired-message" class="hidden">
                         <span class="text-red-500 font-medium">Verification code expired!</span>
                         <button id="resend-otp-btn" class="ml-1 font-medium text-green-600 hover:text-green-800 cursor-pointer bg-transparent border-none p-0">Resend OTP</button>
                     </span>
                 </div>
-                ${
-                    otpAttempts.value > 0
-                        ? `
+                ${otpAttempts.value > 0 ? `
                 <div class="text-sm text-red-500 mt-1">
-                    ${otpAttempts.value} failed attempt${
-                              otpAttempts.value > 1 ? "s" : ""
-                          }${
-                              otpAttempts.value === maxOtpAttempts.value - 1
-                                  ? " (last attempt)"
-                                  : otpAttempts.value >= maxOtpAttempts.value
-                                  ? ". Maximum attempts reached"
-                                  : ""
-                          }.
+                    ${otpAttempts.value} failed attempt${otpAttempts.value > 1 ? 's' : ''}${otpAttempts.value === maxOtpAttempts.value - 1 ? ' (last attempt)' : otpAttempts.value >= maxOtpAttempts.value ? '. Maximum attempts reached' : ''}.
                 </div>
-                `
-                        : ""
-                }
+                ` : ''}
             </div>
         `,
         showCancelButton: true,
@@ -570,89 +537,71 @@ const showOtpVerificationModal = () => {
         },
         didOpen: () => {
             const resendBtn = document.getElementById("resend-otp-btn");
-            const resendCountdownEl =
-                document.getElementById("resend-countdown");
+            const resendCountdownEl = document.getElementById("resend-countdown");
             // Update the timer display
             const updateTimerDisplay = () => {
                 const now = new Date();
-                const timeLeft = Math.max(
-                    0,
-                    Math.ceil((otpExpirationTime.value - now) / 1000)
-                );
+                const timeLeft = Math.max(0, Math.ceil((otpExpirationTime.value - now) / 1000));
                 const minutes = Math.floor(timeLeft / 60);
                 const seconds = timeLeft % 60;
-
-                const otpTimerEl = document.getElementById("otp-timer");
-                const timerMessageEl =
-                    document.getElementById("otp-timer-message");
-                const expiredMessageEl = document.getElementById(
-                    "otp-expired-message"
-                );
-                const otpInput = document.getElementById("swal-otp-input");
-                const confirmButton = document.querySelector(".swal2-confirm");
-
+                
+                const otpTimerEl = document.getElementById('otp-timer');
+                const timerMessageEl = document.getElementById('otp-timer-message');
+                const expiredMessageEl = document.getElementById('otp-expired-message');
+                const otpInput = document.getElementById('swal-otp-input');
+                const confirmButton = document.querySelector('.swal2-confirm');
+                
                 if (!otpTimerEl || !timerMessageEl || !expiredMessageEl) return;
-
+                
                 const isExpired = timeLeft <= 0;
-                const formattedTime = `${minutes}:${seconds
-                    .toString()
-                    .padStart(2, "0")}`;
-
+                const formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                
                 // Only update DOM if the value has changed
                 if (otpTimerEl.textContent !== formattedTime) {
                     otpTimerEl.textContent = formattedTime;
                 }
-
+                
                 // Toggle visibility and states based on expiration
                 if (isExpired) {
-                    if (!expiredMessageEl.classList.contains("hidden")) return; // Already in correct state
-
-                    timerMessageEl.classList.add("hidden");
-                    otpTimerEl.classList.add("hidden");
-                    expiredMessageEl.classList.remove("hidden");
-
+                    if (!expiredMessageEl.classList.contains('hidden')) return; // Already in correct state
+                    
+                    timerMessageEl.classList.add('hidden');
+                    otpTimerEl.classList.add('hidden');
+                    expiredMessageEl.classList.remove('hidden');
+                    
                     // Disable input and button
                     if (otpInput) otpInput.disabled = true;
                     if (confirmButton) confirmButton.disabled = true;
                 } else {
-                    if (
-                        !timerMessageEl.classList.contains("hidden") &&
-                        !otpTimerEl.classList.contains("hidden") &&
-                        expiredMessageEl.classList.contains("hidden")
-                    ) {
+                    if (!timerMessageEl.classList.contains('hidden') && 
+                        !otpTimerEl.classList.contains('hidden') && 
+                        expiredMessageEl.classList.contains('hidden')) {
                         // Already in correct state, just update colors if needed
-                        otpTimerEl.classList.toggle(
-                            "text-red-500",
-                            timeLeft <= 60
-                        );
-                        otpTimerEl.classList.toggle(
-                            "text-gray-600",
-                            timeLeft > 60
-                        );
+                        otpTimerEl.classList.toggle('text-red-500', timeLeft <= 60);
+                        otpTimerEl.classList.toggle('text-gray-600', timeLeft > 60);
                         return;
                     }
-
+                    
                     // Update to show countdown
-                    timerMessageEl.textContent =
-                        "Verification code expires in ";
-                    timerMessageEl.classList.remove("hidden");
-                    otpTimerEl.classList.remove("hidden");
-                    expiredMessageEl.classList.add("hidden");
-
+                    timerMessageEl.textContent = 'Verification code expires in ';
+                    timerMessageEl.classList.remove('hidden');
+                    otpTimerEl.classList.remove('hidden');
+                    expiredMessageEl.classList.add('hidden');
+                    
                     // Update colors
-                    otpTimerEl.classList.toggle("text-red-500", timeLeft <= 60);
-                    otpTimerEl.classList.toggle("text-gray-600", timeLeft > 60);
-
+                    otpTimerEl.classList.toggle('text-red-500', timeLeft <= 60);
+                    otpTimerEl.classList.toggle('text-gray-600', timeLeft > 60);
+                    
                     // Enable input and button
                     if (otpInput) otpInput.disabled = false;
                     if (confirmButton) confirmButton.disabled = false;
                 }
             };
-
+            
             // Set up the timer interval with requestAnimationFrame for smoother updates
             let lastUpdate = 0;
             let animationFrameId = null;
-
+            
             const updateLoop = (timestamp) => {
                 if (!otpTimerInterval) {
                     if (animationFrameId) {
@@ -661,24 +610,24 @@ const showOtpVerificationModal = () => {
                     }
                     return;
                 }
-
+                
                 // Only update DOM at most every 500ms for better performance
                 if (timestamp - lastUpdate > 500) {
                     updateTimerDisplay();
                     lastUpdate = timestamp;
                 }
-
+                
                 // Continue the animation loop
                 animationFrameId = requestAnimationFrame(updateLoop);
             };
-
+            
             // Initial update
             updateTimerDisplay();
-
+            
             // Start the animation loop
             otpTimerInterval = true; // Use a truthy value as a flag
             animationFrameId = requestAnimationFrame(updateLoop);
-
+            
             // Cleanup function for when the modal is closed
             const cleanup = () => {
                 if (animationFrameId) {
@@ -687,7 +636,7 @@ const showOtpVerificationModal = () => {
                 }
                 otpTimerInterval = null;
             };
-
+            
             // Return cleanup function to be called when modal closes
             return cleanup;
 
@@ -695,44 +644,22 @@ const showOtpVerificationModal = () => {
             const updateResendButton = () => {
                 if (isResendDisabled) {
                     resendBtn.disabled = true;
-                    resendBtn.classList.remove(
-                        "text-green-600",
-                        "hover:text-green-800"
-                    );
-                    resendBtn.classList.add(
-                        "text-gray-400",
-                        "cursor-not-allowed"
-                    );
+                    resendBtn.classList.remove("text-green-600", "hover:text-green-800");
+                    resendBtn.classList.add("text-gray-400", "cursor-not-allowed");
                     resendCountdownEl.textContent = `(${resendCountdown}s)`;
                 } else {
                     // Only enable the button if the OTP has expired
-                    const isOtpExpired = formatTimeRemaining(
-                        otpExpirationTime.value
-                    ).isExpired;
+                    const isOtpExpired = formatTimeRemaining(otpExpirationTime.value).isExpired;
                     if (isOtpExpired) {
                         resendBtn.disabled = false;
-                        resendBtn.classList.add(
-                            "text-green-600",
-                            "hover:text-green-800"
-                        );
-                        resendBtn.classList.remove(
-                            "text-gray-400",
-                            "cursor-not-allowed"
-                        );
-                        resendCountdownEl.textContent = "";
+                        resendBtn.classList.add("text-green-600", "hover:text-green-800");
+                        resendBtn.classList.remove("text-gray-400", "cursor-not-allowed");
+                        resendCountdownEl.textContent = '';
                     } else {
                         resendBtn.disabled = true;
-                        resendBtn.classList.remove(
-                            "text-green-600",
-                            "hover:text-green-800"
-                        );
-                        resendBtn.classList.add(
-                            "text-gray-400",
-                            "cursor-not-allowed"
-                        );
-                        const timeLeft = formatTimeRemaining(
-                            otpExpirationTime.value
-                        ).formatted;
+                        resendBtn.classList.remove("text-green-600", "hover:text-green-800");
+                        resendBtn.classList.add("text-gray-400", "cursor-not-allowed");
+                        const timeLeft = formatTimeRemaining(otpExpirationTime.value).formatted;
                         resendCountdownEl.textContent = `(wait ${timeLeft})`;
                     }
                 }
@@ -797,24 +724,24 @@ const verifyOtp = async (otp) => {
     // If OTP is expired, don't proceed with verification
     if (otpExpirationTime.value && new Date() > otpExpirationTime.value) {
         Swal.fire({
-            icon: "error",
-            title: "OTP Expired",
-            text: "The verification code has expired. Please request a new one.",
-            confirmButtonColor: "#10b981",
+            icon: 'error',
+            title: 'OTP Expired',
+            text: 'The verification code has expired. Please request a new one.',
+            confirmButtonColor: '#10b981',
         });
         return;
     }
-
+    
     // Increment attempts counter
     otpAttempts.value += 1;
 
     // Check if max attempts reached
     if (otpAttempts.value >= maxOtpAttempts.value) {
         Swal.fire({
-            icon: "error",
-            title: "Maximum Attempts Reached",
+            icon: 'error',
+            title: 'Maximum Attempts Reached',
             text: `You've exceeded the maximum number of verification attempts. Please request a new OTP.`,
-            confirmButtonColor: "#10b981",
+            confirmButtonColor: '#10b981',
         });
         return;
     }
@@ -965,6 +892,12 @@ const getItemName = (id, items) => {
     return item ? toTitleCase(item.name) : "Not specified";
 };
 
+const getSpecialInterestGroupName = (id) => {
+    if (!id) return '';
+    const interest = special_interest_groups.value.find((item) => item.id == id);
+    return interest ? interest.name : id;
+};
+
 const toTitleCase = (str) => {
     return str.replace(/\b\w/g, (match) => match.toUpperCase());
 };
@@ -973,8 +906,8 @@ const toTitleCase = (str) => {
 const formatDate = (date) => {
     const d = new Date(date);
     const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
 };
 
@@ -988,7 +921,7 @@ const canProceedToNextStep = computed(() => {
     // For step 1, only check the acknowledgment checkbox
     if (currentStep.value === 1) {
         return form.understood_instructions;
-    }
+    } 
     // For step 2, check personal information fields
     else if (currentStep.value === 2) {
         return (
@@ -1003,7 +936,7 @@ const canProceedToNextStep = computed(() => {
             form.religion_id &&
             (form.disability_status === false || form.ncpwd_number)
         );
-    }
+    } 
     // For step 3, check location fields
     else if (currentStep.value === 3) {
         return form.county_id && form.constituency_id && form.ward_id;
@@ -1627,38 +1560,51 @@ const canProceedToNextStep = computed(() => {
                                         class="mt-1 text-sm text-red-600"
                                     />
                                 </div>
+                                <!-- Hidden identification_type field -->
+                                <input type="hidden" name="identification_type" v-model="form.identification_type" value="national_identification_number">
+
                                 <div class="space-y-2">
                                     <div class="flex items-center">
                                         <InputLabel
-                                            for="identification_type"
-                                            value="Identification Type"
+                                            value="Special Interest Group (optional)"
                                             class="block text-sm font-medium text-gray-700"
                                         />
-                                        <i
-                                            class="fas fa-star text-red-500 text-xs ml-1"
-                                        ></i>
                                     </div>
-                                    <select
-                                        id="identification_type"
-                                        v-model="form.identification_type"
-                                        class="block w-full rounded-md border-gray-300 bg-gray-200 text-gray-500 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
-                                        required
-                                        :disabled="true"
-                                        @change="
-                                            form.identification_number = ''
-                                        "
+                                    <VueSelect
+                                        id="special_interest_groups"
+                                        v-model="form.special_interest_groups"
+                                        :options="special_interest_groups"
+                                        label="name"
+                                        multiple
+                                        :reduce="option => option.id"
+                                        placeholder="Select special interest groups (optional)"
+                                        class="w-full"
+                                        :class="{
+                                            'border-red-300': form.errors.special_interest_groups,
+                                        }"
+                                        :clearable="true"
+                                        :close-on-select="false"
+                                        :taggable="false"
+                                        :selectable="() => form.special_interest_groups.length < 5"
                                     >
-                                        <option
-                                            value="national_identification_number"
-                                            selected
-                                        >
-                                            National Identification Number
-                                        </option>
-                                    </select>
+                                        <template #no-options>
+                                            <div class="text-sm text-gray-500 p-2">
+                                                No special interest groups found
+                                            </div>
+                                        </template>
+                                        <template #option="{ name }">
+                                            <div class="flex items-center">
+                                                <span>{{ name }}</span>
+                                            </div>
+                                        </template>
+                                        <template #selected-option="{ name }">
+                                            <div class="bg-green-50 text-green-800 text-xs px-2 py-1 rounded mr-1">
+                                                {{ name }}
+                                            </div>
+                                        </template>
+                                    </VueSelect>
                                     <InputError
-                                        :message="
-                                            form.errors.identification_type
-                                        "
+                                        :message="form.errors.special_interest_groups"
                                         class="mt-1 text-sm text-red-600"
                                     />
                                 </div>
@@ -2186,7 +2132,7 @@ const canProceedToNextStep = computed(() => {
                                             <dt
                                                 class="text-sm font-medium text-gray-500"
                                             >
-                                                ID/Passport No.
+                                                Identification No.
                                             </dt>
                                             <dd
                                                 class="mt-1 text-sm text-gray-900 sm:col-span-2"
@@ -2209,7 +2155,7 @@ const canProceedToNextStep = computed(() => {
                                             <dt
                                                 class="text-sm font-medium text-gray-500"
                                             >
-                                                Party Membership Number
+                                                Party Membership No.
                                             </dt>
                                             <dd
                                                 class="mt-1 text-sm text-gray-900 sm:col-span-2"
@@ -2379,6 +2325,22 @@ const canProceedToNextStep = computed(() => {
                                                     form.telephone ||
                                                     "Not specified"
                                                 }}
+                                            </dd>
+                                        </div>
+                                        <div v-if="form.special_interest_groups && form.special_interest_groups.length > 0" class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                            <dt class="text-sm font-medium text-gray-500">
+                                                Special Interest Groups:
+                                            </dt>
+                                            <dd class="mt-1 text-sm text-gray-900 sm:col-span-2">
+                                                <div class="flex flex-wrap gap-2">
+                                                    <span 
+                                                        v-for="(interest, index) in form.special_interest_groups" 
+                                                        :key="index"
+                                                        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                                                    >
+                                                        {{ getSpecialInterestGroupName(interest) }}
+                                                    </span>
+                                                </div>
                                             </dd>
                                         </div>
                                     </dl>
