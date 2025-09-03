@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use Inertia\Inertia;
 use App\Models\Service;
+use App\Models\Citizen;
 use App\Models\Activity;
 use App\Models\Department;
 use Illuminate\Http\Request;
@@ -538,5 +539,71 @@ class FrontendController extends Controller
     public function store(Request $request)
     {
         // 
+    }
+
+    public function verifyMembership()
+    {
+        // For GET requests or after POST processing, return the Inertia view
+        return Inertia::render('Frontend/VerifyMembership');
+    }
+
+    public function verifyMembershipRequest(Request $request)
+    {
+        $validated = $request->validate([
+            'national_id' => 'required|string|size:8|exists:citizens,national_identification_number',
+        ]);
+
+        $national_id = $validated['national_id'];
+
+        $citizen = Citizen::where('national_identification_number', $national_id)
+            ->with([
+                'county:id,name',
+                'constituency:id,name',
+                'ward:id,name',
+                'user:id,name,email',
+            ])
+            ->first();
+
+        if (!$citizen) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No member found with the provided National ID. Please check the number and try again.',
+            ], 404);
+        }
+
+        // Update last verified timestamp
+        $citizen->update([
+            'last_verified_at' => now(),
+            'verified_by' => $request->user() ? $request->user()->id : null,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'data' => [
+                'name' => $citizen->user ? $citizen->user->name : 'N/A',
+                'email' => $citizen->user->email ?? 'N/A',
+                'national_id' => $citizen->national_identification_number,
+                'registration_number' => $citizen->uuid,
+                'status' => Citizen::getStatusOptions()[($citizen->_status)] ?? 'Unknown',
+                'status_code' => $citizen->_status,
+                'county' => $citizen->county->name ?? 'N/A',
+                'constituency' => $citizen->constituency->name ?? 'N/A',
+                'ward' => $citizen->ward->name ?? 'N/A',
+                'registration_date' => $citizen->created_at->format('d/m/Y'),
+                'last_verified' => $citizen->last_verified_at ? $citizen->last_verified_at->format('d/m/Y H:i') : 'Just now',
+            ]
+        ]);
+    }
+
+    private function getStatusText($status)
+    {
+        return match((int)$status) {
+            Citizen::PENDING => 'Pending',
+            Citizen::PROCESSING => 'Processing',
+            Citizen::PROCESSED => 'Processed',
+            Citizen::ACCEPTED => 'Active Member',
+            Citizen::REJECTED => 'Rejected',
+            default => 'Unknown',
+        };
     }
 }
