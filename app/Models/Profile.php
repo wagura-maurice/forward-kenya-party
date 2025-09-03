@@ -86,6 +86,7 @@ class Profile extends Model
         'state',
         'country',
         'date_of_birth',
+        'special_interest_groups',
         'disability_status',
         'ncpwd_number',
         'ethnicity_id',
@@ -123,6 +124,7 @@ class Profile extends Model
      */
     protected $casts = [
         'date_of_birth' => 'date',
+        'special_interest_groups' => 'array',
         'email_verified_at' => 'datetime',
         'kyc_verified' => 'boolean',
         'metadata' => 'array',
@@ -189,6 +191,7 @@ class Profile extends Model
                     }
                 },
             ],
+            'special_interest_groups' => 'nullable|json',
             'disability_status' => 'nullable|string',
             'ncpwd_number' => 'nullable|string',
             'ethnicity_id' => 'nullable|exists:ethnicities,id',
@@ -254,6 +257,7 @@ class Profile extends Model
                     }
                 },
             ],
+            'special_interest_groups' => 'nullable|json',
             'disability_status' => 'nullable|string',
             'ncpwd_number' => 'nullable|string',
             'ethnicity_id' => 'nullable|exists:ethnicities,id',

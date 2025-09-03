@@ -24,6 +24,17 @@ class Citizen extends Model
     const ACCEPTED = 3;
     const REJECTED = 4;
 
+    public static function getStatusOptions(): array
+    {
+        return [
+            self::PENDING => 'Pending',
+            self::PROCESSING => 'Processing',
+            self::PROCESSED => 'Processed',
+            self::ACCEPTED => 'Accepted',
+            self::REJECTED => 'Rejected',
+        ];
+    }
+
     /**
      * The attributes that are mass assignable.
      *
