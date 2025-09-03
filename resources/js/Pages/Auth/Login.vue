@@ -127,7 +127,7 @@ const submit = async () => {
                 timer: 1500
             }).then(() => {
                 // Redirect to auto-login after showing success message
-                window.location.href = `${route('auto.login')}?telephone=${encodeURIComponent(form.login)}`;
+                window.location.href = '/dashboard';
             });
 
         } catch (error) {
