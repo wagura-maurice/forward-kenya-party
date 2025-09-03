@@ -307,7 +307,6 @@ onUnmounted(() => {
                 'opacity-100 visible': isScrolled,
             }"
             aria-label="Back to top"
-            style="margin-left: 60px"
         >
             <i class="fas fa-arrow-up"></i>
         </button>
