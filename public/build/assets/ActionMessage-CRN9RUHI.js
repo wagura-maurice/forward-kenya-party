@@ -1,0 +1,2 @@
+import{s,k as t,p as o,l as n,D as c,m as i,q as r,O as l,L as d}from"./vendor-BwcupqXt.js";const p={class:"text-sm text-gray-600"},v={__name:"ActionMessage",props:{on:Boolean},setup(e){return(a,_)=>(t(),s("div",null,[o(d,{"leave-active-class":"transition ease-in duration-1000","leave-from-class":"opacity-100","leave-to-class":"opacity-0"},{default:n(()=>[c(i("div",p,[r(a.$slots,"default")],512),[[l,e.on]])]),_:3})]))}};export{v as _};
+//# sourceMappingURL=ActionMessage-CRN9RUHI.js.map
