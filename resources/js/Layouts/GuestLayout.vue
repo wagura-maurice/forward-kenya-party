@@ -340,9 +340,7 @@ onUnmounted(() => {
                         <p
                             class="text-gray-600 dark:text-gray-300 mb-4 text-sm leading-relaxed"
                         >
-                            Empowering Kenyans through Forward Kenya Party's
-                            digital platform for political engagement, community
-                            action, and inclusive participation.
+                            Forward Kenya Party - Empowering Kenyans through progressive leadership, community action, and inclusive participation in the democratic process.
                         </p>
                         <div
                             class="flex items-center space-x-2 bg-white dark:bg-gray-700 px-3 py-1.5 rounded-full w-fit"
@@ -522,7 +520,7 @@ onUnmounted(() => {
                                         href="tel:+254000000000"
                                         class="text-gray-700 dark:text-gray-200 text-sm hover:text-green-600 dark:hover:text-green-400"
                                     >
-                                        +254 713 447 820
+                                        +254 700 000 000
                                     </a>
                                 </div>
                             </li>
@@ -568,8 +566,7 @@ onUnmounted(() => {
                             <p
                                 class="text-gray-600 dark:text-gray-300 mb-4 text-sm"
                             >
-                                Connect with us on social media for the latest
-                                updates and news.
+                                Follow us on social media for the latest updates and news from Forward Kenya Party.
                             </p>
                             <div class="flex flex-wrap gap-2 mb-6">
                                 <a
@@ -622,17 +619,17 @@ onUnmounted(() => {
                             <h4
                                 class="text-gray-800 dark:text-white font-medium mb-2 text-sm"
                             >
-                                Subscribe to our newsletter
+                                Stay Updated
                             </h4>
                             <p
                                 class="text-gray-600 dark:text-gray-300 text-xs mb-3"
                             >
-                                Get the latest news and updates.
+                                Subscribe for the latest news and updates from Forward Kenya Party.
                             </p>
                             <div class="flex">
                                 <input
                                     type="email"
-                                    placeholder="Your email"
+                                    placeholder="Enter your email address"
                                     class="px-3 py-2 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-800 dark:text-white placeholder-gray-400 rounded-l-md text-sm focus:ring-2 focus:ring-green-500 focus:border-transparent w-full transition-all duration-200 focus:outline-none"
                                 />
                                 <button
@@ -644,8 +641,7 @@ onUnmounted(() => {
                             <p
                                 class="text-xs text-gray-400 dark:text-gray-300 mt-2 italic"
                             >
-                                We respect your right to privacy. By subscribing
-                                to our newsletter, you agree to our
+                                By subscribing, you agree to receive updates from Forward Kenya Party and accept our
                                 <a
                                     :href="
                                         route('frontend.terms-and-conditions')
