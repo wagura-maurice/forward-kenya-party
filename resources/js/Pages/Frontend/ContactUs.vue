@@ -190,9 +190,10 @@ const submitForm = () => {
 
             <!-- Contact Form Section -->
             <div
-                class="bg-white dark:bg-gray-900 mt-8 rounded-lg shadow-lg mb-16"
+                class="bg-white dark:bg-gray-900 mt-8 rounded-lg shadow mb-16"
             >
-                <div class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6">
+                <!-- <div class="py-8 px-4 mx-auto max-w-screen-xl lg:py-16 lg:px-6"> -->
+                <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
                         <!-- Left Column: Contact Form -->
                         <div>
@@ -375,16 +376,16 @@ const submitForm = () => {
 
                         <!-- Right Column: Map -->
                         <div
-                            class="bg-gray-100 dark:bg-gray-800 rounded-lg overflow-hidden"
+                            class="rounded-lg overflow-hidden"
                         >
                             <h3
-                                class="text-2xl font-bold text-gray-900 dark:text-white p-6 pb-2"
+                                class="text-2xl font-bold text-gray-900 dark:text-white"
                             >
                                 Find us on map
                             </h3>
-                            <div class="h-full w-full p-6 pt-2">
+                            <div class="h-full w-full pt-2">
                                 <div
-                                    class="relative h-96 w-full rounded-lg overflow-hidden"
+                                    class="relative h-96 w-full overflow-hidden"
                                 >
                                     <!-- Google Maps Embed -->
                                     <iframe
@@ -417,7 +418,7 @@ const submitForm = () => {
                                     </div>
                                 </div>
                                 <div
-                                    class="mt-4 p-4 bg-white/50 dark:bg-gray-800/50 rounded-lg shadow-sm border border-gray-100 dark:border-gray-700"
+                                    class="p-4 bg-white/50 dark:bg-gray-800/50 rounded-b-lg shadow-sm border border-gray-100 dark:border-gray-700"
                                 >
                                     <div
                                         class="flex items-start space-x-3 mb-3"
