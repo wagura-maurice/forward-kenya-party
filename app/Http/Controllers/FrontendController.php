@@ -622,4 +622,301 @@ class FrontendController extends Controller
             default => 'Unknown',
         };
     }
+
+    public function processDonation(Request $request)
+    {
+        try {
+            // Common validation rules for all donation types
+            $rules = [
+                'type' => 'required|in:monetary,in_kind,volunteer',
+                'donor_name' => 'required|string|max:255',
+                'email' => 'required|email|max:255',
+                'phone' => 'required|string|max:20',
+                'terms' => 'required|accepted',
+                'amount' => 'sometimes|numeric' // Sometimes required for all types
+            ];
+
+            // Add conditional validation based on donation type
+            switch ($request->type) {
+                case 'monetary':
+                    $rules['amount'] = 'required|numeric|min:1';
+                    $rules['is_recurring'] = 'required|boolean';
+                    $rules['payment_method'] = 'required|in:mpesa,card,bank,crypto';
+                    
+                    // Payment method specific validations
+                    if ($request->payment_method === 'mpesa') {
+                        $rules['mpesa_phone'] = 'required|string|regex:/^\+?[0-9]{10,15}$/';
+                    } elseif ($request->payment_method === 'card') {
+                        $rules['card_last_four'] = 'required|string|size:4';
+                        // Note: In production, never handle full card details directly
+                        // This should be handled by a payment processor like Stripe
+                    }
+                    break;
+                    
+                case 'in_kind':
+                    $rules['in_kind_type'] = 'required|string|max:255';
+                    $rules['description'] = 'required|string';
+                    $rules['estimated_value'] = 'nullable|numeric|min:0';
+                    break;
+                    
+                case 'volunteer':
+                    $rules['skills'] = 'required|string|max:500';
+                    $rules['availability'] = 'required|string|in:weekdays,weekends,evenings,flexible';
+                    $rules['notes'] = 'nullable|string|max:1000';
+                    break;
+            }
+
+            // Validate the request
+            $validated = $request->validate($rules);
+
+            // Process the donation based on type
+            $donation = null;
+            
+            switch ($request->type) {
+                case 'monetary':
+                    $donation = $this->processMonetaryDonation($validated);
+                    $message = 'Thank you for your monetary donation of KES ' . number_format($validated['amount'], 2) . '!';
+                    if ($validated['is_recurring']) {
+                        $message .= ' Your recurring donation has been set up successfully.';
+                    }
+                    break;
+                    
+                case 'in_kind':
+                    $donation = $this->processInKindDonation($validated);
+                    $message = 'Thank you for your in-kind donation! We appreciate your contribution of ' . 
+                              $validated['in_kind_type'] . '.';
+                    break;
+                    
+                case 'volunteer':
+                    $donation = $this->processVolunteerDonation($validated);
+                    $message = 'Thank you for volunteering with us! We appreciate your ' . 
+                              $validated['skills'] . ' skills and will be in touch soon.';
+                    break;
+            }
+
+            // Send confirmation email
+            // $this->sendDonationConfirmation($donation, $validated['email']);
+
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+                'donation' => $donation,
+                'receipt_number' => $donation['reference'] ?? null,
+                'next_steps' => $this->getNextSteps($request->type, $validated)
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+            
+        } catch (\Exception $e) {
+            \Log::error('Donation processing failed: ' . $e->getMessage());
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while processing your donation. Please try again.'
+            ], 500);
+        }
+    }
+    
+    /**
+     * Process monetary donation
+     */
+    protected function processMonetaryDonation($data)
+    {
+        // Log the donation attempt
+        \Log::info('Processing monetary donation', [
+            'amount' => $data['amount'],
+            'payment_method' => $data['payment_method'],
+            'donor_email' => $data['email']
+        ]);
+        
+        $status = 'pending';
+        
+        // Process based on payment method
+        switch ($data['payment_method']) {
+            case 'mpesa':
+                // In a real app, this would call M-Pesa STK push
+                // $mpesaResponse = $this->initiateMpesaSTKPush($data);
+                $status = 'pending_mpesa_confirmation';
+                $reference = 'DON-' . now()->format('Ymd') . '-' . strtoupper(\Str::random(6));
+                break;
+                
+            case 'card':
+                // In a real app, this would process via Stripe/PayPal
+                // $payment = $this->processCardPayment($data);
+                $status = 'processing';
+                $reference = 'DON-' . now()->format('Ymd') . '-' . strtoupper(\Str::random(6));
+                break;
+                
+            case 'bank':
+                // Provide bank transfer details
+                $status = 'awaiting_transfer';
+                $reference = 'DON-' . now()->format('Ymd') . '-' . strtoupper(\Str::random(6));
+                break;
+                
+            case 'crypto':
+                // Provide crypto wallet address
+                $status = 'awaiting_payment';
+                $reference = 'DON-' . now()->format('Ymd') . '-' . strtoupper(\Str::random(6));
+                break;
+        }
+        
+        // Save to database
+        // $donation = Donation::create([
+        //     'reference' => $reference,
+        //     'donor_name' => $data['donor_name'],
+        //     'email' => $data['email'],
+        //     'phone' => $data['phone'],
+        //     'amount' => $data['amount'],
+        //     'payment_method' => $data['payment_method'],
+        //     'is_recurring' => $data['is_recurring'] ?? false,
+        //     'status' => $status,
+        //     'metadata' => [
+        //         'mpesa_phone' => $data['mpesa_phone'] ?? null,
+        //         'card_last_four' => $data['card_last_four'] ?? null
+        //     ]
+        // ]);
+        
+        return [
+            'type' => 'monetary',
+            'amount' => $data['amount'],
+            'currency' => 'KES',
+            'payment_method' => $data['payment_method'],
+            'is_recurring' => $data['is_recurring'] ?? false,
+            'status' => $status,
+            'reference' => $reference,
+            'timestamp' => now()->toDateTimeString()
+        ];
+    }
+    
+    /**
+     * Process in-kind donation
+     */
+    protected function processInKindDonation($data)
+    {
+        $reference = 'IKD-' . now()->format('Ymd') . '-' . strtoupper(\Str::random(6));
+        
+        // Log the in-kind donation
+        \Log::info('Processing in-kind donation', [
+            'type' => $data['in_kind_type'],
+            'donor' => $data['email'],
+            'reference' => $reference
+        ]);
+        
+        // Save to database
+        // $donation = InKindDonation::create([
+        //     'reference' => $reference,
+        //     'donor_name' => $data['donor_name'],
+        //     'email' => $data['email'],
+        //     'phone' => $data['phone'],
+        //     'type' => $data['in_kind_type'],
+        //     'description' => $data['description'],
+        //     'estimated_value' => $data['estimated_value'] ?? null,
+        //     'status' => 'received',
+        // ]);
+        
+        return [
+            'type' => 'in_kind',
+            'in_kind_type' => $data['in_kind_type'],
+            'description' => $data['description'],
+            'estimated_value' => $data['estimated_value'] ?? null,
+            'status' => 'received',
+            'reference' => $reference,
+            'timestamp' => now()->toDateTimeString()
+        ];
+    }
+    
+    /**
+     * Process volunteer signup
+     */
+    protected function processVolunteerDonation($data)
+    {
+        $reference = 'VOL-' . now()->format('Ymd') . '-' . strtoupper(\Str::random(6));
+        
+        // Log the volunteer signup
+        \Log::info('Processing volunteer signup', [
+            'reference' => $reference,
+            'email' => $data['email'],
+            'skills' => $data['skills']
+        ]);
+        
+        // Save to database
+        // $volunteer = Volunteer::create([
+        //     'reference' => $reference,
+        //     'name' => $data['donor_name'],
+        //     'email' => $data['email'],
+        //     'phone' => $data['phone'],
+        //     'skills' => $data['skills'],
+        //     'availability' => $data['availability'],
+        //     'notes' => $data['notes'] ?? null,
+        //     'status' => 'pending_review'
+        // ]);
+        
+        return [
+            'type' => 'volunteer',
+            'skills' => $data['skills'],
+            'availability' => $data['availability'],
+            'status' => 'pending_review',
+            'reference' => $reference,
+            'timestamp' => now()->toDateTimeString()
+        ];
+    }
+    
+    /**
+     * Get next steps based on donation type
+     */
+    protected function getNextSteps($type, $data)
+    {
+        switch ($type) {
+            case 'monetary':
+                switch ($data['payment_method']) {
+                    case 'mpesa':
+                        return [
+                            'Check your phone to complete the M-Pesa payment',
+                            'You will receive a confirmation message once payment is received'
+                        ];
+                    case 'card':
+                        return [
+                            'Your card payment is being processed',
+                            'You will receive an email receipt shortly'
+                        ];
+                    case 'bank':
+                        return [
+                            'Please transfer to our bank account',
+                            'Account Name: Forward Kenya Party',
+                            'Bank: [Bank Name]',
+                            'Account: [Account Number]',
+                            'Branch: [Branch Name]',
+                            'Use reference: ' . ($data['email'] ?? '')
+                        ];
+                    case 'crypto':
+                        return [
+                            'Send your crypto to:',
+                            'Bitcoin: [BTC Address]',
+                            'Ethereum: [ETH Address]',
+                            'Please include this reference in your transaction: ' . ($data['email'] ?? '')
+                        ];
+                }
+                break;
+                
+            case 'in_kind':
+                return [
+                    'Our team will contact you within 2 business days',
+                    'Please have your ' . ($data['in_kind_type'] ?? 'donation') . ' ready for collection/delivery'
+                ];
+                
+            case 'volunteer':
+                return [
+                    'Our volunteer coordinator will contact you within 3 business days',
+                    'Please check your email for next steps',
+                    'Be ready to provide any additional information about your skills'
+                ];
+        }
+        
+        return [];
+    }
 }
