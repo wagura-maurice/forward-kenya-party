@@ -189,7 +189,7 @@ onUnmounted(() => {
                                     :href="route('login')"
                                     class="text-gray-900 bg-gradient-to-r from-teal-200 to-lime-200 hover:bg-gradient-to-l hover:from-teal-200 hover:to-lime-200 focus:ring-4 focus:outline-none focus:ring-lime-200 dark:focus:ring-teal-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                                 >
-                                    Sign Up
+                                    Sign In
                                 </a>
                             </template>
                         </div>
@@ -286,7 +286,7 @@ onUnmounted(() => {
                             :href="route('login')"
                             class="block text-gray-900 bg-gradient-to-r from-teal-200 to-lime-200 hover:bg-gradient-to-l hover:from-teal-200 hover:to-lime-200 focus:ring-4 focus:outline-none focus:ring-lime-200 dark:focus:ring-teal-700 font-medium rounded-lg text-sm px-5 py-2.5 text-center"
                         >
-                            Sign Up
+                            Sign In
                         </a>
                     </template>
                 </div>
@@ -338,7 +338,7 @@ onUnmounted(() => {
                             />
                         </a>
                         <p
-                            class="text-gray-600 dark:text-gray-300 mb-4 text-sm leading-relaxed"
+                            class="font-light text-gray-500 dark:text-gray-400 text-medium leading-relaxed mb-4"
                         >
                             Forward Kenya Party - Empowering Kenyans through progressive leadership, community action, and inclusive participation in the democratic process.
                         </p>
@@ -348,17 +348,18 @@ onUnmounted(() => {
                             <span
                                 class="h-2 w-2 rounded-full bg-green-500 animate-pulse"
                             ></span>
-                            <span
-                                class="text-xs font-medium text-gray-700 dark:text-gray-200"
-                                >24 / 7 Available</span
+                            <p
+                                class="font-light text-gray-500 dark:text-gray-400 text-medium leading-relaxed"
                             >
+                                24 / 7 Available
+                            </p>
                         </div>
                     </div>
 
                     <!-- Quick Links -->
                     <div>
                         <h3
-                            class="text-base font-semibold text-gray-800 dark:text-white mb-4 relative pb-2"
+                            class="text-xl font-semibold text-gray-800 dark:text-white mb-4 relative pb-2"
                         >
                             Quick Links
                             <span
@@ -372,14 +373,14 @@ onUnmounted(() => {
                                         class="w-6 h-6 rounded-full bg-white dark:bg-gray-700 flex items-center justify-center"
                                     >
                                         <i
-                                            class="fas fa-user-check text-green-500 text-xs"
+                                            class="fas fa-user-check text-green-500 text-sm"
                                         ></i>
                                     </div>
                                 </div>
                                 <div class="ml-3">
                                     <a
                                         href="/verify-membership"
-                                        class="text-gray-700 hover:text-green-600 dark:text-gray-200 dark:hover:text-green-400 text-sm"
+                                        class="font-light text-gray-500 dark:text-gray-400 text-medium leading-relaxed focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1 focus:ring-offset-green-500 underline-offset-8 focus:ring-green-500 hover:ring-green-500 hover:ring-green-500 hover:underline hover:text-green-600 dark:hover:text-green-600"
                                     >
                                         Verify Membership
                                     </a>
@@ -391,14 +392,14 @@ onUnmounted(() => {
                                         class="w-6 h-6 rounded-full bg-white dark:bg-gray-700 flex items-center justify-center"
                                     >
                                         <i
-                                            class="fas fa-chevron-right text-green-500 text-xs"
+                                            class="fas fa-chevron-right text-green-500 text-sm"
                                         ></i>
                                     </div>
                                 </div>
                                 <div class="ml-3">
                                     <a
                                         href="/help-and-support"
-                                        class="text-gray-700 hover:text-green-600 dark:text-gray-200 dark:hover:text-green-400 text-sm"
+                                        class="font-light text-gray-500 dark:text-gray-400 text-medium leading-relaxed focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1 focus:ring-offset-green-500 underline-offset-8 focus:ring-green-500 hover:ring-green-500 hover:ring-green-500 hover:underline hover:text-green-600 dark:hover:text-green-600"
                                     >
                                         Help & Support
                                     </a>
@@ -410,14 +411,14 @@ onUnmounted(() => {
                                         class="w-6 h-6 rounded-full bg-white dark:bg-gray-700 flex items-center justify-center"
                                     >
                                         <i
-                                            class="fas fa-question-circle text-green-500 text-xs"
+                                            class="fas fa-question-circle text-green-500 text-sm"
                                         ></i>
                                     </div>
                                 </div>
                                 <div class="ml-3">
                                     <a
                                         href="/frequently-asked-questions"
-                                        class="text-gray-700 hover:text-green-600 dark:text-gray-200 dark:hover:text-green-400 text-sm"
+                                        class="font-light text-gray-500 dark:text-gray-400 text-medium leading-relaxed focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1 focus:ring-offset-green-500 underline-offset-8 focus:ring-green-500 hover:ring-green-500 hover:ring-green-500 hover:underline hover:text-green-600 dark:hover:text-green-600"
                                     >
                                         FAQ
                                     </a>
@@ -429,14 +430,14 @@ onUnmounted(() => {
                                         class="w-6 h-6 rounded-full bg-white dark:bg-gray-700 flex items-center justify-center"
                                     >
                                         <i
-                                            class="fas fa-file-contract text-green-500 text-xs"
+                                            class="fas fa-file-contract text-green-500 text-sm"
                                         ></i>
                                     </div>
                                 </div>
                                 <div class="ml-3">
                                     <a
                                         href="/terms-and-conditions"
-                                        class="text-gray-700 hover:text-green-600 dark:text-gray-200 dark:hover:text-green-400 text-sm"
+                                        class="font-light text-gray-500 dark:text-gray-400 text-medium leading-relaxed focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1 focus:ring-offset-green-500 underline-offset-8 focus:ring-green-500 hover:ring-green-500 hover:ring-green-500 hover:underline hover:text-green-600 dark:hover:text-green-600"
                                     >
                                         Terms & Conditions
                                     </a>
@@ -448,14 +449,14 @@ onUnmounted(() => {
                                         class="w-6 h-6 rounded-full bg-white dark:bg-gray-700 flex items-center justify-center"
                                     >
                                         <i
-                                            class="fas fa-shield-alt text-green-500 text-xs"
+                                            class="fas fa-shield-alt text-green-500 text-sm"
                                         ></i>
                                     </div>
                                 </div>
                                 <div class="ml-3">
                                     <a
                                         href="/privacy-policy"
-                                        class="text-gray-700 hover:text-green-600 dark:text-gray-200 dark:hover:text-green-400 text-sm"
+                                        class="font-light text-gray-500 dark:text-gray-400 text-medium leading-relaxed focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1 focus:ring-offset-green-500 underline-offset-8 focus:ring-green-500 hover:ring-green-500 hover:ring-green-500 hover:underline hover:text-green-600 dark:hover:text-green-600"
                                     >
                                         Privacy Policy
                                     </a>
@@ -467,7 +468,7 @@ onUnmounted(() => {
                     <!-- Contact Info -->
                     <div>
                         <h3
-                            class="text-base font-semibold text-gray-800 dark:text-white mb-4 relative pb-2"
+                            class="text-xl font-semibold text-gray-800 dark:text-white mb-4 relative pb-2"
                         >
                             Contact Us
                             <span
@@ -481,19 +482,19 @@ onUnmounted(() => {
                                         class="w-6 h-6 rounded-full bg-white dark:bg-gray-700 flex items-center justify-center"
                                     >
                                         <i
-                                            class="fas fa-map-marker-alt text-green-500 text-xs"
+                                            class="fas fa-map-marker-alt text-green-500 text-sm"
                                         ></i>
                                     </div>
                                 </div>
                                 <div class="ml-3">
                                     <h4
-                                        class="text-xs font-medium text-gray-500 dark:text-gray-400"
+                                        class="font-semibold text-gray-500 dark:text-gray-400 text-medium leading-relaxed"
                                     >
                                         Our Location
                                     </h4>
                                     <a
                                         href="/contact-us"
-                                        class="text-gray-700 dark:text-gray-200 text-sm hover:text-green-600 dark:hover:text-green-400"
+                                        class="font-light text-gray-500 dark:text-gray-400 text-medium leading-relaxed focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1 focus:ring-offset-green-500 underline-offset-8 focus:ring-green-500 hover:ring-green-500 hover:ring-green-500 hover:underline hover:text-green-600 dark:hover:text-green-600"
                                     >
                                         Utalii Lane, Viewpark Towers, 19th
                                         Floor, Suite 19, Nairobi, Kenya
@@ -506,19 +507,19 @@ onUnmounted(() => {
                                         class="w-6 h-6 rounded-full bg-white dark:bg-gray-700 flex items-center justify-center"
                                     >
                                         <i
-                                            class="fas fa-phone-alt text-green-500 text-xs"
+                                            class="fas fa-phone-alt text-green-500 text-sm"
                                         ></i>
                                     </div>
                                 </div>
                                 <div class="ml-3">
                                     <h4
-                                        class="text-xs font-medium text-gray-500 dark:text-gray-400"
+                                        class="font-semibold text-gray-500 dark:text-gray-400 text-medium leading-relaxed"
                                     >
                                         Call Us
                                     </h4>
                                     <a
                                         href="tel:+254000000000"
-                                        class="text-gray-700 dark:text-gray-200 text-sm hover:text-green-600 dark:hover:text-green-400"
+                                        class="font-light text-gray-500 dark:text-gray-400 text-medium leading-relaxed focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1 focus:ring-offset-green-500 underline-offset-8 focus:ring-green-500 hover:ring-green-500 hover:ring-green-500 hover:underline hover:text-green-600 dark:hover:text-green-600"
                                     >
                                         +254 700 000 000
                                     </a>
@@ -530,19 +531,19 @@ onUnmounted(() => {
                                         class="w-6 h-6 rounded-full bg-white dark:bg-gray-700 flex items-center justify-center"
                                     >
                                         <i
-                                            class="fas fa-envelope text-green-500 text-xs"
+                                            class="fas fa-envelope text-green-500 text-sm"
                                         ></i>
                                     </div>
                                 </div>
                                 <div class="ml-3">
                                     <h4
-                                        class="text-xs font-medium text-gray-500 dark:text-gray-400"
+                                        class="font-semibold text-gray-500 dark:text-gray-400 text-medium leading-relaxed"
                                     >
                                         Email Us
                                     </h4>
                                     <a
                                         href="mailto:forwardkenyaparty@gmail.com"
-                                        class="text-gray-700 dark:text-gray-200 text-sm hover:text-green-600 dark:hover:text-green-400"
+                                        class="font-light text-gray-500 dark:text-gray-400 text-medium leading-relaxed focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1 focus:ring-offset-green-500 underline-offset-8 focus:ring-green-500 hover:ring-green-500 hover:ring-green-500 hover:underline hover:text-green-600 dark:hover:text-green-600"
                                     >
                                         forwardkenyaparty@gmail.com
                                     </a>
@@ -554,7 +555,7 @@ onUnmounted(() => {
                     <!-- Social Media -->
                     <div>
                         <h3
-                            class="text-base font-semibold text-gray-800 dark:text-white mb-4 relative pb-2 inline-block"
+                            class="text-xl font-semibold text-gray-800 dark:text-white mb-4 relative pb-2"
                         >
                             Follow Us
                             <span
@@ -564,7 +565,7 @@ onUnmounted(() => {
 
                         <div class="mb-6">
                             <p
-                                class="text-gray-600 dark:text-gray-300 mb-4 text-sm"
+                                class="font-light text-gray-500 dark:text-gray-400 text-medium leading-relaxed mb-4"
                             >
                                 Follow us on social media for the latest updates and news from Forward Kenya Party.
                             </p>
@@ -617,16 +618,16 @@ onUnmounted(() => {
                             class="bg-white dark:bg-gray-800 p-4 rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm"
                         >
                             <h4
-                                class="text-gray-800 dark:text-white font-medium mb-2 text-sm"
+                                class="font-light text-gray-900 dark:text-white font-medium mb-2 text-sm"
                             >
                                 Stay Updated
                             </h4>
                             <p
-                                class="text-gray-600 dark:text-gray-300 text-xs mb-3"
+                                class="font-light text-gray-500 dark:text-gray-400 text-medium leading-relaxed mb-3"
                             >
                                 Subscribe for the latest news and updates from Forward Kenya Party.
                             </p>
-                            <div class="flex">
+                            <div class="flex mb-3">
                                 <input
                                     type="email"
                                     placeholder="Enter your email address"
@@ -638,8 +639,8 @@ onUnmounted(() => {
                                     <i class="fas fa-paper-plane text-sm"></i>
                                 </button>
                             </div>
-                            <p
-                                class="text-xs text-gray-400 dark:text-gray-300 mt-2 italic"
+                            <small  
+                                class="font-light text-gray-500 dark:text-gray-400 text-xs leading-relaxed italic"
                             >
                                 By subscribing, you agree to receive updates from Forward Kenya Party and accept our
                                 <a
@@ -647,7 +648,7 @@ onUnmounted(() => {
                                         route('frontend.terms-and-conditions')
                                     "
                                     target="_blank"
-                                    class="text-emerald-600 hover:text-emerald-500 hover:underline underline-offset-4 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-emerald-500 rounded"
+                                    class="font-semibold text-green-500 dark:text-green-400 hover:text-green-600 dark:hover:text-green-400 underline-offset-4 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-emerald-500 rounded"
                                 >
                                     Terms of Service
                                 </a>
@@ -655,11 +656,11 @@ onUnmounted(() => {
                                 <a
                                     :href="route('frontend.privacy-policy')"
                                     target="_blank"
-                                    class="text-emerald-600 hover:text-emerald-500 hover:underline underline-offset-4 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-emerald-500 rounded"
+                                    class="font-semibold text-green-500 dark:text-green-400 hover:text-green-600 dark:hover:text-green-400 underline-offset-4 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-emerald-500 rounded"
                                 >
                                     Privacy Policy </a
                                 >.
-                            </p>
+                            </small>
                         </div>
                     </div>
                 </div>
@@ -672,12 +673,21 @@ onUnmounted(() => {
                         class="flex flex-col md:flex-row justify-between items-center"
                     >
                         <p
-                            class="text-sm text-gray-400 mb-4 md:mb-0 text-center md:text-left"
+                            class="font-light text-gray-500 dark:text-gray-400 text-medium leading-relaxed mb-4 md:mb-0 text-center md:text-left"
                         >
                             © {{ currentYear }}
                             <a
                                 href="/"
-                                class="text-gray-400 hover:text-green-500 dark:hover:text-green-400 transition-colors relative inline-block after:content-[''] after:absolute after:w-0 after:h-px after:bg-green-400 after:left-0 after:-bottom-0.5 after:transition-all hover:after:w-full"
+                                :class="[
+                                    'text-green-500 dark:text-green-400',
+                                    'after:content-[\'\'] after:absolute after:w-0 after:h-px after:bg-green-400 after:left-0 after:-bottom-1 after:transition-all',
+                                    'hover:after:w-full',
+                                    'capitalize hover:text-green-600 dark:hover:text-green-600',
+                                    'focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1 focus:ring-offset-green-500',
+                                    'underline-offset-8',
+                                    'focus:ring-green-500 hover:ring-green-500',
+                                    'hover:underline',
+                                ]"
                                 >{{ app?.name }}</a
                             >. All rights reserved.
                         </p>
@@ -685,7 +695,15 @@ onUnmounted(() => {
                             <a
                                 v-for="(link, index) in otherLinks"
                                 :key="`footer-link-${index}`"
-                                class="text-gray-400 hover:text-green-500 dark:hover:text-green-400 transition-colors text-sm relative after:content-[''] after:absolute after:w-0 after:h-px after:bg-green-400 after:left-0 after:-bottom-1 after:transition-all hover:after:w-full"
+                                :class="[
+                                    'font-light text-gray-500 dark:text-gray-400 text-medium leading-relaxed',
+                                    'relative after:content-[\'\'] after:absolute after:w-0 after:h-px after:bg-green-400 after:left-0 after:-bottom-1 after:transition-all',
+                                    'hover:after:w-full',
+                                    'hover:text-green-600 dark:hover:text-green-600',
+                                    'focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1 focus:ring-offset-green-500',
+                                    'underline-offset-8',
+                                    'focus:ring-green-500 hover:ring-green-500',
+                                ]"
                                 :href="link.href"
                             >
                                 {{ link.name }}
