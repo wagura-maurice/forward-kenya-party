@@ -33,8 +33,10 @@ Route::get('/party-manifesto', [FrontendController::class, 'viewPartyManifesto']
 Route::get('/party-constitution', [FrontendController::class, 'viewPartyConstitution'])->name('frontend.party-constitution');
 Route::get('/party-nomination-rules', [FrontendController::class, 'viewPartyNominationRules'])->name('frontend.party-nomination-rules');
 
-Route::get('/auto/login', [FrontendController::class, 'autoLogin'])->name('auto.login');
-// Example URL: http://forward-kenya-party.devops/auto/login?telephone=254721632497
+Route::get('/auto-login', [FrontendController::class, 'autoLogin'])->name('auto-login');
+// Example URL: http://forward-kenya-party.devops/auto-login?telephone=254721632497
+
+Route::post('/process-donation', [FrontendController::class, 'processDonation'])->name('process-donation');
 
 // Platform Routes
 Route::middleware([
@@ -93,4 +95,3 @@ Route::post('/email/verification-notification', function (Request $request) {
 
     return back()->with('status', 'verification-link-failed');
 })->middleware(['auth:sanctum', config('jetstream.auth_session'), 'throttle:6,1'])->name('verification.send');
-
