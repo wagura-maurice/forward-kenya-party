@@ -88,17 +88,16 @@
         <section class="py-16 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900">
             <div class="container mx-auto px-4 py-8 relative z-10">
                 <div class="text-center mb-12">
-                    <h2
-                        class="text-3xl font-bold text-gray-800 dark:text-white mb-3"
-                    >
+                    <h3 class="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
                         Unity in Diversity for a Better Kenya
-                    </h2>
+                    </h3>
                     <div
                         class="w-20 h-1 bg-gradient-to-r from-green-500 to-blue-500 mx-auto mb-4"
                     ></div>
-                    <p
-                        class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto"
-                    >
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-quote-left text-3xl text-green-600 dark:text-green-400 mr-4"></i>
+                    </div>
+                    <p class="mb-8 lg:mb-16 font-light text-gray-500 dark:text-gray-400 sm:text-xl">
                         Welcome to the Forward Kenya Party—a movement built on the principles of Unity in Diversity.
                         We're committed to creating a prosperous, inclusive Kenya where every voice matters and every
                         citizen has the opportunity to thrive.
@@ -183,17 +182,16 @@
         >
             <div class="container mx-auto px-4 py-8 relative z-10">
                 <div class="text-center mb-12">
-                    <h2
-                        class="text-3xl font-bold text-gray-800 dark:text-white mb-3"
-                    >
+                    <h3 class="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
                         Building Kenya's Future Together
-                    </h2>
+                    </h3>
                     <div
                         class="w-20 h-1 bg-gradient-to-r from-green-500 to-blue-500 mx-auto mb-4"
                     ></div>
-                    <p
-                        class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto"
-                    >
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-quote-left text-3xl text-green-600 dark:text-green-400 mr-4"></i>
+                    </div>
+                    <p class="mb-8 lg:mb-16 font-light text-gray-500 dark:text-gray-400 sm:text-xl">
                         The Forward Kenya Party is driving transformative change across our nation. Our impact is seen in
                         the communities we uplift, the policies we champion, and the inclusive future we're building.
                         Together, we're creating a Kenya where every citizen can thrive in dignity and prosperity.
@@ -264,17 +262,16 @@
         >
             <div class="container mx-auto px-4 py-8 relative z-10">
                 <div class="text-center mb-12">
-                    <h2
-                        class="text-3xl font-bold text-gray-800 dark:text-white mb-3"
-                    >
+                    <h3 class="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
                         Our Pillars of Progress
-                    </h2>
+                    </h3>
                     <div
                         class="w-20 h-1 bg-gradient-to-r from-green-500 to-blue-500 mx-auto mb-4"
                     ></div>
-                    <p
-                        class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto"
-                    >
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-quote-left text-3xl text-green-600 dark:text-green-400 mr-4"></i>
+                    </div>
+                    <p class="mb-8 lg:mb-16 font-light text-gray-500 dark:text-gray-400 sm:text-xl">
                         The Forward Kenya Party is built on strong foundations that drive our mission forward.
                         Explore how we're working to create a better future for all Kenyans through these key focus areas.
                     </p>
@@ -443,21 +440,21 @@
         >
             <div class="container mx-auto px-4 py-8 relative z-10">
                 <div class="text-center mb-12">
-                    <h2
-                        class="text-3xl font-bold text-gray-800 dark:text-white mb-3"
-                    >
+                    <h3 class="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
                         Our Leadership Structure
-                    </h2>
+                    </h3>
                     <div
                         class="w-20 h-1 bg-gradient-to-r from-green-500 to-blue-500 mx-auto mb-4"
                     ></div>
-                    <p
-                        class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto"
-                    >
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-quote-left text-3xl text-green-600 dark:text-green-400 mr-4"></i>
+                    </div>
+                    <p class="mb-8 lg:mb-16 font-light text-gray-500 dark:text-gray-400 sm:text-xl">
                         Meet the dedicated teams driving Forward Kenya Party's vision across key sectors.
                         Our leadership structure ensures accountability, transparency, and effective governance at all levels.
                     </p>
                 </div>
+
                 <div class="relative">
                     <!-- Departments Grid -->
                     <div
@@ -603,17 +600,16 @@
         >
             <div class="container mx-auto px-4 py-8 relative z-10">
                 <div class="text-center mb-12">
-                    <h2
-                        class="text-3xl font-bold text-gray-800 dark:text-white mb-3"
-                    >
+                    <h3 class="text-3xl font-bold text-center text-gray-900 dark:text-white mb-12">
                         Our Strategic Alliances
-                    </h2>
+                    </h3>
                     <div
                         class="w-20 h-1 bg-gradient-to-r from-green-500 to-blue-500 mx-auto mb-4"
                     ></div>
-                    <p
-                        class="text-lg text-gray-600 dark:text-gray-300 max-w-3xl mx-auto"
-                    >
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-quote-left text-3xl text-green-600 dark:text-green-400 mr-4"></i>
+                    </div>
+                    <p class="mb-8 lg:mb-16 font-light text-gray-500 dark:text-gray-400 sm:text-xl">
                         We collaborate with organizations and institutions that share our vision for a united, prosperous Kenya.
                         Together, we're building bridges and creating opportunities for all Kenyans.
                     </p>
