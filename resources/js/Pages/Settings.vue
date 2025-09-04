@@ -14,7 +14,7 @@ const activeTab = ref('core');
 
 const tabs = [
     { id: 'core', name: 'Core Settings', icon: 'cog' },
-    { id: 'roles', name: 'Roles & Abilities', icon: 'user-shield' },
+    { id: 'authorization', name: 'Authorization', icon: 'user-shield' },
     { id: 'media', name: 'Media', icon: 'images' },
     { id: 'regions', name: 'Location', icon: 'map-marked-alt' },
     { id: 'demographics', name: 'Demographics', icon: 'users' },
@@ -24,6 +24,10 @@ const tabs = [
 ];
 
 const subTabs = {
+    authorization: [
+        { id: 'roles', name: 'Roles', icon: 'tag' },
+        { id: 'abilities', name: 'Abilities', icon: 'shield' },
+    ],
     media: [
         { id: 'media-types', name: 'Media Types', icon: 'list' },
         { id: 'media-categories', name: 'Media Categories', icon: 'folder' },
@@ -40,6 +44,7 @@ const subTabs = {
         { id: 'polling-streams', name: 'Polling Streams', icon: 'vote-yea' },
     ],
     demographics: [
+        { id: 'special-interest-groups', name: 'Special Interest Groups', icon: 'layer-group' },
         { id: 'genders', name: 'Genders', icon: 'venus-mars' },
         { id: 'ethnicities', name: 'Ethnic Groups', icon: 'users' },
         { id: 'religions', name: 'Religions', icon: 'place-of-worship' },

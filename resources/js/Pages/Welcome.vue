@@ -85,7 +85,7 @@
         </section>
 
         <!-- Single Point of Access Section -->
-        <section class="py-16 bg-white dark:bg-gray-900">
+        <section class="py-16 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900">
             <div class="container mx-auto px-4 py-8 relative z-10">
                 <div class="text-center mb-12">
                     <h2
@@ -260,7 +260,7 @@
         <section
             id="services"
             ref="servicesSection"
-            class="py-16 bg-white dark:bg-gray-900"
+            class="py-16 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900"
         >
             <div class="container mx-auto px-4 py-8 relative z-10">
                 <div class="text-center mb-12">
@@ -439,7 +439,7 @@
         <section
             id="departments"
             ref="departmentsSection"
-            class="py-16 bg-white dark:bg-gray-900"
+            class="py-16 bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900"
         >
             <div class="container mx-auto px-4 py-8 relative z-10">
                 <div class="text-center mb-12">
