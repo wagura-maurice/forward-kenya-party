@@ -141,7 +141,7 @@ const animateCounter = (target, start, end, duration) => {
 
 const membersCount = ref(0);
 const countiesCount = ref(0);
-const pillarsCount = ref(0);
+const specialIntrestGroupsCount = ref(0);
 const leadersCount = ref(0);
 
 onMounted(() => {
@@ -151,7 +151,7 @@ onMounted(() => {
             if (entry.isIntersecting) {
                 animateCounter(membersCount, 0, 1000000, 2000);
                 animateCounter(countiesCount, 0, 47, 1500);
-                animateCounter(pillarsCount, 0, 5, 1000);
+                animateCounter(specialIntrestGroupsCount, 0, 5, 1000);
                 animateCounter(leadersCount, 0, 100, 1800);
                 observer.unobserve(entry.target);
             }
@@ -207,12 +207,12 @@ defineProps({
                                     <div class="bg-purple-600 dark:bg-purple-500 p-4 rounded-full w-16 h-16 flex-shrink-0 flex items-center justify-center transition-all duration-300">
                                         <i class="fas fa-lightbulb text-2xl text-white"></i>
                                     </div>
-                                    <h3 class="text-2xl md:text-3xl font-light text-gray-900 dark:text-white">Our Ideology</h3>
+                                    <h3 class="text-2xl md:text-3xl font-semibold font-light text-gray-800 dark:text-gray-200">Our Ideology</h3>
                                 </div>
-                                <p class="text-lg leading-relaxed text-white pl-20 mb-8">
+                                <p class="mb-8 lg:mb-16 font-light text-white sm:text-xl leading-relaxed pl-20">
                                     Forward Kenya Party is grounded in civic egalitarianism, emphasizing equal rights, opportunities, and civic participation for all citizens regardless of background. We promote Pan-Africanism for continental solidarity, regional integration in East Africa for economic and political unity, and global engagement to advance Kenya's interests. Our ideology bridges center-left values of democratic participation, social equality, civic empowerment, and decentralization, ensuring inclusivity, transparency, and sustainable progress.
                                 </p>
-                                <ul class="list-disc pl-20 space-y-3 mb-8 text-white">
+                                <ul class="list-disc pl-24 space-y-3 mb-8 text-white">
                                     <li>Democratic Participation: Equal access to decision-making for all citizens</li>
                                     <li>Social Equality: Equitable access to education, healthcare, and opportunities</li>
                                     <li>Civic Education & Empowerment: Informing citizens for active engagement</li>
@@ -253,12 +253,12 @@ defineProps({
                                 <div class="bg-blue-600 dark:bg-blue-500 p-4 rounded-full w-16 h-16 flex-shrink-0 flex items-center justify-center transition-all duration-300">
                                     <i class="fas fa-eye text-2xl text-white"></i>
                                 </div>
-                                <h3 class="text-2xl md:text-3xl font-light text-gray-900 dark:text-white">Our Vision</h3>
+                                <h3 class="text-2xl md:text-3xl font-semibold font-light text-gray-800 dark:text-gray-200">Our Vision</h3>
                             </div>
-                            <p class="text-lg leading-relaxed text-gray-700 dark:text-gray-300 pl-20 mb-6">
+                            <p class="mb-8 lg:mb-16 font-light text-gray-500 dark:text-gray-400 sm:text-xl leading-relaxed pl-20">
                                 A Kenya where prosperity is shared, opportunities are accessible to all, and sustainable development is achieved through innovative and inclusive governance.
                             </p>
-                            <ul class="list-disc pl-24 space-y-3 text-gray-700 dark:text-gray-300">
+                            <ul class="list-disc pl-24 space-y-3 mb-8 text-gray-500 dark:text-gray-400">
                                 <li>Shared prosperity through equitable economic growth</li>
                                 <li>Universal access to quality education and healthcare</li>
                                 <li>Sustainable development that preserves our environment</li>
@@ -272,12 +272,12 @@ defineProps({
                                 <div class="bg-green-600 dark:bg-green-500 p-4 rounded-full w-16 h-16 flex-shrink-0 flex items-center justify-center transition-all duration-300">
                                     <i class="fas fa-bullseye text-2xl text-white"></i>
                                 </div>
-                                <h3 class="text-2xl md:text-3xl font-light text-gray-900 dark:text-white">Our Mission</h3>
+                                <h3 class="text-2xl md:text-3xl font-semibold font-light text-gray-800 dark:text-gray-200">Our Mission</h3>
                             </div>
-                            <p class="text-lg leading-relaxed text-gray-700 dark:text-gray-300 pl-20 mb-6">
+                            <p class="mb-8 lg:mb-16 font-light text-gray-500 dark:text-gray-400 sm:text-xl leading-relaxed pl-20">
                                 To implement practical solutions that address Kenya's most pressing challenges through evidence-based policies, ethical leadership, and active citizen participation at all levels of governance.
                             </p>
-                            <ul class="list-disc pl-24 space-y-3 text-gray-700 dark:text-gray-300">
+                            <ul class="list-disc pl-24 space-y-3 mb-8 text-gray-500 dark:text-gray-400">
                                 <li>Develop and implement evidence-based policy solutions</li>
                                 <li>Foster transparent and accountable leadership</li>
                                 <li>Empower citizens through active participation</li>
@@ -445,8 +445,8 @@ defineProps({
                             <p class="text-gray-600 dark:text-gray-300 font-light font-medium">Counties Represented</p>
                         </div>
                         <div class="bg-yellow-100 dark:bg-yellow-900/20 p-6 rounded-lg">
-                            <h4 class="font-light text-4xl text-yellow-600 dark:text-yellow-400 mb-2 font-semibold">{{ pillarsCount.toLocaleString('en-US') }}</h4>
-                            <p class="text-gray-600 dark:text-gray-300 font-light font-medium">Core Pillars</p>
+                            <h4 class="font-light text-4xl text-yellow-600 dark:text-yellow-400 mb-2 font-semibold">{{ specialIntrestGroupsCount.toLocaleString('en-US') }}</h4>
+                            <p class="text-gray-600 dark:text-gray-300 font-light font-medium">Special Interest Groups</p>
                         </div>
                         <div class="bg-purple-100 dark:bg-purple-900/20 p-6 rounded-lg">
                             <h4 class="font-light text-4xl text-purple-600 dark:text-purple-400 mb-2 font-semibold">{{ leadersCount.toLocaleString('en-US') }}+</h4>
@@ -583,29 +583,30 @@ defineProps({
                 <h3 class="text-3xl font-bold text-center mb-12">Join Our Movement</h3>
                 <p class="text-xl mb-8 max-w-3xl mx-auto font-light"> Join Forward Kenya Party today to shape a united, prosperous, and inclusive Kenya. Engage with our platform, contribute to our vision, and be part of the change. </p>
                 <!-- Testimonials Carousel -->
-                <div class="relative w-full max-w-5xl mx-auto mb-10 px-4 sm:px-8 md:px-12">
-                    <div class="relative overflow-hidden">
+                <div class="relative w-full max-w-4xl mx-auto mb-10 px-4 sm:px-6 md:px-8">
+                    <div class="relative flex items-center">
                         <!-- Left Arrow -->
                         <button 
                             @click="prevTestimonial"
-                            class="absolute left-0 sm:-left-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg z-20 transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600"
+                            class="absolute left-0 sm:-left-4 top-1/2 -translate-y-1/2 bg-white/30 hover:bg-white/40 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg z-20 transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600"
                             :disabled="currentTestimonial === 0" 
                             :class="{'opacity-50 cursor-not-allowed': currentTestimonial === 0}"
                             aria-label="Previous testimonial"
                         >
                             <i class="fas fa-chevron-left"></i>
                         </button>
-                        <!-- Testimonial Items -->
-                        <div 
-                            v-for="(testimonial, index) in testimonials" 
-                            :key="index"
-                            class="absolute inset-0 transition-opacity duration-500"
-                            :class="{
-                                'opacity-100 z-10': currentTestimonial === index,
-                                'opacity-0 z-0': currentTestimonial !== index
-                            }"
-                        >
-                            <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6 h-full transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
+                        <!-- Testimonial Items Container -->
+                        <div class="w-full h-full px-8">
+                            <div 
+                                v-for="(testimonial, index) in testimonials" 
+                                :key="index"
+                                class="w-full transition-all duration-300 ease-in-out z-10"
+                                :class="{
+                                    'opacity-100 block': currentTestimonial === index,
+                                    'opacity-0 hidden': currentTestimonial !== index
+                                }"
+                            >
+                                <div class="bg-white/10 backdrop-blur-sm rounded-xl p-6 w-full transform transition-all duration-300 hover:shadow-2xl relative z-10">
                                 <div class="flex flex-col md:flex-row items-center text-center md:text-left gap-6 h-full">
                                     <!-- Member Photo -->
                                     <div class="flex-shrink-0 w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden border-4 border-white/20 shadow-lg">
@@ -646,7 +647,7 @@ defineProps({
                         <!-- Right Arrow -->
                         <button 
                             @click="nextTestimonial"
-                            class="absolute right-0 sm:-right-4 top-1/2 -translate-y-1/2 bg-white/20 hover:bg-white/30 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg z-20 transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600"
+                            class="absolute right-0 sm:-right-4 top-1/2 -translate-y-1/2 bg-white/30 hover:bg-white/40 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg z-20 transition-all duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-600"
                             :disabled="currentTestimonial === testimonials.length - 1"
                             :class="{'opacity-50 cursor-not-allowed': currentTestimonial === testimonials.length - 1}"
                             aria-label="Next testimonial"
@@ -654,9 +655,10 @@ defineProps({
                             <i class="fas fa-chevron-right"></i>
                         </button>
                     </div>
+                    </div>
 
                     <!-- Pagination Dots -->
-                    <div class="flex justify-center mt-6 space-x-2">
+                    <div class="flex justify-center mt-8 space-x-2 relative z-10">
                         <button 
                             v-for="(testimonial, index) in testimonials" 
                             :key="'dot-'+index"
@@ -668,7 +670,7 @@ defineProps({
                     </div>
 
                     <!-- Counter -->
-                    <div class="text-center mt-4 text-sm text-blue-100">
+                    <div class="text-center mt-4 text-sm text-blue-100 relative z-0">
                         Showing {{ currentTestimonial + 1 }} of {{ testimonials.length }} testimonials
                     </div>
                 </div>
@@ -713,8 +715,7 @@ defineProps({
                     </div>
                 </div>
             </div>
-            
-            
+
             <!-- Donation Modal -->
             <DonationModal 
                 :show="showDonationModal" 
