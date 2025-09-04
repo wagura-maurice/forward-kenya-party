@@ -13,16 +13,14 @@ class Transaction extends Model
     use HasFactory, SoftDeletes;
 
     // Transaction channel constants
-    const C2B = 0;
-    const LNMO = 1;
-    const B2C = 2;
-    const B2B = 3;
+    const C2B = 0; // client to business
+    const B2C = 1; // business to client
+    const B2B = 2; // business to business
 
     public static function getChannelOptions()
     {
         return [
             self::C2B => 'C2B',
-            self::LNMO => 'LNMO',
             self::B2C => 'B2C',
             self::B2B => 'B2B',
         ];
@@ -44,15 +42,21 @@ class Transaction extends Model
 
     // Transaction aggregator constants
     const MPESA_KE = 0;
-    const EQUITY_KE = 1;
-    const KCB_KE = 2;
+    const AIRTEL_MONEY_KE = 1;
+    const EQUITY_BANK_KE = 2;
+    const KCB_BANK_KE = 3;
+    const CASH = 4;
+    const CRYPTO = 5;
 
     public static function getAggregatorOptions()
     {
         return [
             self::MPESA_KE => 'MPESA KE',
-            self::EQUITY_KE => 'EQUITY KE',
-            self::KCB_KE => 'KCB KE',
+            self::AIRTEL_MONEY_KE => 'AIRTEL MONEY KE',
+            self::EQUITY_BANK_KE => 'EQUITY BANK KE',
+            self::KCB_BANK_KE => 'KCB BANK KE',
+            self::CASH => 'CASH',
+            self::CRYPTO => 'CRYPTO',
         ];
     }
 
@@ -70,8 +74,8 @@ class Transaction extends Model
         return false;
     }
 
-    // Transaction type constants
-    const LIPA_NA_MPESA_ONLINE = 'LNMO';
+    // Mpesa Daraja API Transaction type constants
+    const LIPA_NA_MPESA_ONLINE = 'LipaNaMpesaOnline';
     const CUSTOMER_PAY_BILL_ONLINE = 'CustomerPayBillOnline';
     const CUSTOMER_BUY_GOODS_ONLINE = 'CustomerBuyGoodsOnline';
     const PROMOTION_PAYMENT = 'PromotionPayment';
