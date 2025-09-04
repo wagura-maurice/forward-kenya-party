@@ -1,13 +1,12 @@
-<!-- resources/js/Components/DonationModal.vue -->
 <template>
     <div v-if="show" class="fixed inset-0 overflow-y-auto z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
         <!-- Background overlay -->
         <div class="flex items-center justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
-            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true"></div>
-
-            <!-- Modal panel -->
-            <div ref="modalRef" class="inline-block align-bottom bg-white dark:bg-gray-800 rounded-lg px-6 pt-5 pb-6 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full sm:p-8 relative">
-                <div class="w-full">
+            <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" @click="close"></div>
+            
+            <!-- Modal panel - Using larger max-width (3xl) for donation form -->
+            <div ref="modalRef" class="mb-6 bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-xl transform transition-all sm:w-full sm:mx-auto sm:max-w-3xl">
+                <div class="p-8 w-full">
                     <!-- Modal header -->
                     <div class="flex items-center justify-between mb-6">
                         <h3 class="text-2xl font-bold text-gray-900 dark:text-white">
@@ -33,7 +32,7 @@
                         
                         <!-- Donation Type -->
                         <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
                                 Donation Type <span class="text-red-500">*</span>
                             </label>
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-2">
@@ -57,28 +56,6 @@
 
                         <!-- Monetary Donation Fields -->
                         <div v-if="form.donation_type === 'monetary'" class="space-y-4">
-                            <!-- Donation Amount -->
-                            <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    Donation Amount (KES)
-                                    <span class="text-red-500">*</span>
-                                </label>
-                                <div class="mt-1 relative rounded-md shadow-sm">
-                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                        <span class="text-gray-500 sm:text-sm">KES</span>
-                                    </div>
-                                    <input 
-                                        type="number" 
-                                        v-model="form.amount"
-                                        class="focus:ring-green-500 focus:border-green-500 block w-full pl-14 pr-12 sm:text-sm border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                        placeholder="0.00"
-                                        min="1"
-                                        step="1"
-                                        required
-                                    >
-                                </div>
-                            </div>
-                            
                             <!-- Recurring Donation Option -->
                             <div v-if="form.donation_type === 'monetary'" class="flex items-center">
                                 <input 
@@ -94,56 +71,101 @@
                             
                             <!-- Payment Method -->
                             <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
                                     Select Your Payment Method <span class="text-red-500">*</span>
                                 </label>
-                                <div class="grid grid-cols-2 gap-3">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <button 
                                         v-for="method in paymentMethods" 
                                         :key="method.value"
                                         type="button"
                                         @click="form.payment_method = method.value"
                                         :class="[
-                                            'p-3 border rounded-lg flex items-center justify-center transition-colors',
+                                            'p-4 border rounded-lg flex flex-col items-start transition-colors text-left',
                                             form.payment_method === method.value 
-                                                ? 'border-green-500 bg-green-50 dark:bg-green-900/20' 
-                                                : 'border-gray-300 dark:border-gray-600 hover:border-green-500'
+                                                ? 'border-green-500 bg-green-50 dark:bg-green-900/20 ring-1 ring-green-500' 
+                                                : 'border-gray-300 dark:border-gray-600 hover:border-green-500 hover:bg-gray-50 dark:hover:bg-gray-700'
                                         ]"
                                     >
-                                        <i :class="[method.icon, 'mr-2', form.payment_method === method.value ? 'text-green-600' : 'text-gray-500']"></i>
-                                        <span class="font-medium">{{ method.label }}</span>
+                                        <div class="flex items-center w-full mb-1">
+                                            <i :class="[method.icon, 'mr-2', form.payment_method === method.value ? 'text-green-600' : 'text-gray-500']"></i>
+                                            <span class="font-medium text-sm">{{ method.label }}</span>
+                                        </div>
+                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">{{ method.description }}</p>
                                     </button>
                                 </div>
 
-                                <!-- M-Pesa Payment Details -->
-                                <div v-if="form.payment_method === 'mpesa'" class="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                                    <div class="space-y-3">
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                                M-Pesa Phone Number <span class="text-red-500">*</span>
-                                            </label>
-                                            <div class="relative rounded-md shadow-sm">
-                                                <div class="absolute inset-y-0 left-0 flex items-center">
-                                                    <select 
-                                                        v-model="form.mpesa_prefix"
-                                                        class="h-full py-0 pl-3 pr-7 border-transparent bg-transparent text-gray-500 sm:text-sm rounded-l-md focus:outline-none dark:bg-gray-700 dark:text-gray-300"
-                                                    >
-                                                        <option value="+254">+254</option>
-                                                        <option value="+255">+255</option>
-                                                        <option value="+256">+256</option>
-                                                    </select>
-                                                </div>
-                                                <input 
-                                                    type="tel" 
-                                                    v-model="form.mpesa_phone"
-                                                    placeholder="7XX XXX XXX"
-                                                    class="focus:ring-green-500 focus:border-green-500 block w-full pl-20 pr-12 sm:text-sm border-gray-300 rounded-md dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                                <!-- Mobile Money Payment Details -->
+                                <div v-if="form.payment_method === 'mobile_money'" class="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                    <div class="space-y-4">
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <!-- Mobile Money Provider Selection -->
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 text-left">
+                                                    Mobile Money Provider <span class="text-red-500">*</span>
+                                                </label>
+                                                <select 
+                                                    v-model="form.mobile_money_provider"
+                                                    class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md dark:bg-gray-600 dark:border-gray-500 dark:text-white"
                                                     required
                                                 >
+                                                    <option value="mpesa">M-Pesa (Safaricom)</option>
+                                                    <option value="airtel" disabled>Airtel Money</option>
+                                                    <option value="tkash" disabled>T-Kash (Telkom)</option>
+                                                    <option value="equity" disabled>Equity EazzyPay</option>
+                                                </select>
                                             </div>
-                                            <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                                You'll receive an M-Pesa payment request on this number
-                                            </p>
+
+                                            <!-- Telephone Number Input -->
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 text-left">
+                                                    Telephone Number <span class="text-red-500">*</span>
+                                                </label>
+                                                <div class="relative rounded-md shadow-sm flex">
+                                                    <div class="relative flex-shrink-0">
+                                                        <select 
+                                                            v-model="form.telephone_prefix"
+                                                            class="h-full py-2 pl-3 pr-8 border-r-0 border-gray-300 bg-transparent text-gray-500 sm:text-sm rounded-l-md focus:outline-none focus:ring-green-500 focus:border-green-500 dark:bg-gray-700 dark:border-gray-500 dark:text-gray-300"
+                                                        >
+                                                            <option value="+254">+254 (KE)</option>
+                                                            <option value="+255" disabled>+255 (TZ)</option>
+                                                            <option value="+256" disabled>+256 (UG)</option>
+                                                        </select>
+                                                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-500">
+                                                            <i class="fas fa-chevron-down text-xs"></i>
+                                                        </div>
+                                                    </div>
+                                                    <input 
+                                                        type="tel" 
+                                                        v-model="form.telephone_number"
+                                                        :placeholder="form.mobile_money_provider === 'mpesa' ? '7XX XXX XXX' : 'Your mobile telephone number'"
+                                                        class="focus:ring-green-500 focus:border-green-500 block w-full pl-3 pr-3 sm:text-sm border-l-0 border-gray-300 rounded-r-md dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                                                        required
+                                                    >
+                                                </div>
+                                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                                    <template v-if="form.mobile_money_provider === 'mpesa'">
+                                                        You'll receive an M-Pesa payment request on this number
+                                                    </template>
+                                                    <template v-else>
+                                                        We'll send payment instructions to this number
+                                                    </template>
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Provider-specific instructions -->
+                                        <div v-if="form.mobile_money_provider === 'mpesa'" class="p-3 bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200 text-sm rounded-md">
+                                            <p>For Mpesa, please ensure your number is registered for Safaricom Mpesa services.</p>
+                                        </div>
+                                        <div v-if="form.mobile_money_provider === 'airtel'" class="p-3 bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200 text-sm rounded-md">
+                                            <p>For Airtel Money, please ensure your number is registered for Airtel Money services.</p>
+                                        </div>
+                                        <div v-else-if="form.mobile_money_provider === 'tkash'" class="p-3 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 text-sm rounded-md">
+                                            <p>For T-Kash, please ensure your Telkom line is registered for Telekom T-Kash services.</p>
+                                        </div>
+                                        <div v-else-if="form.mobile_money_provider === 'equity'" class="p-3 bg-purple-50 dark:bg-purple-900/20 text-purple-800 dark:text-purple-200 text-sm rounded-md">
+                                            <p>For EazzyPay, please ensure your number is registered for Equity EazzyPay services.</p>
                                         </div>
                                     </div>
                                 </div>
@@ -151,8 +173,9 @@
                                 <!-- Card Payment Details -->
                                 <div v-else-if="form.payment_method === 'card'" class="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                                     <div class="space-y-4">
+                                        <div class="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 text-left">
                                                 Card Number <span class="text-red-500">*</span>
                                             </label>
                                             <input 
@@ -163,9 +186,22 @@
                                                 required
                                             >
                                         </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 text-left">
+                                                Name on Card <span class="text-red-500">*</span>
+                                            </label>
+                                            <input 
+                                                type="text" 
+                                                v-model="form.card_name"
+                                                placeholder="Full name as on card"
+                                                class="focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-gray-300 rounded-md dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                                                required
+                                            >
+                                        </div>
+                                        </div>
                                         <div class="grid grid-cols-2 gap-4">
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 text-left">
                                                     Expiry Date <span class="text-red-500">*</span>
                                                 </label>
                                                 <input 
@@ -177,7 +213,7 @@
                                                 >
                                             </div>
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 text-left">
                                                     CVV <span class="text-red-500">*</span>
                                                 </label>
                                                 <input 
@@ -189,124 +225,177 @@
                                                 >
                                             </div>
                                         </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                                Name on Card <span class="text-red-500">*</span>
-                                            </label>
-                                            <input 
-                                                type="text" 
-                                                v-model="form.card_name"
-                                                placeholder="Full name as on card"
-                                                class="focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-gray-300 rounded-md dark:bg-gray-600 dark:border-gray-500 dark:text-white"
-                                                required
-                                            >
-                                        </div>
+                                        
                                     </div>
                                 </div>
 
                                 <!-- Bank Transfer Details -->
                                 <div v-else-if="form.payment_method === 'bank'" class="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                                    <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Bank Transfer Details:</h4>
-                                    <div class="space-y-3">
+                                    <div class="space-y-4">
+                                        <div class="grid grid-cols-2 gap-4">
                                         <div>
-                                            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Bank Name</p>
-                                            <p class="text-sm text-gray-600 dark:text-gray-300">Equity Bank Kenya Limited</p>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 text-left">
+                                                Select Bank <span class="text-red-500">*</span>
+                                            </label>
+                                            <select 
+                                                v-model="form.selected_bank"
+                                                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                            >
+                                                <option v-for="bank in banks" :key="bank.id" :value="bank.id">
+                                                    {{ bank.name }}
+                                                </option>
+                                            </select>
                                         </div>
+
                                         <div>
-                                            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Account Name</p>
-                                            <p class="text-sm text-gray-600 dark:text-gray-300">Forward Kenya Party</p>
-                                        </div>
-                                        <div>
-                                            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Account Number</p>
-                                            <p class="text-sm text-gray-600 dark:text-gray-300">1234567890</p>
-                                        </div>
-                                        <div>
-                                            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">Branch</p>
-                                            <p class="text-sm text-gray-600 dark:text-gray-300">Nairobi CBD</p>
-                                        </div>
-                                        <div>
-                                            <p class="text-sm font-medium text-gray-700 dark:text-gray-300">SWIFT Code</p>
-                                            <p class="text-sm text-gray-600 dark:text-gray-300">EQBLKENAXXX</p>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    Transaction Reference
+                                                </label>
+                                                <div class="flex rounded-md shadow-sm">
+                                                    <input 
+                                                        type="text" 
+                                                        v-model="form.transaction_reference"
+                                                        class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-l-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                                                        placeholder="Enter reference or click generate"
+                                                    >
+                                                    <button 
+                                                        type="button"
+                                                        @click="generateReference()"
+                                                        class="inline-flex items-center px-3 py-2 border border-l-0 border-gray-300 dark:border-gray-600 rounded-r-md bg-gray-50 dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                                                    >
+                                                        Generate
+                                                    </button>
+                                                </div>
+                                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                                    Please use this reference when making the transfer
+                                                </p>
+                                            </div>
+
+                                            </div>
+                                        
+                                        <div class="space-y-3 bg-white dark:bg-gray-800 p-4 rounded-md border border-gray-200 dark:border-gray-700">
+                                            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">Bank Transfer Details:</h4>
+                                            <div class="grid grid-cols-2 gap-4">
+                                                <div>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400">Bank Name</p>
+                                                    <p class="text-sm font-medium">{{ selectedBank.name }}</p>
+                                                </div>
+                                                <div>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400">Account Name</p>
+                                                    <p class="text-sm font-medium">{{ selectedBank.accountName }}</p>
+                                                </div>
+                                                <div>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400">Account Number</p>
+                                                    <p class="text-sm font-mono">{{ selectedBank.accountNumber }}</p>
+                                                </div>
+                                                <div>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400">Reference Code</p>
+                                                    <p class="text-sm font-mono">
+                                                        {{ selectedBank.referenceCode }}
+                                                        <button 
+                                                            type="button" 
+                                                            @click="copyToClipboard(selectedBank.referenceCode)"
+                                                            class="ml-2 p-1 text-gray-400 hover:text-green-600"
+                                                            title="Copy to clipboard"
+                                                        >
+                                                            <i class="far fa-copy"></i>
+                                                        </button>
+                                                    </p>
+                                                </div>
+                                                <div>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400">Branch</p>
+                                                    <p class="text-sm">{{ selectedBank.branch }}</p>
+                                                </div>
+                                                <div>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400">SWIFT Code</p>
+                                                    <p class="text-sm font-mono">
+                                                        {{ selectedBank.swiftCode }}
+                                                        <button 
+                                                            type="button" 
+                                                            @click="copyToClipboard(selectedBank.swiftCode)"
+                                                            class="ml-2 p-1 text-gray-400 hover:text-green-600"
+                                                            title="Copy to clipboard"
+                                                        >
+                                                            <i class="far fa-copy"></i>
+                                                        </button>
+                                                    </p>
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
-                                    <p class="text-xs text-gray-500 dark:text-gray-400 mt-3">
-                                        Please use your name as the payment reference. Email the transaction details to 
-                                        <a href="mailto:donations@forwardkenyaparty.com" class="text-green-600 hover:underline">donations@forwardkenyaparty.com</a> 
-                                        after transfer.
-                                    </p>
                                 </div>
 
                                 <!-- Cryptocurrency Wallet Addresses -->
                                 <div v-else-if="form.payment_method === 'crypto'" class="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                                    <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Send to Wallet Address:</h4>
                                     <div class="space-y-4">
                                         <div>
-                                            <div class="flex items-center justify-between text-sm mb-1">
-                                                <span class="font-medium text-gray-700 dark:text-gray-300">Bitcoin (BTC)</span>
-                                                <button 
-                                                    @click="copyToClipboard('bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh')"
-                                                    class="text-green-600 hover:text-green-700 text-xs flex items-center"
-                                                >
-                                                    <i class="far fa-copy mr-1"></i> Copy
-                                                </button>
-                                            </div>
-                                            <div class="bg-white dark:bg-gray-800 p-2 rounded text-xs font-mono text-gray-600 dark:text-gray-300 break-all flex items-center justify-between">
-                                                <span>bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh</span>
-                                                <i class="fab fa-bitcoin text-orange-500 ml-2"></i>
-                                            </div>
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                Select Cryptocurrency <span class="text-red-500">*</span>
+                                            </label>
+                                            <select 
+                                                v-model="form.selected_crypto"
+                                                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                            >
+                                                <option v-for="crypto in cryptoWallets" :key="crypto.id" :value="crypto.id">
+                                                    {{ crypto.name }}
+                                                </option>
+                                            </select>
                                         </div>
                                         
-                                        <div>
-                                            <div class="flex items-center justify-between text-sm mb-1">
-                                                <span class="font-medium text-gray-700 dark:text-gray-300">Ethereum (ETH)</span>
-                                                <button 
-                                                    @click="copyToClipboard('0x71C7656EC7ab88b098defB751B7401B5f6d8976F')"
-                                                    class="text-green-600 hover:text-green-700 text-xs flex items-center"
-                                                >
-                                                    <i class="far fa-copy mr-1"></i> Copy
-                                                </button>
+                                        <div class="bg-white dark:bg-gray-800 p-4 rounded-md border border-gray-200 dark:border-gray-700">
+                                            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Send to {{ selectedCrypto.name }} Address:</h4>
+                                            <div class="flex flex-col items-center space-y-4">
+                                                <div class="w-32 h-32 bg-white p-2 rounded border">
+                                                    <img :src="selectedCrypto.qrCode" :alt="selectedCrypto.name + ' QR Code'" class="w-full h-full">
+                                                </div>
+                                                <div class="w-full">
+                                                    <div class="flex items-center bg-gray-100 dark:bg-gray-700 p-2 rounded">
+                                                        <span class="font-mono text-sm break-all">{{ selectedCrypto.address }}</span>
+                                                        <button 
+                                                            type="button" 
+                                                            @click="copyToClipboard(selectedCrypto.address)"
+                                                            class="ml-2 p-1 text-gray-400 hover:text-green-600"
+                                                            title="Copy to clipboard"
+                                                        >
+                                                            <i class="far fa-copy"></i>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                                <div class="w-full">
+                                                    <div class="flex items-center justify-between text-sm">
+                                                        <span class="text-gray-600 dark:text-gray-300">Network:</span>
+                                                        <span class="font-medium">{{ selectedCrypto.network || 'ERC-20' }}</span>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div class="bg-white dark:bg-gray-800 p-2 rounded text-xs font-mono text-gray-600 dark:text-gray-300 break-all flex items-center justify-between">
-                                                <span>0x71C7656EC7ab88b098defB751B7401B5f6d8976F</span>
-                                                <i class="fab fa-ethereum text-purple-500 ml-2"></i>
+                                            
+                                            <div class="mt-4">
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    Transaction Reference (Optional)
+                                                </label>
+                                                <div class="flex rounded-md shadow-sm">
+                                                    <input 
+                                                        type="text" 
+                                                        v-model="form.transaction_reference"
+                                                        class="flex-1 min-w-0 block w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                                                        placeholder="Enter reference for tracking"
+                                                    >
+                                                </div>
+                                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                                    Include this reference when sending the transaction
+                                                </p>
                                             </div>
                                         </div>
-                                        
-                                        <div>
-                                            <div class="flex items-center justify-between text-sm mb-1">
-                                                <span class="font-medium text-gray-700 dark:text-gray-300">USDT (ERC20)</span>
-                                                <button 
-                                                    @click="copyToClipboard('0x71C7656EC7ab88b098defB751B7401B5f6d8976F')"
-                                                    class="text-green-600 hover:text-green-700 text-xs flex items-center"
-                                                >
-                                                    <i class="far fa-copy mr-1"></i> Copy
-                                                </button>
-                                            </div>
-                                            <div class="bg-white dark:bg-gray-800 p-2 rounded text-xs font-mono text-gray-600 dark:text-gray-300 break-all flex items-center justify-between">
-                                                <span>0x71C7656EC7ab88b098defB751B7401B5f6d8976F</span>
-                                                <i class="fas fa-coins text-blue-500 ml-2"></i>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div class="mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-md">
-                                        <p class="text-xs text-yellow-700 dark:text-yellow-300">
-                                            <i class="fas fa-info-circle mr-1"></i>
-                                            After sending your donation, please email the transaction details to 
-                                            <a href="mailto:donations@forwardkenyaparty.com" class="text-green-600 hover:underline font-medium">
-                                                donations@forwardkenyaparty.com
-                                            </a> 
-                                            for confirmation.
-                                        </p>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        
+                                                
                         <!-- In-Kind Donation Fields -->
                         <div v-else-if="form.donation_type === 'in_kind'" class="space-y-4">
+                            <div class="grid grid-cols-2 gap-4">
                             <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
                                     Type of Donation <span class="text-red-500">*</span>
                                 </label>
                                 <select 
@@ -320,22 +409,9 @@
                                     </option>
                                 </select>
                             </div>
-                            
+
                             <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    Description <span class="text-red-500">*</span>
-                                </label>
-                                <textarea 
-                                    v-model="form.description"
-                                    rows="3"
-                                    class="shadow-sm focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                    placeholder="Please describe the item or service you're donating"
-                                    required
-                                ></textarea>
-                            </div>
-                            
-                            <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
                                     Estimated Value (KES)
                                 </label>
                                 <input 
@@ -347,12 +423,30 @@
                                     step="1"
                                 >
                             </div>
+
+                        </div>
+                            
+                            <div class="space-y-2">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
+                                    Description <span class="text-red-500">*</span>
+                                </label>
+                                <textarea 
+                                    v-model="form.description"
+                                    rows="3"
+                                    class="shadow-sm focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                    placeholder="Please describe the item or service you're donating"
+                                    required
+                                ></textarea>
+                            </div>
+                            
+    
                         </div>
                         
                         <!-- Volunteer Donation Fields -->
                         <div v-else-if="form.donation_type === 'volunteer'" class="space-y-4">
-                            <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div class="space-y-2">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
                                     Skills/Expertise <span class="text-red-500">*</span>
                                 </label>
                                 <input 
@@ -362,28 +456,29 @@
                                     placeholder="e.g., Graphic Design, Event Planning, Legal Advice"
                                     required
                                 >
+                                </div>
+                                
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
+                                        Availability <span class="text-red-500">*</span>
+                                    </label>
+                                    <select 
+                                        v-model="form.availability"
+                                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                        required
+                                    >
+                                        <option value="">Select your availability</option>
+                                        <option value="weekdays">Weekdays</option>
+                                        <option value="weekends">Weekends</option>
+                                        <option value="evenings">Evenings</option>
+                                        <option value="flexible">Flexible</option>
+                                        <option value="one_time">One-time event</option>
+                                    </select>
+                                </div>
                             </div>
                             
                             <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    Availability <span class="text-red-500">*</span>
-                                </label>
-                                <select 
-                                    v-model="form.availability"
-                                    class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                    required
-                                >
-                                    <option value="">Select your availability</option>
-                                    <option value="weekdays">Weekdays</option>
-                                    <option value="weekends">Weekends</option>
-                                    <option value="evenings">Evenings</option>
-                                    <option value="flexible">Flexible</option>
-                                    <option value="one_time">One-time event</option>
-                                </select>
-                            </div>
-                            
-                            <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
                                     Additional Notes
                                 </label>
                                 <textarea 
@@ -395,41 +490,70 @@
                             </div>
                         </div>
 
-                        <!-- Donor Information -->
-                        <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                Your Full Name <span class="text-red-500">*</span>
-                            </label>
-                            <input 
-                                type="text" 
-                                v-model="form.donor_name"
-                                class="focus:ring-green-500 focus:border-green-500 block w-full px-3 py-2 sm:text-sm border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                placeholder="John Doe"
-                            >
+                        <div class="grid grid-cols-2 gap-4">
+                            <!-- Monetary Donation Fields -->
+                            <div v-if="form.donation_type === 'monetary'" class="space-y-4">
+                                <!-- Donation Amount -->
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
+                                        Donation Amount (KES)
+                                        <span class="text-red-500">*</span>
+                                    </label>
+                                    <div class="mt-1 relative rounded-md shadow-sm">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <span class="text-gray-500 sm:text-sm">KES</span>
+                                        </div>
+                                        <input 
+                                            type="number" 
+                                            v-model="form.amount"
+                                            class="focus:ring-green-500 focus:border-green-500 block w-full pl-14 pr-12 sm:text-sm border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                            placeholder="0.00"
+                                            min="1"
+                                            step="1"
+                                            required
+                                        >
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Donor Information -->
+                            <div class="space-y-2">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
+                                    Your Full Name <span class="text-red-500">*</span>
+                                </label>
+                                <input 
+                                    type="text" 
+                                    v-model="form.donor_name"
+                                    class="focus:ring-green-500 focus:border-green-500 block w-full px-3 py-2 sm:text-sm border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                    placeholder="John Doe"
+                                >
+                            </div>
                         </div>
 
-                        <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                Your Email Address <span class="text-red-500">*</span>
-                            </label>
-                            <input 
-                                type="email" 
-                                v-model="form.email"
-                                class="focus:ring-green-500 focus:border-green-500 block w-full px-3 py-2 sm:text-sm border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                placeholder="you@example.com"
-                            >
-                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="space-y-2">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
+                                    Your Email Address <span class="text-red-500">*</span>
+                                </label>
+                                <input 
+                                    type="email" 
+                                    v-model="form.email"
+                                    class="focus:ring-green-500 focus:border-green-500 block w-full px-3 py-2 sm:text-sm border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                    placeholder="you@example.com"
+                                >
+                            </div>
 
-                        <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                Your Telehone Number <span class="text-red-500">*</span>
-                            </label>
-                            <input 
-                                type="tel" 
-                                v-model="form.phone"
-                                class="focus:ring-green-500 focus:border-green-500 block w-full px-3 py-2 sm:text-sm border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                placeholder="+254 700 000000"
-                            >
+                            <div class="space-y-2">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
+                                    Your Telehone Number <span class="text-red-500">*</span>
+                                </label>
+                                <input 
+                                    type="tel" 
+                                    v-model="form.phone"
+                                    class="focus:ring-green-500 focus:border-green-500 block w-full px-3 py-2 sm:text-sm border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                    placeholder="+254 700 000000"
+                                >
+                            </div>
                         </div>
 
                         <!-- Terms and Conditions -->
@@ -444,8 +568,8 @@
                                     >
                                 </div>
                                 <div class="ml-3 text-sm">
-                                    <label for="terms" class="font-medium text-gray-700 dark:text-gray-300">
-                                        <span class="w-full">
+                                    <label for="terms" class="font-medium text-gray-700 dark:text-gray-300 text-left">
+                                        <span class="w-full text-left">
                                             By donating, I agree with the
                                             <a
                                                 :href="route('frontend.terms-and-conditions')"
@@ -507,6 +631,8 @@
 
 <script setup>
 import { ref, computed, onMounted, onUnmounted } from 'vue';
+import Swal from 'sweetalert2';
+import axios from 'axios';
 import { useForm } from '@inertiajs/vue3';
 
 const props = defineProps({
@@ -518,6 +644,50 @@ const props = defineProps({
 
 const emit = defineEmits(['close']);
 
+// Banks data
+const banks = [
+    {
+        id: 'equity',
+        name: 'Equity Bank Kenya Limited',
+        accountName: 'Forward Kenya Party',
+        accountNumber: '1234567890',
+        branch: 'Nairobi CBD',
+        swiftCode: 'EQBLKENAXXX',
+        currency: 'KES'
+    },
+    {
+        id: 'kcb',
+        name: 'KCB Bank Kenya Limited',
+        accountName: 'Forward Kenya Party',
+        accountNumber: '0987654321',
+        branch: 'Nairobi Main Branch',
+        swiftCode: 'KCBLKENXXXX',
+        currency: 'KES'
+    }
+];
+
+// Cryptocurrency wallets
+const cryptoWallets = [
+    {
+        id: 'bitcoin',
+        name: 'Bitcoin (BTC)',
+        address: '3FZbgi29cpjq2GjdwV8eyHuJJnkLtktZc5',
+        qrCode: '/images/bitcoin-qr.png'
+    },
+    {
+        id: 'ethereum',
+        name: 'Ethereum (ETH)',
+        address: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F',
+        qrCode: '/images/ethereum-qr.png'
+    },
+    {
+        id: 'usdt',
+        name: 'Tether (USDT-ERC20)',
+        address: '0x1234567890abcdef1234567890abcdef12345678',
+        qrCode: '/images/usdt-qr.png'
+    }
+];
+
 // Donation types
 const donationTypes = [
     { value: 'monetary', label: 'Monetary', icon: 'fas fa-money-bill-wave' },
@@ -528,10 +698,11 @@ const donationTypes = [
 // Payment methods
 const paymentMethods = [
     { 
-        value: 'mpesa', 
-        label: 'M-Pesa', 
+        value: 'mobile_money', 
+        label: 'Mobile Money', 
         icon: 'fas fa-mobile-alt',
-        description: 'Pay via M-Pesa (Kenya)'
+        description: 'Pay via M-Pesa, Airtel Money, T-Kash',
+        subtext: 'Supports M-Pesa, Airtel Money, T-Kash and other mobile money services'
     },
     { 
         value: 'card', 
@@ -552,6 +723,7 @@ const paymentMethods = [
         description: 'Pay with Bitcoin, Ethereum, etc.'
     }
 ];
+
 // In-kind donation types
 const inKindTypes = [
     { value: 'office_supplies', label: 'Office Supplies' },
@@ -565,28 +737,65 @@ const form = useForm({
     donation_type: 'monetary',
     amount: '',
     is_recurring: false,
-    payment_method: 'mpesa',
-    mpesa_phone: '',
-    mpesa_prefix: '+254',
+    payment_method: 'mobile_money',
+    
+    // Mobile Money Fields
+    mobile_money_provider: 'mpesa',
+    telephone_prefix: '+254',
+    telephone_number: '',
+    
+    // Card Fields
     card_number: '',
     card_expiry: '',
     card_cvv: '',
     card_name: '',
+    
+    // Donor Information
     donor_name: '',
     email: '',
     phone: '',
+    
+    // In-Kind Donation Fields
     in_kind_type: '',
     in_kind_description: '',
     in_kind_value: '',
+    
+    // Volunteer Fields
     skills: '',
     availability: '',
-    terms: false
+    
+    // Other Fields
+    terms: false,
+    notes: '',
+    estimated_value: '',
+    selected_bank: 'equity',
+    selected_crypto: 'bitcoin',
+    transaction_reference: ''
 });
 
 const processing = ref(false);
+const modalRef = ref(null);
 
 // Computed properties
 const showMonetaryFields = computed(() => form.donation_type === 'monetary');
+
+const selectedBank = computed(() => {
+    return banks.find(bank => bank.id === form.selected_bank) || banks[0];
+});
+
+const selectedCrypto = computed(() => {
+    return cryptoWallets.find(crypto => crypto.id === form.selected_crypto) || cryptoWallets[0];
+});
+
+const generateReference = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let result = 'FKP-';
+    for (let i = 0; i < 8; i++) {
+        result += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    form.transaction_reference = result;
+    return result;
+};
 
 // Methods
 const selectDonationType = (type) => {
@@ -596,44 +805,101 @@ const selectDonationType = (type) => {
 const copyToClipboard = async (text) => {
     try {
         await navigator.clipboard.writeText(text);
-        // You could add a toast notification here if you have one
-        alert('Wallet address copied to clipboard!');
+        alert('Copied to clipboard!');
     } catch (err) {
         console.error('Failed to copy text: ', err);
-        // Fallback for older browsers
         const textArea = document.createElement('textarea');
         textArea.value = text;
         document.body.appendChild(textArea);
         textArea.select();
         try {
             document.execCommand('copy');
-            alert('Wallet address copied to clipboard!');
+            alert('Copied to clipboard!');
         } catch (err) {
             console.error('Fallback copy failed: ', err);
-            alert('Failed to copy address. Please copy it manually.');
+            alert('Failed to copy. Please copy it manually.');
         }
         document.body.removeChild(textArea);
     }
 };
 
+const close = () => {
+    emit('close');
+};
+
+const handleClickOutside = (event) => {
+    if (modalRef.value && !modalRef.value.contains(event.target)) {
+        close();
+    }
+};
+
+const onKeydown = (e) => {
+    if (e.key === 'Escape' && props.show) {
+        close();
+    }
+};
+
+const showToast = (type, title, message) => {
+    const Toast = Swal.mixin({
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true,
+        didOpen: (toast) => {
+            toast.addEventListener('mouseenter', Swal.stopTimer);
+            toast.addEventListener('mouseleave', Swal.resumeTimer);
+        }
+    });
+
+    Toast.fire({
+        icon: type,
+        title: title,
+        text: message
+    });
+};
+
 const submitDonation = async () => {
+    // Validate form
     if (!form.terms) {
-        alert('Please accept the terms and conditions to proceed.');
+        showToast('warning', 'Terms & Conditions', 'Please accept the terms and conditions to proceed.');
         return;
     }
     
-    // Validate required fields based on donation type
     if (form.donation_type === 'in_kind' && !form.in_kind_type) {
-        alert('Please select the type of in-kind donation.');
+        showToast('warning', 'In-Kind Donation', 'Please select the type of in-kind donation.');
         return;
     }
     
     if (form.donation_type === 'volunteer' && !form.skills) {
-        alert('Please provide your skills/expertise.');
+        showToast('warning', 'Volunteer Information', 'Please provide your skills/expertise.');
         return;
     }
     
-    processing.value = true;
+    // Validate mobile money phone number if that's the selected payment method
+    if (form.donation_type === 'monetary' && form.payment_method === 'mobile_money') {
+        if (!form.telephone_number) {
+            showToast('warning', 'Phone Number Required', 'Please enter your mobile money phone number.');
+            return;
+        }
+        
+        // Basic phone number validation (Kenyan numbers)
+        const phoneRegex = /^[0-9]{9,10}$/;
+        if (!phoneRegex.test(form.telephone_number.replace(/\s+/g, ''))) {
+            showToast('warning', 'Invalid Phone Number', 'Please enter a valid Kenyan phone number (e.g., 712345678).');
+            return;
+        }
+    }
+    
+    // Show loading state
+    const loadingSwal = Swal.fire({
+        title: 'Processing Donation',
+        html: 'Please wait while we process your donation...',
+        allowOutsideClick: false,
+        didOpen: () => {
+            Swal.showLoading();
+        }
+    });
     
     try {
         // Prepare the donation data
@@ -644,76 +910,227 @@ const submitDonation = async () => {
             email: form.email,
             phone: form.phone,
             terms: form.terms,
-            created_at: new Date().toISOString(),
-            // Type-specific fields
             ...(form.donation_type === 'monetary' && {
                 is_recurring: form.is_recurring,
-                payment_method: form.payment_method
+                payment_method: form.payment_method,
+                ...(form.payment_method === 'mobile_money' && {
+                    mobile_money_provider: form.mobile_money_provider,
+                    telephone_number: form.telephone_prefix + form.telephone_number,
+                }),
+                card_last_four: form.payment_method === 'card' ? form.card_number?.slice(-4) : null,
             }),
             ...(form.donation_type === 'in_kind' && {
                 in_kind_type: form.in_kind_type,
-                in_kind_description: form.in_kind_description,
-                in_kind_value: parseFloat(form.in_kind_value) || 0
+                description: form.in_kind_description || form.notes,
+                estimated_value: parseFloat(form.in_kind_value || form.estimated_value) || 0
             }),
             ...(form.donation_type === 'volunteer' && {
                 skills: form.skills,
-                availability: form.availability
+                availability: form.availability,
+                notes: form.notes
             })
         };
         
-        // Log the donation data (replace with actual API call)
-        console.log('Submitting donation:', donationData);
+        // Make the API call
+        const response = await axios.post('/process-donation', donationData);
         
-        // Simulate API call
-        await new Promise(resolve => setTimeout(resolve, 1500));
+        // Close loading state
+        await loadingSwal.close();
         
-        // Show success message based on donation type
-        let successMessage = 'Thank you for your ';
-        switch(form.donation_type) {
-            case 'monetary':
-                successMessage += 'generous monetary donation';
-                if (form.is_recurring) successMessage += ' (recurring monthly)';
-                break;
-            case 'in_kind':
-                successMessage += 'in-kind donation';
-                break;
-            case 'volunteer':
-                successMessage = 'Thank you for volunteering your time and skills';
-                break;
+        // Generate reference if not already set
+        if (!form.transaction_reference) {
+            generateReference();
         }
-        successMessage += '! We appreciate your support.';
+
+        // Show success message based on donation type
+        let successTitle = 'Thank You!';
+        let successHtml = `
+            <div class="text-center">
+                <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
+                    <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    </svg>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">${successTitle}</h3>
+                <div class="mt-2 text-sm text-gray-600 dark:text-gray-300">
+        `;
         
-        alert(successMessage);
+        if (form.donation_type === 'monetary') {
+            successHtml += `
+                <p>Thank you for your ${form.is_recurring ? 'monthly ' : ''}donation of <span class="font-semibold">KES ${form.amount ? form.amount.toLocaleString() : ''}</span>.</p>
+            `;
+            
+            if (form.payment_method === 'mobile_money') {
+                const providerName = {
+                    'mpesa': 'M-Pesa',
+                    'airtel': 'Airtel Money',
+                    'tkash': 'T-Kash',
+                    'equity': 'Equity EazzyPay'
+                }[form.mobile_money_provider] || 'Mobile Money';
+                
+                successHtml += `
+                    <div class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md text-left">
+                        <p class="font-medium text-blue-800 dark:text-blue-200 mb-2">Next Steps:</p>
+                        <ul class="list-disc pl-5 space-y-1 text-sm text-blue-700 dark:text-blue-300">
+                            <li>Check your phone to complete the ${providerName} payment</li>
+                            <li>Keep the ${providerName} confirmation message for your records</li>
+                            ${form.mobile_money_provider === 'mpesa' ? '<li>Enter your M-Pesa PIN when prompted</li>' : ''}
+                        </ul>
+                    </div>`;
+            } else if (form.payment_method === 'bank') {
+                const bank = selectedBank.value;
+                successHtml += `
+                    <div class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md text-left">
+                        <p class="font-medium text-blue-800 dark:text-blue-200 mb-2">Bank Transfer Details:</p>
+                        <div class="grid grid-cols-2 gap-2 text-sm text-blue-700 dark:text-blue-300">
+                            <span class="font-medium">Bank:</span><span>${bank.name}</span>
+                            <span class="font-medium">Account Name:</span><span>${bank.accountName}</span>
+                            <span class="font-medium">Account No:</span><span>${bank.accountNumber}</span>
+                            <span class="font-medium">Branch:</span><span>${bank.branch}</span>
+                            <span class="font-medium">SWIFT Code:</span><span>${bank.swiftCode}</span>
+                            <span class="font-medium">Reference:</span><span class="font-mono">${form.transaction_reference}</span>
+                        </div>
+                    </div>`;
+            } else if (form.payment_method === 'crypto') {
+                const crypto = selectedCrypto.value;
+                successHtml += `
+                    <div class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md text-left">
+                        <p class="font-medium text-blue-800 dark:text-blue-200 mb-2">Crypto Payment Details:</p>
+                        <div class="space-y-2 text-sm text-blue-700 dark:text-blue-300">
+                            <div><span class="font-medium">Currency:</span> ${crypto.name}</div>
+                            <div class="flex items-center">
+                                <span class="font-medium mr-2">Address:</span>
+                                <span class="font-mono text-xs break-all">${crypto.address}</span>
+                                <button 
+                                    type="button" 
+                                    @click="copyToClipboard('${crypto.address}')"
+                                    class="ml-2 p-1 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
+                                    title="Copy to clipboard"
+                                >
+                                    <i class="far fa-copy"></i>
+                                </button>
+                            </div>
+                            <div><span class="font-medium">Reference:</span> <span class="font-mono">${form.transaction_reference}</span></div>
+                        </div>
+                    </div>`;
+            }
+        } else if (form.donation_type === 'in_kind') {
+            successTitle = 'Donation Received!';
+            successHtml = `
+                <div class="text-center">
+                    <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
+                        <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">${successTitle}</h3>
+                    <div class="mt-2 text-sm text-gray-600">
+                        <p>Thank you for your in-kind donation of <span class="font-semibold">${form.in_kind_type}</span>.</p>
+                        <p class="mt-2">We'll review your donation and contact you shortly.</p>
+                    </div>
+                </div>
+            `;
+        } else if (form.donation_type === 'volunteer') {
+            successTitle = 'Welcome Aboard!';
+            successHtml = `
+                <div class="text-center">
+                    <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
+                        <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">${successTitle}</h3>
+                    <div class="mt-2 text-sm text-gray-600">
+                        <p>Thank you for volunteering with us!</p>
+                        <p class="mt-2">Our team will review your application and get in touch soon.</p>
+                    </div>
+                </div>
+            `;
+        }
+        
+        successHtml += `
+                </div>
+                <div class="mt-6 p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-md">
+                    <p class="text-sm text-yellow-700 dark:text-yellow-300">
+                        <i class="fas fa-envelope mr-1"></i>
+                        Please email your payment confirmation to 
+                        <a href="mailto:donations@forwardkenyaparty.com?subject=Donation%20Confirmation%20${encodeURIComponent(form.transaction_reference)}" 
+                           class="text-green-600 hover:underline font-medium">
+                            donations@forwardkenyaparty.com
+                        </a>
+                        with the reference: <span class="font-mono">${form.transaction_reference}</span>
+                    </p>
+                </div>
+            </div>
+        `;
+        
+        // Show success message
+        await Swal.fire({
+            html: successHtml,
+            showConfirmButton: true,
+            confirmButtonText: 'Done',
+            confirmButtonColor: '#10B981',
+            allowOutsideClick: false,
+            customClass: {
+                popup: 'rounded-lg',
+                confirmButton: 'px-4 py-2 text-sm font-medium rounded-md'
+            }
+        });
         
         // Reset form and close modal
         form.reset();
-        form.donation_type = 'monetary'; // Reset to default donation type
+        form.donation_type = 'monetary';
         close();
         
     } catch (error) {
         console.error('Donation submission failed:', error);
-        alert('There was an error processing your request. Please try again.');
-    } finally {
-        processing.value = false;
+        
+        // Close loading state if still open
+        if (Swal.isVisible()) {
+            Swal.close();
+        }
+        
+        // Show error message
+        let errorMessage = 'There was an error processing your request. Please try again.';
+        
+        if (error.response) {
+            // The request was made and the server responded with a status code
+            // that falls out of the range of 2xx
+            if (error.response.status === 422) {
+                // Handle validation errors
+                const errors = error.response.data.errors || {};
+                const errorMessages = Object.values(errors).flat();
+                
+                // Show first error in a toast
+                if (errorMessages.length > 0) {
+                    showToast('error', 'Validation Error', errorMessages[0]);
+                    // Don't show the error in the alert if we've shown it in a toast
+                    return;
+                }
+                errorMessage = 'Please check your input and try again.';
+            } else if (error.response.data && error.response.data.message) {
+                errorMessage = error.response.data.message;
+            } else if (error.response.status === 429) {
+                // Handle rate limiting
+                errorMessage = 'Too many attempts. Please try again later.';
+            }
+        } else if (error.request) {
+            // The request was made but no response was received
+            errorMessage = 'Unable to connect to the server. Please check your internet connection.';
+        }
+        
+        await Swal.fire({
+            icon: 'error',
+            title: 'Donation Failed',
+            text: errorMessage,
+            confirmButtonText: 'Try Again',
+            confirmButtonColor: '#EF4444',
+            allowOutsideClick: false
+        });
     }
 };
 
-const modalRef = ref(null);
-
-const handleClickOutside = (event) => {
-    if (modalRef.value && !modalRef.value.contains(event.target)) {
-        close();
-    }
-};
-
-// Close on escape key
-const onKeydown = (e) => {
-    if (e.key === 'Escape' && props.show) {
-        close();
-    }
-};
-
-// Add event listeners when component is mounted
+// Event listeners
 onMounted(() => {
     if (props.show) {
         document.addEventListener('keydown', onKeydown);
@@ -721,7 +1138,6 @@ onMounted(() => {
     }
 });
 
-// Clean up event listeners when component is unmounted
 onUnmounted(() => {
     document.removeEventListener('keydown', onKeydown);
     document.removeEventListener('mousedown', handleClickOutside);
