@@ -10,6 +10,13 @@ import { resolvePageComponent } from "laravel-vite-plugin/inertia-helpers";
 import Swal from "sweetalert2/dist/sweetalert2.js";
 import { ZiggyVue } from "../../vendor/tightenco/ziggy";
 
+// Import ApexCharts
+import VueApexCharts from 'vue3-apexcharts';
+import ApexCharts from 'apexcharts';
+
+// Import ApexCharts CSS
+import 'apexcharts/dist/apexcharts.css';
+
 // Make SweetAlert2 available globally
 window.Swal = Swal;
 
@@ -46,6 +53,12 @@ createInertiaApp({
         const app = createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(ZiggyVue);
+
+        // Register ApexCharts component
+        app.component('apexchart', VueApexCharts);
+        
+        // Make ApexCharts available globally
+        app.config.globalProperties.$apexcharts = ApexCharts;
 
         // Set the appName globally
         app.config.globalProperties.$appName = appName;
