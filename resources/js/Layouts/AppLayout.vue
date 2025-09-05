@@ -192,7 +192,7 @@ onUnmounted(() => {
                                     <button
                                         class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition"
                                     >
-                                        Our Work
+                                        Our portfolio
                                         <i
                                             class="fas fa-chevron-down ml-2 -mr-0.5 h-4 w-4"
                                         ></i>
@@ -601,7 +601,7 @@ onUnmounted(() => {
                                 "
                                 class="w-full flex items-center justify-between px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 rounded-md"
                             >
-                                <span>Our Work</span>
+                                <span>Our portfolio</span>
                                 <i
                                     class="fas transition-transform duration-200"
                                     :class="
