@@ -28,7 +28,7 @@
         "flowbite-typography": "^1.0.5",
         "pdfjs-dist": "^2.16.105",
         "qrcode": "^1.5.4",
-        "sweetalert2": "^11.22.2",
+        "sweetalert2": "^11.22.4",
         "vue-select": "^4.0.0-beta.6",
         "vue-toastification": "^2.0.0-rc.5",
         "vue3-apexcharts": "^1.8.0"
