@@ -365,7 +365,7 @@
     ]
   },
   "resources/js/Pages/Frontend/AboutUs.vue": {
-    "file": "assets/AboutUs-B87DeIFe.js",
+    "file": "assets/AboutUs-D82_reUW.js",
     "name": "AboutUs",
     "src": "resources/js/Pages/Frontend/AboutUs.vue",
     "isDynamicEntry": true,
@@ -708,7 +708,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-C6XU3dWG.js",
+    "file": "assets/app-NDxV0Pw1.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -754,7 +754,7 @@
       "resources/js/Pages/Welcome.vue"
     ],
     "css": [
-      "assets/app-z8aTghPz.css"
+      "assets/app-GQ8QAU0s.css"
     ],
     "assets": [
       "assets/fa-brands-400-D_cYUPeE.woff2",
