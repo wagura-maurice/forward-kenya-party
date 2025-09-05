@@ -8,7 +8,7 @@
             <div ref="modalRef" class="mb-6 bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-xl transform transition-all sm:w-full sm:mx-auto sm:max-w-3xl">
                 <div class="p-8 w-full">
                     <!-- Modal header -->
-                    <div class="flex items-center justify-between mb-6">
+                    <div class="flex justify-between mb-6">
                         <h3 class="text-2xl font-bold text-gray-900 dark:text-white">
                             Support Our Cause
                         </h3>
@@ -25,14 +25,14 @@
                     <!-- Donation Form -->
                     <div class="space-y-6">
                         <div>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6">
+                            <p class="text-gray-600 dark:text-gray-300 mb-6 text-left">
                                 Your generous donation will help us continue our mission. All contributions are greatly appreciated.
                             </p>
                         </div>
                         
                         <!-- Donation Type -->
                         <div class="space-y-2">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
+                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                 Donation Type <span class="text-red-500">*</span>
                             </label>
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-2">
@@ -71,7 +71,7 @@
                             
                             <!-- Payment Method -->
                             <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Select Your Payment Method <span class="text-red-500">*</span>
                                 </label>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -81,7 +81,7 @@
                                         type="button"
                                         @click="form.payment_method = method.value"
                                         :class="[
-                                            'p-4 border rounded-lg flex flex-col items-start transition-colors text-left',
+                                            'p-4 border rounded-lg flex flex-col items-start transition-colors',
                                             form.payment_method === method.value 
                                                 ? 'border-green-500 bg-green-50 dark:bg-green-900/20 ring-1 ring-green-500' 
                                                 : 'border-gray-300 dark:border-gray-600 hover:border-green-500 hover:bg-gray-50 dark:hover:bg-gray-700'
@@ -101,7 +101,7 @@
                                         <div class="grid grid-cols-2 gap-4">
                                             <!-- Mobile Money Provider Selection -->
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 text-left">
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                     Mobile Money Provider <span class="text-red-500">*</span>
                                                 </label>
                                                 <select 
@@ -118,7 +118,7 @@
 
                                             <!-- Telephone Number Input -->
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 text-left">
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                     Telephone Number <span class="text-red-500">*</span>
                                                 </label>
                                                 <div class="relative rounded-md shadow-sm flex">
@@ -175,7 +175,7 @@
                                     <div class="space-y-4">
                                         <div class="grid grid-cols-2 gap-4">
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 text-left">
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Card Number <span class="text-red-500">*</span>
                                             </label>
                                             <input 
@@ -187,7 +187,7 @@
                                             >
                                         </div>
                                         <div>
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 text-left">
+                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                 Name on Card <span class="text-red-500">*</span>
                                             </label>
                                             <input 
@@ -201,7 +201,7 @@
                                         </div>
                                         <div class="grid grid-cols-2 gap-4">
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 text-left">
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                     Expiry Date <span class="text-red-500">*</span>
                                                 </label>
                                                 <input 
@@ -213,7 +213,7 @@
                                                 >
                                             </div>
                                             <div>
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 text-left">
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                     CVV <span class="text-red-500">*</span>
                                                 </label>
                                                 <input 
@@ -225,7 +225,6 @@
                                                 >
                                             </div>
                                         </div>
-                                        
                                     </div>
                                 </div>
 
@@ -233,21 +232,21 @@
                                 <div v-else-if="form.payment_method === 'bank'" class="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                                     <div class="space-y-4">
                                         <div class="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 text-left">
-                                                Select Bank <span class="text-red-500">*</span>
-                                            </label>
-                                            <select 
-                                                v-model="form.selected_bank"
-                                                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                            >
-                                                <option v-for="bank in banks" :key="bank.id" :value="bank.id">
-                                                    {{ bank.name }}
-                                                </option>
-                                            </select>
-                                        </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    Select Bank <span class="text-red-500">*</span>
+                                                </label>
+                                                <select 
+                                                    v-model="form.selected_bank"
+                                                    class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                >
+                                                    <option v-for="bank in banks" :key="bank.id" :value="bank.id">
+                                                        {{ bank.name }}
+                                                    </option>
+                                                </select>
+                                            </div>
 
-                                        <div>
+                                            <div>
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                     Transaction Reference
                                                 </label>
@@ -270,8 +269,7 @@
                                                     Please use this reference when making the transfer
                                                 </p>
                                             </div>
-
-                                            </div>
+                                        </div>
                                         
                                         <div class="space-y-3 bg-white dark:bg-gray-800 p-4 rounded-md border border-gray-200 dark:border-gray-700">
                                             <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">Bank Transfer Details:</h4>
@@ -288,7 +286,7 @@
                                                     <p class="text-xs text-gray-500 dark:text-gray-400">Account Number</p>
                                                     <p class="text-sm font-mono">{{ selectedBank.accountNumber }}</p>
                                                 </div>
-                                                <div>
+                                                <!-- <div>
                                                     <p class="text-xs text-gray-500 dark:text-gray-400">Reference Code</p>
                                                     <p class="text-sm font-mono">
                                                         {{ selectedBank.referenceCode }}
@@ -301,7 +299,7 @@
                                                             <i class="far fa-copy"></i>
                                                         </button>
                                                     </p>
-                                                </div>
+                                                </div> -->
                                                 <div>
                                                     <p class="text-xs text-gray-500 dark:text-gray-400">Branch</p>
                                                     <p class="text-sm">{{ selectedBank.branch }}</p>
@@ -328,29 +326,56 @@
                                 <!-- Cryptocurrency Wallet Addresses -->
                                 <div v-else-if="form.payment_method === 'crypto'" class="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                                     <div class="space-y-4">
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                                Select Cryptocurrency <span class="text-red-500">*</span>
-                                            </label>
-                                            <select 
-                                                v-model="form.selected_crypto"
-                                                class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                            >
-                                                <option v-for="crypto in cryptoWallets" :key="crypto.id" :value="crypto.id">
-                                                    {{ crypto.name }}
-                                                </option>
-                                            </select>
+                                        <div class="grid grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    Select Cryptocurrency <span class="text-red-500">*</span>
+                                                </label>
+                                                <select 
+                                                    v-model="form.selected_crypto"
+                                                    class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                                >
+                                                    <option v-for="crypto in cryptoWallets" :key="crypto.id" :value="crypto.id">
+                                                        {{ crypto.name }}
+                                                    </option>
+                                                </select>
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    Transaction Reference
+                                                </label>
+                                                <div class="flex rounded-md shadow-sm">
+                                                    <input 
+                                                        type="text" 
+                                                        v-model="form.transaction_reference"
+                                                        class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none rounded-l-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-green-500 focus:border-green-500 sm:text-sm"
+                                                        placeholder="Enter reference or click generate"
+                                                    >
+                                                    <button 
+                                                        type="button"
+                                                        @click="generateReference()"
+                                                        class="inline-flex items-center px-3 py-2 border border-l-0 border-gray-300 dark:border-gray-600 rounded-r-md bg-gray-50 dark:bg-gray-700 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-600 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500"
+                                                    >
+                                                        Generate
+                                                    </button>
+                                                </div>
+                                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                                                    Include this reference when sending the transaction
+                                                </p>
+                                            </div>
                                         </div>
                                         
                                         <div class="bg-white dark:bg-gray-800 p-4 rounded-md border border-gray-200 dark:border-gray-700">
-                                            <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Send to {{ selectedCrypto.name }} Address:</h4>
-                                            <div class="flex flex-col items-center space-y-4">
+                                            <div class="grid grid-cols-5 gap-4">
+                                            <div class="col-span-1">
                                                 <div class="w-32 h-32 bg-white p-2 rounded border">
                                                     <img :src="selectedCrypto.qrCode" :alt="selectedCrypto.name + ' QR Code'" class="w-full h-full">
                                                 </div>
-                                                <div class="w-full">
-                                                    <div class="flex items-center bg-gray-100 dark:bg-gray-700 p-2 rounded">
-                                                        <span class="font-mono text-sm break-all">{{ selectedCrypto.address }}</span>
+                                            </div>
+                                            <div class="col-span-4 flex flex-col justify-end space-y-2 px-4">
+                                                    <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Send to {{ selectedCrypto.name }} Address:</h4>
+                                                    <div class="flex items-center bg-gray-100 dark:bg-gray-700 p-2 rounded w-full">
+                                                        <span class="font-mono text-sm break-all w-full">{{ selectedCrypto.address }}</span>
                                                         <button 
                                                             type="button" 
                                                             @click="copyToClipboard(selectedCrypto.address)"
@@ -360,30 +385,11 @@
                                                             <i class="far fa-copy"></i>
                                                         </button>
                                                     </div>
-                                                </div>
-                                                <div class="w-full">
-                                                    <div class="flex items-center justify-between text-sm">
+                                                    <div class="flex items-center justify-start text-sm">
                                                         <span class="text-gray-600 dark:text-gray-300">Network:</span>
-                                                        <span class="font-medium">{{ selectedCrypto.network || 'ERC-20' }}</span>
+                                                        <span class="font-medium ml-auto">{{ selectedCrypto.network || 'ERC-20' }}</span>
                                                     </div>
                                                 </div>
-                                            </div>
-                                            
-                                            <div class="mt-4">
-                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                                    Transaction Reference (Optional)
-                                                </label>
-                                                <div class="flex rounded-md shadow-sm">
-                                                    <input 
-                                                        type="text" 
-                                                        v-model="form.transaction_reference"
-                                                        class="flex-1 min-w-0 block w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:ring-green-500 focus:border-green-500 sm:text-sm"
-                                                        placeholder="Enter reference for tracking"
-                                                    >
-                                                </div>
-                                                <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-                                                    Include this reference when sending the transaction
-                                                </p>
                                             </div>
                                         </div>
                                     </div>
@@ -394,40 +400,40 @@
                         <!-- In-Kind Donation Fields -->
                         <div v-else-if="form.donation_type === 'in_kind'" class="space-y-4">
                             <div class="grid grid-cols-2 gap-4">
-                            <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
-                                    Type of Donation <span class="text-red-500">*</span>
-                                </label>
-                                <select 
-                                    v-model="form.in_kind_type"
-                                    class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                    required
-                                >
-                                    <option value="">Select donation type</option>
-                                    <option v-for="type in inKindTypes" :key="type.value" :value="type.value">
-                                        {{ type.label }}
-                                    </option>
-                                </select>
-                            </div>
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        Type of Donation <span class="text-red-500">*</span>
+                                    </label>
+                                    <select 
+                                        v-model="form.in_kind_type"
+                                        class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-green-500 focus:border-green-500 sm:text-sm rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                        required
+                                    >
+                                        <option value="">Select donation type</option>
+                                        <option v-for="type in inKindTypes" :key="type.value" :value="type.value">
+                                            {{ type.label }}
+                                        </option>
+                                    </select>
+                                </div>
 
-                            <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
-                                    Estimated Value (KES)
-                                </label>
-                                <input 
-                                    type="number" 
-                                    v-model="form.estimated_value"
-                                    class="focus:ring-green-500 focus:border-green-500 block w-full px-3 py-2 sm:text-sm border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                    placeholder="0.00"
-                                    min="0"
-                                    step="1"
-                                >
-                            </div>
+                                <div class="space-y-2">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        Estimated Value (KES)
+                                    </label>
+                                    <input 
+                                        type="number" 
+                                        v-model="form.estimated_value"
+                                        class="focus:ring-green-500 focus:border-green-500 block w-full px-3 py-2 sm:text-sm border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                        placeholder="0.00"
+                                        min="0"
+                                        step="1"
+                                    >
+                                </div>
 
-                        </div>
+                            </div>
                             
                             <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Description <span class="text-red-500">*</span>
                                 </label>
                                 <textarea 
@@ -438,15 +444,13 @@
                                     required
                                 ></textarea>
                             </div>
-                            
-    
                         </div>
                         
                         <!-- Volunteer Donation Fields -->
                         <div v-else-if="form.donation_type === 'volunteer'" class="space-y-4">
                             <div class="grid grid-cols-2 gap-4">
                                 <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Skills/Expertise <span class="text-red-500">*</span>
                                 </label>
                                 <input 
@@ -459,7 +463,7 @@
                                 </div>
                                 
                                 <div class="space-y-2">
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                         Availability <span class="text-red-500">*</span>
                                     </label>
                                     <select 
@@ -478,7 +482,7 @@
                             </div>
                             
                             <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Additional Notes
                                 </label>
                                 <textarea 
@@ -495,7 +499,7 @@
                             <div v-if="form.donation_type === 'monetary'" class="space-y-4">
                                 <!-- Donation Amount -->
                                 <div class="space-y-2">
-                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                         Donation Amount (KES)
                                         <span class="text-red-500">*</span>
                                     </label>
@@ -517,14 +521,15 @@
                             </div>
 
                             <!-- Donor Information -->
-                            <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
+                            <div :class="form.donation_type === 'monetary' ? 'space-y-2' : 'col-span-2'">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Your Full Name <span class="text-red-500">*</span>
                                 </label>
                                 <input 
                                     type="text" 
                                     v-model="form.donor_name"
                                     class="focus:ring-green-500 focus:border-green-500 block w-full px-3 py-2 sm:text-sm border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                    :class="form.donation_type === 'monetary' ? '' : 'col-span-2'"
                                     placeholder="John Doe"
                                 >
                             </div>
@@ -532,7 +537,7 @@
 
                         <div class="grid grid-cols-2 gap-4">
                             <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Your Email Address <span class="text-red-500">*</span>
                                 </label>
                                 <input 
@@ -544,7 +549,7 @@
                             </div>
 
                             <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 text-left">
+                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Your Telehone Number <span class="text-red-500">*</span>
                                 </label>
                                 <input 
@@ -558,7 +563,7 @@
 
                         <!-- Terms and Conditions -->
                         <div class="space-y-2">
-                            <div class="flex items-start">
+                            <div class="flex items-start justify-start">
                                 <div class="flex items-center h-5">
                                     <input 
                                         id="terms" 
@@ -567,9 +572,9 @@
                                         class="focus:ring-green-500 h-4 w-4 text-green-600 border-gray-300 rounded dark:bg-gray-700 dark:border-gray-600"
                                     >
                                 </div>
-                                <div class="ml-3 text-sm">
-                                    <label for="terms" class="font-medium text-gray-700 dark:text-gray-300 text-left">
-                                        <span class="w-full text-left">
+                                <div class="ml-3 text-sm pl-5">
+                                    <label for="terms" class="font-medium text-gray-700 dark:text-gray-300">
+                                        <span class="w-full">
                                             By donating, I agree with the
                                             <a
                                                 :href="route('frontend.terms-and-conditions')"
@@ -595,7 +600,7 @@
                                     </label>
                                 </div>
                             </div>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 ml-7 -mt-1">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 ml-0 -mt-1 pl-5">
                                 You must agree to the terms of
                                 service and our privacy policy to make a donation.
                             </p>
@@ -630,7 +635,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue';
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue';
+import QRCode from 'qrcode';
 import Swal from 'sweetalert2';
 import axios from 'axios';
 import { useForm } from '@inertiajs/vue3';
@@ -667,26 +673,68 @@ const banks = [
 ];
 
 // Cryptocurrency wallets
-const cryptoWallets = [
+const cryptoWallets = ref([
     {
         id: 'bitcoin',
         name: 'Bitcoin (BTC)',
         address: '3FZbgi29cpjq2GjdwV8eyHuJJnkLtktZc5',
-        qrCode: '/images/bitcoin-qr.png'
+        qrCode: ''
     },
     {
         id: 'ethereum',
         name: 'Ethereum (ETH)',
         address: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F',
-        qrCode: '/images/ethereum-qr.png'
+        qrCode: ''
     },
     {
         id: 'usdt',
         name: 'Tether (USDT-ERC20)',
         address: '0x1234567890abcdef1234567890abcdef12345678',
-        qrCode: '/images/usdt-qr.png'
+        qrCode: ''
+    },
+    {
+        id: 'ton',
+        name: 'TON (TON)',
+        address: '0:1234567890abcdef1234567890abcdef12345678',
+        qrCode: ''
     }
-];
+]);
+
+// Generate QR codes for all crypto wallets when the component is mounted
+onMounted(() => {
+    generateQRCodes();
+});
+
+// Function to generate QR codes for all crypto wallets
+const generateQRCodes = async () => {
+    const updatedWallets = [];
+    for (const wallet of cryptoWallets.value) {
+        const qrCode = await generateQRCode(wallet.address);
+        updatedWallets.push({
+            ...wallet,
+            qrCode
+        });
+    }
+    cryptoWallets.value = updatedWallets;
+};
+
+// Function to generate a QR code from text
+const generateQRCode = async (text) => {
+    try {
+        return await QRCode.toDataURL(text, {
+            width: 256,
+            margin: 1,
+            color: {
+                dark: '#000000',
+                light: '#ffffff'
+            },
+            errorCorrectionLevel: 'M' // Error correction level: L, M, Q, H
+        });
+    } catch (error) {
+        console.error('Error generating QR code:', error);
+        return '';
+    }
+};
 
 // Donation types
 const donationTypes = [
@@ -784,7 +832,7 @@ const selectedBank = computed(() => {
 });
 
 const selectedCrypto = computed(() => {
-    return cryptoWallets.find(crypto => crypto.id === form.selected_crypto) || cryptoWallets[0];
+    return cryptoWallets.value.find(crypto => crypto.id === form.selected_crypto) || cryptoWallets.value[0];
 });
 
 const generateReference = () => {
@@ -969,7 +1017,7 @@ const submitDonation = async () => {
                 }[form.mobile_money_provider] || 'Mobile Money';
                 
                 successHtml += `
-                    <div class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md text-left">
+                    <div class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md">
                         <p class="font-medium text-blue-800 dark:text-blue-200 mb-2">Next Steps:</p>
                         <ul class="list-disc pl-5 space-y-1 text-sm text-blue-700 dark:text-blue-300">
                             <li>Check your phone to complete the ${providerName} payment</li>
@@ -980,7 +1028,7 @@ const submitDonation = async () => {
             } else if (form.payment_method === 'bank') {
                 const bank = selectedBank.value;
                 successHtml += `
-                    <div class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md text-left">
+                    <div class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md">
                         <p class="font-medium text-blue-800 dark:text-blue-200 mb-2">Bank Transfer Details:</p>
                         <div class="grid grid-cols-2 gap-2 text-sm text-blue-700 dark:text-blue-300">
                             <span class="font-medium">Bank:</span><span>${bank.name}</span>
@@ -994,7 +1042,7 @@ const submitDonation = async () => {
             } else if (form.payment_method === 'crypto') {
                 const crypto = selectedCrypto.value;
                 successHtml += `
-                    <div class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md text-left">
+                    <div class="mt-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-md">
                         <p class="font-medium text-blue-800 dark:text-blue-200 mb-2">Crypto Payment Details:</p>
                         <div class="space-y-2 text-sm text-blue-700 dark:text-blue-300">
                             <div><span class="font-medium">Currency:</span> ${crypto.name}</div>
