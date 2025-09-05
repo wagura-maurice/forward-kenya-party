@@ -635,7 +635,7 @@
                         @mouseleave="isHovering = false"
                     >
                         <!-- Partner Items -->
-                        <div
+                        <!-- <div
                             v-for="(partner, index) in partners"
                             :key="index"
                             class="flex-shrink-0 w-48 h-32 flex items-center justify-center bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 hover:shadow-md transition-all duration-300 transform hover:-translate-y-1"
@@ -661,7 +661,7 @@
                                     }"
                                 />
                             </a>
-                        </div>
+                        </div> -->
                     </div>
 
                     <button
