@@ -7,6 +7,7 @@ use Inertia\Inertia;
 use App\Models\Service;
 use App\Models\Activity;
 use App\Models\Department;
+use App\Models\SpecialInterestGroup;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -239,25 +240,71 @@ class BackendController extends Controller
                 'icon' => 'fa fa-user-plus',
                 'color' => 'teal'
             ],
-            'engagement_rate' => [
-                'count' => $engagementRate,
-                'change' => $calculateChange($engagementRate, $previousEngagementRate),
-                'previous_period' => $previousEngagementRate,
-                'percentage_change' => $calculateChange($engagementRate, $previousEngagementRate),
-                'title' => 'Engagement Rate',
-                'icon' => 'fa fa-chart-line',
-                'color' => 'orange'
+            'members_leaving_this_month' => [
+                'count' => max(0, $previousMonthMembers - $newMembersThisMonth),
+                'change' => $calculateChange($previousMonthMembers, $newMembersThisMonth),
+                'previous_period' => $previousMonthMembers,
+                'percentage_change' => $calculateChange($previousMonthMembers, $newMembersThisMonth),
+                'title' => 'Members Leaving This Month',
+                'icon' => 'fa fa-user-times',
+                'color' => 'red'
             ],
-            
-            // Financials
-            'donations' => [
+            // Special Interest Groups
+            SpecialInterestGroup::PERSONS_WITH_DISABILITY => [
                 'count' => 0,
                 'change' => 0,
                 'previous_period' => 0,
                 'percentage_change' => 0,
-                'title' => 'Donations',
-                'icon' => 'fa fa-donate',
-                'color' => 'red'
+                'title' => 'Persons With Disabilty',
+                'icon' => 'fa fa-wheelchair',
+                'color' => 'brown'
+            ],
+            SpecialInterestGroup::YOUTH => [
+                'count' => 0,
+                'change' => 0,
+                'previous_period' => 0,
+                'percentage_change' => 0,
+                'title' => 'Youth',
+                'icon' => 'fa fa-child',
+                'color' => 'yellow'
+            ],
+            SpecialInterestGroup::WOMEN => [
+                'count' => 0,
+                'change' => 0,
+                'previous_period' => 0,
+                'percentage_change' => 0,
+                'title' => 'Women',
+                'icon' => 'fa fa-female',
+                'color' => 'pink'
+            ],
+            SpecialInterestGroup::PERSONS_MARGINALIZED => [
+                'count' => 0,
+                'change' => 0,
+                'previous_period' => 0,
+                'percentage_change' => 0,
+                'title' => 'Persons Marginalized',
+                'icon' => 'fa fa-exclamation-triangle',
+                'color' => 'orange'
+            ],
+            SpecialInterestGroup::PERSONS_MINORITY => [
+                'count' => 0,
+                'change' => 0,
+                'previous_period' => 0,
+                'percentage_change' => 0,
+                'title' => 'Persons Minority',
+                'icon' => 'fa fa-users',
+                'color' => 'blue'
+            ],
+            
+            // Financials
+            'membership_fees' => [
+                'count' => $currentMembershipCollections,
+                'change' => $calculateChange($currentMembershipCollections, $previousMembershipCollections),
+                'previous_period' => $previousMembershipCollections,
+                'percentage_change' => $calculateChange($currentMembershipCollections, $previousMembershipCollections),
+                'title' => 'Membership Fees',
+                'icon' => 'fa fa-receipt',
+                'color' => 'blue'
             ],
             'monthly_subscriptions' => [
                 'count' => $currentMonthlyContributions,
@@ -268,46 +315,43 @@ class BackendController extends Controller
                 'icon' => 'fa fa-money-bill-wave',
                 'color' => 'green'
             ],
-            'membership_fees' => [
-                'count' => $currentMembershipCollections,
-                'change' => $calculateChange($currentMembershipCollections, $previousMembershipCollections),
-                'previous_period' => $previousMembershipCollections,
-                'percentage_change' => $calculateChange($currentMembershipCollections, $previousMembershipCollections),
-                'title' => 'Membership Fees',
-                'icon' => 'fa fa-receipt',
-                'color' => 'blue'
-            ],
-            
-            // Election & Compliance
-            'candidates' => [
-                'count' => $currentCandidates,
-                'change' => $calculateChange($currentCandidates, $previousCandidates),
-                'previous_period' => $previousCandidates,
-                'percentage_change' => $calculateChange($currentCandidates, $previousCandidates),
-                'title' => 'Candidates',
-                'icon' => 'fa fa-user-tie',
-                'color' => 'purple'
-            ],
-            'nomination_papers' => [
+            'monetary_donations' => [
                 'count' => 0,
                 'change' => 0,
                 'previous_period' => 0,
                 'percentage_change' => 0,
-                'title' => 'Nomination Papers',
-                'icon' => 'fa fa-file-signature',
-                'color' => 'indigo'
+                'title' => 'Monetary Donations',
+                'icon' => 'fa fa-donate',
+                'color' => 'red'
             ],
-            'compliance_items' => [
-                'count' => $currentComplianceItems,
-                'change' => $calculateChange($currentComplianceItems, $previousComplianceItems),
-                'previous_period' => $previousComplianceItems,
-                'percentage_change' => $calculateChange($currentComplianceItems, $previousComplianceItems),
-                'title' => 'Compliance Items',
-                'icon' => 'fa fa-tasks',
+            'in_kind_donations' => [
+                'count' => 0,
+                'change' => 0,
+                'previous_period' => 0,
+                'percentage_change' => 0,
+                'title' => 'In Kind Donations',
+                'icon' => 'fa fa-box',
+                'color' => 'red'
+            ],
+            // Volunteers
+            'active_volunteers' => [
+                'count' => 0,
+                'change' => 0,
+                'previous_period' => 0,
+                'percentage_change' => 0,
+                'title' => 'Active Volunteers',
+                'icon' => 'fa fa-hands-helping',
+                'color' => 'green'
+            ],
+            'volunteer_hours' => [
+                'count' => 0,
+                'change' => 0,
+                'previous_period' => 0,
+                'percentage_change' => 0,
+                'title' => 'Volunteer Hours',
+                'icon' => 'fa fa-clock',
                 'color' => 'orange'
             ],
-            
-            // Additional Stats
             'departments' => [
                 'count' => $currentDepartments,
                 'change' => $calculateChange($currentDepartments, $previousDepartments),
@@ -326,12 +370,34 @@ class BackendController extends Controller
                 'icon' => 'fa fa-concierge-bell',
                 'color' => 'pink'
             ],
-            'projects' => [
+            
+            // Election & Compliance
+            'aspirants' => [
+                'count' => 0,
+                'change' => 0,
+                'previous_period' => 0,
+                'percentage_change' => 0,
+                'title' => 'Aspirants',
+                'icon' => 'fa fa-user-astronaut',
+                'color' => 'indigo'
+            ],
+            'candidates' => [
+                'count' => $currentCandidates,
+                'change' => $calculateChange($currentCandidates, $previousCandidates),
+                'previous_period' => $previousCandidates,
+                'percentage_change' => $calculateChange($currentCandidates, $previousCandidates),
+                'title' => 'Candidates',
+                'icon' => 'fa fa-user-tie',
+                'color' => 'purple'
+            ],
+            
+            // Additional Stats
+            'campaigns' => [
                 'count' => $currentProjects,
                 'change' => $calculateChange($currentProjects, $previousProjects),
                 'previous_period' => $previousProjects,
                 'percentage_change' => $calculateChange($currentProjects, $previousProjects),
-                'title' => 'Projects',
+                'title' => 'Campaigns',
                 'icon' => 'fa fa-project-diagram',
                 'color' => 'red'
             ],
@@ -366,63 +432,16 @@ class BackendController extends Controller
                 'icon' => 'fa fa-calendar-alt',
                 'color' => 'pink'
             ],
-            
-            // Volunteers
-            'active_volunteers' => [
-                'count' => 0,
-                'change' => 0,
-                'previous_period' => 0,
-                'percentage_change' => 0,
-                'title' => 'Active Volunteers',
-                'icon' => 'fa fa-hands-helping',
-                'color' => 'green'
-            ],
-            'volunteer_hours' => [
-                'count' => 0,
-                'change' => 0,
-                'previous_period' => 0,
-                'percentage_change' => 0,
-                'title' => 'Volunteer Hours',
-                'icon' => 'fa fa-clock',
+            'engagement_rate' => [
+                'count' => $engagementRate,
+                'change' => $calculateChange($engagementRate, $previousEngagementRate),
+                'previous_period' => $previousEngagementRate,
+                'percentage_change' => $calculateChange($engagementRate, $previousEngagementRate),
+                'title' => 'Engagement Rate',
+                'icon' => 'fa fa-chart-line',
                 'color' => 'orange'
-            ],
-            
-            // Special Interest Groups
-            'youth_members' => [
-                'count' => 0,
-                'change' => 0,
-                'previous_period' => 0,
-                'percentage_change' => 0,
-                'title' => 'Youth Members',
-                'icon' => 'fa fa-child',
-                'color' => 'yellow'
-            ],
-            'women_members' => [
-                'count' => 0,
-                'change' => 0,
-                'previous_period' => 0,
-                'percentage_change' => 0,
-                'title' => 'Women Members',
-                'icon' => 'fa fa-female',
-                'color' => 'pink'
             ]
         ];
-
-        // dd([
-        //     'title' => ucwords($roles[0]) . ' Dashboard',
-        //     'breadcrumbs' => [
-        //         [
-        //             'label' => 'Dashboard',
-        //             'url' => route('dashboard')
-        //         ]
-        //     ],  
-        //     'data' => [
-        //         'stats' => $stats,
-        //         'activities' => $activities->toArray(),
-        //         'roles' => $roles,
-        //         'user' => $user
-        //     ],
-        // ]);
 
         return Inertia::render('Dashboard', [
             'title' => ucwords($roles[0] == 'citizen' ? 'Member' : $roles[0]) . ' Dashboard',

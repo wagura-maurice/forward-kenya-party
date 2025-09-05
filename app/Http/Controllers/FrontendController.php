@@ -625,6 +625,8 @@ class FrontendController extends Controller
 
     public function processDonation(Request $request)
     {
+        // dd($request->all());
+
         try {
             // Common validation rules for all donation types
             $rules = [
@@ -641,11 +643,12 @@ class FrontendController extends Controller
                 case 'monetary':
                     $rules['amount'] = 'required|numeric|min:1';
                     $rules['is_recurring'] = 'required|boolean';
-                    $rules['payment_method'] = 'required|in:mpesa,card,bank,crypto';
+                    $rules['payment_method'] = 'required|in:mobile_money,card,bank,crypto';
                     
                     // Payment method specific validations
-                    if ($request->payment_method === 'mpesa') {
-                        $rules['mpesa_phone'] = 'required|string|regex:/^\+?[0-9]{10,15}$/';
+                    if ($request->payment_method === 'mobile_money') {
+                        $rules['mobile_money_provider'] = 'required|in:mpesa,airtel,tkash,equity';
+                        $rules['telephone_number'] = 'required|string|regex:/^\+?[0-9]{10,15}$/';
                     } elseif ($request->payment_method === 'card') {
                         $rules['card_last_four'] = 'required|string|size:4';
                         // Note: In production, never handle full card details directly
@@ -674,9 +677,15 @@ class FrontendController extends Controller
             
             switch ($request->type) {
                 case 'monetary':
+                    // Map mobile_money to mpesa for backward compatibility
+                    if ($validated['payment_method'] === 'mobile_money') {
+                        $validated['payment_method'] = $validated['mobile_money_provider'] ?? 'mpesa';
+                        $validated['phone'] = $validated['telephone_number'] ?? $validated['phone'];
+                    }
+                    
                     $donation = $this->processMonetaryDonation($validated);
                     $message = 'Thank you for your monetary donation of KES ' . number_format($validated['amount'], 2) . '!';
-                    if ($validated['is_recurring']) {
+                    if (($validated['is_recurring'] ?? false)) {
                         $message .= ' Your recurring donation has been set up successfully.';
                     }
                     break;
