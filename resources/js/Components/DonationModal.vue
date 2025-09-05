@@ -6,9 +6,9 @@
             
             <!-- Modal panel - Using larger max-width (3xl) for donation form -->
             <div ref="modalRef" class="mb-6 bg-white dark:bg-gray-800 rounded-lg overflow-hidden shadow-xl transform transition-all sm:w-full sm:mx-auto sm:max-w-3xl">
-                <div class="p-8 w-full">
+                <div class="p-8 w-full text-left">
                     <!-- Modal header -->
-                    <div class="flex justify-between mb-6">
+                    <div class="flex justify-between items-start mb-6">
                         <h3 class="text-2xl font-bold text-gray-900 dark:text-white">
                             Support Our Cause
                         </h3>
@@ -25,7 +25,7 @@
                     <!-- Donation Form -->
                     <div class="space-y-6">
                         <div>
-                            <p class="text-gray-600 dark:text-gray-300 mb-6 text-left">
+                            <p class="text-gray-600 dark:text-gray-300 mb-6">
                                 Your generous donation will help us continue our mission. All contributions are greatly appreciated.
                             </p>
                         </div>
@@ -57,7 +57,7 @@
                         <!-- Monetary Donation Fields -->
                         <div v-if="form.donation_type === 'monetary'" class="space-y-4">
                             <!-- Recurring Donation Option -->
-                            <div v-if="form.donation_type === 'monetary'" class="flex items-center">
+                            <div class="flex items-center">
                                 <input 
                                     id="recurring" 
                                     type="checkbox" 
@@ -81,7 +81,7 @@
                                         type="button"
                                         @click="form.payment_method = method.value"
                                         :class="[
-                                            'p-4 border rounded-lg flex flex-col items-start transition-colors',
+                                            'p-4 border rounded-lg flex flex-col items-start transition-colors text-left',
                                             form.payment_method === method.value 
                                                 ? 'border-green-500 bg-green-50 dark:bg-green-900/20 ring-1 ring-green-500' 
                                                 : 'border-gray-300 dark:border-gray-600 hover:border-green-500 hover:bg-gray-50 dark:hover:bg-gray-700'
@@ -98,7 +98,7 @@
                                 <!-- Mobile Money Payment Details -->
                                 <div v-if="form.payment_method === 'mobile_money'" class="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                                     <div class="space-y-4">
-                                        <div class="grid grid-cols-2 gap-4">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <!-- Mobile Money Provider Selection -->
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
@@ -158,11 +158,11 @@
                                         <div v-if="form.mobile_money_provider === 'mpesa'" class="p-3 bg-green-50 dark:bg-green-900/20 text-green-800 dark:text-green-200 text-sm rounded-md">
                                             <p>For Mpesa, please ensure your number is registered for Safaricom Mpesa services.</p>
                                         </div>
-                                        <div v-if="form.mobile_money_provider === 'airtel'" class="p-3 bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200 text-sm rounded-md">
+                                        <div v-else-if="form.mobile_money_provider === 'airtel'" class="p-3 bg-red-50 dark:bg-red-900/20 text-red-800 dark:text-red-200 text-sm rounded-md">
                                             <p>For Airtel Money, please ensure your number is registered for Airtel Money services.</p>
                                         </div>
                                         <div v-else-if="form.mobile_money_provider === 'tkash'" class="p-3 bg-blue-50 dark:bg-blue-900/20 text-blue-800 dark:text-blue-200 text-sm rounded-md">
-                                            <p>For T-Kash, please ensure your Telkom line is registered for Telekom T-Kash services.</p>
+                                            <p>For T-Kash, please ensure your Telkom line is registered for Telkom T-Kash services.</p>
                                         </div>
                                         <div v-else-if="form.mobile_money_provider === 'equity'" class="p-3 bg-purple-50 dark:bg-purple-900/20 text-purple-800 dark:text-purple-200 text-sm rounded-md">
                                             <p>For EazzyPay, please ensure your number is registered for Equity EazzyPay services.</p>
@@ -173,33 +173,33 @@
                                 <!-- Card Payment Details -->
                                 <div v-else-if="form.payment_method === 'card'" class="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                                     <div class="space-y-4">
-                                        <div class="grid grid-cols-2 gap-4">
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                                Card Number <span class="text-red-500">*</span>
-                                            </label>
-                                            <input 
-                                                type="text" 
-                                                v-model="form.card_number"
-                                                placeholder="1234 5678 9012 3456"
-                                                class="focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-gray-300 rounded-md dark:bg-gray-600 dark:border-gray-500 dark:text-white"
-                                                required
-                                            >
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    Card Number <span class="text-red-500">*</span>
+                                                </label>
+                                                <input 
+                                                    type="text" 
+                                                    v-model="form.card_number"
+                                                    placeholder="1234 5678 9012 3456"
+                                                    class="focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-gray-300 rounded-md dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                                                    required
+                                                >
+                                            </div>
+                                            <div>
+                                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
+                                                    Name on Card <span class="text-red-500">*</span>
+                                                </label>
+                                                <input 
+                                                    type="text" 
+                                                    v-model="form.card_name"
+                                                    placeholder="Full name as on card"
+                                                    class="focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-gray-300 rounded-md dark:bg-gray-600 dark:border-gray-500 dark:text-white"
+                                                    required
+                                                >
+                                            </div>
                                         </div>
-                                        <div>
-                                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                                                Name on Card <span class="text-red-500">*</span>
-                                            </label>
-                                            <input 
-                                                type="text" 
-                                                v-model="form.card_name"
-                                                placeholder="Full name as on card"
-                                                class="focus:ring-green-500 focus:border-green-500 block w-full sm:text-sm border-gray-300 rounded-md dark:bg-gray-600 dark:border-gray-500 dark:text-white"
-                                                required
-                                            >
-                                        </div>
-                                        </div>
-                                        <div class="grid grid-cols-2 gap-4">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                     Expiry Date <span class="text-red-500">*</span>
@@ -231,7 +231,7 @@
                                 <!-- Bank Transfer Details -->
                                 <div v-else-if="form.payment_method === 'bank'" class="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                                     <div class="space-y-4">
-                                        <div class="grid grid-cols-2 gap-4">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                     Select Bank <span class="text-red-500">*</span>
@@ -273,7 +273,7 @@
                                         
                                         <div class="space-y-3 bg-white dark:bg-gray-800 p-4 rounded-md border border-gray-200 dark:border-gray-700">
                                             <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">Bank Transfer Details:</h4>
-                                            <div class="grid grid-cols-2 gap-4">
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                                 <div>
                                                     <p class="text-xs text-gray-500 dark:text-gray-400">Bank Name</p>
                                                     <p class="text-sm font-medium">{{ selectedBank.name }}</p>
@@ -286,20 +286,6 @@
                                                     <p class="text-xs text-gray-500 dark:text-gray-400">Account Number</p>
                                                     <p class="text-sm font-mono">{{ selectedBank.accountNumber }}</p>
                                                 </div>
-                                                <!-- <div>
-                                                    <p class="text-xs text-gray-500 dark:text-gray-400">Reference Code</p>
-                                                    <p class="text-sm font-mono">
-                                                        {{ selectedBank.referenceCode }}
-                                                        <button 
-                                                            type="button" 
-                                                            @click="copyToClipboard(selectedBank.referenceCode)"
-                                                            class="ml-2 p-1 text-gray-400 hover:text-green-600"
-                                                            title="Copy to clipboard"
-                                                        >
-                                                            <i class="far fa-copy"></i>
-                                                        </button>
-                                                    </p>
-                                                </div> -->
                                                 <div>
                                                     <p class="text-xs text-gray-500 dark:text-gray-400">Branch</p>
                                                     <p class="text-sm">{{ selectedBank.branch }}</p>
@@ -326,7 +312,7 @@
                                 <!-- Cryptocurrency Wallet Addresses -->
                                 <div v-else-if="form.payment_method === 'crypto'" class="mt-4 p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
                                     <div class="space-y-4">
-                                        <div class="grid grid-cols-2 gap-4">
+                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                             <div>
                                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                                                     Select Cryptocurrency <span class="text-red-500">*</span>
@@ -366,28 +352,28 @@
                                         </div>
                                         
                                         <div class="bg-white dark:bg-gray-800 p-4 rounded-md border border-gray-200 dark:border-gray-700">
-                                            <div class="grid grid-cols-5 gap-4">
-                                            <div class="col-span-1">
-                                                <div class="w-32 h-32 bg-white p-2 rounded border">
-                                                    <img :src="selectedCrypto.qrCode" :alt="selectedCrypto.name + ' QR Code'" class="w-full h-full">
+                                            <div class="flex flex-col md:flex-row items-start gap-4">
+                                                <div class="w-full md:w-1/4 flex items-center justify-center">
+                                                    <div class="w-32 h-32 bg-white p-2 rounded border">
+                                                        <img :src="selectedCrypto.qrCode" :alt="selectedCrypto.name + ' QR Code'" class="w-full h-full mx-auto">
+                                                    </div>
                                                 </div>
-                                            </div>
-                                            <div class="col-span-4 flex flex-col justify-end space-y-2 px-4">
-                                                    <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Send to {{ selectedCrypto.name }} Address:</h4>
-                                                    <div class="flex items-center bg-gray-100 dark:bg-gray-700 p-2 rounded w-full">
-                                                        <span class="font-mono text-sm break-all w-full">{{ selectedCrypto.address }}</span>
+                                                <div class="w-full md:w-3/4 space-y-3">
+                                                    <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300">Send to {{ selectedCrypto.name }} Address:</h4>
+                                                    <div class="flex items-center bg-gray-100 dark:bg-gray-700 p-2 rounded">
+                                                        <span class="font-mono text-sm break-all flex-1 mr-2">{{ selectedCrypto.address }}</span>
                                                         <button 
                                                             type="button" 
                                                             @click="copyToClipboard(selectedCrypto.address)"
-                                                            class="ml-2 p-1 text-gray-400 hover:text-green-600"
+                                                            class="p-1 text-gray-400 hover:text-green-600 flex-shrink-0"
                                                             title="Copy to clipboard"
                                                         >
-                                                            <i class="far fa-copy"></i>
+                                                            <i class="far fa-copy text-green-500"></i>
                                                         </button>
                                                     </div>
-                                                    <div class="flex items-center justify-start text-sm">
+                                                    <div class="flex justify-between text-sm">
                                                         <span class="text-gray-600 dark:text-gray-300">Network:</span>
-                                                        <span class="font-medium ml-auto">{{ selectedCrypto.network || 'ERC-20' }}</span>
+                                                        <span class="font-medium">{{ selectedCrypto.network || 'ERC-20' }}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -399,7 +385,7 @@
                                                 
                         <!-- In-Kind Donation Fields -->
                         <div v-else-if="form.donation_type === 'in_kind'" class="space-y-4">
-                            <div class="grid grid-cols-2 gap-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div class="space-y-2">
                                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                         Type of Donation <span class="text-red-500">*</span>
@@ -429,7 +415,6 @@
                                         step="1"
                                     >
                                 </div>
-
                             </div>
                             
                             <div class="space-y-2">
@@ -448,18 +433,18 @@
                         
                         <!-- Volunteer Donation Fields -->
                         <div v-else-if="form.donation_type === 'volunteer'" class="space-y-4">
-                            <div class="grid grid-cols-2 gap-4">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div class="space-y-2">
-                                <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    Skills/Expertise <span class="text-red-500">*</span>
-                                </label>
-                                <input 
-                                    type="text" 
-                                    v-model="form.skills"
-                                    class="focus:ring-green-500 focus:border-green-500 block w-full px-3 py-2 sm:text-sm border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                    placeholder="e.g., Graphic Design, Event Planning, Legal Advice"
-                                    required
-                                >
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        Skills/Expertise <span class="text-red-500">*</span>
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        v-model="form.skills"
+                                        class="focus:ring-green-500 focus:border-green-500 block w-full px-3 py-2 sm:text-sm border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                        placeholder="e.g., Graphic Design, Event Planning, Legal Advice"
+                                        required
+                                    >
                                 </div>
                                 
                                 <div class="space-y-2">
@@ -494,7 +479,7 @@
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <!-- Monetary Donation Fields -->
                             <div v-if="form.donation_type === 'monetary'" class="space-y-4">
                                 <!-- Donation Amount -->
@@ -521,7 +506,7 @@
                             </div>
 
                             <!-- Donor Information -->
-                            <div :class="form.donation_type === 'monetary' ? 'space-y-2' : 'col-span-2'">
+                            <div :class="form.donation_type === 'monetary' ? 'space-y-2' : 'col-span-2 space-y-2'">
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Your Full Name <span class="text-red-500">*</span>
                                 </label>
@@ -529,13 +514,13 @@
                                     type="text" 
                                     v-model="form.donor_name"
                                     class="focus:ring-green-500 focus:border-green-500 block w-full px-3 py-2 sm:text-sm border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                                    :class="form.donation_type === 'monetary' ? '' : 'col-span-2'"
                                     placeholder="John Doe"
+                                    required
                                 >
                             </div>
                         </div>
 
-                        <div class="grid grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div class="space-y-2">
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
                                     Your Email Address <span class="text-red-500">*</span>
@@ -545,64 +530,62 @@
                                     v-model="form.email"
                                     class="focus:ring-green-500 focus:border-green-500 block w-full px-3 py-2 sm:text-sm border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                     placeholder="you@example.com"
+                                    required
                                 >
                             </div>
 
                             <div class="space-y-2">
                                 <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                                    Your Telehone Number <span class="text-red-500">*</span>
+                                    Your Telephone Number <span class="text-red-500">*</span>
                                 </label>
                                 <input 
                                     type="tel" 
                                     v-model="form.phone"
                                     class="focus:ring-green-500 focus:border-green-500 block w-full px-3 py-2 sm:text-sm border border-gray-300 rounded-md dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                     placeholder="+254 700 000000"
+                                    required
                                 >
                             </div>
                         </div>
 
                         <!-- Terms and Conditions -->
                         <div class="space-y-2">
-                            <div class="flex items-start justify-start">
+                            <div class="flex items-start">
                                 <div class="flex items-center h-5">
                                     <input 
                                         id="terms" 
                                         type="checkbox" 
                                         v-model="form.terms"
                                         class="focus:ring-green-500 h-4 w-4 text-green-600 border-gray-300 rounded dark:bg-gray-700 dark:border-gray-600"
+                                        required
                                     >
                                 </div>
-                                <div class="ml-3 text-sm pl-5">
+                                <div class="ml-3 text-sm">
                                     <label for="terms" class="font-medium text-gray-700 dark:text-gray-300">
-                                        <span class="w-full">
-                                            By donating, I agree with the
-                                            <a
-                                                :href="route('frontend.terms-and-conditions')"
-                                                target="_blank"
-                                                class="text-emerald-600 hover:text-emerald-500 hover:underline underline-offset-4 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-emerald-500 rounded"
-                                            >
-                                                Terms of Service
-                                            </a>
-                                            <span class="mx-1">and</span>
-                                            <a
-                                                :href="route('frontend.privacy-policy')"
-                                                target="_blank"
-                                                class="text-emerald-600 hover:text-emerald-500 hover:underline underline-offset-4 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-emerald-500 rounded"
-                                            >
-                                                Privacy Policy. 
-                                            </a>
-
-                                                Furthermore, I understand that donations made to this cause are
-                                                tax deductible as per the provisions of the Income Tax
-                                                Ordinance Chapter 186 of the Laws of Kenya, 2015.
-
-                                        </span>
+                                        By donating, I agree with the
+                                        <a
+                                            :href="route('frontend.terms-and-conditions')"
+                                            target="_blank"
+                                            class="text-emerald-600 hover:text-emerald-500 hover:underline underline-offset-4 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-emerald-500 rounded"
+                                        >
+                                            Terms of Service
+                                        </a>
+                                        <span class="mx-1">and</span>
+                                        <a
+                                            :href="route('frontend.privacy-policy')"
+                                            target="_blank"
+                                            class="text-emerald-600 hover:text-emerald-500 hover:underline underline-offset-4 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-emerald-500 rounded"
+                                        >
+                                            Privacy Policy. 
+                                        </a>
+                                        Furthermore, I understand that donations made to this cause are
+                                        tax deductible as per the provisions of the Income Tax
+                                        Ordinance Chapter 186 of the Laws of Kenya, 2015.
                                     </label>
                                 </div>
                             </div>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 ml-0 -mt-1 pl-5">
-                                You must agree to the terms of
-                                service and our privacy policy to make a donation.
+                            <p class="text-xs text-gray-500 dark:text-gray-400 ml-7">
+                                You must agree to the terms of service and our privacy policy to make a donation.
                             </p>
                         </div>
 
@@ -613,7 +596,7 @@
                                 @click="submitDonation"
                                 :disabled="!form.terms || processing"
                                 :class="[
-                                    'w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500',
+                                    'w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gradient-to-r from-green-600 to-blue-600 hover:from-green-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-all duration-200',
                                     (!form.terms || processing) ? 'opacity-50 cursor-not-allowed' : ''
                                 ]"
                             >
@@ -816,6 +799,7 @@ const form = useForm({
     terms: false,
     notes: '',
     estimated_value: '',
+    description: '',
     selected_bank: 'equity',
     selected_crypto: 'bitcoin',
     transaction_reference: ''
@@ -853,7 +837,7 @@ const selectDonationType = (type) => {
 const copyToClipboard = async (text) => {
     try {
         await navigator.clipboard.writeText(text);
-        alert('Copied to clipboard!');
+        showToast('success', 'Copied!', 'Address copied to clipboard');
     } catch (err) {
         console.error('Failed to copy text: ', err);
         const textArea = document.createElement('textarea');
@@ -862,10 +846,10 @@ const copyToClipboard = async (text) => {
         textArea.select();
         try {
             document.execCommand('copy');
-            alert('Copied to clipboard!');
+            showToast('success', 'Copied!', 'Address copied to clipboard');
         } catch (err) {
             console.error('Fallback copy failed: ', err);
-            alert('Failed to copy. Please copy it manually.');
+            showToast('error', 'Copy Failed', 'Please copy the address manually');
         }
         document.body.removeChild(textArea);
     }
@@ -969,8 +953,8 @@ const submitDonation = async () => {
             }),
             ...(form.donation_type === 'in_kind' && {
                 in_kind_type: form.in_kind_type,
-                description: form.in_kind_description || form.notes,
-                estimated_value: parseFloat(form.in_kind_value || form.estimated_value) || 0
+                description: form.description || form.notes,
+                estimated_value: parseFloat(form.estimated_value) || 0
             }),
             ...(form.donation_type === 'volunteer' && {
                 skills: form.skills,
@@ -993,19 +977,19 @@ const submitDonation = async () => {
         // Show success message based on donation type
         let successTitle = 'Thank You!';
         let successHtml = `
-            <div class="text-center">
+            <div class="text-left">
                 <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
                     <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                     </svg>
                 </div>
-                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2">${successTitle}</h3>
+                <h3 class="text-lg font-medium text-gray-900 dark:text-white mb-2 text-center">${successTitle}</h3>
                 <div class="mt-2 text-sm text-gray-600 dark:text-gray-300">
         `;
         
         if (form.donation_type === 'monetary') {
             successHtml += `
-                <p>Thank you for your ${form.is_recurring ? 'monthly ' : ''}donation of <span class="font-semibold">KES ${form.amount ? form.amount.toLocaleString() : ''}</span>.</p>
+                <p class="text-center mb-4">Thank you for your ${form.is_recurring ? 'monthly ' : ''}donation of <span class="font-semibold">KES ${form.amount ? parseFloat(form.amount).toLocaleString() : ''}</span>.</p>
             `;
             
             if (form.payment_method === 'mobile_money') {
@@ -1033,9 +1017,9 @@ const submitDonation = async () => {
                         <div class="grid grid-cols-2 gap-2 text-sm text-blue-700 dark:text-blue-300">
                             <span class="font-medium">Bank:</span><span>${bank.name}</span>
                             <span class="font-medium">Account Name:</span><span>${bank.accountName}</span>
-                            <span class="font-medium">Account No:</span><span>${bank.accountNumber}</span>
+                            <span class="font-medium">Account No:</span><span class="font-mono">${bank.accountNumber}</span>
                             <span class="font-medium">Branch:</span><span>${bank.branch}</span>
-                            <span class="font-medium">SWIFT Code:</span><span>${bank.swiftCode}</span>
+                            <span class="font-medium">SWIFT Code:</span><span class="font-mono">${bank.swiftCode}</span>
                             <span class="font-medium">Reference:</span><span class="font-mono">${form.transaction_reference}</span>
                         </div>
                     </div>`;
@@ -1046,53 +1030,44 @@ const submitDonation = async () => {
                         <p class="font-medium text-blue-800 dark:text-blue-200 mb-2">Crypto Payment Details:</p>
                         <div class="space-y-2 text-sm text-blue-700 dark:text-blue-300">
                             <div><span class="font-medium">Currency:</span> ${crypto.name}</div>
-                            <div class="flex items-center">
-                                <span class="font-medium mr-2">Address:</span>
+                            <div>
+                                <span class="font-medium">Address:</span><br>
                                 <span class="font-mono text-xs break-all">${crypto.address}</span>
-                                <button 
-                                    type="button" 
-                                    @click="copyToClipboard('${crypto.address}')"
-                                    class="ml-2 p-1 text-blue-500 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300"
-                                    title="Copy to clipboard"
-                                >
-                                    <i class="far fa-copy"></i>
-                                </button>
                             </div>
                             <div><span class="font-medium">Reference:</span> <span class="font-mono">${form.transaction_reference}</span></div>
                         </div>
                     </div>`;
             }
         } else if (form.donation_type === 'in_kind') {
+            const inKindTypeLabel = inKindTypes.find(type => type.value === form.in_kind_type)?.label || form.in_kind_type;
             successTitle = 'Donation Received!';
             successHtml = `
-                <div class="text-center">
+                <div class="text-left">
                     <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
                         <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                         </svg>
                     </div>
-                    <h3 class="text-lg font-medium text-gray-900 mb-2">${successTitle}</h3>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2 text-center">${successTitle}</h3>
                     <div class="mt-2 text-sm text-gray-600">
-                        <p>Thank you for your in-kind donation of <span class="font-semibold">${form.in_kind_type}</span>.</p>
-                        <p class="mt-2">We'll review your donation and contact you shortly.</p>
+                        <p class="text-center">Thank you for your in-kind donation of <span class="font-semibold">${inKindTypeLabel}</span>.</p>
+                        <p class="mt-2 text-center">We'll review your donation and contact you shortly.</p>
                     </div>
-                </div>
             `;
         } else if (form.donation_type === 'volunteer') {
             successTitle = 'Welcome Aboard!';
             successHtml = `
-                <div class="text-center">
+                <div class="text-left">
                     <div class="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-green-100 mb-4">
                         <svg class="h-8 w-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
                         </svg>
                     </div>
-                    <h3 class="text-lg font-medium text-gray-900 mb-2">${successTitle}</h3>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2 text-center">${successTitle}</h3>
                     <div class="mt-2 text-sm text-gray-600">
-                        <p>Thank you for volunteering with us!</p>
-                        <p class="mt-2">Our team will review your application and get in touch soon.</p>
+                        <p class="text-center">Thank you for volunteering with us!</p>
+                        <p class="mt-2 text-center">Our team will review your application and get in touch soon.</p>
                     </div>
-                </div>
             `;
         }
         
@@ -1128,6 +1103,11 @@ const submitDonation = async () => {
         // Reset form and close modal
         form.reset();
         form.donation_type = 'monetary';
+        form.payment_method = 'mobile_money';
+        form.mobile_money_provider = 'mpesa';
+        form.telephone_prefix = '+254';
+        form.selected_bank = 'equity';
+        form.selected_crypto = 'bitcoin';
         close();
         
     } catch (error) {
