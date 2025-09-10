@@ -108,7 +108,7 @@ class DepartmentsTableSeeder extends Seeder
                 '_status' => Department::ACTIVE, // Assuming 1 corresponds to 'Active'
                 'logo' => $department['logo'],
                 // 'contact_email' => 'example@ecitizen.go.ke', // Replace with actual email
-                // 'contact_phone' => '+254700000000', // Replace with actual phone number
+                // 'contact_phone' => '+254 713 447820', // Replace with actual phone number
                 'website' => $department['website'],
                 'is_featured' => true,
                 'created_at' => now(),
