@@ -103,7 +103,14 @@ const submitForm = () => {
             <p
                 class="mb-8 lg:mb-16 font-light text-gray-500 dark:text-gray-400 sm:text-xl"
             >
-                Join us in shaping the future of Kenya through our shared values of unity, equity, and sustainable development. Whether you're interested in party membership, want to learn about our vision for Kenya, seek information about our candidates, or wish to contribute your ideas, we welcome your engagement. Your voice matters in our collective journey towards building a more inclusive and prosperous nation. Together, we can make a difference.
+                Join us in shaping the future of Kenya through our shared values
+                of unity, equity, and sustainable development. Whether you're
+                interested in party membership, want to learn about our vision
+                for Kenya, seek information about our candidates, or wish to
+                contribute your ideas, we welcome your engagement. Your voice
+                matters in our collective journey towards building a more
+                inclusive and prosperous nation. Together, we can make a
+                difference.
             </p>
 
             <!-- Contact Information Grid -->
@@ -189,7 +196,9 @@ const submitForm = () => {
             </div>
 
             <!-- Contact Form Section -->
-            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg rounded-xl p-8 md:p-12 text-white mb-16">
+            <div
+                class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg rounded-xl p-8 md:p-12 text-white mb-16"
+            >
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
                     <!-- Left Column: Contact Form -->
                     <div>
@@ -198,10 +207,7 @@ const submitForm = () => {
                         >
                             Send us a message
                         </h3>
-                        <form
-                            @submit.prevent="submitForm"
-                            class="space-y-6"
-                        >
+                        <form @submit.prevent="submitForm" class="space-y-6">
                             <!-- Email Input -->
                             <div>
                                 <label
@@ -242,7 +248,7 @@ const submitForm = () => {
                                     pattern="[0-9+\-\s()]{10,20}"
                                     title="Please enter a valid phone number"
                                     class="shadow-sm bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-green-500 dark:focus:border-green-500 dark:shadow-sm-light"
-                                    placeholder="+254 700 000 000"
+                                    placeholder="+254 713 447820"
                                 />
                                 <p
                                     v-if="form.errors.phone"
@@ -307,61 +313,91 @@ const submitForm = () => {
                                         <input
                                             type="checkbox"
                                             id="agree_to_privacy_policy"
-                                            v-model="form.agree_to_privacy_policy"
+                                            v-model="
+                                                form.agree_to_privacy_policy
+                                            "
                                             class="w-4 h-4 text-green-600 bg-gray-100 rounded border-gray-300 focus:ring-green-500 dark:focus:ring-green-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600"
                                             required
                                         />
                                     </div>
                                     <div class="ml-3 text-sm">
-                                        <label for="agree_to_privacy_policy" class="font-medium text-gray-700 dark:text-gray-300">
+                                        <label
+                                            for="agree_to_privacy_policy"
+                                            class="font-medium text-gray-700 dark:text-gray-300"
+                                        >
                                             <div class="flex flex-wrap">
                                                 <span class="mr-1">
-                                                    By contacting us, you agree to the
+                                                    By contacting us, you agree
+                                                    to the
                                                     <a
-                                                        :href="route('frontend.terms-and-conditions')"
+                                                        :href="
+                                                            route(
+                                                                'frontend.terms-and-conditions'
+                                                            )
+                                                        "
                                                         target="_blank"
                                                         class="text-emerald-600 hover:text-emerald-500 hover:underline underline-offset-4 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-emerald-500 rounded"
                                                     >
                                                         Terms of Service
                                                     </a>
-                                                    <span class="mx-1">and</span>
+                                                    <span class="mx-1"
+                                                        >and</span
+                                                    >
                                                     <a
-                                                        :href="route('frontend.privacy-policy')"
+                                                        :href="
+                                                            route(
+                                                                'frontend.privacy-policy'
+                                                            )
+                                                        "
                                                         target="_blank"
                                                         class="text-emerald-600 hover:text-emerald-500 hover:underline underline-offset-4 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-emerald-500 rounded"
                                                     >
                                                         Privacy Policy
                                                     </a>
-                                                    and affirm that all information provided is true and accurate.
+                                                    and affirm that all
+                                                    information provided is true
+                                                    and accurate.
                                                 </span>
                                             </div>
                                         </label>
-                                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                                            You must agree to the terms of service and our privacy policy to submit a contact form.
+                                        <p
+                                            class="text-xs text-gray-500 dark:text-gray-400 mt-2"
+                                        >
+                                            You must agree to the terms of
+                                            service and our privacy policy to
+                                            submit a contact form.
                                         </p>
                                     </div>
                                 </div>
                                 <p
-                                    v-if="
-                                        form.errors.agree_to_privacy_policy
-                                    "
+                                    v-if="form.errors.agree_to_privacy_policy"
                                     class="text-sm text-red-600 dark:text-red-400"
                                 >
-                                    {{
-                                        form.errors.agree_to_privacy_policy
-                                    }}
+                                    {{ form.errors.agree_to_privacy_policy }}
                                 </p>
                             </div>
 
                             <!-- Submit Button -->
                             <button
                                 type="submit"
-                                :disabled="!form.agree_to_privacy_policy || form.processing || !form.email || !form.phone || !form.subject || !form.message"
+                                :disabled="
+                                    !form.agree_to_privacy_policy ||
+                                    form.processing ||
+                                    !form.email ||
+                                    !form.phone ||
+                                    !form.subject ||
+                                    !form.message
+                                "
                                 :class="[
                                     'font-medium rounded-lg text-sm px-5 py-2.5 text-center me-2 mb-2',
-                                    form.agree_to_privacy_policy && form.email && form.phone && form.subject && form.message && !form.processing
+                                    form.agree_to_privacy_policy &&
+                                    form.email &&
+                                    form.phone &&
+                                    form.subject &&
+                                    form.message &&
+                                    !form.processing
                                         ? 'text-gray-900 bg-gradient-to-r from-teal-200 to-lime-200 hover:bg-gradient-to-l hover:from-teal-200 hover:to-lime-200 focus:ring-4 focus:outline-none focus:ring-lime-200 dark:focus:ring-teal-700 cursor-pointer'
-                                        : 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400 cursor-not-allowed'
+                                        : 'bg-gray-200 text-gray-500 dark:bg-gray-700 dark:text-gray-400 cursor-not-allowed',
                                 ]"
                             >
                                 <span v-if="form.processing">Sending...</span>
@@ -371,18 +407,14 @@ const submitForm = () => {
                     </div>
 
                     <!-- Right Column: Map -->
-                    <div
-                        class="rounded-lg overflow-hidden"
-                    >
+                    <div class="rounded-lg overflow-hidden">
                         <h3
                             class="text-2xl font-bold text-gray-900 dark:text-white"
                         >
                             Find us on map
                         </h3>
                         <div class="h-full w-full pt-2">
-                            <div
-                                class="relative h-96 w-full overflow-hidden"
-                            >
+                            <div class="relative h-96 w-full overflow-hidden">
                                 <!-- Google Maps Embed -->
                                 <iframe
                                     src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3988.800778530791!2d36.81814931475399!3d-1.284638999999982!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x182f10d7b2f1e9f3%3A0x1d5e6c1c9b6b1f1f!2sView%20Park%20Towers%2C%20Nairobi!5e0!3m2!1sen!2ske!4v1620000000000!5m2!1sen!2ske"
@@ -405,8 +437,7 @@ const submitForm = () => {
                                             class="fas fa-map-marker-alt text-4xl text-red-600 hover:animate-bounce cursor-pointer"
                                             style="
                                                 filter: drop-shadow(
-                                                    0 0 2px
-                                                        rgba(0, 0, 0, 0.5)
+                                                    0 0 2px rgba(0, 0, 0, 0.5)
                                                 );
                                             "
                                         ></i>
@@ -416,9 +447,7 @@ const submitForm = () => {
                             <div
                                 class="p-4 bg-white/50 dark:bg-gray-800/50 rounded-b-lg shadow-sm border border-gray-100 dark:border-gray-700"
                             >
-                                <div
-                                    class="flex items-start space-x-3 mb-3"
-                                >
+                                <div class="flex items-start space-x-3 mb-3">
                                     <div
                                         class="p-2 bg-green-100 dark:bg-green-900/30 rounded-full w-10 h-10 flex-shrink-0 flex items-center justify-center mt-0.5"
                                     >
@@ -435,7 +464,8 @@ const submitForm = () => {
                                         <p
                                             class="text-xs text-gray-600 dark:text-gray-400"
                                         >
-                                            Utalii Lane, Viewpark Towers, 19th Floor, Suite 19<br>
+                                            Utalii Lane, Viewpark Towers, 19th
+                                            Floor, Suite 19<br />
                                             P.O. Box: 27999 – 00100, GPO NAIROBI
                                         </p>
                                     </div>
