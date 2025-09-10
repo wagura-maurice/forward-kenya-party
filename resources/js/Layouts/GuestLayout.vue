@@ -115,26 +115,28 @@ onUnmounted(() => {
                                 :key="index"
                                 class="relative group"
                             >
-                                <h4><a
-                                    :href="link.href"
-                                    class="text-gray-700 dark:text-gray-200 hover:text-green-600 transition relative"
-                                    :class="{
-                                        'text-green-600 font-semibold':
-                                            isActivePage(link.href),
-                                    }"
-                                >
-                                    {{ link.name }}
-                                    <span
-                                        class="absolute left-0 -bottom-1 w-full h-0.5 bg-green-600 transform transition-all duration-300"
+                                <h4>
+                                    <a
+                                        :href="link.href"
+                                        class="text-gray-700 dark:text-gray-200 hover:text-green-600 transition relative"
                                         :class="{
-                                            'scale-100': isActivePage(
-                                                link.href
-                                            ),
-                                            'scale-0 group-hover:scale-100':
-                                                !isActivePage(link.href),
+                                            'text-green-600 font-semibold':
+                                                isActivePage(link.href),
                                         }"
-                                    ></span>
-                                </a></h4>
+                                    >
+                                        {{ link.name }}
+                                        <span
+                                            class="absolute left-0 -bottom-1 w-full h-0.5 bg-green-600 transform transition-all duration-300"
+                                            :class="{
+                                                'scale-100': isActivePage(
+                                                    link.href
+                                                ),
+                                                'scale-0 group-hover:scale-100':
+                                                    !isActivePage(link.href),
+                                            }"
+                                        ></span>
+                                    </a>
+                                </h4>
                             </div>
                         </nav>
 
@@ -340,7 +342,9 @@ onUnmounted(() => {
                         <p
                             class="font-light text-gray-500 dark:text-gray-400 text-medium leading-relaxed mb-4"
                         >
-                            Forward Kenya Party - Empowering Kenyans through progressive leadership, community action, and inclusive participation in the democratic process.
+                            Forward Kenya Party - Empowering Kenyans through
+                            progressive leadership, community action, and
+                            inclusive participation in the democratic process.
                         </p>
                         <div
                             class="flex items-center space-x-2 bg-white dark:bg-gray-700 px-3 py-1.5 rounded-full w-fit"
@@ -518,10 +522,10 @@ onUnmounted(() => {
                                         Call Us
                                     </h4>
                                     <a
-                                        href="tel:+254000000000"
+                                        href="tel:+254713447820"
                                         class="font-light text-gray-500 dark:text-gray-400 text-medium leading-relaxed focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1 focus:ring-offset-green-500 underline-offset-8 focus:ring-green-500 hover:ring-green-500 hover:ring-green-500 hover:underline hover:text-green-600 dark:hover:text-green-600"
                                     >
-                                        +254 700 000 000
+                                        +254 713 447820
                                     </a>
                                 </div>
                             </li>
@@ -567,7 +571,8 @@ onUnmounted(() => {
                             <p
                                 class="font-light text-gray-500 dark:text-gray-400 text-medium leading-relaxed mb-4"
                             >
-                                Follow us on social media for the latest updates and news from Forward Kenya Party.
+                                Follow us on social media for the latest updates
+                                and news from Forward Kenya Party.
                             </p>
                             <div class="flex flex-wrap gap-2 mb-6">
                                 <a
@@ -594,7 +599,7 @@ onUnmounted(() => {
                                         },
                                         {
                                             icon: 'fab fa-whatsapp',
-                                            url: 'https://api.whatsapp.com/send?phone=+254700000000',
+                                            url: 'https://api.whatsapp.com/send?phone=+254 713 447820',
                                             color: 'bg-green-100 text-green-600 hover:bg-green-600 hover:text-white',
                                         },
                                         {
@@ -625,7 +630,8 @@ onUnmounted(() => {
                             <p
                                 class="font-light text-gray-500 dark:text-gray-400 text-medium leading-relaxed mb-3"
                             >
-                                Subscribe for the latest news and updates from Forward Kenya Party.
+                                Subscribe for the latest news and updates from
+                                Forward Kenya Party.
                             </p>
                             <div class="flex mb-3">
                                 <input
@@ -639,10 +645,11 @@ onUnmounted(() => {
                                     <i class="fas fa-paper-plane text-sm"></i>
                                 </button>
                             </div>
-                            <small  
+                            <small
                                 class="font-light text-gray-500 dark:text-gray-400 text-xs leading-relaxed italic"
                             >
-                                By subscribing, you agree to receive updates from Forward Kenya Party and accept our
+                                By subscribing, you agree to receive updates
+                                from Forward Kenya Party and accept our
                                 <a
                                     :href="
                                         route('frontend.terms-and-conditions')
