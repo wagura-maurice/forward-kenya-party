@@ -38,9 +38,9 @@ task('release:application', function () {
     // serve the app down
     run('{{bin/php}} {{release_path}}/artisan down');
     // Clear caches
-    // run('{{bin/php}} {{release_path}}/artisan cache:clear');
+    run('{{bin/php}} {{release_path}}/artisan cache:clear');
     // Clear expired password reset tokens
-    // run('{{bin/php}} {{release_path}}/artisan auth:clear-resets');
+    run('{{bin/php}} {{release_path}}/artisan auth:clear-resets');
     // Clear and cache routes
     run('{{bin/php}} {{release_path}}/artisan route:clear');
     // Clear and cache config
@@ -52,9 +52,9 @@ task('release:application', function () {
     // optimize config and cache
     run('{{bin/php}} {{release_path}}/artisan optimize');
     // Run database migrations
-    // run('{{bin/php}} {{release_path}}/artisan migrate:fresh --seed --force');
+    run('{{bin/php}} {{release_path}}/artisan migrate:fresh --seed --force');
     // Run custom commands
-    // run('{{bin/php}} {{release_path}}/artisan app:optimize');
+    run('{{bin/php}} {{release_path}}/artisan app:optimize');
     // run('{{bin/php}} {{release_path}}/artisan app:debug');
     // serve the app up
     run('{{bin/php}} {{release_path}}/artisan up');
