@@ -27,7 +27,8 @@
         "spatie/laravel-activitylog": "^4.10",
         "spatie/laravel-json-api-paginate": "^1.16",
         "spatie/laravel-query-builder": "^6.3",
-        "tightenco/ziggy": "^2.0"
+        "tightenco/ziggy": "^2.0",
+        "twilio/sdk": "^8.11"
     },
     "require-dev": {
         "laravel/pail": "^1.1",
