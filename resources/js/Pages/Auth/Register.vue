@@ -1,4 +1,4 @@
-<!-- resources/js/Pages/Auth/Register.vue -->
+like th<!-- resources/js/Pages/Auth/Register.vue -->
 <script setup>
 import { Head, Link, useForm, router } from "@inertiajs/vue3";
 import { ref, computed, watch } from "vue";
@@ -1929,13 +1929,19 @@ const canProceedToNextStep = computed(() => {
                                         label="name"
                                         :reduce="(county) => county.id"
                                         placeholder="Select County"
-                                        class="w-full"
+                                        class="w-full capitalize-select"
                                         :class="{
                                             'border-red-500':
                                                 form.errors.county_id,
                                         }"
                                         :clearable="false"
                                     >
+                                        <template #option="{ name }">
+                                            <span class="capitalize">{{ name }}</span>
+                                        </template>
+                                        <template #selected-option="{ name }">
+                                            <span class="capitalize">{{ name }}</span>
+                                        </template>
                                         <template #no-options>
                                             <div
                                                 class="text-sm text-gray-500 py-2 px-3"
@@ -1972,7 +1978,7 @@ const canProceedToNextStep = computed(() => {
                                             (constituency) => constituency.id
                                         "
                                         placeholder="Select Constituency"
-                                        class="w-full"
+                                        class="w-full capitalize-select"
                                         :class="{
                                             'border-red-500':
                                                 form.errors.constituency_id,
@@ -1980,6 +1986,12 @@ const canProceedToNextStep = computed(() => {
                                         :disabled="!form.county_id"
                                         :clearable="false"
                                     >
+                                        <template #option="{ name }">
+                                            <span class="capitalize">{{ name }}</span>
+                                        </template>
+                                        <template #selected-option="{ name }">
+                                            <span class="capitalize">{{ name }}</span>
+                                        </template>
                                         <template #no-options>
                                             <div
                                                 class="text-sm text-gray-500 py-2 px-3"
@@ -2018,7 +2030,7 @@ const canProceedToNextStep = computed(() => {
                                         label="name"
                                         :reduce="(ward) => ward.id"
                                         placeholder="Select Ward"
-                                        class="w-full"
+                                        class="w-full capitalize-select"
                                         :class="{
                                             'border-red-500':
                                                 form.errors.ward_id,
@@ -2026,6 +2038,12 @@ const canProceedToNextStep = computed(() => {
                                         :disabled="!form.constituency_id"
                                         :clearable="false"
                                     >
+                                        <template #option="{ name }">
+                                            <span class="capitalize">{{ name }}</span>
+                                        </template>
+                                        <template #selected-option="{ name }">
+                                            <span class="capitalize">{{ name }}</span>
+                                        </template>
                                         <template #no-options>
                                             <div
                                                 class="text-sm text-gray-500 py-2 px-3"
