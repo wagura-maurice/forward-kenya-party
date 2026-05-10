@@ -8,6 +8,7 @@ use App\Http\Controllers\BackendController;
 use App\Http\Controllers\ExportController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\FrontendController;
+use App\Http\Controllers\MemberController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 Route::get('/', [FrontendController::class, 'welcome'])->name('frontend.welcome');
@@ -65,6 +66,9 @@ Route::middleware([
 
     // Settings
     Route::get('/settings', [BackendController::class, 'settings'])->name('settings');
+    
+    // Members Management
+    Route::resource('members', MemberController::class);
 });
 
 Route::get('/email/verify', function () {

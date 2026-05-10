@@ -11,24 +11,15 @@ use App\Http\Controllers\API\LedgerController;
 use App\Http\Controllers\API\TicketController;
 use App\Http\Controllers\API\WalletController;
 use App\Http\Controllers\API\AbilityController;
-use App\Http\Controllers\API\CitizenController;
+use App\Http\Controllers\API\MemberController;
 use App\Http\Controllers\API\CountryController;
 use App\Http\Controllers\API\InvoiceController;
 use App\Http\Controllers\API\JournalController;
 use App\Http\Controllers\API\ManagerController;
 use App\Http\Controllers\API\ProfileController;
 use App\Http\Controllers\API\ReceiptController;
-use App\Http\Controllers\API\RefugeeController;
-use App\Http\Controllers\API\ServiceController;
-use App\Http\Controllers\API\SettingController;
-use App\Http\Controllers\API\ActivityController;
-use App\Http\Controllers\API\CurrencyController;
-use App\Http\Controllers\API\DiplomatController;
 use App\Http\Controllers\API\DocumentController;
 use App\Http\Controllers\API\FeedbackController;
-use App\Http\Controllers\API\ResidentController;
-use App\Http\Controllers\API\ConsulateController;
-use App\Http\Controllers\API\ForeignerController;
 use App\Http\Controllers\API\MediaTypeController;
 use App\Http\Controllers\API\SubCountyController;
 use App\Http\Controllers\REST\LocationController;
@@ -39,7 +30,6 @@ use App\Http\Controllers\REST\EthnicityController;
 use App\Http\Controllers\AfricaIsTalkingController;
 use App\Http\Controllers\API\InvoiceTypeController;
 use App\Http\Controllers\API\ReceiptTypeController;
-use App\Http\Controllers\API\RefugeeCampController;
 use App\Http\Controllers\API\ServiceTypeController;
 use App\Http\Controllers\API\TransactionController;
 use App\Http\Controllers\API\ActivityTypeController;
@@ -136,26 +126,12 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::apiResource('/constituency', ConstituencyController::class, ['as' => 'constituency']);
     // ward management
     Route::apiResource('/ward', WardController::class, ['as' => 'ward']);
-    // consulate management
-    Route::apiResource('/consulate', ConsulateController::class, ['as' => 'consulate']);
-    // refugee camp management
-    Route::apiResource('/refugee/camp', RefugeeCampController::class, ['as' => 'refugee.camp']);
     // administrator management
     Route::apiResource('/administrator', AdministratorController::class, ['as' => 'administrator']);
     // manager management
     Route::apiResource('/manager', ManagerController::class, ['as' => 'manager']);
-    // citizen management
-    Route::apiResource('/citizen', CitizenController::class, ['as' => 'citizen']);
-    // resident management
-    Route::apiResource('/resident', ResidentController::class, ['as' => 'resident']);
-    // refugee management
-    Route::apiResource('/refugee', RefugeeController::class, ['as' => 'refugee']);
-    // resident management
-    Route::apiResource('/resident', ResidentController::class, ['as' => 'resident']);
-    // diplomat management
-    Route::apiResource('/diplomat', DiplomatController::class, ['as' => 'diplomat']);
-    // foreigner management
-    Route::apiResource('/foreigner', ForeignerController::class, ['as' => 'foreigner']);
+    // member management
+    Route::apiResource('/member', MemberController::class, ['as' => 'member']);
     // guest management
     Route::apiResource('/guest', GuestController::class, ['as' => 'guest']);
     // media management
