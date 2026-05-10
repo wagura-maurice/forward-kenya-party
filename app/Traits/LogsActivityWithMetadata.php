@@ -20,41 +20,27 @@ trait LogsActivityWithMetadata
     public static function bootLogsActivityWithMetadata()
     {
         $className = static::class;
-        \Illuminate\Support\Facades\Log::info("Booting LogsActivityWithMetadata trait for {$className}");
         
-        // Register event listeners with more detailed logging
+        // Register event listeners
         $events = ['created', 'updated', 'deleted', 'restored'];
         
         foreach ($events as $event) {
             // Skip restored event if the model doesn't use SoftDeletes
-            if ($event === 'restored' && !method_exists($className, 'restored')) {
-                \Illuminate\Support\Facades\Log::info("Skipping {$event} event for {$className} - method not found");
-                continue;
+            if ($event === 'restored') {
+                // Check if the model uses SoftDeletes trait
+                $uses = class_uses($className);
+                if (!isset($uses[\Illuminate\Database\Eloquent\SoftDeletes::class])) {
+                    continue;
+                }
             }
-            
-            // Log that we're registering the event
-            \Illuminate\Support\Facades\Log::info("Registering {$event} event for {$className}");
             
             // Register the event with error handling
             try {
                 static::{$event}(function ($model) use ($event) {
-                    $modelClass = get_class($model);
-                    $modelId = $model->getKey();
-                    \Illuminate\Support\Facades\Log::info(
-                        "{$event} event triggered for {$modelClass} (ID: {$modelId})"
-                    );
-                    
-                    // Log the model's attributes for debugging
-                    \Illuminate\Support\Facades\Log::info("Model attributes: " . json_encode($model->getAttributes()));
-                    
                     // Call the logActivity method
                     $description = ucfirst($event) . ' ' . class_basename($model);
                     $model->logActivity($event, $description);
-                    
-                    \Illuminate\Support\Facades\Log::info("logActivity called for {$event} event on {$modelClass} (ID: {$modelId})");
                 });
-                
-                \Illuminate\Support\Facades\Log::info("Successfully registered {$event} event for {$className}");
             } catch (\Exception $e) {
                 \Illuminate\Support\Facades\Log::error(
                     "Failed to register {$event} event for {$className}: " . $e->getMessage(),
@@ -147,7 +133,6 @@ trait LogsActivityWithMetadata
                 'subject_id' => $this->getKey(),
                 'subject_type' => get_class($this),
                 'causer_id' => $causerId,
-                'causer_type' => $causerType,
                 '_status' => 1, // Completed
                 'created_at' => now(),
             ];
