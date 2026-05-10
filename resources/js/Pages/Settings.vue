@@ -16,10 +16,20 @@ const tabs = [
     { id: 'core', name: 'Core Settings', icon: 'cog' },
     { id: 'authorization', name: 'Authorization', icon: 'user-shield' },
     { id: 'media', name: 'Media', icon: 'images' },
+    { id: 'document', name: 'Documents', icon: 'file-alt' },
+    { id: 'currency', name: 'Currencies', icon: 'dollar-sign' },
     { id: 'regions', name: 'Location', icon: 'map-marked-alt' },
+    { id: 'bank', name: 'Banks', icon: 'university' },
     { id: 'demographics', name: 'Demographics', icon: 'users' },
     { id: 'departments', name: 'Departments', icon: 'sitemap' },
     { id: 'services', name: 'Services', icon: 'concierge-bell' },
+    { id: 'activity', name: 'Activities', icon: 'tasks' },
+    { id: 'exchange-rate', name: 'Exchange Rates', icon: 'exchange-alt' },
+    { id: 'account', name: 'Accounts', icon: 'user-circle' },
+    { id: 'receipts', name: 'Receipts', icon: 'receipt' },
+    { id: 'invoice', name: 'Invoices', icon: 'file-invoice' },
+    { id: 'feedback', name: 'Feedback', icon: 'comment-dots' },
+    { id: 'tickets', name: 'Tickets', icon: 'ticket-alt' },
     { id: 'communications', name: 'Communications', icon: 'envelope' },
 ];
 
@@ -32,6 +42,10 @@ const subTabs = {
         { id: 'media-types', name: 'Media Types', icon: 'list' },
         { id: 'media-categories', name: 'Media Categories', icon: 'folder' },
     ],
+    document: [
+        { id: 'document-types', name: 'Type', icon: 'list' },
+        { id: 'document-categories', name: 'Category', icon: 'folder' },
+    ],
     regions: [
         { id: 'counties', name: 'Counties', icon: 'map' },
         { id: 'subcounties', name: 'Sub-Counties', icon: 'map-marked-alt' },
@@ -43,11 +57,16 @@ const subTabs = {
         { id: 'polling-stations', name: 'Polling Stations', icon: 'vote-yea' },
         { id: 'polling-streams', name: 'Polling Streams', icon: 'vote-yea' },
     ],
+    bank: [
+        { id: 'bank-types', name: 'Type', icon: 'list' },
+        { id: 'bank-categories', name: 'Category', icon: 'folder' },
+    ],
     demographics: [
         { id: 'special-interest-groups', name: 'Special Interest Groups', icon: 'layer-group' },
         { id: 'genders', name: 'Genders', icon: 'venus-mars' },
         { id: 'ethnicities', name: 'Ethnic Groups', icon: 'users' },
         { id: 'religions', name: 'Religions', icon: 'place-of-worship' },
+        { id: 'languages', name: 'Languages', icon: 'language' },
     ],
     departments: [
         { id: 'department-types', name: 'Types', icon: 'sitemap' },
@@ -57,9 +76,37 @@ const subTabs = {
         { id: 'service-types', name: 'Types', icon: 'concierge-bell' },
         { id: 'service-categories', name: 'Categories', icon: 'folder' },
     ],
+    activity: [
+        { id: 'activity-types', name: 'Types', icon: 'tasks' },
+        { id: 'activity-categories', name: 'Categories', icon: 'folder' },
+    ],
     communications: [
         { id: 'communication-types', name: 'Types', icon: 'envelope' },
         { id: 'communication-categories', name: 'Categories', icon: 'folder' },
+    ],
+    currency: [
+        { id: 'currency-types', name: 'Type', icon: 'list' },
+        { id: 'currency-categories', name: 'Category', icon: 'folder' },
+    ],
+    account: [
+        { id: 'account-types', name: 'Type', icon: 'user-circle' },
+        { id: 'account-categories', name: 'Category', icon: 'folder' },
+    ],
+    receipts: [
+        { id: 'receipts-types', name: 'Type', icon: 'receipt' },
+        { id: 'receipts-categories', name: 'Category', icon: 'folder' },
+    ],
+    invoice: [
+        { id: 'invoice-types', name: 'Type', icon: 'file-invoice' },
+        { id: 'invoice-categories', name: 'Category', icon: 'folder' },
+    ],
+    feedback: [
+        { id: 'feedback-types', name: 'Type', icon: 'comment-dots' },
+        { id: 'feedback-categories', name: 'Category', icon: 'folder' },
+    ],
+    tickets: [
+        { id: 'tickets-types', name: 'Type', icon: 'ticket-alt' },
+        { id: 'tickets-categories', name: 'Category', icon: 'folder' },
     ],
 };
 
