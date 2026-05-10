@@ -285,16 +285,8 @@ class PollingCenter extends Model
         return $this->belongsTo(Village::class, 'village_id', 'id');
     }
 
-    public function consulates(): BelongsToMany
-    {
-        return $this->belongsToMany(Consulate::class)->withTimestamps();
-    }
-
-    public function refugee_centers(): BelongsToMany
-    {
-        return $this->belongsToMany(RefugeeCenter::class)->withTimestamps();
-    }
-
+    
+    
     public function polling_stations(): BelongsToMany
     {
         return $this->belongsToMany(PollingStation::class)->withTimestamps();

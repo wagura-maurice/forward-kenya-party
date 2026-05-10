@@ -255,13 +255,4 @@ class Country extends Model
         return $this->hasMany(Ward::class);
     }
 
-    public function consulates(): HasMany
-    {
-        return $this->hasMany(Consulate::class);
     }
-
-    public function refugee_centers(): HasMany
-    {
-        return $this->hasMany(RefugeeCenter::class);
-    }
-}

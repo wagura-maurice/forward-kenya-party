@@ -61,6 +61,11 @@ class Profile extends Model
     const INCOME_SOURCE_PENSION = 3;
     const INCOME_SOURCE_OTHER = 4;
 
+    // Constants for preferred contact method
+    const CONTACT_METHOD_EMAIL = 0;
+    const CONTACT_METHOD_TEXT_MESSAGE = 1;
+    const CONTACT_METHOD_WHATSAPP = 2;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -86,13 +91,7 @@ class Profile extends Model
         'state',
         'country',
         'date_of_birth',
-        'special_interest_groups',
-        'disability_status',
-        'ncpwd_number',
-        'ethnicity_id',
         'language_id',
-        'religion_id',
-        'other_religion',
         'marital_status',
         'highest_level_of_education',
         'employment_status',
@@ -101,7 +100,6 @@ class Profile extends Model
         'company_name',
         'work_address',
         'work_phone',
-        'linkedin_username',
         'proof_of_address',
         'proof_of_identity',
         'security_question',
@@ -109,12 +107,7 @@ class Profile extends Model
         'social_media',
         'biography',
         'hobbies_interests',
-        'communication_preferences',
         'preferred_contact_method',
-        'telegram_user_id',
-        'telegram_username',
-        'kyc_verified',
-        'is_active',
     ];
 
     /**
@@ -124,10 +117,12 @@ class Profile extends Model
      */
     protected $casts = [
         'date_of_birth' => 'date',
-        'special_interest_groups' => 'array',
-        'email_verified_at' => 'datetime',
-        'kyc_verified' => 'boolean',
-        'metadata' => 'array',
+        'languages_spoken' => 'array',
+        'emergency_contact' => 'array',
+        'proof_of_address' => 'array',
+        'proof_of_identity' => 'array',
+        'social_media' => 'array',
+        'hobbies_interests' => 'array',
     ];
 
     /**
@@ -191,22 +186,15 @@ class Profile extends Model
                     }
                 },
             ],
-            'special_interest_groups' => 'nullable|json',
-            'disability_status' => 'nullable|string',
-            'ncpwd_number' => 'nullable|string',
-            'ethnicity_id' => 'nullable|exists:ethnicities,id',
             'language_id' => 'nullable|exists:languages,id',
-            'religion_id' => 'nullable|exists:religions,id',
-            'other_religion' => 'nullable|string',
-            'marital_status' => 'nullable|string',
-            'highest_level_of_education' => 'nullable|string',
-            'employment_status' => 'nullable|string',
-            'income_source' => 'nullable|string',
+            'marital_status' => 'nullable|integer',
+            'highest_level_of_education' => 'nullable|integer',
+            'employment_status' => 'nullable|integer',
+            'income_source' => 'nullable|integer',
             'job_title' => 'nullable|string',
             'company_name' => 'nullable|string',
             'work_address' => 'nullable|string',
             'work_phone' => 'nullable|string',
-            'linkedin_username' => 'nullable|string',
             'proof_of_address' => 'nullable|json',
             'proof_of_identity' => 'nullable|json',
             'security_question' => 'nullable|string',
@@ -214,12 +202,7 @@ class Profile extends Model
             'social_media' => 'nullable|json',
             'biography' => 'nullable|string',
             'hobbies_interests' => 'nullable|json',
-            'communication_preferences' => 'nullable|json',
-            'preferred_contact_method' => 'nullable|json',
-            'telegram_user_id' => 'nullable|integer',
-            'telegram_username' => 'nullable|string',
-            'kyc_verified' => 'boolean',
-            'is_active' => 'boolean',
+            'preferred_contact_method' => 'nullable|integer',
         ];
     }
     
@@ -257,22 +240,15 @@ class Profile extends Model
                     }
                 },
             ],
-            'special_interest_groups' => 'nullable|json',
-            'disability_status' => 'nullable|string',
-            'ncpwd_number' => 'nullable|string',
-            'ethnicity_id' => 'nullable|exists:ethnicities,id',
             'language_id' => 'nullable|exists:languages,id',
-            'religion_id' => 'nullable|exists:religions,id',
-            'other_religion' => 'nullable|string',
-            'marital_status' => 'nullable|string',
-            'highest_level_of_education' => 'nullable|string',
-            'employment_status' => 'nullable|string',
-            'income_source' => 'nullable|string',
+            'marital_status' => 'nullable|integer',
+            'highest_level_of_education' => 'nullable|integer',
+            'employment_status' => 'nullable|integer',
+            'income_source' => 'nullable|integer',
             'job_title' => 'nullable|string',
             'company_name' => 'nullable|string',
             'work_address' => 'nullable|string',
             'work_phone' => 'nullable|string',
-            'linkedin_username' => 'nullable|string',
             'proof_of_address' => 'nullable|json',
             'proof_of_identity' => 'nullable|json',
             'security_question' => 'nullable|string',
@@ -280,12 +256,7 @@ class Profile extends Model
             'social_media' => 'nullable|json',
             'biography' => 'nullable|string',
             'hobbies_interests' => 'nullable|json',
-            'communication_preferences' => 'nullable|json',
-            'preferred_contact_method' => 'nullable|json',
-            'telegram_user_id' => 'nullable|integer',
-            'telegram_username' => 'nullable|string',
-            'kyc_verified' => 'boolean',
-            'is_active' => 'boolean',
+            'preferred_contact_method' => 'nullable|integer',
         ];
     }
 
@@ -294,23 +265,45 @@ class Profile extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function ethnicity(): BelongsTo
-    {
-        return $this->belongsTo(Ethnicity::class, 'ethnicity_id');
-    }
-
     public function language(): BelongsTo
     {
         return $this->belongsTo(Language::class, 'language_id');
     }
 
-    public function religion(): BelongsTo
+    public function member(): BelongsTo
     {
-        return $this->belongsTo(Religion::class, 'religion_id');
+        return $this->belongsTo(Member::class, 'user_id', 'user_id');
     }
 
-    public function citizen(): BelongsTo
+    /**
+     * Get the activities for the profile.
+     */
+    public function activities(): HasMany
     {
-        return $this->belongsTo(Citizen::class, 'user_id', 'user_id');
+        return $this->hasMany(Activity::class);
+    }
+
+    /**
+     * Get the communications for the profile.
+     */
+    public function communications(): HasMany
+    {
+        return $this->hasMany(Communication::class);
+    }
+
+    /**
+     * Get the documents for the profile.
+     */
+    public function documents(): HasMany
+    {
+        return $this->hasMany(Document::class);
+    }
+
+    /**
+     * Get the feedback for the profile.
+     */
+    public function feedback(): HasMany
+    {
+        return $this->hasMany(Feedback::class);
     }
 }

@@ -113,14 +113,6 @@ class Ward extends Model
         return $this->belongsToMany(PollingStation::class)->withTimestamps();
     }
 
-    public function consulates(): BelongsToMany
-    {
-        return $this->belongsToMany(Consulate::class)->withTimestamps();
-    }
-
-    public function refugee_centers(): BelongsToMany
-    {
-        return $this->belongsToMany(RefugeeCenter::class)->withTimestamps();
-    }
     
+        
 }

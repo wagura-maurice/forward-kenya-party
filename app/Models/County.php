@@ -104,14 +104,6 @@ class County extends Model
         return $this->hasMany(PollingStation::class, 'county_id');
     }
 
-    public function consulates()
-    {
-        return $this->hasMany(Consulate::class, 'county_id');
-    }
-
-    public function refugee_centers()
-    {
-        return $this->hasMany(RefugeeCenter::class, 'county_id');
-    }
     
+        
 }

@@ -329,7 +329,7 @@ class Feedback extends Model
     }
 
     /**
-     * Get the admin who responded to the feedback.
+     * Get the administrator who responded to the feedback.
      *
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */

@@ -53,8 +53,6 @@ class Guest extends Model
         'location_id',
         'village_id',
         'polling_station_id',
-        'consulate_id',
-        'refugee_center_id',
         'company_name',
         'company_email',
         'company_telephone',
@@ -140,8 +138,6 @@ class Guest extends Model
             'location_id' => 'nullable|exists:locations,id',
             'village_id' => 'nullable|exists:villages,id',
             'polling_station_id' => 'nullable|exists:polling_stations,id',
-            'consulate_id' => 'nullable|exists:consulates,id',
-            'refugee_center_id' => 'nullable|exists:refugee_centers,id',
             'company_name' => 'nullable|string|max:255',
             'company_email' => 'nullable|email|max:255',
             'company_telephone' => 'nullable|string|max:20',
@@ -182,8 +178,6 @@ class Guest extends Model
             'location_id' => 'nullable|exists:locations,id',
             'village_id' => 'nullable|exists:villages,id',
             'polling_station_id' => 'nullable|exists:polling_stations,id',
-            'consulate_id' => 'nullable|exists:consulates,id',
-            'refugee_center_id' => 'nullable|exists:refugee_centers,id',
             'company_name' => 'nullable|string|max:255',
             'company_email' => 'nullable|email|max:255',
             'company_telephone' => 'nullable|string|max:20',
@@ -284,22 +278,8 @@ class Guest extends Model
         return $this->belongsTo(PollingStation::class);
     }
 
-    /**
-     * Get the consulate of the guest.
-     */
-    public function consulate()
-    {
-        return $this->belongsTo(Consulate::class);
-    }
-
-    /**
-     * Get the refugee center of the guest.
-     */
-    public function refugeeCenter()
-    {
-        return $this->belongsTo(RefugeeCenter::class);
-    }
-
+    
+    
     /**
      * Get the status label attribute.
      *

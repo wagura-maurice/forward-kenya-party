@@ -62,10 +62,15 @@ class User extends Authenticatable
         'status',
         'last_login_at',
         'last_login_ip',
+        'last_login_device',
+        'last_login_user_agent',
+        'last_login_os',
+        'last_login_location',
         'email_verified_at',
         'two_factor_secret',
         'two_factor_recovery_codes',
         'two_factor_confirmed_at',
+        'current_team_id',
         'profile_photo_path',
         'timezone',
         'language',
@@ -255,8 +260,13 @@ class User extends Authenticatable
             'phone' => ['nullable', 'string', 'max:20'],
             'phone_country' => ['nullable', 'string', 'max:2'],
             'status' => ['nullable', 'integer', 'in:0,1,2'],
+            'last_login_device' => ['nullable', 'string', 'max:255'],
+            'last_login_user_agent' => ['nullable', 'string'],
+            'last_login_os' => ['nullable', 'string', 'max:100'],
+            'last_login_location' => ['nullable', 'string', 'max:255'],
             'timezone' => ['nullable', 'string', 'timezone'],
             'language' => ['nullable', 'string', 'in:en,sw'],
+            'current_team_id' => ['nullable', 'exists:teams,id'],
         ];
     }
 
@@ -272,8 +282,13 @@ class User extends Authenticatable
             'phone' => ['nullable', 'string', 'max:20'],
             'phone_country' => ['nullable', 'string', 'max:2'],
             'status' => ['nullable', 'integer', 'in:0,1,2'],
+            'last_login_device' => ['sometimes', 'nullable', 'string', 'max:255'],
+            'last_login_user_agent' => ['sometimes', 'nullable', 'string'],
+            'last_login_os' => ['sometimes', 'nullable', 'string', 'max:100'],
+            'last_login_location' => ['sometimes', 'nullable', 'string', 'max:255'],
             'timezone' => ['nullable', 'string', 'timezone'],
             'language' => ['nullable', 'string', 'in:en,sw'],
+            'current_team_id' => ['sometimes', 'nullable', 'exists:teams,id'],
         ];
     }
 
@@ -351,11 +366,19 @@ class User extends Authenticatable
     }
 
     /**
-     * Get the citizen record associated with the user.
+     * Get the member record associated with the user.
      */
-    public function citizen(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function member(): \Illuminate\Database\Eloquent\Relations\HasOne
     {
-        return $this->hasOne(Citizen::class);
+        return $this->hasOne(Member::class);
+    }
+
+    /**
+     * Get the current team of the user.
+     */
+    public function currentTeam(): BelongsTo
+    {
+        return $this->belongsTo(Team::class, 'current_team_id');
     }
 
     /**
@@ -375,43 +398,11 @@ class User extends Authenticatable
     }
 
     /**
-     * Check if the user has the citizen role.
+     * Check if the user has the member role.
      */
-    public function isCitizen(): bool
+    public function isMember(): bool
     {
-        return $this->hasRole('citizen');
-    }
-
-    /**
-     * Check if the user has the resident role.
-     */
-    public function isResident(): bool
-    {
-        return $this->hasRole('resident');
-    }
-
-    /**
-     * Check if the user has the refugee role.
-     */
-    public function isRefugee(): bool
-    {
-        return $this->hasRole('refugee');
-    }
-
-    /**
-     * Check if the user has the diplomat role.
-     */
-    public function isDiplomat(): bool
-    {
-        return $this->hasRole('diplomat');
-    }
-
-    /**
-     * Check if the user has the foreigner role.
-     */
-    public function isForeigner(): bool
-    {
-        return $this->hasRole('foreigner');
+        return $this->hasRole('member');
     }
 
     /**
@@ -430,5 +421,45 @@ class User extends Authenticatable
     public function invoices(): HasMany
     {
         return $this->hasMany(Invoice::class);
+    }
+
+    /**
+     * Get activities where user is the verifier.
+     */
+    public function verifiedMembers(): HasMany
+    {
+        return $this->hasMany(Member::class, 'verified_by');
+    }
+
+    /**
+     * Get communications sent by user.
+     */
+    public function communications(): HasMany
+    {
+        return $this->hasMany(Communication::class);
+    }
+
+    /**
+     * Get documents uploaded by user.
+     */
+    public function documents(): HasMany
+    {
+        return $this->hasMany(Document::class);
+    }
+
+    /**
+     * Get feedback given by user.
+     */
+    public function feedback(): HasMany
+    {
+        return $this->hasMany(Feedback::class);
+    }
+
+    /**
+     * Get media uploaded by user.
+     */
+    public function media(): HasMany
+    {
+        return $this->hasMany(Media::class);
     }
 }
