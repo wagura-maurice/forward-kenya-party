@@ -15,8 +15,8 @@ class CurrencyTypesTableSeeder extends Seeder
      */
     public function run()
     {
-        // Delete all existing records in the currency_types table
-        \DB::table('currency_types')->delete();
+        // Don't delete existing records to avoid foreign key constraint issues
+        // \DB::table('currency_types')->delete();
 
         // Define possible currency types
         $types = [
@@ -102,7 +102,7 @@ class CurrencyTypesTableSeeder extends Seeder
 
         // Insert the currency types into the database using Eloquent
         foreach ($types as $key => $type) {
-            CurrencyType::create(array_merge($type, ['id' => $key + 1, 'uuid' => (String) Str::uuid(), 'created_at' => now(), 'updated_at' => now()]));
+            CurrencyType::create(array_merge($type, ['uuid' => (String) Str::uuid(), 'created_at' => now(), 'updated_at' => now()]));
         }
     }
 }

@@ -19,7 +19,7 @@ class CountriesTableSeeder extends Seeder
             [
                 'name' => 'Kenya',
                 'uuid' => (string) Str::uuid(),
-                'slug' => Str::slug('Kenya'),
+                'slug' => 'kenya', // Fixed slug to avoid duplicates
                 'demonym' => 'Kenyan',
                 'description' => 'An East African country known for its wildlife safaris and Great Rift Valley.',
                 'notes' => null,
@@ -50,7 +50,7 @@ class CountriesTableSeeder extends Seeder
             [
                 'name' => 'Uganda',
                 'uuid' => (string) Str::uuid(),
-                'slug' => Str::slug('Uganda'),
+                'slug' => 'uganda', // Fixed slug to avoid duplicates
                 'demonym' => 'Ugandan',
                 'description' => 'A country in East Africa known for its mountains and wildlife.',
                 'notes' => null,
@@ -81,7 +81,7 @@ class CountriesTableSeeder extends Seeder
             [
                 'name' => 'Tanzania',
                 'uuid' => (string) Str::uuid(),
-                'slug' => Str::slug('Tanzania'),
+                'slug' => 'tanzania', // Fixed slug to avoid duplicates
                 'demonym' => 'Tanzanian',
                 'description' => 'A country in East Africa known for Serengeti National Park and Mount Kilimanjaro.',
                 'notes' => null,
@@ -98,21 +98,21 @@ class CountriesTableSeeder extends Seeder
                 'region' => 'Africa',
                 'subregion' => 'East Africa',
                 'latitude' => -6.1630,
-                'longitude' => 35.7516,
+                'longitude' => 35.0306,
                 'area' => 945087.00,
-                'population' => 59734000,
+                'population' => 59734200,
                 'government_type' => 0,
                 'driving_side' => 0,
                 'phone_code' => '+255',
                 'zip_code_format' => null,
-                'languages' => json_encode(['sw', 'en']),
+                'languages' => json_encode(['en', 'sw']),
                 'created_at' => now(),
                 'updated_at' => now(),
             ],
             [
                 'name' => 'Rwanda',
                 'uuid' => (string) Str::uuid(),
-                'slug' => Str::slug('Rwanda'),
+                'slug' => 'rwanda', // Fixed slug to avoid duplicates
                 'demonym' => 'Rwandan',
                 'description' => 'A landlocked East African country known for its wildlife and hills.',
                 'notes' => null,

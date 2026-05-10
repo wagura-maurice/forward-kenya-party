@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class DatabaseSeeder extends Seeder
 {
@@ -20,17 +21,25 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
         ]); */
         
+        // Media and document management
         $this->call(MediaTypesTableSeeder::class);
         $this->call(MediaCategoriesTableSeeder::class);
         $this->call(DocumentTypesTableSeeder::class);
         $this->call(DocumentCategoriesTableSeeder::class);
+        
+        // Core system tables (verified to exist in migrations) - must run first
         $this->call(SettingsTableSeeder::class);
         $this->call(RolesTableSeeder::class);
         $this->call(AbilitiesTableSeeder::class);
+        
+        // Currency system - must run before countries that reference currency_types
+        $this->call(CurrencyTypesTableSeeder::class);
+        $this->call(CurrencyCategoriesTableSeeder::class);
+        $this->call(CurrenciesTableSeeder::class);
+        $this->call(ExchangeRatesTableSeeder::class);
+        
+        // Geographic hierarchy (must come after currencies)
         $this->call(CountriesTableSeeder::class);
-        $this->call(EthnicityCategoryTableSeeder::class);
-        $this->call(EthnicityTypeSeeder::class);
-        $this->call(EthnicityTableSeeder::class);
         $this->call(RegionsTableSeeder::class);
         $this->call(CountiesTableSeeder::class);
         $this->call(SubCountiesTableSeeder::class);
@@ -38,40 +47,53 @@ class DatabaseSeeder extends Seeder
         $this->call(WardsTableSeeder::class);
         $this->call(LocationsTableSeeder::class);
         $this->call(VillagesTableSeeder::class);
-        // $this->call(PollingCentersTableSeeder::class);
+        
+        // Polling system (user requested to keep these)
+        $this->call(PollingCenterTypeSeeder::class);
+        $this->call(PollingCenterCategorySeeder::class);
+        $this->call(PollingCenterSeeder::class);
+        $this->call(PollingStationTypeSeeder::class);
+        $this->call(PollingStationCategorySeeder::class);
         $this->call(PollingStationsTableSeeder::class);
-        // $this->call(PollingStreamsTableSeeder::class);
-        $this->call(ConsulatesTableSeeder::class);
-        $this->call(RefugeeCenterTypeSeeder::class);
-        $this->call(RefugeeCenterCategorySeeder::class);
-        $this->call(RefugeeCentersTableSeeder::class);
+        $this->call(PollingStreamTypeSeeder::class);
+        $this->call(PollingStreamCategorySeeder::class);
+        $this->call(PollingStreamSeeder::class);
         
-        // Religion seeders
-        $this->call(ReligionTypeTableSeeder::class);
-        $this->call(ReligionCategoryTableSeeder::class);
-        $this->call(ReligionTableSeeder::class);
+        // Banking system
+        $this->call(BankTypesTableSeeder::class);
+        $this->call(BankCategoriesTableSeeder::class);
+        $this->call(BanksTableSeeder::class);
         
-        // $this->call(BankTypesTableSeeder::class);
-        // $this->call(BankCategoriesTableSeeder::class);
-        // $this->call(BanksTableSeeder::class);
-        $this->call(EthnicityTableSeeder::class);
+        // Ethnicity and religion systems
         $this->call(EthnicityCategoryTableSeeder::class);
+        $this->call(EthnicityTypeSeeder::class);
         $this->call(EthnicityTableSeeder::class);
         $this->call(ReligionTypeTableSeeder::class);
         $this->call(ReligionCategoryTableSeeder::class);
         $this->call(ReligionTableSeeder::class);
-        $this->call(LanguageTypeTableSeeder::class);
+        
+        // Language system
         $this->call(LanguageCategoryTableSeeder::class);
+        $this->call(LanguageTypeTableSeeder::class);
         $this->call(LanguageTableSeeder::class);
+        
+        // Department and service systems (verified to exist in migrations)
         $this->call(DepartmentTypesTableSeeder::class);
         $this->call(DepartmentCategoriesTableSeeder::class);
+        $this->call(DepartmentsTableSeeder::class);
         $this->call(ServiceTypesTableSeeder::class);
         $this->call(ServiceCategoriesTableSeeder::class);
+        $this->call(ServicesTableSeeder::class);
+        $this->call(DepartmentServiceTableSeeder::class);
+        
+        // Activity and notification systems (verified to exist in migrations)
         $this->call(ActivityTypesTableSeeder::class);
         $this->call(ActivityCategoriesTableSeeder::class);
-        // $this->call(ActivityNotificationsTableSeeder::class);
-        $this->call(CurrencyTypesTableSeeder::class);
-        $this->call(CurrencyCategoriesTableSeeder::class);
+        
+        // Exchange rate system (verified to exist in migrations)
+        $this->call(ExchangeRatesTableSeeder::class);
+        
+        // Account and transaction systems (verified to exist in migrations)
         $this->call(AccountTypesTableSeeder::class);
         $this->call(AccountCategoriesTableSeeder::class);
         $this->call(ReceiptTypesTableSeeder::class);
@@ -80,16 +102,18 @@ class DatabaseSeeder extends Seeder
         $this->call(InvoiceCategoriesTableSeeder::class);
         $this->call(TransactionTypesTableSeeder::class);
         $this->call(TransactionCategoriesTableSeeder::class);
+        
+        // Feedback and ticket systems (verified to exist in migrations)
         $this->call(FeedbackTypesTableSeeder::class);
         $this->call(FeedbackCategoriesTableSeeder::class);
         $this->call(TicketTypesTableSeeder::class);
         $this->call(TicketCategoriesTableSeeder::class);
+        
+        // Communication systems (verified to exist in migrations)
         $this->call(CommunicationTypesTableSeeder::class);
         $this->call(CommunicationCategoriesTableSeeder::class);
-        $this->call(DepartmentsTableSeeder::class);
-        $this->call(ServicesTableSeeder::class);
-        $this->call(DepartmentServiceTableSeeder::class);
-
+        
+        // Create default users with role assignments
         // create default administrator
         User::factory()->create([
             'name' => 'administrator',
@@ -102,35 +126,11 @@ class DatabaseSeeder extends Seeder
             'email' => 'manager@forwardkenyaparty.com',
         ])->assignRole('manager');
 
-        // create default citizen
+        // create default member
         User::factory()->create([
-            'name' => 'citizen',
-            'email' => 'citizen@forwardkenyaparty.com',
-        ])->assignRole('citizen');
-
-        // create default resident
-        User::factory()->create([
-            'name' => 'resident',
-            'email' => 'resident@forwardkenyaparty.com',
-        ])->assignRole('resident');
-
-        // create default refugee
-        User::factory()->create([
-            'name' => 'refugee',
-            'email' => 'refugee@forwardkenyaparty.com',
-        ])->assignRole('refugee');
-
-        // create default diplomat
-        User::factory()->create([
-            'name' => 'diplomat',
-            'email' => 'diplomat@forwardkenyaparty.com',
-        ])->assignRole('diplomat');
-
-        // create default foreigner
-        User::factory()->create([
-            'name' => 'foreigner',
-            'email' => 'foreigner@forwardkenyaparty.com',
-        ])->assignRole('foreigner');
+            'name' => 'member',
+            'email' => 'member@forwardkenyaparty.com',
+        ])->assignRole('member');
 
         // create default guest
         User::factory()->create([
