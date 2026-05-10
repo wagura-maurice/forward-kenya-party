@@ -2,26 +2,28 @@
 
 namespace App\Policies;
 
-use App\Models\ConsulateType;
-use App\Models\User;
+use App\Models\Gender;
 use Illuminate\Auth\Access\Response;
+use Illuminate\Auth\Access\AuthorizationException;
 
-class ConsulateTypePolicy
+class GenderPolicy
 {
+    use HandlesAuthorization;
+
     /**
      * Determine whether the user can view any models.
      */
     public function viewAny(User $user): bool
     {
-        return false;
+        return true;
     }
 
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, ConsulateType $consulateType): bool
+    public function view(User $user, Gender $gender): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -29,38 +31,46 @@ class ConsulateTypePolicy
      */
     public function create(User $user): bool
     {
-        return false;
+        return true;
     }
 
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, ConsulateType $consulateType): bool
+    public function update(User $user, Gender $gender): bool
     {
-        return false;
+        return true;
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, ConsulateType $consulateType): bool
+    public function delete(User $user, Gender $gender): bool
     {
-        return false;
+        return true;
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, ConsulateType $consulateType): bool
+    public function restore(User $user, Gender $gender): bool
     {
-        return false;
+        return true;
     }
 
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, ConsulateType $consulateType): bool
+    public function forceDelete(User $user, Gender $gender): bool
     {
-        return false;
+        return true;
+    }
+
+    /**
+     * Determine whether the user can replicate the model.
+     */
+    public function replicate(User $user, Gender $gender): bool
+    {
+        return true;
     }
 }

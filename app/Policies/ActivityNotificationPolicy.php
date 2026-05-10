@@ -40,8 +40,8 @@ class ActivityNotificationPolicy
      */
     public function create(User $user): bool
     {
-        // Only admin users can create notifications
-        return $user->isAdmin();
+        // Only administrator users can create notifications
+        return $user->isAdministrator();
     }
 
     /**
@@ -76,8 +76,8 @@ class ActivityNotificationPolicy
      */
     public function restore(User $user, ActivityNotification $notification): bool
     {
-        // Only admin users can restore notifications
-        return $user->isAdmin();
+        // Only administrator users can restore notifications
+        return $user->isAdministrator();
     }
 
     /**
@@ -85,8 +85,8 @@ class ActivityNotificationPolicy
      */
     public function forceDelete(User $user, ActivityNotification $notification): bool
     {
-        // Only admin users can force delete notifications
-        return $user->isAdmin();
+        // Only administrator users can force delete notifications
+        return $user->isAdministrator();
     }
     
     /**
