@@ -144,12 +144,15 @@ class RouteServiceProvider extends BaseServiceProvider
                                 ->name('show');
                         });
 
-                    // Log registered routes for debugging
-                    $departmentSlugs = $departments->pluck('slug')->toArray();
-                    Log::info('Registered department routes:', [
-                        'count' => count($departmentSlugs),
-                        'slugs' => $departmentSlugs
-                    ]);
+                    // Only log routes if not already logged (to prevent duplicate logs during cache clearing)
+                    if (!cache()->has('department_routes_logged')) {
+                        $departmentSlugs = $departments->pluck('slug')->toArray();
+                        Log::info('Registered department routes:', [
+                            'count' => count($departmentSlugs),
+                            'slugs' => $departmentSlugs
+                        ]);
+                        cache()->put('department_routes_logged', true, 3600);
+                    }
 
                 } catch (\Exception $e) {
                     Log::error('Error registering dynamic routes: ' . $e->getMessage());
