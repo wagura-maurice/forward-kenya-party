@@ -504,7 +504,7 @@ const copyToClipboard = (text) => {
                                     <p
                                         class="text-sm font-medium text-gray-800 dark:text-gray-200 capitalize"
                                     >
-                                        {{ profile?.ethnicity?.name }}
+                                        {{ member?.ethnicity?.name }}
                                     </p>
                                 </div>
                             </div>
