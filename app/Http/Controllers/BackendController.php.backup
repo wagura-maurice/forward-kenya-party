@@ -1,0 +1,795 @@
+<?php
+// app/Http/Controllers/BackendController.php
+namespace App\Http\Controllers;
+
+use App\Models\User;
+use Inertia\Inertia;
+use App\Models\Service;
+use App\Models\Activity;
+use App\Models\Department;
+use App\Models\SpecialInterestGroup;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
+
+class BackendController extends Controller
+{
+    /**
+     * Get the appropriate icon for an activity
+     *
+     * @param string $description
+     * @return string
+     */
+    protected function getActivityIcon($description)
+    {
+        if (str_contains(strtolower($description), 'created')) {
+            return 'fa-solid fa-plus';
+        } elseif (str_contains(strtolower($description), 'updated')) {
+            return 'fa-solid fa-pen';
+        } elseif (str_contains(strtolower($description), 'deleted')) {
+            return 'fa-solid fa-trash';
+        } elseif (str_contains(strtolower($description), 'login')) {
+            return 'fa-solid fa-sign-in-alt';
+        } elseif (str_contains(strtolower($description), 'logout')) {
+            return 'fa-solid fa-sign-out-alt';
+        } elseif (str_contains(strtolower($description), 'registered')) {
+            return 'fa-solid fa-user-plus';
+        } else {
+            return 'fa-solid fa-bell';
+        }
+    }
+
+    /**
+     * Get the appropriate color for an activity
+     *
+     * @param string $description
+     * @return string
+     */
+    protected function getActivityColor($description)
+    {
+        if (str_contains(strtolower($description), 'created') || str_contains(strtolower($description), 'registered')) {
+            return 'green';
+        } elseif (str_contains(strtolower($description), 'updated')) {
+            return 'blue';
+        } elseif (str_contains(strtolower($description), 'deleted')) {
+            return 'red';
+        } elseif (str_contains(strtolower($description), 'login') || str_contains(strtolower($description), 'logout')) {
+            return 'indigo';
+        } else {
+            return 'gray';
+        }
+    }
+    
+    /**
+     * Get the status text for an activity status code
+     *
+     * @param int $status
+     * @return string
+     */
+    protected function getStatusText($status)
+    {
+        return match ((int)$status) {
+            0 => 'Pending',
+            1 => 'Completed',
+            2 => 'Failed',
+            3 => 'In Progress',
+            default => 'Unknown'
+        };
+    }
+    
+    /**
+     * Get the CSS class for an activity status
+     *
+     * @param int $status
+     * @return string
+     */
+    protected function getStatusClass($status)
+    {
+        return match ((int)$status) {
+            0 => 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
+            1 => 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
+            2 => 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
+            3 => 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+            default => 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300'
+        };
+    }
+    
+    public function dashboard(Request $request)
+    {
+        $user = $request->user()->load('roles');
+        $roles = $user->roles->sortByDesc('id')->pluck('name')->toArray();
+
+        // Get recent activities with relationships
+        $activities = Activity::with(['user', 'service', 'department'])
+            ->latest()
+            ->take(5)
+            ->get()
+            ->map(function ($activity) {
+                return [
+                    'id' => $activity->id,
+                    'user_id' => $activity->user ? $activity->user->id : NULL,
+                    'user_name' => $activity->user ? $activity->user->name : 'System',
+                    'user_avatar' => $activity->user ? $activity->user->profile_photo_path : null,
+                    'title' => $activity->title,
+                    'action' => $activity->action,
+                    'description' => $activity->description,
+                    'details' => $activity->details,
+                    'status' => $this->getStatusText($activity->_status),
+                    'status_class' => $this->getStatusClass($activity->_status),
+                    'created_at' => $activity->created_at->diffForHumans(),
+                    'started_at' => $activity->started_at?->format('M d, Y H:i'),
+                    'completed_at' => $activity->completed_at?->format('M d, Y H:i'),
+                    'scheduled_for' => $activity->scheduled_for?->format('M d, Y H:i'),
+                    'service_name' => $activity->service?->name,
+                    'department_name' => $activity->department?->name,
+                    'icon' => $this->getActivityIcon($activity->action),
+                    'color' => $this->getActivityColor($activity->action)
+                ];
+            });
+
+        // Calculate date ranges for 30-day comparison
+        $thirtyDaysAgo = now()->subDays(30);
+        $sixtyDaysAgo = now()->subDays(60);
+        
+        // Helper function to calculate percentage change
+        $calculateChange = function($current, $previous) {
+            if ($previous === 0) return $current > 0 ? 100 : 0;
+            return round((($current - $previous) / $previous) * 100, 1);
+        };
+        
+        // User statistics
+        $currentUsers = User::count();
+        $previousPeriodUsers = User::where('created_at', '<', $thirtyDaysAgo)
+            ->where('created_at', '>=', $sixtyDaysAgo)
+            ->count();
+        
+        // Active users (logged in within last 30 days)
+        $activeUsers = User::where('last_login_at', '>=', $thirtyDaysAgo)->count();
+        $previousActiveUsers = User::where('last_login_at', '>=', $sixtyDaysAgo)
+            ->where('last_login_at', '<', $thirtyDaysAgo)
+            ->count();
+        
+        // Other statistics with 30-day comparison
+        $currentServices = Service::count();
+        $previousServices = Service::where('created_at', '<', $thirtyDaysAgo)
+            ->where('created_at', '>=', $sixtyDaysAgo)
+            ->count();
+        
+        $currentDepartments = Department::count();
+        $previousDepartments = Department::where('created_at', '<', $thirtyDaysAgo)
+            ->where('created_at', '>=', $sixtyDaysAgo)
+            ->count();
+        
+        // Get featured projects (using activities as a placeholder for now)
+        $featuredProjects = Activity::where('_status', 1) // Assuming 1 is the status for active/approved
+            ->latest()
+            ->get();
+            
+        $currentProjects = $featuredProjects->count();
+        $previousProjects = Activity::where('created_at', '<', $thirtyDaysAgo)
+            ->where('created_at', '>=', $sixtyDaysAgo)
+            ->count();
+        
+        // Financial metrics
+        // Membership Collections (one-time onboarding fees)
+        $currentMembershipCollections = 0; // TODO: Implement actual query
+        $previousMembershipCollections = 0; // TODO: Implement actual query
+        
+        // Monthly Contributions (recurring membership fees)
+        $currentMonthlyContributions = 0; // TODO: Implement actual query
+        $previousMonthlyContributions = 0; // TODO: Implement actual query
+        $currentCandidates = 0; // Implement actual query
+        $previousCandidates = 0;
+        $currentComplianceItems = 0; // Implement actual query
+        $previousComplianceItems = 0;
+        
+        // New member stats with 30-day comparison
+        $newMembersThisMonth = User::where('created_at', '>=', $thirtyDaysAgo)->count();
+        $previousMonthMembers = User::where('created_at', '<', $thirtyDaysAgo)
+            ->where('created_at', '>=', $sixtyDaysAgo)
+            ->count();
+            
+        // Calculate engagement rate (example: % of users who logged in this month)
+        $totalUsers = max(1, $currentUsers); // Avoid division by zero
+        $engagedUsers = User::where('last_login_at', '>=', $thirtyDaysAgo)->count();
+        $previousEngaged = User::where('last_login_at', '>=', $sixtyDaysAgo)
+            ->where('last_login_at', '<', $thirtyDaysAgo)
+            ->count();
+            
+        $engagementRate = round(($engagedUsers / $totalUsers) * 100);
+        $previousEngagementRate = $previousEngaged > 0 ? round(($previousEngaged / max(1, $previousPeriodUsers)) * 100) : 0;
+
+        // Get featured services and departments
+        $featuredServices = Service::where('is_featured', true)
+            ->with('departments')
+            ->orderBy('name')
+            ->take(4)
+            ->get();
+
+        $featuredDepartments = Department::where('is_featured', true)
+            ->withCount('services')
+            ->orderBy('name')
+            ->take(4)
+            ->get();
+
+        $stats = [
+            // Membership & Users
+            'total_users' => [
+                'count' => $currentUsers,
+                'change' => $calculateChange($currentUsers, $previousPeriodUsers),
+                'previous_period' => $previousPeriodUsers,
+                'percentage_change' => $calculateChange($currentUsers, $previousPeriodUsers),
+                'title' => 'Total Users',
+                'icon' => 'fa fa-users',
+                'color' => 'blue'
+            ],
+            'active_users' => [
+                'count' => $activeUsers,
+                'change' => $calculateChange($activeUsers, $previousActiveUsers),
+                'previous_period' => $previousActiveUsers,
+                'percentage_change' => $calculateChange($activeUsers, $previousActiveUsers),
+                'title' => 'Active Members',
+                'icon' => 'fa fa-user-check',
+                'color' => 'green'
+            ],
+            'new_members_this_month' => [
+                'count' => $newMembersThisMonth,
+                'change' => $calculateChange($newMembersThisMonth, $previousMonthMembers),
+                'previous_period' => $previousMonthMembers,
+                'percentage_change' => $calculateChange($newMembersThisMonth, $previousMonthMembers),
+                'title' => 'New Members This Month',
+                'icon' => 'fa fa-user-plus',
+                'color' => 'teal'
+            ],
+            'members_leaving_this_month' => [
+                'count' => max(0, $previousMonthMembers - $newMembersThisMonth),
+                'change' => $calculateChange($previousMonthMembers, $newMembersThisMonth),
+                'previous_period' => $previousMonthMembers,
+                'percentage_change' => $calculateChange($previousMonthMembers, $newMembersThisMonth),
+                'title' => 'Members Leaving This Month',
+                'icon' => 'fa fa-user-times',
+                'color' => 'red'
+            ],
+            // Special Interest Groups
+            SpecialInterestGroup::PERSONS_WITH_DISABILITY => [
+                'count' => 0,
+                'change' => 0,
+                'previous_period' => 0,
+                'percentage_change' => 0,
+                'title' => 'Persons With Disabilty',
+                'icon' => 'fa fa-wheelchair',
+                'color' => 'brown'
+            ],
+            SpecialInterestGroup::YOUTH => [
+                'count' => 0,
+                'change' => 0,
+                'previous_period' => 0,
+                'percentage_change' => 0,
+                'title' => 'Youth',
+                'icon' => 'fa fa-child',
+                'color' => 'yellow'
+            ],
+            SpecialInterestGroup::WOMEN => [
+                'count' => 0,
+                'change' => 0,
+                'previous_period' => 0,
+                'percentage_change' => 0,
+                'title' => 'Women',
+                'icon' => 'fa fa-female',
+                'color' => 'pink'
+            ],
+            SpecialInterestGroup::PERSONS_MARGINALIZED => [
+                'count' => 0,
+                'change' => 0,
+                'previous_period' => 0,
+                'percentage_change' => 0,
+                'title' => 'Persons Marginalized',
+                'icon' => 'fa fa-exclamation-triangle',
+                'color' => 'orange'
+            ],
+            SpecialInterestGroup::PERSONS_MINORITY => [
+                'count' => 0,
+                'change' => 0,
+                'previous_period' => 0,
+                'percentage_change' => 0,
+                'title' => 'Persons Minority',
+                'icon' => 'fa fa-users',
+                'color' => 'blue'
+            ],
+            
+            // Financials
+            'membership_fees' => [
+                'count' => $currentMembershipCollections,
+                'change' => $calculateChange($currentMembershipCollections, $previousMembershipCollections),
+                'previous_period' => $previousMembershipCollections,
+                'percentage_change' => $calculateChange($currentMembershipCollections, $previousMembershipCollections),
+                'title' => 'Membership Fees',
+                'icon' => 'fa fa-receipt',
+                'color' => 'blue'
+            ],
+            'monthly_subscriptions' => [
+                'count' => $currentMonthlyContributions,
+                'change' => $calculateChange($currentMonthlyContributions, $previousMonthlyContributions),
+                'previous_period' => $previousMonthlyContributions,
+                'percentage_change' => $calculateChange($currentMonthlyContributions, $previousMonthlyContributions),
+                'title' => 'Monthly Subscriptions',
+                'icon' => 'fa fa-money-bill-wave',
+                'color' => 'green'
+            ],
+            'monetary_donations' => [
+                'count' => 0,
+                'change' => 0,
+                'previous_period' => 0,
+                'percentage_change' => 0,
+                'title' => 'Monetary Donations',
+                'icon' => 'fa fa-donate',
+                'color' => 'red'
+            ],
+            'in_kind_donations' => [
+                'count' => 0,
+                'change' => 0,
+                'previous_period' => 0,
+                'percentage_change' => 0,
+                'title' => 'In Kind Donations',
+                'icon' => 'fa fa-box',
+                'color' => 'red'
+            ],
+            // Volunteers
+            'active_volunteers' => [
+                'count' => 0,
+                'change' => 0,
+                'previous_period' => 0,
+                'percentage_change' => 0,
+                'title' => 'Active Volunteers',
+                'icon' => 'fa fa-hands-helping',
+                'color' => 'green'
+            ],
+            'volunteer_hours' => [
+                'count' => 0,
+                'change' => 0,
+                'previous_period' => 0,
+                'percentage_change' => 0,
+                'title' => 'Volunteer Hours',
+                'icon' => 'fa fa-clock',
+                'color' => 'orange'
+            ],
+            'departments' => [
+                'count' => $currentDepartments,
+                'change' => $calculateChange($currentDepartments, $previousDepartments),
+                'previous_period' => $previousDepartments,
+                'percentage_change' => $calculateChange($currentDepartments, $previousDepartments),
+                'title' => 'Departments',
+                'icon' => 'fa fa-sitemap',
+                'color' => 'indigo'
+            ],
+            'services' => [
+                'count' => $currentServices,
+                'change' => $calculateChange($currentServices, $previousServices),
+                'previous_period' => $previousServices,
+                'percentage_change' => $calculateChange($currentServices, $previousServices),
+                'title' => 'Services',
+                'icon' => 'fa fa-concierge-bell',
+                'color' => 'pink'
+            ],
+            
+            // Election & Compliance
+            'aspirants' => [
+                'count' => 0,
+                'change' => 0,
+                'previous_period' => 0,
+                'percentage_change' => 0,
+                'title' => 'Aspirants',
+                'icon' => 'fa fa-user-astronaut',
+                'color' => 'indigo'
+            ],
+            'candidates' => [
+                'count' => $currentCandidates,
+                'change' => $calculateChange($currentCandidates, $previousCandidates),
+                'previous_period' => $previousCandidates,
+                'percentage_change' => $calculateChange($currentCandidates, $previousCandidates),
+                'title' => 'Candidates',
+                'icon' => 'fa fa-user-tie',
+                'color' => 'purple'
+            ],
+            
+            // Additional Stats
+            'campaigns' => [
+                'count' => $currentProjects,
+                'change' => $calculateChange($currentProjects, $previousProjects),
+                'previous_period' => $previousProjects,
+                'percentage_change' => $calculateChange($currentProjects, $previousProjects),
+                'title' => 'Campaigns',
+                'icon' => 'fa fa-project-diagram',
+                'color' => 'red'
+            ],
+            
+            // Media & Communications
+            'press_releases' => [
+                'count' => 0,
+                'change' => 0,
+                'previous_period' => 0,
+                'percentage_change' => 0,
+                'title' => 'Press Releases',
+                'icon' => 'fa fa-newspaper',
+                'color' => 'blue'
+            ],
+            'social_media_reach' => [
+                'count' => 0,
+                'change' => 0,
+                'previous_period' => 0,
+                'percentage_change' => 0,
+                'title' => 'Social Media Reach',
+                'icon' => 'fa fa-share-alt',
+                'color' => 'purple'
+            ],
+            
+            // Events & Meetings
+            'upcoming_events' => [
+                'count' => 0,
+                'change' => 0,
+                'previous_period' => 0,
+                'percentage_change' => 0,
+                'title' => 'Upcoming Events',
+                'icon' => 'fa fa-calendar-alt',
+                'color' => 'pink'
+            ],
+            'engagement_rate' => [
+                'count' => $engagementRate,
+                'change' => $calculateChange($engagementRate, $previousEngagementRate),
+                'previous_period' => $previousEngagementRate,
+                'percentage_change' => $calculateChange($engagementRate, $previousEngagementRate),
+                'title' => 'Engagement Rate',
+                'icon' => 'fa fa-chart-line',
+                'color' => 'orange'
+            ]
+        ];
+
+        // Load location data for the member form
+        $locations = [
+            'counties' => \App\Models\County::orderBy('name')->get(['id', 'name']),
+            'constituencies' => \App\Models\Constituency::orderBy('name')->get(['id', 'name', 'county_id']),
+            'wards' => \App\Models\Ward::orderBy('name')->get(['id', 'name', 'constituency_id']),
+            'subCounties' => \App\Models\SubCounty::orderBy('name')->get(['id', 'name', 'county_id']),
+        ];
+
+        // Load ethnicity and religion data
+        $ethnicities = \App\Models\Ethnicity::orderBy('name')->get(['id', 'name']);
+        $religions = \App\Models\Religion::orderBy('name')->get(['id', 'name']);
+
+        return Inertia::render('Dashboard', [
+            'title' => ucwords($roles[0] == 'member' ? 'Member' : $roles[0]) . ' Dashboard',
+            'breadcrumbs' => [
+                [
+                    'label' => 'Dashboard',
+                    'url' => route('dashboard')
+                ]
+            ],  
+            'data' => [
+                'stats' => $stats,
+                'activities' => $activities->toArray(),
+                'roles' => $roles,
+                'user' => $user,
+                'locations' => $locations,
+                'ethnicities' => $ethnicities,
+                'religions' => $religions
+            ],
+        ]);
+    }
+
+    public function profile(Request $request)
+    {
+        // Get the authenticated user with their profile and relationships
+        $user = $request->user()->load([
+            'profile' => function($query) {
+                $query->with([
+                    'member' => function($query) {
+                        $query->with([
+                            'religion',
+                            'county',
+                            'subCounty',
+                            'constituency',
+                            'ward',
+                            'location',
+                            'village',
+                            'pollingCenter',
+                            'pollingStation',
+                            'pollingStream',
+                        ]);
+                    }
+                ]);
+            }
+        ]);
+
+        // Prepare the user data for the frontend
+        $userData = [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'email_verified_at' => $user->email_verified_at,
+            'profile_photo_path' => $user->profile_photo_path,
+            'created_at' => $user->created_at,
+            'updated_at' => $user->updated_at,
+            'profile' => null
+        ];
+
+        // dd($userData);
+
+        if ($user->profile) {
+            $profile = $user->profile->toArray();
+            
+            $profile['religion'] = $user->member->religion ? [
+                'id' => $user->member->religion->id,
+                'name' => $user->member->religion->name
+            ] : null;
+
+            $profile['ethnicity'] = $user->member->ethnicity ? [
+                'id' => $user->member->ethnicity->id,
+                'name' => $user->member->ethnicity->name
+            ] : null;
+
+            $profile['member'] = $user->profile->member ? [
+                'uuid' => $user->profile->member->uuid,
+                'national_identification_number' => $user->profile->member->national_identification_number,
+                'passport_number' => $user->profile->member->passport_number,
+                'county' => $user->profile->member->county ? [
+                    'id' => $user->profile->member->county->id,
+                    'name' => $user->profile->member->county->name
+                ] : null,
+                'sub_county' => $user->profile->member->subCounty ? [
+                    'id' => $user->profile->member->subCounty->id,
+                    'name' => $user->profile->member->subCounty->name
+                ] : null,
+                'constituency' => $user->profile->member->constituency ? [
+                    'id' => $user->profile->member->constituency->id,
+                    'name' => $user->profile->member->constituency->name
+                ] : null,
+                'ward' => $user->profile->member->ward ? [
+                    'id' => $user->profile->member->ward->id,
+                    'name' => $user->profile->member->ward->name
+                ] : null,
+                'location' => $user->profile->member->location ? [
+                    'id' => $user->profile->member->location->id,
+                    'name' => $user->profile->member->location->name
+                ] : null,
+                'village' => $user->profile->member->village ? [
+                    'id' => $user->profile->member->village->id,
+                    'name' => $user->profile->member->village->name
+                ] : null,
+                'polling_center' => $user->profile->member->pollingCenter ? [
+                    'id' => $user->profile->member->pollingCenter->id,
+                    'name' => $user->profile->member->pollingCenter->name
+                ] : null,
+                'polling_station' => $user->profile->member->pollingStation ? [
+                    'id' => $user->profile->member->pollingStation->id,
+                    'name' => $user->profile->member->pollingStation->name
+                ] : null,
+                'polling_stream' => $user->profile->member->pollingStream ? [
+                    'id' => $user->profile->member->pollingStream->id,
+                    'name' => $user->profile->member->pollingStream->name
+                ] : null,
+            ] : null;
+
+            $userData['profile'] = $profile;
+        }
+
+        return Inertia::render('Profile/Index', [
+            'title' => 'My Profile',
+            'breadcrumbs' => [
+                ['label' => 'Profile', 'url' => route('profile')]
+            ],
+            'data' => [
+                'user' => $userData
+            ],
+        ]);
+    }
+
+    public function viewProfile(Request $request, $user_id)
+    {
+        // Get the user with their profile and relationships
+        $user = User::findOrFail($user_id);
+        $user->load([
+            'profile' => function($query) {
+                $query->with([
+                    'religion',
+                    'ethnicity',
+                    'member' => function($query) {
+                        $query->with([
+                            'county',
+                            'subCounty',
+                            'constituency',
+                            'ward',
+                            'location',
+                            'village',
+                            'pollingCenter',
+                            'pollingStation',
+                            'pollingStream',
+                        ]);
+                    }
+                ]);
+            }
+        ]);
+
+        // Prepare the user data for the frontend
+        $userData = [
+            'id' => $user->id,
+            'name' => $user->name,
+            'email' => $user->email,
+            'email_verified_at' => $user->email_verified_at,
+            'profile_photo_path' => $user->profile_photo_path,
+            'created_at' => $user->created_at,
+            'updated_at' => $user->updated_at,
+            'profile' => null
+        ];
+
+        if ($user->profile) {
+            $profile = $user->profile->toArray();
+            
+            $profile['religion'] = $user->member->religion ? [
+                'id' => $user->member->religion->id,
+                'name' => $user->member->religion->name
+            ] : null;
+
+            $profile['ethnicity'] = $user->member->ethnicity ? [
+                'id' => $user->member->ethnicity->id,
+                'name' => $user->member->ethnicity->name
+            ] : null;
+
+            $profile['member'] = $user->profile->member ? [
+                'uuid' => $user->profile->member->uuid,
+                'national_identification_number' => $user->profile->member->national_identification_number,
+                'passport_number' => $user->profile->member->passport_number,
+                'county' => $user->profile->member->county ? [
+                    'id' => $user->profile->member->county->id,
+                    'name' => $user->profile->member->county->name
+                ] : null,
+                'sub_county' => $user->profile->member->subCounty ? [
+                    'id' => $user->profile->member->subCounty->id,
+                    'name' => $user->profile->member->subCounty->name
+                ] : null,
+                'constituency' => $user->profile->member->constituency ? [
+                    'id' => $user->profile->member->constituency->id,
+                    'name' => $user->profile->member->constituency->name
+                ] : null,
+                'ward' => $user->profile->member->ward ? [
+                    'id' => $user->profile->member->ward->id,
+                    'name' => $user->profile->member->ward->name
+                ] : null,
+                'location' => $user->profile->member->location ? [
+                    'id' => $user->profile->member->location->id,
+                    'name' => $user->profile->member->location->name
+                ] : null,
+                'village' => $user->profile->member->village ? [
+                    'id' => $user->profile->member->village->id,
+                    'name' => $user->profile->member->village->name
+                ] : null,
+                'polling_center' => $user->profile->member->pollingCenter ? [
+                    'id' => $user->profile->member->pollingCenter->id,
+                    'name' => $user->profile->member->pollingCenter->name
+                ] : null,
+                'polling_station' => $user->profile->member->pollingStation ? [
+                    'id' => $user->profile->member->pollingStation->id,
+                    'name' => $user->profile->member->pollingStation->name
+                ] : null,
+                'polling_stream' => $user->profile->member->pollingStream ? [
+                    'id' => $user->profile->member->pollingStream->id,
+                    'name' => $user->profile->member->pollingStream->name
+                ] : null,
+            ] : null;
+
+            $userData['profile'] = $profile;
+        }
+
+        return Inertia::render('Profile/View', [
+            'title' => 'View Profile',
+            'breadcrumbs' => [
+                [
+                    'label' => 'Profile',
+                    'url' => route('profile')
+                ]
+            ],
+                'data' => [
+                'user' => $userData
+            ],
+        ]);
+    }
+
+    public function activity(Request $request)
+    {
+        // Get pagination parameters
+        $perPage = $request->query('per_page', 5);
+        $page = $request->query('page', 1);
+        $search = $request->query('search');
+        
+        // Base query
+        $query = Activity::query()
+            ->with(['user', 'service', 'department'])
+            ->latest();
+        
+        // Apply search filter if search term exists
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('description', 'like', "%{$search}%")
+                  ->orWhere('details', 'like', "%{$search}%")
+                  ->orWhereHas('user', function($q) use ($search) {
+                      $q->where('name', 'like', "%{$search}%");
+                  });
+            });
+        }
+        
+        // Get paginated results
+        $activities = $query->paginate($perPage, ['*'], 'page', $page);
+
+        // Transform the paginated collection
+        $transformedActivities = $activities->getCollection()->map(function ($activity) {
+            return [
+                'id' => $activity->id,
+                'user_id' => $activity->user ? $activity->user->id : null,
+                'user_name' => $activity->user ? $activity->user->name : 'System',
+                'user_avatar' => $activity->user ? $activity->user->profile_photo_path : null,
+                'title' => $activity->title,
+                'action' => $activity->action,
+                'description' => $activity->description,
+                'details' => $activity->details,
+                'status' => $this->getStatusText($activity->_status),
+                'status_class' => $this->getStatusClass($activity->_status),
+                'created_at' => $activity->created_at->diffForHumans(),
+                'started_at' => $activity->started_at?->format('M d, Y H:i'),
+                'completed_at' => $activity->completed_at?->format('M d, Y H:i'),
+                'scheduled_for' => $activity->scheduled_for?->format('M d, Y H:i'),
+                'service_name' => $activity->service?->name,
+                'department_name' => $activity->department?->name,
+                'icon' => $this->getActivityIcon($activity->action),
+                'color' => $this->getActivityColor($activity->action)
+            ];
+        });
+
+        // Create a new paginator with the transformed collection
+        $paginatedResponse = new \Illuminate\Pagination\LengthAwarePaginator(
+            $transformedActivities,
+            $activities->total(),
+            $activities->perPage(),
+            $activities->currentPage(),
+            ['path' => \Illuminate\Support\Facades\URL::current()]
+        );
+        
+        return Inertia::render('Activity', [
+            'title' => 'Activity',
+            'breadcrumbs' => [
+                [
+                    'label' => 'Activity',
+                    'url' => route('activity')
+                ]
+            ],
+            'data' => [
+                'user' => $request->user(),
+                'activities' => $paginatedResponse
+            ]
+        ]);
+    }
+
+    public function deleteActivity(Request $request, $id)
+    {
+        $activity = Activity::find($id);
+        if ($activity) {
+            $activity->delete();
+            return redirect()->route('activity')->with('success', 'Activity deleted successfully.');
+        }
+        return redirect()->route('activity')->with('error', 'Activity not found.');
+    }
+
+    public function settings(Request $request)
+    {
+        return Inertia::render('Settings', [
+            'title' => 'Systems Settings',
+            'breadcrumbs' => [
+                [
+                    'label' => 'Settings',
+                    'url' => route('settings')
+                ]
+            ],
+            'data' => [
+                'user' => $request->user()
+            ]
+        ]);
+    }
+}
