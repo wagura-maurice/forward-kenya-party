@@ -49,7 +49,7 @@ if (! function_exists('updateSetting')) {
 }
 
 if (! function_exists('getSetting')) {
-    function getSetting(string $item): string
+    function getSetting(string $item): ?string
     {
         $setting = Setting::whereItem($item)->first();
 
