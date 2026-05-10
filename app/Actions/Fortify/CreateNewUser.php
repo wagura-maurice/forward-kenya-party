@@ -4,7 +4,7 @@ namespace App\Actions\Fortify;
 
 use App\Models\User;
 use App\Models\Gender;
-use App\Models\Citizen;
+use App\Models\Member;
 use App\Models\Profile;
 use Illuminate\Support\Str;
 use Illuminate\Support\Carbon;
@@ -68,14 +68,16 @@ class CreateNewUser implements CreatesNewUsers
         $input['telephone'] = phoneNumberPrefix(str_replace(' ', '', $input['telephone']));
         // dd($input);
 
-        // Add this
-        app(CaptchaValidation::class)->validate($input['g-recaptcha-response']);
+        // Add this - skip captcha for admin-created members
+        if (!isset($input['g-recaptcha-response']) || $input['g-recaptcha-response'] !== 'admin_bypass') {
+            app(CaptchaValidation::class)->validate($input['g-recaptcha-response'] ?? '');
+        }
           
         // Validate the input
         $validated = Validator::make($input, [
             'surname' => ['required', 'string', 'max:255', function ($attribute, $value, $fail) {
-                if (!preg_match('/^[A-Z][a-z]+$/', $value)) {
-                    $fail('The ' . $attribute . ' must be a human surname.');
+                if (!preg_match('/^[a-zA-Z]+$/', $value)) {
+                    $fail('The ' . $attribute . ' must be a valid surname (letters only).');
                 }
             }],
             'other_name' => ['required', 'string', 'max:255', function ($attribute, $value, $fail) {
@@ -84,15 +86,15 @@ class CreateNewUser implements CreatesNewUsers
                     $fail('The ' . $attribute . ' must be a human name in one to three parts.');
                 }
                 foreach ($names as $name) {
-                    if (!preg_match('/^[A-Z][a-z]+$/', $name)) {
-                        $fail('The ' . $attribute . ' must be a human name in one to three parts.');
+                    if (!preg_match('/^[a-zA-Z]+$/', $name)) {
+                        $fail('The ' . $attribute . ' must contain only letters.');
                     }
                 }
             }],
             'telephone' => ['required', 'string', 'max:20', 'telephone', 'unique:profiles,telephone'],
             'identification_type' => ['required', 'string', 'in:national_identification_number,passport_number'],
-            'identification_number' => ['required', 'string', 'max:50', 'unique:citizens,national_identification_number'],
-            'party_membership_number' => ['required', 'string', 'max:50', 'unique:citizens,uuid'],
+            'identification_number' => ['required', 'string', 'max:50', 'unique:members,national_identification_number'],
+            'party_membership_number' => ['required', 'string', 'max:50', 'unique:members,party_membership_number'],
             'date_of_birth' => ['required', 'date', 'before:today', function ($attribute, $value, $fail) {
                 $age = Carbon::parse($value)->age;
                 if ($age < 18 || $age > 120) {
@@ -115,7 +117,7 @@ class CreateNewUser implements CreatesNewUsers
                 function ($attribute, $value, $fail) use ($input) {
                     if (($input['disability_status'] ?? false) && empty($value)) {
                         $fail('The NCPWD number is required when disability status is "Yes".');
-                    } elseif ($value && Profile::where('ncpwd_number', $value)->exists()) {
+                    } elseif ($value && Member::where('ncpwd_number', $value)->exists()) {
                         $fail('The NCPWD number has already been taken.');
                     }
                 }
@@ -144,8 +146,8 @@ class CreateNewUser implements CreatesNewUsers
                 'last_login_at' => now(),
                 'last_login_ip' => request()->ip(),
             ]), function (User $user) use ($input) {
-                // Assign citizen role
-                $user->assignRole('citizen');
+                // Assign member role
+                $user->assignRole('member');
         
                 // Split other_name into first and middle names
                 $nameParts = explode(' ', $input['other_name'], 2);
@@ -159,11 +161,6 @@ class CreateNewUser implements CreatesNewUsers
                     'last_name' => $input['surname'],
                     'gender' => $input['gender'],
                     'date_of_birth' => Carbon::parse($input['date_of_birth'])->format('Y-m-d'),
-                    'special_interest_groups' => json_encode($input['special_interest_groups']),
-                    'disability_status' => (bool)$input['disability_status'],
-                    'ncpwd_number' => (bool)$input['disability_status'] ? $input['ncpwd_number'] : null,
-                    'ethnicity_id' => $input['ethnicity_id'],
-                    'religion_id' => $input['religion_id'],
                     'telephone' => $input['telephone'],
                     'address_line_1' => null,
                     'address_line_2' => null,
@@ -171,13 +168,18 @@ class CreateNewUser implements CreatesNewUsers
                     'state' => null,
                 ]);
         
-                // Create citizen record
-                Citizen::create([
+                // Create member record
+                Member::create([
                     'uuid' => $input['party_membership_number'], // Str::uuid()->toString(),
                     'user_id' => $user->id,
                     'county_id' => $input['county_id'],
                     'constituency_id' => $input['constituency_id'],
                     'ward_id' => $input['ward_id'],
+                    'special_interest_groups' => $input['special_interest_groups'] ?? null,
+                    'disability_status' => (bool)$input['disability_status'],
+                    'ncpwd_number' => (bool)$input['disability_status'] ? $input['ncpwd_number'] : null,
+                    'ethnicity_id' => $input['ethnicity_id'],
+                    'religion_id' => $input['religion_id'],
                     'passport_number' => $input['identification_type'] === 'passport_number' 
                         ? $input['identification_number'] 
                         : null,

@@ -22,9 +22,9 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
      */
     public function update(User $user, array $input)
     {
-        // Get the profile and citizen IDs if they exist
+        // Get the profile and member IDs if they exist
         $profileId = $user->profile?->id;
-        $citizenId = $user->citizen?->id;
+        $memberId = $user->member?->id;
 
         // Validate the input
         $rules = [
@@ -43,24 +43,6 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
                 }
             }],
             'profile.gender' => ['required', 'string', 'in:' . implode(',', array_keys(Gender::getGenderOptions()))],
-            'profile.ncpwd_number' => [
-                'nullable', 
-                'string', 
-                'max:50',
-                function ($attribute, $value, $fail) use ($input, $profileId) {
-                    if ($value) {
-                        $query = Profile::where('ncpwd_number', $value);
-                        if ($profileId) {
-                            $query->where('id', '!=', $profileId);
-                        }
-                        if ($query->exists()) {
-                            $fail('The NCPWD number has already been taken.');
-                        }
-                    }
-                }
-            ],
-            'profile.ethnicity_id' => ['required', 'exists:ethnicities,id'],
-            'profile.religion_id' => ['required', 'exists:religions,id'],
             'profile.telephone' => [
                 'required', 
                 'string', 
@@ -83,52 +65,69 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
             'profile.country' => ['nullable', 'string', 'max:255'],
         ];
 
-        // Add citizen validation rules if citizen exists or we're creating one
-        $citizenRules = [
-            'citizen.national_identification_number' => [
+        // Add member validation rules if member exists or we're creating one
+        $memberRules = [
+            'member.national_identification_number' => [
                 'nullable', 
                 'string', 
                 'max:50',
-                $citizenId 
-                    ? Rule::unique('citizens', 'national_identification_number')->ignore($citizenId)
-                    : Rule::unique('citizens', 'national_identification_number')
+                $memberId 
+                    ? Rule::unique('members', 'national_identification_number')->ignore($memberId)
+                    : Rule::unique('members', 'national_identification_number')
             ],
-            'citizen.passport_number' => [
+            'member.passport_number' => [
                 'nullable', 
                 'string', 
                 'max:50',
-                $citizenId 
-                    ? Rule::unique('citizens', 'passport_number')->ignore($citizenId)
-                    : Rule::unique('citizens', 'passport_number')
+                $memberId 
+                    ? Rule::unique('members', 'passport_number')->ignore($memberId)
+                    : Rule::unique('members', 'passport_number')
             ],
-            'citizen.driver_license_number' => [
+            'member.county_id' => ['required', 'exists:counties,id'],
+            'member.sub_county_id' => ['nullable', 'exists:sub_counties,id'],
+            'member.constituency_id' => ['required', 'exists:constituencies,id'],
+            'member.ward_id' => ['required', 'exists:wards,id'],
+            'member.location_id' => ['nullable', 'exists:locations,id'],
+            'member.village_id' => ['nullable', 'exists:villages,id'],
+            'member.polling_center_id' => ['nullable', 'exists:polling_centers,id'],
+            'member.polling_station_id' => ['nullable', 'exists:polling_stations,id'],
+            'member.polling_stream_id' => ['nullable', 'exists:polling_streams,id'],
+            'member.special_interest_groups' => ['nullable', 'array'],
+            'member.disability_status' => ['required', 'boolean'],
+            'member.ncpwd_number' => [
                 'nullable', 
                 'string', 
                 'max:50',
-                $citizenId 
-                    ? Rule::unique('citizens', 'driver_license_number')->ignore($citizenId)
-                    : Rule::unique('citizens', 'driver_license_number')
+                function ($attribute, $value, $fail) use ($input, $memberId) {
+                    if ($value) {
+                        $query = \App\Models\Member::where('ncpwd_number', $value);
+                        if ($memberId) {
+                            $query->where('id', '!=', $memberId);
+                        }
+                        if ($query->exists()) {
+                            $fail('The NCPWD number has already been taken.');
+                        }
+                    }
+                }
             ],
-            'citizen.county_id' => ['required', 'exists:counties,id'],
-            'citizen.sub_county_id' => ['required', 'exists:sub_counties,id'],
-            'citizen.constituency_id' => ['required', 'exists:constituencies,id'],
-            'citizen.ward_id' => ['required', 'exists:wards,id'],
-            'citizen.location_id' => ['nullable', 'exists:locations,id'],
-            'citizen.village_id' => ['nullable', 'exists:villages,id'],
-            'citizen.polling_center_id' => ['nullable', 'exists:polling_centers,id'],
-            'citizen.polling_station_id' => ['nullable', 'exists:polling_stations,id'],
-            'citizen.polling_stream_id' => ['nullable', 'exists:polling_streams,id']
+            'member.ethnicity_id' => ['required', 'exists:ethnicities,id'],
+            'member.religion_id' => ['required', 'exists:religions,id']
         ];
         
-        $rules = array_merge($rules, $citizenRules);
+        $rules = array_merge($rules, $memberRules);
 
         $validated = Validator::make($input, $rules, [
-            'profile.ethnicity_id.required' => 'The ethnicity field is required.',
-            'profile.religion_id.required' => 'The religion field is required.',
-            'citizen.county_id.required' => 'The county field is required.',
-            'citizen.sub_county_id.required' => 'The sub-county field is required.',
-            'citizen.constituency_id.required' => 'The constituency field is required.',
-            'citizen.ward_id.required' => 'The ward field is required.',
+            'member.ethnicity_id.required' => 'The ethnicity field is required.',
+            'member.religion_id.required' => 'The religion field is required.',
+            'member.county_id.required' => 'The county field is required.',
+            'member.sub_county_id.required' => 'The sub-county field is required.',
+            'member.constituency_id.required' => 'The constituency field is required.',
+            'member.ward_id.required' => 'The ward field is required.',
+            'member.location_id.required' => 'The location field is required.',
+            'member.village_id.required' => 'The village field is required.',
+            'member.polling_center_id.required' => 'The polling center field is required.',
+            'member.polling_station_id.required' => 'The polling station field is required.',
+            'member.polling_stream_id.required' => 'The polling stream field is required.',
         ]);
         
         $validated->validateWithBag('updateProfileInformation');
@@ -160,10 +159,6 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
                     'last_name' => $input['profile']['surname'],
                     'date_of_birth' => Carbon::parse($input['profile']['date_of_birth'])->format('Y-m-d'),
                     'gender' => $input['profile']['gender'],
-                    'disability_status' => $input['profile']['ncpwd_number'] ? true : false,
-                    'ncpwd_number' => $input['profile']['ncpwd_number'] ?? null,
-                    'ethnicity_id' => $input['profile']['ethnicity_id'],
-                    'religion_id' => $input['profile']['religion_id'],
                     'telephone' => phoneNumberPrefix($input['profile']['telephone']),
                     'address_line_1' => $input['profile']['address_line_1'] ?? null,
                     'address_line_2' => $input['profile']['address_line_2'] ?? null,
@@ -178,27 +173,31 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
                     $user->profile()->create($profileData);
                 }
 
-                // Update or create citizen record
-                $citizenData = [
+                // Update or create member record
+                $memberData = [
                     'user_id' => $user->id,
-                    'county_id' => $input['citizen']['county_id'],
-                    'sub_county_id' => $input['citizen']['sub_county_id'],
-                    'constituency_id' => $input['citizen']['constituency_id'],
-                    'ward_id' => $input['citizen']['ward_id'],
-                    'location_id' => $input['citizen']['location_id'],
-                    'village_id' => $input['citizen']['village_id'],
-                    'polling_center_id' => $input['citizen']['polling_center_id'],
-                    'polling_station_id' => $input['citizen']['polling_station_id'],
-                    'polling_stream_id' => $input['citizen']['polling_stream_id'],
-                    'national_identification_number' => $input['citizen']['national_identification_number'] ?? null,
-                    'passport_number' => $input['citizen']['passport_number'] ?? null,
-                    'driver_license_number' => $input['citizen']['driver_license_number'] ?? null,
+                    'county_id' => $input['member']['county_id'],
+                    'sub_county_id' => $input['member']['sub_county_id'],
+                    'constituency_id' => $input['member']['constituency_id'],
+                    'ward_id' => $input['member']['ward_id'],
+                    'location_id' => $input['member']['location_id'],
+                    'village_id' => $input['member']['village_id'],
+                    'polling_center_id' => $input['member']['polling_center_id'],
+                    'polling_station_id' => $input['member']['polling_station_id'],
+                    'polling_stream_id' => $input['member']['polling_stream_id'],
+                    'special_interest_groups' => $input['member']['special_interest_groups'] ?? null,
+                    'disability_status' => $input['member']['disability_status'],
+                    'ncpwd_number' => $input['member']['ncpwd_number'] ?? null,
+                    'ethnicity_id' => $input['member']['ethnicity_id'],
+                    'religion_id' => $input['member']['religion_id'],
+                    'national_identification_number' => $input['member']['national_identification_number'] ?? null,
+                    'passport_number' => $input['member']['passport_number'] ?? null,
                 ];
 
-                if ($user->citizen) {
-                    $user->citizen->update($citizenData);
+                if ($user->member) {
+                    $user->member->update($memberData);
                 } else {
-                    $user->citizen()->create(array_merge($citizenData, ['uuid' => generateUniqueMembershipNumber()]));
+                    $user->member()->create(array_merge($memberData, ['uuid' => generateUniqueMembershipNumber(), 'party_membership_number' => generateUniqueMembershipNumber()]));
                 }
             });
 
@@ -206,7 +205,7 @@ class UpdateUserProfileInformation implements UpdatesUserProfileInformation
                 return response()->json([
                     'status' => 'success',
                     'message' => 'Profile updated successfully!',
-                    'user' => $user->fresh()->load('profile', 'citizen')
+                    'user' => $user->fresh()->load('profile', 'member')
                 ]);
             }
 
