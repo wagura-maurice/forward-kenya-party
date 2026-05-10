@@ -40,7 +40,7 @@ const closeModal = () => {
 <template>
     <ActionSection>
         <template #title>
-            Party Membership
+            Delete Party Membership
         </template>
 
         <template #description>
@@ -61,14 +61,14 @@ const closeModal = () => {
 
             <div class="mt-5 flex items-center justify-end">
                 <DangerButton @click="confirmUserDeletion">
-                    Party Membership
+                    Delete Party Membership
                 </DangerButton>
             </div>
 
             <!-- Delete Account Confirmation Modal -->
             <DialogModal :show="confirmingUserDeletion" @close="closeModal">
                 <template #title>
-                    Party Membership
+                    Delete Party Membership
                 </template>
 
                 <template #content>
@@ -107,7 +107,7 @@ const closeModal = () => {
                         :disabled="form.processing"
                         @click="deleteUser"
                     >
-                        Party Membership
+                        Delete Party Membership
                     </DangerButton>
                 </template>
             </DialogModal>

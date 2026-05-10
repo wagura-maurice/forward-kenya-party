@@ -21,9 +21,9 @@ const { props: pageProps } = usePage();
 // Access authenticated user data
 const user = computed(() => pageProps?.auth?.user || null);
 
-// Access the profile and member data
+// Access the profile and citizen data
 const profile = computed(() => user.value?.profile || {});
-const member = computed(() => user.value?.member || {});
+const citizen = computed(() => user.value?.citizen || {});
 
 // Initialize form with default values and validation rules
 const form = useForm(
@@ -38,6 +38,9 @@ const form = useForm(
             photo: null,
             date_of_birth: "",
             gender: "",
+            ncpwd_number: "",
+            ethnicity_id: "",
+            religion_id: "",
             // Contact Information
             telephone: "",
             address_line_1: "",
@@ -46,18 +49,12 @@ const form = useForm(
             state: "",
             country: "",
         },
-        // Member Information
-        member: {
+        // Citizen Information
+        citizen: {
             // Identification Information
             national_identification_number: "",
             passport_number: "",
             driver_license_number: "",
-            // Personal Information (moved from profile)
-            special_interest_groups: [],
-            disability_status: false,
-            ncpwd_number: "",
-            ethnicity_id: "",
-            religion_id: "",
             // Local Government Information
             county_id: "",
             sub_county_id: "",
@@ -74,19 +71,19 @@ const form = useForm(
         // Custom validation rules
         resetOnSuccess: false,
         rules: {
-            "member.national_identification_number": [
+            "citizen.national_identification_number": [
                 (value, form) => {
-                    if (!value && !form.member.passport_number) {
+                    if (!value && !form.citizen.passport_number) {
                         return "Either National Identification Number or Passport Number is required";
                     }
                     return true;
                 },
             ],
-            "member.passport_number": [
+            "citizen.passport_number": [
                 (value, form) => {
                     if (
                         !value &&
-                        !form.member.national_identification_number
+                        !form.citizen.national_identification_number
                     ) {
                         return "Either Passport Number or National Identification Number is required";
                     }
@@ -96,12 +93,6 @@ const form = useForm(
         },
     }
 );
-
-// Debug: Check initial data state
-console.log('Debug - Initial pageProps:', pageProps);
-console.log('Debug - Initial formData locations:', pageProps.formData?.locations);
-console.log('Debug - Initial member data:', member.value);
-console.log('Debug - Initial form member data:', form.member);
 
 // OTP Configuration
 const otpConfig = {
@@ -649,15 +640,15 @@ watch(
     { immediate: true, deep: true }
 );
 
-// Watch for member changes to update form data
+// Watch for citizen changes to update form data
 watch(
-    member,
+    citizen,
     (newCitizen) => {
         if (newCitizen && Object.keys(newCitizen).length > 0) {
-            // Update member fields in form
+            // Update citizen fields in form
             Object.keys(newCitizen).forEach((key) => {
-                if (key in form.member) {
-                    form.member[key] = newCitizen[key];
+                if (key in form.citizen) {
+                    form.citizen[key] = newCitizen[key];
                 }
             });
         }
@@ -690,6 +681,9 @@ watch(
 
             // Update other profile fields
             form.profile.gender = newProfile.gender || "";
+            form.profile.ncpwd_number = newProfile.ncpwd_number || null;
+            form.profile.ethnicity_id = newProfile.ethnicity_id || "";
+            form.profile.religion_id = newProfile.religion_id || "";
             form.profile.telephone = newProfile.telephone || null;
             form.profile.address_line_1 = newProfile.address_line_1 || null;
             form.profile.address_line_2 = newProfile.address_line_2 || null;
@@ -701,42 +695,36 @@ watch(
     { immediate: true, deep: true }
 );
 
-// Watch for member changes to update form
+// Watch for citizen changes to update form
 watch(
-    member,
-    (newMember) => {
-        if (newMember && Object.keys(newMember).length > 0) {
-            console.log("Updating member form data:", newMember);
+    citizen,
+    (newCitizen) => {
+        if (newCitizen && Object.keys(newCitizen).length > 0) {
+            console.log("Updating citizen form data:", newCitizen);
 
-            // Update member fields
-            form.member.national_identification_number = newMember.national_identification_number || null;
-            form.member.passport_number = newMember.passport_number || null;
-            form.member.driver_license_number =
-                newMember.driver_license_number || null;
-
-            // Update personal information fields (moved from profile)
-            form.member.special_interest_groups = newMember.special_interest_groups || [];
-            form.member.disability_status = newMember.disability_status || false;
-            form.member.ncpwd_number = newMember.ncpwd_number || null;
-            form.member.ethnicity_id = newMember.ethnicity_id || null;
-            form.member.religion_id = newMember.religion_id || null;
+            // Update citizen fields
+            form.citizen.national_identification_number =
+                newCitizen.national_identification_number || null;
+            form.citizen.passport_number = newCitizen.passport_number || null;
+            form.citizen.driver_license_number =
+                newCitizen.driver_license_number || null;
 
             // Update location fields
-            form.member.county_id = newMember.county_id || null;
-            form.member.sub_county_id = newMember.sub_county_id || null;
-            form.member.constituency_id = newMember.constituency_id || null;
-            form.member.ward_id = newMember.ward_id || null;
-            form.member.location_id = newMember.location_id || null;
-            form.member.village_id = newMember.village_id || null;
-            form.member.polling_center_id =
-                newMember.polling_center_id || null;
-            form.member.polling_station_id =
-                newMember.polling_station_id || null;
-            form.member.polling_stream_id =
-                newMember.polling_stream_id || null;
+            form.citizen.county_id = newCitizen.county_id || null;
+            form.citizen.sub_county_id = newCitizen.sub_county_id || null;
+            form.citizen.constituency_id = newCitizen.constituency_id || null;
+            form.citizen.ward_id = newCitizen.ward_id || null;
+            form.citizen.location_id = newCitizen.location_id || null;
+            form.citizen.village_id = newCitizen.village_id || null;
+            form.citizen.polling_center_id =
+                newCitizen.polling_center_id || null;
+            form.citizen.polling_station_id =
+                newCitizen.polling_station_id || null;
+            form.citizen.polling_stream_id =
+                newCitizen.polling_stream_id || null;
 
             // Log the updated form data for debugging
-            console.log("Updated form.member:", form.member);
+            console.log("Updated form.citizen:", form.citizen);
         }
     },
     { immediate: true, deep: true }
@@ -770,10 +758,12 @@ const prepareFormData = () => {
     }
 
     // Add all member fields to formData
-    if (form.member) {
-        Object.keys(form.member).forEach((key) => {
-            if (form.member[key] !== null && form.member[key] !== undefined) {
-                formData.append(`member[${key}]`, form.member[key]);
+    if (form.citizen) {
+        Object.keys(form.citizen).forEach((key) => {
+            if (form.citizen[key] !== null && form.citizen[key] !== undefined) {
+                // Map citizen field names to member field names for backend compatibility
+                const memberFieldName = key.replace('county_id', 'county_id');
+                formData.append(`member[${memberFieldName}]`, form.citizen[key]);
             }
         });
     }
@@ -1057,74 +1047,16 @@ const filteredPollingCenters = ref([]);
 const filteredPollingStations = ref([]);
 const filteredPollingStreams = ref([]);
 
-// Computed properties to get selected location names from member table
-const selectedCountyName = computed(() => {
-    console.log('Debug - Getting county name from member table');
-    console.log('Debug - member.value:', member.value);
-    
-    // Get county name directly from member object (from members table)
-    if (member.value?.county?.name) {
-        const name = member.value.county.name.charAt(0).toUpperCase() + member.value.county.name.slice(1).toLowerCase();
-        console.log('Debug - County name from member table:', name);
-        return name;
-    }
-    
-    console.log('Debug - No county data found in member table');
-    return '';
-});
-
-const selectedSubCountyName = computed(() => {
-    console.log('Debug - Getting sub-county name from member table');
-    
-    // Get sub-county name directly from member object (from members table)
-    if (member.value?.sub_county?.name) {
-        const name = member.value.sub_county.name.charAt(0).toUpperCase() + member.value.sub_county.name.slice(1).toLowerCase();
-        console.log('Debug - Sub-county name from member table:', name);
-        return name;
-    }
-    
-    console.log('Debug - No sub-county data found in member table');
-    return '';
-});
-
-const selectedConstituencyName = computed(() => {
-    console.log('Debug - Getting constituency name from member table');
-    
-    // Get constituency name directly from member object (from members table)
-    if (member.value?.constituency?.name) {
-        const name = member.value.constituency.name.charAt(0).toUpperCase() + member.value.constituency.name.slice(1).toLowerCase();
-        console.log('Debug - Constituency name from member table:', name);
-        return name;
-    }
-    
-    console.log('Debug - No constituency data found in member table');
-    return '';
-});
-
-const selectedWardName = computed(() => {
-    console.log('Debug - Getting ward name from member table');
-    
-    // Get ward name directly from member object (from members table)
-    if (member.value?.ward?.name) {
-        const name = member.value.ward.name.charAt(0).toUpperCase() + member.value.ward.name.slice(1).toLowerCase();
-        console.log('Debug - Ward name from member table:', name);
-        return name;
-    }
-    
-    console.log('Debug - No ward data found in member table');
-    return '';
-});
-
 // Watcher for county changes
 watch(
-    () => form.member.county_id,
+    () => form.citizen.county_id,
     (newCountyId) => {
         if (!newCountyId) {
             filteredSubCounties.value = [];
             filteredConstituencies.value = [];
             // Reset only county-dependent fields
-            form.member.sub_county_id = "";
-            form.member.constituency_id = "";
+            form.citizen.sub_county_id = "";
+            form.citizen.constituency_id = "";
             return;
         }
 
@@ -1141,19 +1073,19 @@ watch(
             ) || [];
 
         // Reset only county-dependent fields
-        form.member.sub_county_id = null;
-        form.member.constituency_id = null;
+        form.citizen.sub_county_id = "";
+        form.citizen.constituency_id = "";
     }
 );
 
 // Watcher for constituency changes
 watch(
-    () => form.member.constituency_id,
+    () => form.citizen.constituency_id,
     (newConstituencyId) => {
         if (!newConstituencyId) {
             filteredWards.value = [];
             // Reset only constituency-dependent fields
-            form.member.ward_id = "";
+            form.citizen.ward_id = "";
             return;
         }
 
@@ -1163,20 +1095,20 @@ watch(
             ) || [];
 
         // Reset only constituency-dependent fields
-        form.member.ward_id = "";
+        form.citizen.ward_id = "";
     }
 );
 
 // Watcher for ward changes
 watch(
-    () => form.member.ward_id,
+    () => form.citizen.ward_id,
     (newWardId) => {
         if (!newWardId) {
             filteredLocations.value = [];
             filteredPollingCenters.value = [];
             // Reset only ward-dependent fields
-            form.member.location_id = "";
-            form.member.polling_center_id = "";
+            form.citizen.location_id = "";
+            form.citizen.polling_center_id = "";
             return;
         }
 
@@ -1193,19 +1125,19 @@ watch(
             ) || [];
 
         // Reset only ward-dependent fields
-        form.member.location_id = null;
-        form.member.polling_center_id = null;
+        form.citizen.location_id = "";
+        form.citizen.polling_center_id = "";
     }
 );
 
 // Watcher for location changes
 watch(
-    () => form.member.location_id,
+    () => form.citizen.location_id,
     (newLocationId) => {
         if (!newLocationId) {
             filteredVillages.value = [];
             // Reset only location-dependent fields
-            form.member.village_id = null;
+            form.citizen.village_id = "";
             return;
         }
 
@@ -1215,18 +1147,18 @@ watch(
             ) || [];
 
         // Reset only location-dependent fields
-        form.member.village_id = null;
+        form.citizen.village_id = "";
     }
 );
 
 // Watcher for polling center changes
 watch(
-    () => form.member.polling_center_id,
+    () => form.citizen.polling_center_id,
     (newCenterId) => {
         if (!newCenterId) {
             filteredPollingStations.value = [];
             // Reset only polling-center-dependent fields
-            form.member.polling_station_id = null;
+            form.citizen.polling_station_id = "";
             return;
         }
 
@@ -1236,18 +1168,18 @@ watch(
             ) || [];
 
         // Reset only polling-center-dependent fields
-        form.member.polling_station_id = null;
+        form.citizen.polling_station_id = "";
     }
 );
 
 // Watcher for polling station changes
 watch(
-    () => form.member.polling_station_id,
+    () => form.citizen.polling_station_id,
     (newStationId) => {
         if (!newStationId) {
             filteredPollingStreams.value = [];
             // Reset only polling-station-dependent fields
-            form.member.polling_stream_id = null;
+            form.citizen.polling_stream_id = "";
             return;
         }
 
@@ -1257,154 +1189,154 @@ watch(
             ) || [];
 
         // Reset only polling-station-dependent fields
-        form.member.polling_stream_id = null;
+        form.citizen.polling_stream_id = "";
     }
 );
 
 // Watchers to clear child fields when parent changes
 watch(
-    () => form.member.county_id,
+    () => form.citizen.county_id,
     () => {
-        form.member.sub_county_id = "";
-        form.member.constituency_id = "";
-        form.member.ward_id = "";
-        form.member.location_id = "";
-        form.member.village_id = "";
-        form.member.polling_center_id = "";
-        form.member.polling_station_id = "";
-        form.member.polling_stream_id = "";
+        form.citizen.sub_county_id = "";
+        form.citizen.constituency_id = "";
+        form.citizen.ward_id = "";
+        form.citizen.location_id = "";
+        form.citizen.village_id = "";
+        form.citizen.polling_center_id = "";
+        form.citizen.polling_station_id = "";
+        form.citizen.polling_stream_id = "";
     }
 );
 
 watch(
-    () => form.member.constituency_id,
+    () => form.citizen.constituency_id,
     () => {
-        form.member.ward_id = "";
-        form.member.location_id = "";
-        form.member.village_id = "";
-        form.member.polling_center_id = "";
-        form.member.polling_station_id = "";
-        form.member.polling_stream_id = "";
+        form.citizen.ward_id = "";
+        form.citizen.location_id = "";
+        form.citizen.village_id = "";
+        form.citizen.polling_center_id = "";
+        form.citizen.polling_station_id = "";
+        form.citizen.polling_stream_id = "";
     }
 );
 
 watch(
-    () => form.member.ward_id,
+    () => form.citizen.ward_id,
     () => {
-        form.member.location_id = "";
-        form.member.village_id = "";
-        form.member.polling_center_id = "";
-        form.member.polling_station_id = "";
-        form.member.polling_stream_id = "";
+        form.citizen.location_id = "";
+        form.citizen.village_id = "";
+        form.citizen.polling_center_id = "";
+        form.citizen.polling_station_id = "";
+        form.citizen.polling_stream_id = "";
     }
 );
 
 watch(
-    () => form.member.location_id,
+    () => form.citizen.location_id,
     () => {
-        form.member.village_id = "";
+        form.citizen.village_id = "";
     }
 );
 
 watch(
-    () => form.member.polling_center_id,
+    () => form.citizen.polling_center_id,
     () => {
-        form.member.polling_station_id = "";
-        form.member.polling_stream_id = "";
+        form.citizen.polling_station_id = "";
+        form.citizen.polling_stream_id = "";
     }
 );
 
 watch(
-    () => form.member.polling_station_id,
+    () => form.citizen.polling_station_id,
     () => {
-        form.member.polling_stream_id = "";
+        form.citizen.polling_stream_id = "";
     }
 );
 
 // Watch for county changes to filter sub-counties and reset dependent fields
 watch(
-    () => form.member.county_id,
+    () => form.citizen.county_id,
     (newCountyId) => {
         // Reset dependent fields
-        form.member.sub_county_id = "";
-        form.member.constituency_id = "";
-        form.member.ward_id = "";
-        form.member.location_id = "";
-        form.member.village_id = "";
-        form.member.polling_center_id = "";
-        form.member.polling_station_id = "";
-        form.member.polling_stream_id = "";
+        form.citizen.sub_county_id = "";
+        form.citizen.constituency_id = "";
+        form.citizen.ward_id = "";
+        form.citizen.location_id = "";
+        form.citizen.village_id = "";
+        form.citizen.polling_center_id = "";
+        form.citizen.polling_station_id = "";
+        form.polling_stream_id = "";
     }
 );
 
 // Watch for sub-county changes to reset dependent fields
 watch(
-    () => form.member.sub_county_id,
+    () => form.citizen.sub_county_id,
     (newSubCountyId) => {
         if (newSubCountyId) {
             // Reset dependent fields if needed
-            form.member.ward_id = "";
-            form.member.location_id = "";
-            form.member.village_id = "";
-            form.member.polling_center_id = "";
-            form.member.polling_station_id = "";
-            form.member.polling_stream_id = "";
+            form.citizen.ward_id = "";
+            form.citizen.location_id = "";
+            form.citizen.village_id = "";
+            form.citizen.polling_center_id = "";
+            form.citizen.polling_station_id = "";
+            form.citizen.polling_stream_id = "";
         }
     }
 );
 
 // Watch for constituency changes to reset dependent fields
 watch(
-    () => form.member.constituency_id,
+    () => form.citizen.constituency_id,
     (newConstituencyId) => {
         // Reset dependent fields
-        form.member.ward_id = "";
-        form.member.location_id = "";
-        form.member.village_id = "";
-        form.member.polling_center_id = "";
-        form.member.polling_station_id = "";
-        form.member.polling_stream_id = "";
+        form.citizen.ward_id = "";
+        form.citizen.location_id = "";
+        form.citizen.village_id = "";
+        form.citizen.polling_center_id = "";
+        form.citizen.polling_station_id = "";
+        form.citizen.polling_stream_id = "";
     }
 );
 
 // Watch for ward changes to reset dependent fields
 watch(
-    () => form.member.ward_id,
+    () => form.citizen.ward_id,
     (newWardId) => {
         // Reset dependent fields
-        form.member.location_id = "";
-        form.member.village_id = "";
-        form.member.polling_center_id = "";
-        form.member.polling_station_id = "";
-        form.member.polling_stream_id = "";
+        form.citizen.location_id = "";
+        form.citizen.village_id = "";
+        form.citizen.polling_center_id = "";
+        form.citizen.polling_station_id = "";
+        form.citizen.polling_stream_id = "";
     }
 );
 
 // Watch for location changes to reset village field
 watch(
-    () => form.member.location_id,
+    () => form.citizen.location_id,
     (newLocationId) => {
         if (newLocationId) {
-            form.member.village_id = "";
+            form.citizen.village_id = "";
         }
     }
 );
 
 // Watch for polling center changes to reset dependent fields
 watch(
-    () => form.member.polling_center_id,
+    () => form.citizen.polling_center_id,
     (newCenterId) => {
-        form.member.polling_station_id = "";
-        form.member.polling_stream_id = "";
+        form.citizen.polling_station_id = "";
+        form.citizen.polling_stream_id = "";
     }
 );
 
 // Watch for polling station changes to reset polling stream
 watch(
-    () => form.member.polling_station_id,
+    () => form.citizen.polling_station_id,
     (newStationId) => {
         if (newStationId) {
-            form.member.polling_stream_id = "";
+            form.citizen.polling_stream_id = "";
         }
     }
 );
@@ -1584,7 +1516,9 @@ const toggleSection = (section) => {
                                     required
                                 />
                                 <InputError
-                                    :message="form.errors['profile.date_of_birth']"
+                                    :message="
+                                        form.errors['profile.date_of_birth']
+                                    "
                                     class="mt-2"
                                 />
                             </div>
@@ -1603,7 +1537,8 @@ const toggleSection = (section) => {
                                 >
                                     <option value="" disabled hidden>Select Gender</option>
                                     <option
-                                        v-for="gender in $page.props.formData.genders"
+                                        v-for="gender in $page.props.formData
+                                            .genders"
                                         :key="gender.id"
                                         :value="gender.id"
                                     >
@@ -1624,13 +1559,14 @@ const toggleSection = (section) => {
                                 </InputLabel>
                                 <select
                                     id="ethnicity_id"
-                                    v-model="form.member.ethnicity_id"
+                                    v-model="form.profile.ethnicity_id"
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                     required
                                 >
                                     <option value="" disabled hidden>Select Ethnicity</option>
                                     <option
-                                        v-for="ethnicity in $page.props.formData.ethnicities"
+                                        v-for="ethnicity in $page.props.formData
+                                            .ethnicities"
                                         :key="ethnicity.id"
                                         :value="ethnicity.id"
                                     >
@@ -1638,7 +1574,7 @@ const toggleSection = (section) => {
                                     </option>
                                 </select>
                                 <InputError
-                                    :message="form.errors['member.ethnicity_id']"
+                                    :message="form.errors.ethnicity_id"
                                     class="mt-2"
                                 />
                             </div>
@@ -1651,13 +1587,14 @@ const toggleSection = (section) => {
                                 </InputLabel>
                                 <select
                                     id="religion_id"
-                                    v-model="form.member.religion_id"
+                                    v-model="form.profile.religion_id"
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                     required
                                 >
                                     <option value="" disabled hidden>Select Religion</option>
                                     <option
-                                        v-for="religion in $page.props.formData.religions"
+                                        v-for="religion in $page.props.formData
+                                            .religions"
                                         :key="religion.id"
                                         :value="religion.id"
                                     >
@@ -1665,7 +1602,7 @@ const toggleSection = (section) => {
                                     </option>
                                 </select>
                                 <InputError
-                                    :message="form.errors['member.religion_id']"
+                                    :message="form.errors.religion_id"
                                     class="mt-2"
                                 />
                             </div>
@@ -1686,7 +1623,8 @@ const toggleSection = (section) => {
                         <svg
                             class="w-5 h-5 transition-transform duration-200"
                             :class="{
-                                'rotate-180': activeSection === 'identification',
+                                'rotate-180':
+                                    activeSection === 'identification',
                             }"
                             fill="none"
                             stroke="currentColor"
@@ -1707,7 +1645,9 @@ const toggleSection = (section) => {
                     >
                         <div class="grid grid-cols-6 gap-6">
                             <div class="col-span-6 sm:col-span-3">
-                                <InputLabel for="national_identification_number">
+                                <InputLabel
+                                    for="national_identification_number"
+                                >
                                     National Identification Number
                                     <i
                                         class="fas fa-star text-red-500 text-xs ml-1"
@@ -1719,17 +1659,20 @@ const toggleSection = (section) => {
                                 </InputLabel>
                                 <TextInput
                                     id="national_identification_number"
-                                    v-model="form.member.national_identification_number"
+                                    v-model="
+                                        form.citizen
+                                            .national_identification_number
+                                    "
                                     type="text"
                                     class="mt-1 block w-full"
                                     placeholder="e.g., 12345678"
-                                    :required="!form.member.passport_number"
+                                    :required="!form.citizen.passport_number"
                                     autocomplete="off"
                                 />
                                 <InputError
                                     :message="
                                         form.errors[
-                                            'member.national_identification_number'
+                                            'citizen.national_identification_number'
                                         ]
                                     "
                                     class="mt-2"
@@ -1744,21 +1687,25 @@ const toggleSection = (section) => {
                                     ></i>
                                     <span
                                         class="text-xs text-gray-500 font-normal"
-                                        >(or National Identification Number)</span
+                                        >(or National Identification
+                                        Number)</span
                                     >
                                 </InputLabel>
                                 <TextInput
                                     id="passport_number"
-                                    v-model="form.member.passport_number"
+                                    v-model="form.citizen.passport_number"
                                     type="text"
                                     class="mt-1 block w-full"
                                     placeholder="e.g., A1234567"
-                                    :required="!form.member.national_identification_number"
+                                    :required="
+                                        !form.citizen
+                                            .national_identification_number
+                                    "
                                     autocomplete="off"
                                 />
                                 <InputError
                                     :message="
-                                        form.errors['member.passport_number']
+                                        form.errors['citizen.passport_number']
                                     "
                                     class="mt-2"
                                 />
@@ -1773,7 +1720,7 @@ const toggleSection = (section) => {
                                 </InputLabel>
                                 <TextInput
                                     id="membership_number"
-                                    v-model="form.member.uuid"
+                                    v-model="form.citizen.uuid"
                                     type="text"
                                     class="mt-1 block w-full bg-gray-200 text-gray-500 rounded-md border border-gray-300 py-2 px-3 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm opacity-50"
                                     placeholder="e.g., FKP-2345678"
@@ -1782,7 +1729,7 @@ const toggleSection = (section) => {
                                     autocomplete="off"
                                 />
                                 <InputError
-                                    :message="form.errors['member.uuid']"
+                                    :message="form.errors['citizen.uuid']"
                                     class="mt-2"
                                 />
                             </div>
@@ -1792,18 +1739,18 @@ const toggleSection = (section) => {
                                     NCPWD Number
                                     <span
                                         class="text-xs text-gray-500 font-normal"
-                                        >(If Applicable)</span
+                                        >(if Applicable)</span
                                     >
                                 </InputLabel>
                                 <TextInput
                                     id="ncpwd_number"
-                                    v-model="form.member.ncpwd_number"
+                                    v-model="form.profile.ncpwd_number"
                                     type="text"
                                     class="mt-1 block w-full"
                                     placeholder="e.g., NCPWD/1234/5678"
                                 />
                                 <InputError
-                                    :message="form.errors['member.ncpwd_number']"
+                                    :message="form.errors.ncpwd_number"
                                     class="mt-2"
                                 />
                             </div>
@@ -1867,7 +1814,8 @@ const toggleSection = (section) => {
 
                                 <div
                                     v-if="
-                                        $page.props.jetstream.hasEmailVerification &&
+                                        $page.props.jetstream
+                                            .hasEmailVerification &&
                                         user.email_verified_at === null
                                     "
                                     class="mt-2"
@@ -1881,7 +1829,9 @@ const toggleSection = (section) => {
                                             method="post"
                                             as="button"
                                             class="underline text-xs hover:text-gray-900 dark:hover:text-gray-200"
-                                            @click.prevent="sendEmailVerification"
+                                            @click.prevent="
+                                                sendEmailVerification
+                                            "
                                         >
                                             Resend verification
                                         </Link>
@@ -1934,7 +1884,9 @@ const toggleSection = (section) => {
                                     placeholder="e.g., 123 Main Street"
                                 />
                                 <InputError
-                                    :message="form.errors['profile.address_line_1']"
+                                    :message="
+                                        form.errors['profile.address_line_1']
+                                    "
                                     class="mt-2"
                                 />
                             </div>
@@ -1955,7 +1907,9 @@ const toggleSection = (section) => {
                                     placeholder="e.g., Apartment, suite, etc. (optional)"
                                 />
                                 <InputError
-                                    :message="form.errors['profile.address_line_2']"
+                                    :message="
+                                        form.errors['profile.address_line_2']
+                                    "
                                     class="mt-2"
                                 />
                             </div>
@@ -2068,13 +2022,14 @@ const toggleSection = (section) => {
                                 </InputLabel>
                                 <select
                                     id="county_id"
-                                    v-model="form.member.county_id"
+                                    v-model="form.citizen.county_id"
                                     class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                     required
                                 >
                                     <option value="">Select County</option>
                                     <option
-                                        v-for="county in $page.props.formData.locations.counties"
+                                        v-for="county in $page.props.formData
+                                            .locations.counties"
                                         :key="county.id"
                                         :value="county.id"
                                     >
@@ -2082,7 +2037,7 @@ const toggleSection = (section) => {
                                     </option>
                                 </select>
                                 <InputError
-                                    :message="form.errors['member.county_id']"
+                                    :message="form.errors['citizen.county_id']"
                                     class="mt-2"
                                 />
                             </div>
@@ -2097,28 +2052,30 @@ const toggleSection = (section) => {
                                 <div class="relative">
                                     <select
                                         id="sub_county_id"
-                                        v-model="form.member.sub_county_id"
+                                        v-model="form.citizen.sub_county_id"
                                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                         :disabled="
-                                            !form.member.county_id ||
+                                            !form.citizen.county_id ||
                                             isLoadingSubCounties
                                         "
                                     >
-                                        <option value="">Select Sub County</option>
+                                        <option value="">
+                                            Select Sub County
+                                        </option>
                                         <!-- Show current sub-county first if it exists -->
                                         <option
                                             v-if="
-                                                member?.sub_county &&
-                                                member.sub_county.county_id ==
-                                                    form.member.county_id
+                                                citizen?.sub_county &&
+                                                citizen.sub_county.county_id ==
+                                                    form.citizen.county_id
                                             "
-                                            :value="member.sub_county_id"
+                                            :value="citizen.sub_county_id"
                                             :key="
                                                 'current-subcounty-' +
-                                                member.sub_county_id
+                                                citizen.sub_county_id
                                             "
                                         >
-                                            {{ member.sub_county.name.charAt(0).toUpperCase() + member.sub_county.name.slice(1).toLowerCase() }}
+                                            {{ citizen.sub_county.name.charAt(0).toUpperCase() + citizen.sub_county.name.slice(1).toLowerCase() }}
                                         </option>
                                         <!-- Then show other filtered sub-counties -->
                                         <option
@@ -2126,7 +2083,7 @@ const toggleSection = (section) => {
                                             :key="sub_county.id"
                                             :value="sub_county.id"
                                             :disabled="
-                                                member?.sub_county_id ===
+                                                citizen?.sub_county_id ===
                                                 sub_county.id
                                             "
                                         >
@@ -2160,7 +2117,9 @@ const toggleSection = (section) => {
                                     </div>
                                 </div>
                                 <InputError
-                                    :message="form.errors['member.sub_county_id']"
+                                    :message="
+                                        form.errors['citizen.sub_county_id']
+                                    "
                                     class="mt-2"
                                 />
                             </div>
@@ -2175,25 +2134,29 @@ const toggleSection = (section) => {
                                 <div class="relative">
                                     <select
                                         id="constituency_id"
-                                        v-model="form.member.constituency_id"
+                                        v-model="form.citizen.constituency_id"
                                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
-                                        :disabled="!form.member.county_id"
+                                        :disabled="!form.citizen.county_id"
                                         required
                                     >
-                                        <option value="">Select Constituency</option>
+                                        <option value="">
+                                            Select Constituency
+                                        </option>
                                         <!-- Show current constituency first if it exists -->
                                         <option
                                             v-if="
-                                                member?.constituency_id &&
-                                                member?.constituency &&
-                                                member.constituency.county_id == form.member.county_id
+                                                citizen?.constituency &&
+                                                citizen.constituency
+                                                    .county_id ==
+                                                    form.citizen.county_id
                                             "
-                                            :value="member.constituency_id"
-                                            :key="'current-constituency-' + member.constituency_id"
+                                            :value="citizen.constituency_id"
+                                            :key="
+                                                'current-constituency-' +
+                                                citizen.constituency_id
+                                            "
                                         >
-                                            {{
-                                                member.constituency.name.charAt(0).toUpperCase() + member.constituency.name.slice(1).toLowerCase()
-                                            }}
+                                            {{ citizen.constituency.name.charAt(0).toUpperCase() + citizen.constituency.name.slice(1).toLowerCase() }}
                                         </option>
                                         <!-- Then show other filtered constituencies -->
                                         <option
@@ -2201,7 +2164,7 @@ const toggleSection = (section) => {
                                             :key="constituency.id"
                                             :value="constituency.id"
                                             :disabled="
-                                                member?.constituency_id ===
+                                                citizen?.constituency_id ===
                                                 constituency.id
                                             "
                                         >
@@ -2210,7 +2173,9 @@ const toggleSection = (section) => {
                                     </select>
                                 </div>
                                 <InputError
-                                    :message="form.errors['member.constituency_id']"
+                                    :message="
+                                        form.errors['citizen.constituency_id']
+                                    "
                                     class="mt-2"
                                 />
                             </div>
@@ -2225,10 +2190,10 @@ const toggleSection = (section) => {
                                 <div class="relative">
                                     <select
                                         id="ward_id"
-                                        v-model="form.member.ward_id"
+                                        v-model="form.citizen.ward_id"
                                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                         :disabled="
-                                            !form.member.constituency_id ||
+                                            !form.citizen.constituency_id ||
                                             isLoadingWards
                                         "
                                         required
@@ -2237,17 +2202,17 @@ const toggleSection = (section) => {
                                         <!-- Show current ward first if it exists -->
                                         <option
                                             v-if="
-                                                member?.ward &&
-                                                member.ward.constituency_id ==
-                                                    form.member.constituency_id
+                                                citizen?.ward &&
+                                                citizen.ward.constituency_id ==
+                                                    form.citizen.constituency_id
                                             "
-                                            :value="member.ward_id"
+                                            :value="citizen.ward_id"
                                             :key="
                                                 'current-ward-' +
-                                                member.ward_id
+                                                citizen.ward_id
                                             "
                                         >
-                                            {{ member.ward.name.charAt(0).toUpperCase() + member.ward.name.slice(1).toLowerCase() }}
+                                            {{ citizen.ward.name.charAt(0).toUpperCase() + citizen.ward.name.slice(1).toLowerCase() }}
                                         </option>
                                         <!-- Then show other filtered wards -->
                                         <option
@@ -2255,7 +2220,7 @@ const toggleSection = (section) => {
                                             :key="ward.id"
                                             :value="ward.id"
                                             :disabled="
-                                                member?.ward_id === ward.id
+                                                citizen?.ward_id === ward.id
                                             "
                                         >
                                             {{ ward.name.charAt(0).toUpperCase() + ward.name.slice(1).toLowerCase() }}
@@ -2288,7 +2253,7 @@ const toggleSection = (section) => {
                                     </div>
                                 </div>
                                 <InputError
-                                    :message="form.errors['member.ward_id']"
+                                    :message="form.errors['citizen.ward_id']"
                                     class="mt-2"
                                 />
                             </div>
@@ -2300,10 +2265,10 @@ const toggleSection = (section) => {
                                 <div class="relative">
                                     <select
                                         id="location_id"
-                                        v-model="form.member.location_id"
+                                        v-model="form.citizen.location_id"
                                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                         :disabled="
-                                            !form.member.ward_id ||
+                                            !form.citizen.ward_id ||
                                             isLoadingLocations
                                         "
                                     >
@@ -2313,20 +2278,17 @@ const toggleSection = (section) => {
                                         <!-- Show current location first if it exists -->
                                         <option
                                             v-if="
-                                                member?.location_id &&
-                                                member?.location &&
-                                                member.location.ward_id ==
-                                                    form.member.ward_id &&
-                                                member.location_id &&
-                                                member.location.name
+                                                citizen?.location &&
+                                                citizen.location.ward_id ==
+                                                    form.citizen.ward_id
                                             "
-                                            :value="member.location_id"
+                                            :value="citizen.location_id"
                                             :key="
                                                 'current-location-' +
-                                                member.location_id
+                                                citizen.location_id
                                             "
                                         >
-                                            {{ member.location.name.charAt(0).toUpperCase() + member.location.name.slice(1).toLowerCase() }}
+                                            {{ citizen.location.name.charAt(0).toUpperCase() + citizen.location.name.slice(1).toLowerCase() }}
                                         </option>
                                         <!-- Then show other filtered locations -->
                                         <option
@@ -2334,7 +2296,7 @@ const toggleSection = (section) => {
                                             :key="location.id"
                                             :value="location.id"
                                             :disabled="
-                                                member?.location_id ===
+                                                citizen?.location_id ===
                                                 location.id
                                             "
                                         >
@@ -2368,7 +2330,9 @@ const toggleSection = (section) => {
                                     </div>
                                 </div>
                                 <InputError
-                                    :message="form.errors['member.location_id']"
+                                    :message="
+                                        form.errors['citizen.location_id']
+                                    "
                                     class="mt-2"
                                 />
                             </div>
@@ -2380,10 +2344,10 @@ const toggleSection = (section) => {
                                 <div class="relative">
                                     <select
                                         id="village_id"
-                                        v-model="form.member.village_id"
+                                        v-model="form.citizen.village_id"
                                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                         :disabled="
-                                            !form.member.location_id ||
+                                            !form.citizen.location_id ||
                                             isLoadingVillages
                                         "
                                     >
@@ -2391,20 +2355,17 @@ const toggleSection = (section) => {
                                         <!-- Show current village first if it exists -->
                                         <option
                                             v-if="
-                                                member?.village_id &&
-                                                member?.village &&
-                                                member.village.location_id ==
-                                                    form.member.location_id &&
-                                                member.village_id &&
-                                                member.village.name
+                                                citizen?.village &&
+                                                citizen.village.location_id ==
+                                                    form.citizen.location_id
                                             "
-                                            :value="member.village_id"
+                                            :value="citizen.village_id"
                                             :key="
                                                 'current-village-' +
-                                                member.village_id
+                                                citizen.village_id
                                             "
                                         >
-                                            {{ member.village.name.charAt(0).toUpperCase() + member.village.name.slice(1).toLowerCase() }}
+                                            {{ citizen.village.name.charAt(0).toUpperCase() + citizen.village.name.slice(1).toLowerCase() }}
                                         </option>
                                         <!-- Then show other filtered villages -->
                                         <option
@@ -2412,7 +2373,7 @@ const toggleSection = (section) => {
                                             :key="village.id"
                                             :value="village.id"
                                             :disabled="
-                                                member?.village_id ===
+                                                citizen?.village_id ===
                                                 village.id
                                             "
                                         >
@@ -2446,7 +2407,7 @@ const toggleSection = (section) => {
                                     </div>
                                 </div>
                                 <InputError
-                                    :message="form.errors['member.village_id']"
+                                    :message="form.errors['citizen.village_id']"
                                     class="mt-2"
                                 />
                             </div>
@@ -2458,31 +2419,31 @@ const toggleSection = (section) => {
                                 <div class="relative">
                                     <select
                                         id="polling_center_id"
-                                        v-model="form.member.polling_center_id"
+                                        v-model="form.citizen.polling_center_id"
                                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                         :disabled="
-                                            !form.member.ward_id ||
+                                            !form.citizen.ward_id ||
                                             isLoadingPollingCenters
                                         "
                                     >
-                                        <option value="">Select Polling Center</option>
+                                        <option value="">
+                                            Select Polling Center
+                                        </option>
                                         <!-- Show current polling center first if it exists -->
                                         <option
                                             v-if="
-                                                member?.polling_center_id &&
-                                                member?.polling_center &&
-                                                member.polling_center.ward_id ==
-                                                    form.member.ward_id &&
-                                                member.polling_center_id &&
-                                                member.polling_center.name
+                                                citizen?.polling_center &&
+                                                citizen.polling_center
+                                                    .ward_id ==
+                                                    form.citizen.ward_id
                                             "
-                                            :value="member.polling_center_id"
+                                            :value="citizen.polling_center_id"
                                             :key="
-                                                'current-polling-center-' +
-                                                member.polling_center_id
+                                                'current-center-' +
+                                                citizen.polling_center_id
                                             "
                                         >
-                                            {{ member.polling_center.name.charAt(0).toUpperCase() + member.polling_center.name.slice(1).toLowerCase() }}
+                                            {{ citizen.polling_center.name.charAt(0).toUpperCase() + citizen.polling_center.name.slice(1).toLowerCase() }}
                                         </option>
                                         <!-- Then show other filtered polling centers -->
                                         <option
@@ -2490,7 +2451,7 @@ const toggleSection = (section) => {
                                             :key="center.id"
                                             :value="center.id"
                                             :disabled="
-                                                member?.polling_center_id ===
+                                                citizen?.polling_center_id ===
                                                 center.id
                                             "
                                         >
@@ -2524,7 +2485,9 @@ const toggleSection = (section) => {
                                     </div>
                                 </div>
                                 <InputError
-                                    :message="form.errors['member.polling_center_id']"
+                                    :message="
+                                        form.errors['citizen.polling_center_id']
+                                    "
                                     class="mt-2"
                                 />
                             </div>
@@ -2536,31 +2499,34 @@ const toggleSection = (section) => {
                                 <div class="relative">
                                     <select
                                         id="polling_station_id"
-                                        v-model="form.member.polling_station_id"
+                                        v-model="
+                                            form.citizen.polling_station_id
+                                        "
                                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                         :disabled="
-                                            !form.member.polling_center_id ||
+                                            !form.citizen.polling_center_id ||
                                             isLoadingPollingStations
                                         "
                                     >
-                                        <option value="">Select Polling Station</option>
+                                        <option value="">
+                                            Select Polling Station
+                                        </option>
                                         <!-- Show current polling station first if it exists -->
                                         <option
                                             v-if="
-                                                member?.polling_station_id &&
-                                                member?.polling_station &&
-                                                member.polling_station.polling_center_id ==
-                                                        form.member.polling_center_id &&
-                                                member.polling_station_id &&
-                                                member.polling_station.name
+                                                citizen?.polling_station &&
+                                                citizen.polling_station
+                                                    .polling_center_id ==
+                                                    form.citizen
+                                                        .polling_center_id
                                             "
-                                            :value="member.polling_station_id"
+                                            :value="citizen.polling_station_id"
                                             :key="
                                                 'current-station-' +
-                                                member.polling_station_id
+                                                citizen.polling_station_id
                                             "
                                         >
-                                            {{ member.polling_station.name.charAt(0).toUpperCase() + member.polling_station.name.slice(1).toLowerCase() }}
+                                            {{ citizen.polling_station.name.charAt(0).toUpperCase() + citizen.polling_station.name.slice(1).toLowerCase() }}
                                         </option>
                                         <!-- Then show other filtered polling stations -->
                                         <option
@@ -2568,7 +2534,7 @@ const toggleSection = (section) => {
                                             :key="station.id"
                                             :value="station.id"
                                             :disabled="
-                                                member?.polling_station_id ===
+                                                citizen?.polling_station_id ===
                                                 station.id
                                             "
                                         >
@@ -2602,7 +2568,11 @@ const toggleSection = (section) => {
                                     </div>
                                 </div>
                                 <InputError
-                                    :message="form.errors['member.polling_station_id']"
+                                    :message="
+                                        form.errors[
+                                            'citizen.polling_station_id'
+                                        ]
+                                    "
                                     class="mt-2"
                                 />
                             </div>
@@ -2614,10 +2584,10 @@ const toggleSection = (section) => {
                                 <div class="relative">
                                     <select
                                         id="polling_stream_id"
-                                        v-model="form.member.polling_stream_id"
+                                        v-model="form.citizen.polling_stream_id"
                                         class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600 rounded-md shadow-sm"
                                         :disabled="
-                                            !form.member.polling_station_id ||
+                                            !form.citizen.polling_station_id ||
                                             isLoadingPollingStreams
                                         "
                                     >
@@ -2627,20 +2597,19 @@ const toggleSection = (section) => {
                                         <!-- Show current polling stream first if it exists -->
                                         <option
                                             v-if="
-                                                member?.polling_stream_id &&
-                                                (member?.polling_stream &&
-                                                    member.polling_stream.polling_station_id ==
-                                                        form.member.polling_station_id) &&
-                                                member.polling_stream_id &&
-                                                member.polling_stream.name
+                                                citizen?.polling_stream &&
+                                                citizen.polling_stream
+                                                    .polling_station_id ==
+                                                    form.citizen
+                                                        .polling_station_id
                                             "
-                                            :value="member.polling_stream_id"
+                                            :value="citizen.polling_stream_id"
                                             :key="
-                                                'current-polling-stream-' +
-                                                member.polling_stream_id
+                                                'current-stream-' +
+                                                citizen.polling_stream_id
                                             "
                                         >
-                                            {{ member.polling_stream.name.charAt(0).toUpperCase() + member.polling_stream.name.slice(1).toLowerCase() }}
+                                            {{ citizen.polling_stream.name.charAt(0).toUpperCase() + citizen.polling_stream.name.slice(1).toLowerCase() }}
                                         </option>
                                         <!-- Then show other filtered polling streams -->
                                         <option
@@ -2648,7 +2617,7 @@ const toggleSection = (section) => {
                                             :key="stream.id"
                                             :value="stream.id"
                                             :disabled="
-                                                member?.polling_stream_id ===
+                                                citizen?.polling_stream_id ===
                                                 stream.id
                                             "
                                         >
@@ -2683,51 +2652,10 @@ const toggleSection = (section) => {
                                 </div>
                                 <InputError
                                     :message="
-                                        form.errors['member.polling_stream_id']
+                                        form.errors['citizen.polling_stream_id']
                                     "
                                     class="mt-2"
                                 />
-                            </div>
-
-                            <!-- Debug: Show computed property values -->
-                            <div class="col-span-6 bg-yellow-50 p-2 mb-2 text-xs">
-                                Debug: County="{{ selectedCountyName }}", SubCounty="{{ selectedSubCountyName }}", Constituency="{{ selectedConstituencyName }}", Ward="{{ selectedWardName }}"
-                            </div>
-                            
-                            <!-- Test: Always show display section temporarily -->
-                            <div class="col-span-6 bg-blue-50 p-2 mb-2 text-xs">
-                                Test: Display section logic working - this should always be visible
-                            </div>
-                            
-                            <!-- Display Selected Voting Location Information -->
-                            <div class="col-span-6" v-if="selectedCountyName || selectedSubCountyName || selectedConstituencyName || selectedWardName">
-                                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-                                    <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3 flex items-center">
-                                        <svg class="w-4 h-4 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        </svg>
-                                        Selected Voting Location
-                                    </h3>
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                                        <div v-if="selectedCountyName" class="flex items-center">
-                                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400 mr-2">County:</span>
-                                            <span class="text-sm text-gray-900 dark:text-gray-100 font-medium">{{ selectedCountyName }}</span>
-                                        </div>
-                                        <div v-if="selectedSubCountyName" class="flex items-center">
-                                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400 mr-2">Sub County:</span>
-                                            <span class="text-sm text-gray-900 dark:text-gray-100 font-medium">{{ selectedSubCountyName }}</span>
-                                        </div>
-                                        <div v-if="selectedConstituencyName" class="flex items-center">
-                                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400 mr-2">Constituency:</span>
-                                            <span class="text-sm text-gray-900 dark:text-gray-100 font-medium">{{ selectedConstituencyName }}</span>
-                                        </div>
-                                        <div v-if="selectedWardName" class="flex items-center">
-                                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400 mr-2">Ward:</span>
-                                            <span class="text-sm text-gray-900 dark:text-gray-100 font-medium">{{ selectedWardName }}</span>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </div>
                     </div>
@@ -2977,7 +2905,7 @@ const toggleSection = (section) => {
                     <p class="text-xs text-gray-500 dark:text-gray-400">
                         Having trouble? Contact support at
                         <a
-                            hreo="mailto:support@oorwardkenyaparty.com"
+                            href="mailto:support@forwardkenyaparty.com"
                             class="text-indigo-600 dark:text-indigo-400 hover:underline"
                             >support@forwardkenyaparty.com</a
                         >
