@@ -37,29 +37,13 @@ return new class extends Migration
             $table->string('state')->nullable()->comment('User\'s state of residence');
             $table->string('country')->nullable()->comment('User\'s country of residence');
             $table->date('date_of_birth')->nullable()->comment('User\'s date of birth');
-            $table->json('special_interest_groups')->nullable()->comment('Array of special interest groups');
-            $table->boolean('disability_status')->default(false)->comment('User\'s disability status if any');
-            $table->string('ncpwd_number')->nullable()->comment('User\'s NCPWD number if any');
-            $table->foreignId('ethnicity_id')
-                  ->nullable()
-                  ->constrained('ethnicities')
-                  ->onDelete('cascade')
-                  ->onUpdate('cascade')
-                  ->comment('Foreign key referencing the users table with cascade delete and update');
             $table->foreignId('language_id')
                   ->nullable()
                   ->constrained('languages')
                   ->onDelete('cascade')
                   ->onUpdate('cascade')
                   ->comment('Foreign key referencing the users table with cascade delete and update');
-            $table->foreignId('religion_id')
-                  ->nullable()
-                  ->constrained('religions')
-                  ->onDelete('cascade')
-                  ->onUpdate('cascade')
-                  ->comment('Foreign key referencing the users table with cascade delete and update');
-            $table->string('other_religion', 100)->nullable()->comment('User\'s other religion if any');
-            $table->integer('marital_status')->default(Profile::MARITAL_STATUS_SINGLE)
+                        $table->integer('marital_status')->default(Profile::MARITAL_STATUS_SINGLE)
                   ->comment('Marital status of the Profile: 0 = Single, 1 = Married, 2 = Divorced, 3 = Separated, 4 = Widowed');
             $table->integer('highest_level_of_education')->default(Profile::HIGHEST_LEVEL_OF_EDUCATION_PRIMARY)
                   ->comment('Highest level of education completed by the Profile: 0 = Primary, 1 = Secondary, 2 = High School, 3 = University, 4 = Other');
@@ -71,7 +55,6 @@ return new class extends Migration
             $table->string('company_name')->nullable()->comment('Name of the user\'s employer');
             $table->text('work_address')->nullable()->comment('User\'s work address');
             $table->string('work_phone', 20)->nullable()->comment('User\'s work phone number');
-            $table->string('linkedin_username', 100)->nullable()->comment('LinkedIn username (the part after linkedin.com/in/)');
             $table->json('proof_of_address')->nullable()->comment('Proof of address document (e.g., utility bill)');
             $table->json('proof_of_identity')->nullable()->comment('Proof of identity document (e.g., passport)');
             $table->string('security_question')->nullable()->comment('Security question for account recovery');
@@ -79,13 +62,7 @@ return new class extends Migration
             $table->json('social_media')->nullable()->comment('JSON object containing social media profiles');
             $table->text('biography')->nullable()->comment('User\'s personal biography');
             $table->json('hobbies_interests')->nullable()->comment('Array of user\'s hobbies and interests');
-            $table->json('communication_preferences')->nullable()->comment('User\'s communication preferences');
-            $table->string('preferred_contact_method', 20)->default('email')->comment('Preferred method of contact');
-            $table->string('profile_burner_photo_path', 2048)->nullable();
-            $table->bigInteger('telegram_user_id')->unsigned()->nullable()->unique()->comment('Telegram user ID for bot communications');
-            $table->string('telegram_username', 50)->nullable()->comment('Telegram username (without @)');
-            $table->boolean('kyc_verified')->default(false)->comment('Flag indicating whether the user\'s KYC (Know Your Customer) is verified');
-            $table->boolean('is_active')->default(true)->comment('Flag indicating whether the user\'s profile is active');
+            $table->integer('preferred_contact_method')->default(0)->comment('Preferred method of contact: 0 = Email, 1 = Text Message, 2 = WhatsApp');
             $table->softDeletes();
             $table->timestamps();
         });        

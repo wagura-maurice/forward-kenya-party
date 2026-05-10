@@ -81,6 +81,31 @@ return new class extends Migration
                   ->nullable()
                   ->comment('Detailed information about the activity');
             
+            // Spatie Activity Log columns
+            $table->string('log_name', 255)
+                  ->nullable()
+                  ->index()
+                  ->comment('The log name for Spatie Activity Log');
+            
+            $table->json('properties')
+                  ->nullable()
+                  ->comment('The properties for Spatie Activity Log');
+            
+            $table->uuid('batch_uuid')
+                  ->nullable()
+                  ->comment('The batch UUID for Spatie Activity Log');
+            
+            $table->foreignId('causer_id')
+                  ->nullable()
+                  ->comment('The ID of user who caused the activity');
+            
+            $table->string('causer_type')
+                  ->nullable()
+                  ->comment('The type of user who caused the activity');
+            
+            // Index for causer relationship
+            $table->index(['log_name', 'causer_id', 'causer_type'], 'activities_causer_index');
+            
             // Status and timestamps
             $table->unsignedTinyInteger('_status')
                   ->default(0)
@@ -115,10 +140,6 @@ return new class extends Migration
             $table->string('subject_type')->nullable();
             $table->unsignedBigInteger('subject_id')->nullable();
             
-            // Causer (polymorphic relationship)
-            $table->string('causer_type')->nullable();
-            $table->unsignedBigInteger('causer_id')->nullable();
-            
             // Timestamps
             $table->timestamps();
             $table->softDeletes();
@@ -128,7 +149,6 @@ return new class extends Migration
         Schema::table('activities', function (Blueprint $table) {
             // Index for polymorphic relationships
             $table->index(['subject_type', 'subject_id'], 'activities_subject_index');
-            $table->index(['causer_type', 'causer_id'], 'activities_causer_index');
             
             // Other indexes for better performance
             $table->index('action', 'activities_action_index');
