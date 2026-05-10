@@ -36,7 +36,7 @@ class CheckActivityLogSetup extends Command
         // Check required columns
         $requiredColumns = [
             'id', 'log_name', 'description', 'subject_type', 'subject_id',
-            'causer_type', 'causer_id', 'properties', 'created_at', 'updated_at'
+            'causer_id', 'properties', 'created_at', 'updated_at'
         ];
         
         $missingColumns = [];
@@ -86,7 +86,7 @@ class CheckActivityLogSetup extends Command
                     $activity->id,
                     $activity->description,
                     $activity->subject_type . ':' . $activity->subject_id,
-                    ($activity->causer_type ?? 'N/A') . ':' . ($activity->causer_id ?? 'N/A'),
+                    ($activity->causer_id ?? 'N/A'),
                     $activity->created_at
                 ]]
             );
