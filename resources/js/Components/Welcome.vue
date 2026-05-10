@@ -17,8 +17,12 @@ const auth = pageProps.auth;
 // Access the nested data property from the Inertia response
 const data = pageProps.data || {};
 
+// Debug: Log the locations data
+console.log('Welcome component - pageProps.data:', pageProps.data);
+console.log('Welcome component - locations:', pageProps.data?.locations);
+
 // Check if user has administrator role
-const hasAdminRole = computed(() => {
+const hasAdministratorRole = computed(() => {
     return Array.isArray(auth?.user?.roles) && auth.user.roles.includes('administrator');
 });
 
@@ -106,23 +110,24 @@ const getAddress = computed(() => {
     return address.length > 0 ? address.join(", ") : "Not provided";
 });
 
-// Get religion from profile
+// Get religion from member
+const member = computed(() => user.value?.member || {});
 const religion = computed(() => {
-    return profile.value?.religion?.name || "Not specified";
+    return member.value?.religion?.name || "Not specified";
 });
 
-// Get ethnicity from profile
+// Get ethnicity from member
 const ethnicity = computed(() => {
-    return profile.value?.ethnicity?.name || "Not specified";
+    return member.value?.ethnicity?.name || "Not specified";
 });
 
 // Format disability status
 const disabilityStatus = computed(() => {
     const hasDisability =
-        profile.value?.disability_status === true ||
-        profile.value?.disability_status === "true" ||
-        profile.value?.disability_status === "1" ||
-        profile.value?.disability_status === "yes";
+        member.value?.disability_status === true ||
+        member.value?.disability_status === "true" ||
+        member.value?.disability_status === "1" ||
+        member.value?.disability_status === "yes";
 
     return hasDisability ? "Yes" : "No";
 });
@@ -192,7 +197,7 @@ const showNotification = (message, isSuccess = true) => {
 };
 
 // Library section state
-const isLibraryExpanded = ref(hasAdminRole.value ? false : true);
+const isLibraryExpanded = ref(hasAdministratorRole.value ? false : true);
 
 // Toggle library section
 const toggleLibrary = () => {
@@ -211,15 +216,19 @@ const handleImportMembers = () => {
     showImportModal.value = false;
 };
 
+// Handle member save
+const handleMemberSaved = () => {
+    // Handle member save success logic
+    showMemberModal.value = false;
+    // You could add refresh logic here if needed
+};
+
 // Handle member export
 const handleExportMembers = () => {
     // Handle export success logic
     showExportModal.value = false;
 };
 
-// Debug: Log the data structure
-console.log('Page props:', pageProps);
-console.log('Nested data:', data);
 
 // Get the stats from the data object, handling both direct and nested structures
 const stats = data?.stats;
@@ -229,9 +238,6 @@ const activities = data?.activities || data?.data?.activities || [];
 const roles = data?.roles || data?.data?.roles || [];
 const userData = data?.user || data?.data?.user || null;
 
-// Debug: Log the activities data
-console.log('Activities:', activities);
-console.log('Has admin role:', hasAdminRole.value);
 
 // Get icon class based on activity type
 const getActivityIcon = (iconType) => {
@@ -282,7 +288,7 @@ const formatChange = (change) => {
         <section class="py-6 sm:py-8">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div
-                    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10" v-if="hasAdminRole"
+                    class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10" v-if="hasAdministratorRole"
                 >
                     <!-- Stat Card Component -->
                     <template v-for="(stat, key) in Object.entries(stats)" :key="key">
@@ -332,7 +338,7 @@ const formatChange = (change) => {
                 <!-- Latest Activities Section - Only visible to administrators -->
                 <div
                     class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-10"
-                    v-if="hasAdminRole"
+                    v-if="hasAdministratorRole"
                 >
                     <div
                         class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-100 dark:border-gray-700"
@@ -828,13 +834,15 @@ const formatChange = (change) => {
         <!-- Member Form Modal -->
         <MemberFormModal 
             :show="showMemberModal" 
-            :counties="pageProps.locations?.counties || []"
-            :constituencies="pageProps.locations?.constituencies || []"
-            :wards="pageProps.locations?.wards || []"
-            :subCounties="pageProps.locations?.subCounties || []"
-            :subLocations="pageProps.locations?.subLocations || []"
+            :counties="pageProps.data?.locations?.counties || []"
+            :constituencies="pageProps.data?.locations?.constituencies || []"
+            :wards="pageProps.data?.locations?.wards || []"
+            :subCounties="pageProps.data?.locations?.subCounties || []"
+            :subLocations="pageProps.data?.locations?.subLocations || []"
+            :ethnicities="pageProps.data?.ethnicities || []"
+            :religions="pageProps.data?.religions || []"
             @close="toggleMemberModal"
-            @save="handleSaveMember"
+            @save="handleMemberSaved"
         />
 
         <!-- Import Members Modal -->
