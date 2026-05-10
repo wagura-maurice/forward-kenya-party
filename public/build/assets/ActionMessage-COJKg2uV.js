@@ -1,0 +1,2 @@
+import{k as s,f as t,u as o,q as n,D as c,s as i,v as r,N as l,L as d}from"./vendor-DvOwlbkI.js";const v={class:"text-sm text-gray-600"},u={__name:"ActionMessage",props:{on:Boolean},setup(e){return(a,_)=>(s(),t("div",null,[o(d,{"leave-active-class":"transition ease-in duration-1000","leave-from-class":"opacity-100","leave-to-class":"opacity-0"},{default:n(()=>[c(i("div",v,[r(a.$slots,"default")],512),[[l,e.on]])]),_:3})]))}};export{u as _};
+//# sourceMappingURL=ActionMessage-COJKg2uV.js.map
