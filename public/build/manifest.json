@@ -234,7 +234,7 @@
     ]
   },
   "resources/js/Pages/Activity.vue": {
-    "file": "assets/Activity-k3NbJDov.js",
+    "file": "assets/Activity-Bqs5HrOy.js",
     "name": "Activity",
     "src": "resources/js/Pages/Activity.vue",
     "isDynamicEntry": true,
@@ -355,7 +355,7 @@
     ]
   },
   "resources/js/Pages/Dashboard.vue": {
-    "file": "assets/Dashboard-BX_1x654.js",
+    "file": "assets/Dashboard-BWj4RXux.js",
     "name": "Dashboard",
     "src": "resources/js/Pages/Dashboard.vue",
     "isDynamicEntry": true,
@@ -536,7 +536,7 @@
     ]
   },
   "resources/js/Pages/Profile/Index.vue": {
-    "file": "assets/Index-CWRRq_6P.js",
+    "file": "assets/Index-nKnz8gs7.js",
     "name": "Index",
     "src": "resources/js/Pages/Profile/Index.vue",
     "isDynamicEntry": true,
@@ -546,7 +546,7 @@
       "__plugin-vue_export-helper-DlAUqK2U.js"
     ],
     "css": [
-      "assets/Index-CUFOocSU.css"
+      "assets/Index-YUdsPCEh.css"
     ]
   },
   "resources/js/Pages/Profile/Partials/DeleteUserForm.vue": {
@@ -618,7 +618,7 @@
     ]
   },
   "resources/js/Pages/Profile/Partials/UpdateProfileInformationForm.vue": {
-    "file": "assets/UpdateProfileInformationForm-Dm-KtSzK.js",
+    "file": "assets/UpdateProfileInformationForm-DbjLt7WG.js",
     "name": "UpdateProfileInformationForm",
     "src": "resources/js/Pages/Profile/Partials/UpdateProfileInformationForm.vue",
     "isDynamicEntry": true,
@@ -636,7 +636,7 @@
     ]
   },
   "resources/js/Pages/Profile/Show.vue": {
-    "file": "assets/Show-CBdZ0FKB.js",
+    "file": "assets/Show-CNFfvpyg.js",
     "name": "Show",
     "src": "resources/js/Pages/Profile/Show.vue",
     "isDynamicEntry": true,
@@ -666,7 +666,7 @@
     ]
   },
   "resources/js/Pages/Profile/View.vue": {
-    "file": "assets/View-BZU23Vuo.js",
+    "file": "assets/View-CI8L7HzD.js",
     "name": "View",
     "src": "resources/js/Pages/Profile/View.vue",
     "isDynamicEntry": true,
@@ -676,7 +676,7 @@
       "__plugin-vue_export-helper-DlAUqK2U.js"
     ],
     "css": [
-      "assets/View-RDDCqfAx.css"
+      "assets/View-evlWvSoO.css"
     ]
   },
   "resources/js/Pages/Settings.vue": {
@@ -714,7 +714,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-DniZRE_y.js",
+    "file": "assets/app-C2-yVetF.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -762,7 +762,7 @@
       "resources/js/Pages/Welcome.vue"
     ],
     "css": [
-      "assets/app-BS1PZvW-.css"
+      "assets/app-DdBl3AOl.css"
     ],
     "assets": [
       "assets/fa-brands-400-D_cYUPeE.woff2",
