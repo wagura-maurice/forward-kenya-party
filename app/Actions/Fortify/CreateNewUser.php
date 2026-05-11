@@ -170,7 +170,7 @@ class CreateNewUser implements CreatesNewUsers
         
                 // Create member record
                 Member::create([
-                    'uuid' => $input['party_membership_number'], // Str::uuid()->toString(),
+                    'uuid' => Str::uuid()->toString(),
                     'user_id' => $user->id,
                     'county_id' => $input['county_id'],
                     'constituency_id' => $input['constituency_id'],
