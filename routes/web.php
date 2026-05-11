@@ -56,6 +56,7 @@ Route::middleware([
 
     // Import
     Route::get('/import/membership', [ImportController::class, 'importMembership'])->name('import.membership');
+    Route::post('/members/import', [ImportController::class, 'importMembership'])->name('members.import');
 
     // Export
     Route::get('/export/membership', [ExportController::class, 'exportMembership'])->name('export.membership');
