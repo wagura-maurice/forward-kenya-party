@@ -10,7 +10,13 @@ const { title, data } = defineProps({
     },
     data: {
         type: Object,
-        required: true,
+        default: () => ({
+            stats: {},
+            activities: [],
+            featuredServices: [],
+            featuredDepartments: [],
+            featuredProjects: [],
+        }),
     },
 });
 </script>

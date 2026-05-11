@@ -21,33 +21,47 @@ const props = defineProps({
         type: String,
         required: true,
     },
-    data: {
+    activities: {
         type: Object,
-        required: true,
+        default: () => ({
+            data: [],
+            current_page: 1,
+            per_page: 5,
+            total: 0,
+            from: 0,
+            to: 0,
+            last_page: 1,
+            first_page_url: null,
+            last_page_url: null,
+            next_page_url: null,
+            prev_page_url: null,
+            path: '',
+            links: []
+        }),
     },
 });
 
 // Reactive state
 const searchQuery = ref('');
-const perPage = ref(props.data.activities?.per_page || 5);
-const user = ref(props.data.user || null);
+const perPage = ref(props.activities?.per_page || 5);
+const user = ref(null);
 const isLoading = ref(false);
 
 // Initialize activities with pagination data
 const activities = ref({
-    data: props.data.activities?.data || [],
-    current_page: props.data.activities?.current_page || 1,
-    first_page_url: props.data.activities?.first_page_url || '',
-    from: props.data.activities?.from || 0,
-    last_page: props.data.activities?.last_page || 1,
-    last_page_url: props.data.activities?.last_page_url || '',
-    links: props.data.activities?.links || [],
-    next_page_url: props.data.activities?.next_page_url || null,
-    path: props.data.activities?.path || '',
-    per_page: props.data.activities?.per_page || 5,
-    prev_page_url: props.data.activities?.prev_page_url || null,
-    to: props.data.activities?.to || 0,
-    total: props.data.activities?.total || 0
+    data: props.activities?.data || [],
+    current_page: props.activities?.current_page || 1,
+    first_page_url: props.activities?.first_page_url || '',
+    from: props.activities?.from || 0,
+    last_page: props.activities?.last_page || 1,
+    last_page_url: props.activities?.last_page_url || '',
+    links: props.activities?.links || [],
+    next_page_url: props.activities?.next_page_url || null,
+    path: props.activities?.path || '',
+    per_page: props.activities?.per_page || 5,
+    prev_page_url: props.activities?.prev_page_url || null,
+    to: props.activities?.to || 0,
+    total: props.activities?.total || 0
 });
 
 // Get page instance for accessing URL parameters
@@ -157,9 +171,9 @@ const applyFilters = (resetPage = false) => {
     router.get(route('activity'), query, {
         preserveState: true,
         preserveScroll: true,
-        only: ['data'],
+        only: ['activities'],
         onSuccess: (page) => {
-            const newActivities = page.props.data.activities;
+            const newActivities = page.props.activities;
             activities.value = {
                 ...activities.value,
                 data: newActivities.data,
@@ -223,9 +237,9 @@ const handlePageChange = (url) => {
     router.get(route('activity'), query, {
         preserveState: true,
         preserveScroll: true,
-        only: ['data'],
+        only: ['activities'],
         onSuccess: (page) => {
-            const newActivities = page.props.data.activities;
+            const newActivities = page.props.activities;
             activities.value = {
                 ...activities.value,
                 data: newActivities.data,
