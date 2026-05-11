@@ -2689,46 +2689,7 @@ const toggleSection = (section) => {
                                 />
                             </div>
 
-                            <!-- Debug: Show computed property values -->
-                            <div class="col-span-6 bg-yellow-50 p-2 mb-2 text-xs">
-                                Debug: County="{{ selectedCountyName }}", SubCounty="{{ selectedSubCountyName }}", Constituency="{{ selectedConstituencyName }}", Ward="{{ selectedWardName }}"
-                            </div>
                             
-                            <!-- Test: Always show display section temporarily -->
-                            <div class="col-span-6 bg-blue-50 p-2 mb-2 text-xs">
-                                Test: Display section logic working - this should always be visible
-                            </div>
-                            
-                            <!-- Display Selected Voting Location Information -->
-                            <div class="col-span-6" v-if="selectedCountyName || selectedSubCountyName || selectedConstituencyName || selectedWardName">
-                                <div class="bg-gray-50 dark:bg-gray-800 rounded-lg p-4 border border-gray-200 dark:border-gray-700">
-                                    <h3 class="text-sm font-medium text-gray-900 dark:text-gray-100 mb-3 flex items-center">
-                                        <svg class="w-4 h-4 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                                        </svg>
-                                        Selected Voting Location
-                                    </h3>
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                                        <div v-if="selectedCountyName" class="flex items-center">
-                                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400 mr-2">County:</span>
-                                            <span class="text-sm text-gray-900 dark:text-gray-100 font-medium">{{ selectedCountyName }}</span>
-                                        </div>
-                                        <div v-if="selectedSubCountyName" class="flex items-center">
-                                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400 mr-2">Sub County:</span>
-                                            <span class="text-sm text-gray-900 dark:text-gray-100 font-medium">{{ selectedSubCountyName }}</span>
-                                        </div>
-                                        <div v-if="selectedConstituencyName" class="flex items-center">
-                                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400 mr-2">Constituency:</span>
-                                            <span class="text-sm text-gray-900 dark:text-gray-100 font-medium">{{ selectedConstituencyName }}</span>
-                                        </div>
-                                        <div v-if="selectedWardName" class="flex items-center">
-                                            <span class="text-xs font-medium text-gray-500 dark:text-gray-400 mr-2">Ward:</span>
-                                            <span class="text-sm text-gray-900 dark:text-gray-100 font-medium">{{ selectedWardName }}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
