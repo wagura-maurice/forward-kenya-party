@@ -1,6 +1,7 @@
 <script setup>
 import { ref, computed } from 'vue';
-import { useForm, router } from '@inertiajs/vue3';
+import { useForm } from '@inertiajs/vue3';
+import axios from 'axios';
 
 defineProps({
     show: {
@@ -13,15 +14,10 @@ const emit = defineEmits(['close', 'import']);
 
 const form = useForm({
     file: null,
-    type: 'excel',
-    has_headers: true,
-    update_existing: false,
-    match_columns: {}
+    update_existing: true,
 });
 
 const fileInput = ref(null);
-const showColumnMapping = ref(false);
-const fileHeaders = ref([]);
 const isDragging = ref(false);
 
 const handleDragOver = (e) => {
@@ -40,47 +36,66 @@ const handleDrop = (e) => {
     const files = e.dataTransfer.files;
     if (files.length > 0) {
         const file = files[0];
-        if (file.name.endsWith('.xlsx')) {
+        if (file.name.endsWith('.csv')) {
             handleFileChange({ target: { files: [file] } });
         } else {
-            alert('Please upload a valid .xlsx file');
+            alert('Please upload a valid .csv file');
         }
     }
 };
 
 // Template columns that should be in the Excel file
 const templateColumns = [
-    'surname',
-    'other_names',
-    'id_number',
-    'phone',
-    'email',
-    'gender',
-    'date_of_birth',
-    'county',
-    'constituency',
-    'ward',
-    'polling_station',
-    'occupation',
-    'education_level',
-    'disability_status',
-    'disability_description',
-    'ncpwd_number'
+    'First Name',
+    'Middle Name',
+    'Last Name',
+    'National ID Number',
+    'Phone Number',
+    'Email Address',
+    'Gender',
+    'Date of Birth',
+    'County',
+    'Constituency',
+    'Ward',
+    'Polling Center',
+    'Disability Status',
+    'NCPWD Number'
 ];
 
 // Download the template file
 const downloadTemplate = () => {
-    // Create a simple Excel file with headers
-    const headers = templateColumns.join('\t') + '\n';
-    const blob = new Blob([headers], { type: 'application/vnd.ms-excel' });
-    const url = URL.createObjectURL(blob);
+    // Create CSV content with headers and example data
+    const headers = templateColumns.join(',') + '\n';
+    
+    // Example data row to guide users
+    const exampleData = [
+        'John',           // first_name
+        'Doe',            // middle_name  
+        'Smith',          // last_name
+        '123456789',      // national_identification_number
+        '+254712345678',  // phone
+        'john.smith@email.com', // email
+        'male',           // gender (male/female)
+        '1990-01-15',     // date_of_birth (YYYY-MM-DD)
+        'Nairobi',        // county
+        'Westlands',      // constituency
+        'Parklands',      // ward
+        'Kenyatta Primary School', // polling_center
+        'false',          // disability_status (true/false)
+        ''                // ncpwd_number (optional)
+    ].join(',') + '\n';
+    
+    const csvContent = headers + exampleData;
+    const timestamp = new Date().toISOString().slice(0,19).replace(/[:-]/g, '');
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = 'members_import_template.xls';
+    a.download = `FKP_MEMBERS_IMPORT_TEMPLATE_${timestamp}.csv`;
     document.body.appendChild(a);
     a.click();
+    window.URL.revokeObjectURL(url);
     document.body.removeChild(a);
-    URL.revokeObjectURL(url);
 };
 
 // Handle file selection
@@ -88,49 +103,14 @@ const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (!file) return;
     
-    if (!file.name.endsWith('.xlsx')) {
-        alert('Please upload a valid .xlsx file');
+    if (!file.name.endsWith('.csv')) {
+        alert('Please upload a valid .csv file');
         return;
     }
 
     form.file = file;
-    readFileHeaders(file);
 };
 
-// Read file headers for column mapping
-const readFileHeaders = (file) => {
-    if (file.name.endsWith('.csv')) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            const text = e.target.result;
-            const firstLine = text.split('\n')[0];
-            fileHeaders.value = firstLine.split(',').map(h => h.trim().toLowerCase());
-            initializeColumnMapping();
-        };
-        reader.readAsText(file);
-    } else if (file.name.match(/\.xlsx?$/i)) {
-        // For Excel files, we'll just show the column mapping UI
-        // In a real app, you might want to use a library like xlsx to read the file
-        showColumnMapping.value = true;
-    }
-};
-
-// Initialize column mapping with best guesses
-const initializeColumnMapping = () => {
-    templateColumns.forEach(col => {
-        // Try to find a matching header
-        const match = fileHeaders.value.find(h => 
-            h.toLowerCase().includes(col) || 
-            col.toLowerCase().includes(h)
-        );
-        
-        if (match) {
-            form.match_columns[col] = match;
-        } else {
-            form.match_columns[col] = '';
-        }
-    });
-};
 
 const close = () => {
     form.reset();
@@ -143,19 +123,76 @@ const importFile = () => {
         return;
     }
 
+    // Create FormData for file upload
     const formData = new FormData();
     formData.append('file', form.file);
-    formData.append('type', form.type);
-    formData.append('has_headers', form.has_headers);
     formData.append('update_existing', form.update_existing);
 
-    form.post(route('members.import'), {
-        preserveScroll: true,
-        onSuccess: () => {
+    // Use axios to handle file download
+    axios.post(route('members.import'), formData, {
+        headers: {
+            'Content-Type': 'multipart/form-data',
+        },
+        responseType: 'blob'
+    })
+    .then(response => {
+        // Check if response is a CSV file (report) or JSON (error)
+        const contentType = response.headers['content-type'];
+        
+        if (contentType && contentType.includes('text/csv')) {
+            // Download the report file
+            const blob = new Blob([response.data], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            const timestamp = new Date().toISOString().slice(0,19).replace(/[:-]/g, '').replace('T', '_');
+            a.download = `import_report_${timestamp}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+            
             emit('import');
             close();
-        },
-        forceFormData: true
+            alert('Import completed! Report downloaded successfully.');
+        } else {
+            // Handle JSON error response
+            response.data.text().then(text => {
+                try {
+                    const errorData = JSON.parse(text);
+                    if (errorData.flash?.error) {
+                        alert('Import failed: ' + errorData.flash.error);
+                    }
+                } catch (e) {
+                    alert('Import failed: Unknown error occurred');
+                }
+            });
+        }
+    })
+    .catch(error => {
+        console.error('Import error:', error);
+        if (error.response) {
+            // The request was made and the server responded with a status code
+            // that falls out of the range of 2xx
+            if (error.response.data instanceof Blob) {
+                error.response.data.text().then(text => {
+                    try {
+                        const errorData = JSON.parse(text);
+                        alert('Import failed: ' + (errorData.flash?.error || errorData.message || 'Unknown error'));
+                    } catch (e) {
+                        alert('Import failed: ' + text);
+                    }
+                });
+            } else {
+                alert('Import failed: ' + (error.response.data?.message || 'Unknown error'));
+            }
+        } else if (error.request) {
+            // The request was made but no response was received
+            alert('Import failed: No response from server');
+        } else {
+            // Something happened in setting up the request that triggered an Error
+            alert('Import failed: ' + error.message);
+        }
     });
 };
 </script>
@@ -203,7 +240,10 @@ const importFile = () => {
                                         </h3>
                                         <div class="mt-2 text-sm text-blue-700 dark:text-blue-300">
                                             <p>
-                                                Download our Excel template to ensure your file has the correct format.
+                                                Download our CSV template to ensure your file has the correct format and column names.
+                                            </p>
+                                            <p class="mt-1 text-xs">
+                                                The template includes example data and formatting guidelines for successful import.
                                             </p>
                                         </div>
                                         <div class="mt-4">
@@ -260,14 +300,14 @@ const importFile = () => {
                                                     type="file"
                                                     ref="fileInput"
                                                     @change="handleFileChange"
-                                                    accept=".xlsx"
+                                                    accept=".csv"
                                                     class="sr-only"
                                                 />
                                             </span>
                                             <p class="pl-1">or drag and drop</p>
                                         </div>
                                         <p class="text-xs text-gray-500 dark:text-gray-400">
-                                            Excel (.xlsx) up to 5MB
+                                            CSV (.csv) up to 5MB
                                         </p>
                                         <p v-if="form.file" class="text-sm font-medium text-gray-900 dark:text-gray-100 mt-2">
                                             {{ form.file.name }}
@@ -277,33 +317,7 @@ const importFile = () => {
                             </div>
 
 
-                            <!-- Column Mapping (shown when file is selected) -->
-                            <div v-if="showColumnMapping && fileHeaders.length > 0" class="space-y-4">
-                                <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
-                                    <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
-                                        Map Columns
-                                    </h4>
-                                    <div class="space-y-3">
-                                        <div v-for="col in templateColumns" :key="col" class="grid grid-cols-3 gap-4 items-center">
-                                            <label class="text-sm font-medium text-gray-700 dark:text-gray-300">
-                                                {{ col.replace(/_/g, ' ') }}
-                                            </label>
-                                            <div class="col-span-2">
-                                                <select 
-                                                    v-model="form.match_columns[col]"
-                                                    class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm rounded-md"
-                                                >
-                                                    <option value="">-- Select Column --</option>
-                                                    <option v-for="header in fileHeaders" :key="header" :value="header">
-                                                        {{ header }}
-                                                    </option>
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
+                            
                             <!-- Import Options -->
                             <div class="space-y-3">
                                 <div class="flex items-center">
