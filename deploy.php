@@ -40,7 +40,7 @@ task('release:application', function () {
     // Clear caches
     run('{{bin/php}} {{release_path}}/artisan cache:clear');
     // Clear expired password reset tokens
-    // run('{{bin/php}} {{release_path}}/artisan auth:clear-resets');
+    run('{{bin/php}} {{release_path}}/artisan auth:clear-resets');
     // Clear and cache routes
     run('{{bin/php}} {{release_path}}/artisan route:clear');
     // Clear and cache config
