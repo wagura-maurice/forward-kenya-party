@@ -25,7 +25,7 @@ const toastMessage = ref("");
 // Access user data passed from the backend
 const user = computed(() => props.data?.user || null);
 const profile = computed(() => user.value?.profile || {});
-const citizen = computed(() => profile.value?.citizen || {});
+const member = computed(() => profile.value?.member || {});
 
 // Computed properties
 const fullName = computed(() => {
@@ -234,11 +234,11 @@ const copyToClipboard = (text) => {
                                 </div>
                                 <div class="flex items-center bg-gray-50 dark:bg-gray-700/50 px-2 py-1 rounded-full text-md">
                                     <span class="text-gray-500 dark:text-gray-400 mr-1">ID:</span>
-                                    <span class="font-medium">{{ citizen?.uuid || "N/A" }}</span>
+                                    <span class="font-medium">{{ member?.uuid || "N/A" }}</span>
                                     <button
-                                        @click="copyToClipboard(citizen?.uuid)"
+                                        @click="copyToClipboard(member?.uuid)"
                                         class="text-green-600 hover:text-green-800 dark:text-green-400 dark:hover:text-green-300 transition-colors ml-1"
-                                        :disabled="!citizen?.uuid"
+                                        :disabled="!member?.uuid"
                                         title="Copy membership number"
                                     >
                                         <i class="fas fa-copy text-xs"></i>
@@ -421,7 +421,7 @@ const copyToClipboard = (text) => {
                                         v-if="$page.props.auth.user && $page.props.auth.user.id === user.id" 
                                     >
                                         {{
-                                            citizen?.national_identification_number ||
+                                            member?.national_identification_number ||
                                             "Not provided"
                                         }}
                                     </p>
@@ -445,7 +445,7 @@ const copyToClipboard = (text) => {
                                         v-if="$page.props.auth.user && $page.props.auth.user.id === user.id" 
                                     >
                                         {{
-                                            citizen?.passport_number ||
+                                            member?.passport_number ||
                                             "Not provided"
                                         }}
                                     </p>
@@ -467,11 +467,11 @@ const copyToClipboard = (text) => {
                                     <p
                                         class="text-sm font-medium text-gray-800 dark:text-gray-200"
                                     >
-                                        {{ profile?.disability_status ? "Yes" : "No" }}
+                                        {{ member?.disability_status ? "Yes" : "No" }}
                                     </p>
                                 </div>
                             </div>
-                            <div v-if="profile?.disability_status">
+                            <div v-if="member?.disability_status">
                                 <p
                                     class="text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1"
                                 >
@@ -484,7 +484,7 @@ const copyToClipboard = (text) => {
                                     <p
                                         class="text-sm font-medium text-gray-800 dark:text-gray-200" v-if="$page.props.auth.user && $page.props.auth.user.id === user.id"
                                     >
-                                        {{ profile?.ncpwd_number || "Not provided" }}
+                                        {{ member?.ncpwd_number || "Not provided" }}
                                     </p>
                                     <p v-else class="text-sm font-medium text-red-800 dark:text-red-200">
                                         Redacted
@@ -521,7 +521,7 @@ const copyToClipboard = (text) => {
                                     <p
                                         class="text-sm font-medium text-gray-800 dark:text-gray-200 capitalize"
                                     >
-                                        {{ profile?.religion?.name }}
+                                        {{ member?.religion?.name }}
                                     </p>
                                 </div>
                             </div>
@@ -687,7 +687,7 @@ const copyToClipboard = (text) => {
                                     <p
                                         class="text-sm font-medium text-gray-800 dark:text-gray-200 capitalize"
                                     >
-                                        {{ citizen?.county?.name || "Not provided" }}
+                                        {{ member?.county?.name || "Not provided" }}
                                     </p>
                                 </div>
                             </div>
@@ -704,7 +704,7 @@ const copyToClipboard = (text) => {
                                     <p
                                         class="text-sm font-medium text-gray-800 dark:text-gray-200 capitalize"
                                     >
-                                        {{ citizen?.sub_county?.name || "Not provided" }}
+                                        {{ member?.sub_county?.name || "Not provided" }}
                                     </p>
                                 </div>
                             </div>
@@ -721,7 +721,7 @@ const copyToClipboard = (text) => {
                                     <p
                                         class="text-sm font-medium text-gray-800 dark:text-gray-200 capitalize"
                                     >
-                                        {{ citizen?.constituency?.name || "Not provided" }}
+                                        {{ member?.constituency?.name || "Not provided" }}
                                     </p>
                                 </div>
                             </div>
@@ -738,7 +738,7 @@ const copyToClipboard = (text) => {
                                     <p
                                         class="text-sm font-medium text-gray-800 dark:text-gray-200 capitalize"
                                     >
-                                        {{ citizen?.ward?.name || "Not provided" }}
+                                        {{ member?.ward?.name || "Not provided" }}
                                     </p>
                                 </div>
                             </div>
@@ -755,7 +755,7 @@ const copyToClipboard = (text) => {
                                     <p
                                         class="text-sm font-medium text-gray-800 dark:text-gray-200" v-if="$page.props.auth.user && $page.props.auth.user.id === user.id"
                                     >
-                                        {{ citizen?.location?.name || "Not provided" }}
+                                        {{ member?.location?.name || "Not provided" }}
                                     </p>
                                     <p v-else class="text-sm font-medium text-red-800 dark:text-red-200">
                                         Redacted
@@ -775,7 +775,7 @@ const copyToClipboard = (text) => {
                                     <p
                                         class="text-sm font-medium text-gray-800 dark:text-gray-200" v-if="$page.props.auth.user && $page.props.auth.user.id === user.id"
                                     >
-                                        {{ citizen?.village?.name || "Not provided" }}
+                                        {{ member?.village?.name || "Not provided" }}
                                     </p>
                                     <p v-else class="text-sm font-medium text-red-800 dark:text-red-200">
                                         Redacted
@@ -795,7 +795,7 @@ const copyToClipboard = (text) => {
                                     <p
                                         class="text-sm font-medium text-gray-800 dark:text-gray-200" v-if="$page.props.auth.user && $page.props.auth.user.id === user.id"
                                     >
-                                        {{ citizen?.polling_center?.name || "Not provided" }}
+                                        {{ member?.polling_center?.name || "Not provided" }}
                                     </p>
                                     <p v-else class="text-sm font-medium text-red-800 dark:text-red-200">
                                         Redacted
@@ -815,7 +815,7 @@ const copyToClipboard = (text) => {
                                     <p
                                         class="text-sm font-medium text-gray-800 dark:text-gray-200" v-if="$page.props.auth.user && $page.props.auth.user.id === user.id"
                                     >
-                                        {{ citizen?.polling_station?.name || "Not provided" }}
+                                        {{ member?.polling_station?.name || "Not provided" }}
                                     </p>
                                     <p v-else class="text-sm font-medium text-red-800 dark:text-red-200">
                                         Redacted
@@ -835,7 +835,7 @@ const copyToClipboard = (text) => {
                                     <p
                                         class="text-sm font-medium text-gray-800 dark:text-gray-200" v-if="$page.props.auth.user && $page.props.auth.user.id === user.id"
                                     >
-                                        {{ citizen?.polling_stream?.name || "Not provided" }}
+                                        {{ member?.polling_stream?.name || "Not provided" }}
                                     </p>
                                     <p v-else class="text-sm font-medium text-red-800 dark:text-red-200">
                                         Redacted
