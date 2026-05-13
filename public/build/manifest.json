@@ -355,7 +355,7 @@
     ]
   },
   "resources/js/Pages/Dashboard.vue": {
-    "file": "assets/Dashboard-BWj4RXux.js",
+    "file": "assets/Dashboard-DRDIDvBM.js",
     "name": "Dashboard",
     "src": "resources/js/Pages/Dashboard.vue",
     "isDynamicEntry": true,
@@ -714,7 +714,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-C2-yVetF.js",
+    "file": "assets/app-N_ZhVT9g.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -762,7 +762,7 @@
       "resources/js/Pages/Welcome.vue"
     ],
     "css": [
-      "assets/app-DdBl3AOl.css"
+      "assets/app-qoGgm7TB.css"
     ],
     "assets": [
       "assets/fa-brands-400-D_cYUPeE.woff2",
