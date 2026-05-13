@@ -147,6 +147,36 @@ class SettingsTableSeeder extends Seeder
                 'created_at' => '2024-07-22 14:12:35',
                 'updated_at' => NULL,
             ),
+            13 => 
+            array (
+                'id' => 14,
+                'item' => 'WAHA_API_URL',
+                'default_value' => 'http://84.247.143.79:3000',
+                'current_value' => NULL,
+                'deleted_at' => NULL,
+                'created_at' => '2025-05-12 00:00:00',
+                'updated_at' => NULL,
+            ),
+            14 => 
+            array (
+                'id' => 15,
+                'item' => 'WAHA_API_KEY',
+                'default_value' => '782338157f924709910c1fbc2635faff',
+                'current_value' => NULL,
+                'deleted_at' => NULL,
+                'created_at' => '2025-05-12 00:00:00',
+                'updated_at' => NULL,
+            ),
+            15 => 
+            array (
+                'id' => 16,
+                'item' => 'WAHA_SESSION',
+                'default_value' => 'default',
+                'current_value' => NULL,
+                'deleted_at' => NULL,
+                'created_at' => '2025-05-12 00:00:00',
+                'updated_at' => NULL,
+            ),
         ));
     }
 }

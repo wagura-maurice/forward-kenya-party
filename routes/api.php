@@ -1,7 +1,16 @@
 <?php
 
 use Illuminate\Http\Request;
+use App\Http\Controllers\WahaWebhookController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\API\SettingController;
+use App\Http\Controllers\API\ServiceController;
+use App\Http\Controllers\API\ActivityController;
+use App\Http\Controllers\API\CurrencyController;
+use App\Http\Controllers\API\AccountTypeController;
+use App\Http\Controllers\API\AccountCategoryController;
+use App\Http\Controllers\API\AccountController;
+use App\Http\Controllers\API\CommunicationController;
 use App\Http\Controllers\API\RoleController;
 use App\Http\Controllers\API\WardController;
 use App\Http\Controllers\API\GuestController;
@@ -104,6 +113,11 @@ Route::group(['prefix' => '/ipn'], function () {
     });
 });
 
+// WAHA WhatsApp Webhook Routes (no middleware for external access)
+Route::group(['prefix' => 'webhook'], function () {
+    Route::post('/waha', [WahaWebhookController::class, 'handleWebhook'])->name('webhook.waha');
+});
+
 # (*) protected access routes
 Route::group(['middleware' => ['auth:sanctum']], function () {
     // light of guidances management
@@ -161,9 +175,9 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     // exchange rate management
     Route::apiResource('/exchange/rate', ExchangeRateController::class, ['as' => 'exchange.rate']);
     // account management
-    Route::apiResource('/account/type', ReceiptTypeController::class, ['as' => 'account']);
-    Route::apiResource('/account/category', ReceiptCategoryController::class, ['as' => 'account']);
-    Route::apiResource('/account/catalog', ReceiptController::class, ['as' => 'account']);
+    Route::apiResource('/account/type', AccountTypeController::class, ['as' => 'account']);
+    Route::apiResource('/account/category', AccountCategoryController::class, ['as' => 'account']);
+    Route::apiResource('/account/catalog', AccountController::class, ['as' => 'account']);
     // receipt management
     Route::apiResource('/receipt/type', ReceiptTypeController::class, ['as' => 'receipt']);
     Route::apiResource('/receipt/category', ReceiptCategoryController::class, ['as' => 'receipt']);
@@ -213,5 +227,5 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::apiResource('/inbound/text/message/catalog', InboundTextMessageController::class, ['as' => 'inbound.text.message']);
     Route::apiResource('/inbound/voice/message/catalog', InboundVoiceMessageController::class, ['as' => 'inbound.voice.message']);
     Route::apiResource('/inbound/email/message/catalog', InboundEmailMessageController::class, ['as' => 'inbound.email.message']);
-    Route::apiResource('/communication/catalog', CommunicationCategoryController::class, ['as' => 'communication']);
+    Route::apiResource('/communication/catalog', CommunicationController::class, ['as' => 'communication']);
 });

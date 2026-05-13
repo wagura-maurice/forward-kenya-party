@@ -9,6 +9,7 @@ use App\Http\Controllers\ExportController;
 use App\Http\Controllers\ImportController;
 use App\Http\Controllers\FrontendController;
 use App\Http\Controllers\MemberController;
+use App\Http\Controllers\WahaWebhookController;
 use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 Route::get('/', [FrontendController::class, 'welcome'])->name('frontend.welcome');
@@ -100,3 +101,14 @@ Route::post('/email/verification-notification', function (Request $request) {
 
     return back()->with('status', 'verification-link-failed');
 })->middleware(['auth:sanctum', config('jetstream.auth_session'), 'throttle:6,1'])->name('verification.send');
+
+// WhatsApp Invitation Routes (inside auth middleware for CSRF protection)
+Route::middleware([
+    'auth:sanctum',
+    config('jetstream.auth_session'),
+    'verified',
+])->group(function () {
+    Route::prefix('whatsapp')->group(function () {
+        Route::post('/invite', [WahaWebhookController::class, 'inviteMembers'])->name('whatsapp.invite');
+    });
+});
