@@ -82,14 +82,14 @@ class WahaService
      */
     public function sendWelcomeMessage(string $chatId): array
     {
-        $message = "*🇰🇪 WELCOME TO FORWARD KENYA PARTY* 🇰🇪\n\n"
+        $message = "*🇰🇪 Welcome To Forward Kenya Party* 🇰🇪\n\n"
             . "Thank you for your interest in joining the Forward Kenya Party! We are committed to building a better future for all Kenyans.\n\n"
-            . "*OUR LIVES, OUR HERITAGE*\n\n"
-            . "*📋 IMPORTANT: Before you join us*\n\n"
+            . "*Our Lives, Our Heritage*\n\n"
+            . "*📋 Important: Before You Join Us*\n\n"
             . "Please check if you're currently registered with any political party:\n\n"
-            . "🔹 *USSD:* Dial *509#\n"
-            . "🔹 *IPPMS Portal:* https://ippms.orpp.or.ke\n"
-            . "🔹 *eCitizen Portal:* https://accounts.ecitizen.go.ke/en\n\n"
+            . "🔹 *Ussd:* Dial *509#\n"
+            . "🔹 *Ippms Portal:* https://ippms.orpp.or.ke\n"
+            . "🔹 *Ecitizen Portal:* https://accounts.ecitizen.go.ke/en\n\n"
             . "If you're registered with another party, you'll need to resign before joining us.\n\n"
             . "*Ready to join Forward Kenya Party?*\n"
             . "Reply with: */join*\n\n"
@@ -107,7 +107,7 @@ class WahaService
      */
     public function askForSurname(string $chatId): array
     {
-        $message = "*📝 REGISTRATION - Step 1/16*\n\n"
+        $message = "*📝 Registration - Step 1/16*\n\n"
             . "Let's start your registration process!\n\n"
             . "Please enter your *surname* (family name):\n\n"
             . "Example: Waithaka\n\n"
@@ -121,7 +121,7 @@ class WahaService
      */
     public function askForOtherNames(string $chatId): array
     {
-        $message = "*📝 REGISTRATION - Step 2/16*\n\n"
+        $message = "*📝 Registration - Step 2/16*\n\n"
             . "Great! Now please enter your *other names*:\n\n"
             . "Example: Maurice Wagura\n\n"
             . "*Note:* 2-4 names allowed, letters only";
@@ -134,23 +134,10 @@ class WahaService
      */
     public function askForPhoneNumber(string $chatId): array
     {
-        $message = "*📝 REGISTRATION - Step 3/16*\n\n"
+        $message = "*📝 Registration - Step 3/16*\n\n"
             . "Please confirm your *phone number*:\n\n"
             . "Format: 07xxxxxxxx (10 digits)\n\n"
             . "Example: 0712345678";
-
-        return $this->sendText($chatId, $message);
-    }
-
-    /**
-     * Send message asking for ID number
-     */
-    public function askForIdNumber(string $chatId): array
-    {
-        $message = "*📝 REGISTRATION - Step 5/16*\n\n"
-            . "Please enter your *National ID number*:\n\n"
-            . "Format: Maximum 8 digits\n\n"
-            . "Example: 12345678";
 
         return $this->sendText($chatId, $message);
     }
@@ -160,9 +147,22 @@ class WahaService
      */
     public function askForEmailAddress(string $chatId): array
     {
-        $message = "*📝 REGISTRATION - Step 4/16*\n\n"
+        $message = "*📝 Registration - Step 4/16*\n\n"
             . "Please enter your *email address*:\n\n"
             . "Example: john.doe@gmail.com";
+
+        return $this->sendText($chatId, $message);
+    }
+
+    /**
+     * Send message asking for ID number
+     */
+    public function askForIdNumber(string $chatId): array
+    {
+        $message = "*📝 Registration - Step 5/16*\n\n"
+            . "Please enter your *National Id Number*:\n\n"
+            . "Format: Maximum 8 digits\n\n"
+            . "Example: 12345678";
 
         return $this->sendText($chatId, $message);
     }
@@ -172,9 +172,9 @@ class WahaService
      */
     public function askForDateOfBirth(string $chatId): array
     {
-        $message = "*📝 REGISTRATION - Step 6/16*\n\n"
+        $message = "*📝 Registration - Step 6/16*\n\n"
             . "Please enter your *date of birth*:\n\n"
-            . "Format: YYYY-MM-DD\n\n"
+            . "Format: Yyyy-Mm-Dd\n\n"
             . "Example: 1990-01-15\n\n"
             . "*Note:* You must be 18 years or older";
 
@@ -186,11 +186,11 @@ class WahaService
      */
     public function askForGender(string $chatId): array
     {
-        $message = "*📝 REGISTRATION - Step 7/16*\n\n"
+        $message = "*📝 Registration - Step 7/16*\n\n"
             . "Please select your *gender*:\n\n"
-            . "Reply with:\n"
-            . "🔹 *1* for Male\n"
-            . "🔹 *2* for Female";
+            . "Reply With:\n"
+            . "🔹 *1* Male\n"
+            . "🔹 *2* Female";
 
         return $this->sendText($chatId, $message);
     }
@@ -200,12 +200,12 @@ class WahaService
      */
     public function askForEthnicity(string $chatId, array $ethnicities): array
     {
-        $message = "*📝 REGISTRATION - Step 8/16*\n\n"
+        $message = "*📝 Registration - Step 8/16*\n\n"
             . "Please select your *ethnicity*:\n\n"
-            . "*Number only - no names or strings*\n\n";
+            . "*Number Only - No Names Or Strings*\n\n";
 
         foreach ($ethnicities as $index => $ethnicity) {
-            $message .= "🔹 *" . ($index + 1) . "* {$ethnicity['name']}\n";
+            $message .= "🔹 *" . ($index + 1) . "* " . ucwords(strtolower($ethnicity['name'])) . "\n";
         }
 
         $message .= "\nReply with the number corresponding to your ethnicity.";
@@ -218,12 +218,12 @@ class WahaService
      */
     public function askForReligion(string $chatId, array $religions): array
     {
-        $message = "*📝 REGISTRATION - Step 9/16*\n\n"
+        $message = "*📝 Registration - Step 9/16*\n\n"
             . "Please select your *religion*:\n\n"
-            . "*Number only - no names or strings*\n\n";
+            . "*Number Only - No Names Or Strings*\n\n";
 
         foreach ($religions as $index => $religion) {
-            $message .= "🔹 *" . ($index + 1) . "* {$religion['name']}\n";
+            $message .= "🔹 *" . ($index + 1) . "* " . ucwords(strtolower($religion['name'])) . "\n";
         }
 
         $message .= "\nReply with the number corresponding to your religion.";
@@ -237,14 +237,14 @@ class WahaService
     public function askForSpecialInterestGroups(string $chatId): array
     {
         $groups = \App\Models\SpecialInterestGroup::getSpecialInterestGroups();
-        $message = "*📝 REGISTRATION - Step 10/16*\n\n"
+        $message = "*📝 Registration - Step 10/16*\n\n"
             . "Please select your *special interest groups*:\n\n"
             . "(You can select multiple by separating with commas)\n\n"
-            . "*Numbers only - no names or strings*\n\n";
+            . "*Numbers Only - No Names Or Strings*\n\n";
 
         $index = 1;
         foreach ($groups as $name => $code) {
-            $message .= "🔹 *{$index}* {$name}\n";
+            $message .= "🔹 *{$index}* " . ucwords(strtolower($name)) . "\n";
             $index++;
         }
 
@@ -258,11 +258,11 @@ class WahaService
      */
     public function askForPWDStatus(string $chatId): array
     {
-        $message = "*📝 REGISTRATION - Step 11/16*\n\n"
+        $message = "*📝 Registration - Step 11/16*\n\n"
             . "Are you a Person With Disability (PWD)?\n\n"
-            . "Reply with:\n"
-            . "🔹 *1* for Yes\n"
-            . "🔹 *2* for No";
+            . "Reply With:\n"
+            . "🔹 *1* Yes\n"
+            . "🔹 *2* No";
 
         return $this->sendText($chatId, $message);
     }
@@ -272,8 +272,8 @@ class WahaService
      */
     public function askForNCPWDNumber(string $chatId): array
     {
-        $message = "*📝 REGISTRATION - Step 12/16*\n\n"
-            . "Please enter your *NCPWD number*:\n\n"
+        $message = "*📝 Registration - Step 12/16*\n\n"
+            . "Please enter your *NCPWD Number*:\n\n"
             . "Example: 12345678";
 
         return $this->sendText($chatId, $message);
@@ -284,12 +284,12 @@ class WahaService
      */
     public function askForCounty(string $chatId, array $counties): array
     {
-        $message = "*📝 REGISTRATION - Step 13/16*\n\n"
+        $message = "*📝 Registration - Step 13/16*\n\n"
             . "Please select your *county*:\n\n"
-            . "*Number only - no names or strings*\n\n";
+            . "*Number Only - No Names Or Strings*\n\n";
 
         foreach ($counties as $index => $county) {
-            $message .= "🔹 *" . ($index + 1) . "* {$county['name']}\n";
+            $message .= "🔹 *" . ($index + 1) . "* " . ucwords(strtolower($county['name'])) . "\n";
         }
 
         $message .= "\nReply with the number corresponding to your county.";
@@ -302,12 +302,12 @@ class WahaService
      */
     public function askForConstituency(string $chatId, array $constituencies): array
     {
-        $message = "*📝 REGISTRATION - Step 14/16*\n\n"
+        $message = "*📝 Registration - Step 14/16*\n\n"
             . "Please select your *constituency*:\n\n"
-            . "*Number only - no names or strings*\n\n";
+            . "*Number Only - No Names Or Strings*\n\n";
 
         foreach ($constituencies as $index => $constituency) {
-            $message .= "🔹 *" . ($index + 1) . "* {$constituency['name']}\n";
+            $message .= "🔹 *" . ($index + 1) . "* " . ucwords(strtolower($constituency['name'])) . "\n";
         }
 
         $message .= "\nReply with the number corresponding to your constituency.";
@@ -320,12 +320,12 @@ class WahaService
      */
     public function askForWard(string $chatId, array $wards): array
     {
-        $message = "*📝 REGISTRATION - Step 15/16*\n\n"
+        $message = "*📝 Registration - Step 15/16*\n\n"
             . "Please select your *ward*:\n\n"
-            . "*Number only - no names or strings*\n\n";
+            . "*Number Only - No Names Or Strings*\n\n";
 
         foreach ($wards as $index => $ward) {
-            $message .= "🔹 *" . ($index + 1) . "* {$ward['name']}\n";
+            $message .= "🔹 *" . ($index + 1) . "* " . ucwords(strtolower($ward['name'])) . "\n";
         }
 
         $message .= "\nReply with the number corresponding to your ward.";
@@ -339,30 +339,35 @@ class WahaService
     public function askForConfirmation(string $chatId, array $registrationData): array
     {
         $email = $registrationData['email'] ?? 'N/A';
-        $ethnicityName = $registrationData['ethnicity_name'] ?? 'N/A';
-        $religionName = $registrationData['religion_name'] ?? 'N/A';
-        $specialInterestGroups = isset($registrationData['special_interest_group_names']) ? implode(', ', $registrationData['special_interest_group_names']) : 'N/A';
+        $ethnicityName = isset($registrationData['ethnicity_name']) ? ucwords(strtolower($registrationData['ethnicity_name'])) : 'N/A';
+        $religionName = isset($registrationData['religion_name']) ? ucwords(strtolower($registrationData['religion_name'])) : 'N/A';
+        $specialInterestGroups = isset($registrationData['special_interest_group_names']) 
+            ? ucwords(strtolower(implode(', ', $registrationData['special_interest_group_names']))) 
+            : 'N/A';
         $pwdStatus = isset($registrationData['disability_status']) && $registrationData['disability_status'] ? 'Yes' : 'No';
         $ncpwdNumber = $registrationData['ncpwd_number'] ?? 'N/A';
-        $constituencyName = $registrationData['constituency_name'] ?? 'N/A';
-        $wardName = $registrationData['ward_name'] ?? 'N/A';
+        $constituencyName = isset($registrationData['constituency_name']) ? ucwords(strtolower($registrationData['constituency_name'])) : 'N/A';
+        $wardName = isset($registrationData['ward_name']) ? ucwords(strtolower($registrationData['ward_name'])) : 'N/A';
+        $countyName = isset($registrationData['county_name']) ? ucwords(strtolower($registrationData['county_name'])) : 'N/A';
         $gender = $registrationData['gender'] === 'XY' ? 'Male' : 'Female';
+        $surname = ucwords(strtolower($registrationData['surname'] ?? ''));
+        $otherName = ucwords(strtolower($registrationData['other_name'] ?? ''));
 
-        $message = "*📋 REGISTRATION CONFIRMATION*\n\n"
+        $message = "*📋 Registration Confirmation*\n\n"
             . "Please review your details:\n\n"
             . "*👤 Personal Information*\n"
-            . "Name: {$registrationData['surname']} {$registrationData['other_name']}\n"
+            . "Name: {$surname} {$otherName}\n"
             . "Phone: {$registrationData['telephone']}\n"
             . "Email: {$email}\n"
-            . "ID: {$registrationData['identification_number']}\n"
-            . "DOB: {$registrationData['date_of_birth']}\n"
+            . "Id: {$registrationData['identification_number']}\n"
+            . "Dob: {$registrationData['date_of_birth']}\n"
             . "Gender: {$gender}\n"
             . "Ethnicity: {$ethnicityName}\n"
             . "Religion: {$religionName}\n"
             . "Special Interest Groups: {$specialInterestGroups}\n"
             . "PWD Status: {$pwdStatus}\n"
             . "NCPWD Number: {$ncpwdNumber}\n"
-            . "County: {$registrationData['county_name']}\n"
+            . "County: {$countyName}\n"
             . "Constituency: {$constituencyName}\n"
             . "Ward: {$wardName}\n\n"
             . "*📋 Party Information*\n"
@@ -373,7 +378,7 @@ class WahaService
             . "• Provide accurate information\n"
             . "• Support the party's objectives\n"
             . "• Abide by the party constitution\n\n"
-            . "*Reply with:*\n"
+            . "*Reply With:*\n"
             . "🔹 *confirm* to complete registration\n"
             . "🔹 *cancel* to start over";
 
@@ -385,10 +390,13 @@ class WahaService
      */
     public function sendRegistrationSuccess(string $chatId, array $memberData): array
     {
-        $message = "*🎉 REGISTRATION SUCCESSFUL!* 🎉\n\n"
+        $surname = ucwords(strtolower($memberData['surname'] ?? ''));
+        $otherName = ucwords(strtolower($memberData['other_name'] ?? ''));
+
+        $message = "*🎉 Registration Successful!* 🎉\n\n"
             . "Welcome to Forward Kenya Party!\n\n"
             . "*👋 Member Details*\n"
-            . "Name: {$memberData['surname']} {$memberData['other_name']}\n"
+            . "Name: {$surname} {$otherName}\n"
             . "Membership Number: {$memberData['party_membership_number']}\n\n"
             . "*🌟 Next Steps*\n"
             . "• Check your email for membership details\n"
@@ -398,7 +406,7 @@ class WahaService
             . "📧 Email: forwardkenyaparty@gmail.com\n"
             . "📞 Phone: +254713447820\n"
             . "🌐 Website: https://forwardkenyaparty.com\n\n"
-            . "*OUR LIVES, OUR HERITAGE!* 🇰🇪";
+            . "*Our Lives, Our Heritage!* 🇰🇪";
 
         return $this->sendText($chatId, $message);
     }
@@ -420,7 +428,7 @@ class WahaService
      */
     public function sendHelpMessage(string $chatId): array
     {
-        $message = "*🇰🇪 FORWARD KENYA PARTY - HELP* 🇰🇪\n\n"
+        $message = "*🇰🇪 Forward Kenya Party - Help* 🇰🇪\n\n"
             . "*Available Commands:*\n\n"
             . "🔹 */join* - Start registration process\n"
             . "🔹 */help* - Show this help message\n"
@@ -430,7 +438,7 @@ class WahaService
             . "2. Other names (2-4 words)\n"
             . "3. Phone number\n"
             . "4. Email address\n"
-            . "5. National ID number\n"
+            . "5. National Id number\n"
             . "6. Date of birth\n"
             . "7. Gender\n"
             . "8. Ethnicity\n"
@@ -448,8 +456,8 @@ class WahaService
             . "🌐 Website: https://forwardkenyaparty.com\n"
             . "📞 Head Office: View Park Towers, P.O. Box 27999-00100 Nairobi\n\n"
             . "*Need to check party membership?*\n"
-            . "🔹 USSD: *509#\n"
-            . "🔹 IPPMS: https://ippms.orpp.or.ke\n\n"
+            . "🔹 Ussd: *509#\n"
+            . "🔹 Ippms: https://ippms.orpp.or.ke\n\n"
             . "*Forward Kenya Party - Building Tomorrow Together* 🇰🇪";
 
         return $this->sendText($chatId, $message);

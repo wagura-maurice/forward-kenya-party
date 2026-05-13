@@ -14,7 +14,7 @@ curl -X PUT http://84.247.143.79:3000/api/sessions/default \
     "config": {
       "webhooks": [
         {
-          "url": "https://commit-equality-already-eating.trycloudflare.com/api/webhook/waha",
+          "url": "http://forwardkenyaparty.com/api/webhook/waha",
           "events": ["message", "message.any"]
         }
       ]
