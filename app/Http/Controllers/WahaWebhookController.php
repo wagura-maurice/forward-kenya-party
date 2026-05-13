@@ -1042,8 +1042,8 @@ class WahaWebhookController extends Controller
         }
 
         $names = explode(' ', $otherNames);
-        if (count($names) < 2 || count($names) > 4) {
-            return ['valid' => false, 'error' => 'Please provide 2-4 names'];
+        if (count($names) < 2 || count($names) > 3) {
+            return ['valid' => false, 'error' => 'Please provide 2-3 names'];
         }
 
         foreach ($names as $name) {

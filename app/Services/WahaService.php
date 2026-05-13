@@ -124,7 +124,7 @@ class WahaService
         $message = "*📝 Registration - Step 2/16*\n\n"
             . "Great! Now please enter your *other names*:\n\n"
             . "Example: Maurice Wagura\n\n"
-            . "*Note:* 2-4 names allowed, letters only";
+            . "*Note:* 2-3 names allowed, letters only";
 
         return $this->sendText($chatId, $message);
     }
