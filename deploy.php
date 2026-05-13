@@ -25,7 +25,7 @@ add('writable_dirs', []);
 host('84.247.143.80')
     ->user('deployer')
     ->port(22)
-    ->identityFile('~/.ssh/id_rsa') // ssh on local machine that links to the deployer on vps
+    ->identityFile('~/.ssh/id_ed25519') // ssh on local machine that links to the deployer on vps
     ->set('deploy_path', '/var/www/html/{{application}}');
 
 // Tasks
