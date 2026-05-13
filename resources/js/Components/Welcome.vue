@@ -7,6 +7,7 @@ import MemberFormModal from '@/Components/MemberFormModal.vue';
 import ImportMembersModal from '@/Components/ImportMembersModal.vue';
 import ExportMembersModal from '@/Components/ExportMembersModal.vue';
 import SyncMembersModal from '@/Components/SyncMembersModal.vue';
+import InviteMembersModal from '@/Components/InviteMembersModal.vue';
 
 const { props } = usePage();
 
@@ -34,6 +35,7 @@ const showMemberModal = ref(false);
 const showImportModal = ref(false);
 const showExportModal = ref(false);
 const showSyncModal = ref(false);
+const showInviteModal = ref(false);
 
 // Toggle modals
 const toggleMemberModal = () => {
@@ -50,6 +52,10 @@ const toggleExportModal = () => {
 
 const toggleSyncModal = () => {
     showSyncModal.value = !showSyncModal.value;
+};
+
+const toggleInviteModal = () => {
+    showInviteModal.value = !showInviteModal.value;
 };
 
 // Access the authenticated user data
@@ -227,6 +233,13 @@ const handleMemberSaved = () => {
 const handleExportMembers = () => {
     // Handle export success logic
     showExportModal.value = false;
+};
+
+// Handle WhatsApp invitation success
+const handleInviteSuccess = (results) => {
+    // Handle invitation success logic
+    showInviteModal.value = false;
+    // You could add refresh logic here if needed
 };
 
 
@@ -530,6 +543,16 @@ const formatChange = (change) => {
                                         class="fas fa-sync text-purple-500 w-5 h-5 mr-3"
                                     ></i>
                                     <span>Synchronize Members</span>
+                                </button>
+                                <button
+                                    type="button"
+                                    @click="toggleInviteModal"
+                                    class="w-full text-left flex items-center p-3 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 text-gray-700 dark:text-gray-300"
+                                >
+                                    <i
+                                        class="fas fa-paper-plane text-green-500 w-5 h-5 mr-3"
+                                    ></i>
+                                    <span>Invite Members</span>
                                 </button>
                                 <Link
                                     :href="route('settings')"
@@ -849,20 +872,27 @@ const formatChange = (change) => {
         <ImportMembersModal 
             :show="showImportModal" 
             @close="toggleImportModal"
-            @import="handleImportMembers"
+            @success="handleImportMembers"
         />
 
         <!-- Export Members Modal -->
         <ExportMembersModal 
             :show="showExportModal" 
             @close="toggleExportModal"
-            @export="handleExportMembers"
+            @success="handleExportMembers"
         />
 
         <!-- Sync Members Modal -->
         <SyncMembersModal 
             :show="showSyncModal" 
             @close="toggleSyncModal"
+        />
+
+        <!-- Invite Members Modal -->
+        <InviteMembersModal 
+            :show="showInviteModal"
+            @close="toggleInviteModal"
+            @success="handleInviteSuccess"
         />
     </div>
 </template>
