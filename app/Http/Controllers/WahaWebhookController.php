@@ -1,5 +1,5 @@
 <?php
-
+// app/Http/Controllers/WahaWebhookController.php
 namespace App\Http\Controllers;
 
 use App\Services\WahaService;
@@ -260,7 +260,7 @@ class WahaWebhookController extends Controller
                 // User sent a message after welcome, assume they want to join
                 $this->handleCommand($conversation, '/join', $messageId);
                 break;
-                
+
             case 'surname':
                 $this->processSurname($conversation, $message);
                 break;
@@ -271,6 +271,10 @@ class WahaWebhookController extends Controller
 
             case 'phone_number':
                 $this->processPhoneNumber($conversation, $message);
+                break;
+
+            case 'email_address':
+                $this->processEmailAddress($conversation, $message);
                 break;
 
             case 'id_number':
@@ -285,8 +289,36 @@ class WahaWebhookController extends Controller
                 $this->processGender($conversation, $message);
                 break;
 
+            case 'ethnicity':
+                $this->processEthnicity($conversation, $message);
+                break;
+
+            case 'religion':
+                $this->processReligion($conversation, $message);
+                break;
+
+            case 'special_interest_groups':
+                $this->processSpecialInterestGroups($conversation, $message);
+                break;
+
+            case 'pwd_status':
+                $this->processPWDStatus($conversation, $message);
+                break;
+
+            case 'ncpwd_number':
+                $this->processNCPWDNumber($conversation, $message);
+                break;
+
             case 'county':
                 $this->processCounty($conversation, $message);
+                break;
+
+            case 'constituency':
+                $this->processConstituency($conversation, $message);
+                break;
+
+            case 'ward':
+                $this->processWard($conversation, $message);
                 break;
 
             case 'confirmation':
@@ -316,6 +348,7 @@ class WahaWebhookController extends Controller
                                              "Hello! The phone number {$phoneNumber} is already registered with Forward Kenya Party.\n\n" .
                                              "If this is a mistake or you need help, please contact our support team:\n\n" .
                                              "📧 Email: forwardkenyaparty@gmail.com\n" .
+                                             "📞 Phone: +254713447820\n" .
                                              "🌐 Website: https://forwardkenyaparty.com\n\n" .
                                              "📞 Head Office: View Park Towers, P.O. Box 27999-00100 Nairobi\n\n" .
                                              "*Forward Kenya Party - Building Tomorrow Together* 🇰🇪";
@@ -336,7 +369,7 @@ class WahaWebhookController extends Controller
                 break;
 
             case '/help':
-                $this->queueHelpMessage($conversation);
+                $this->wahaService->sendHelpMessage($conversation->chat_id);
                 break;
 
             case '/cancel':
@@ -344,7 +377,7 @@ class WahaWebhookController extends Controller
                 break;
 
             default:
-                $this->queueHelpMessage($conversation);
+                $this->wahaService->sendHelpMessage($conversation->chat_id);
                 break;
         }
     }
@@ -358,28 +391,12 @@ class WahaWebhookController extends Controller
         $conversation->update([
             'current_step' => 'surname',
             'conversation_data' => [
-                'party_membership_number' => $this->generateMembershipNumber()
+                'party_membership_number' => generateUniqueNumber('FKP', \App\Models\Member::class, 'party_membership_number')
             ]
         ]);
 
-        // Queue the surname question instead of sending directly
-        $message = "*📝 REGISTRATION - Step 1/8*\n\n" .
-                  "Let's start your registration process!\n\n" .
-                  "Please enter your *surname* (family name):\n\n" .
-                  "Example: Waithaka\n\n" .
-                  "*Note:* Only letters are allowed";
-
-        $metadata = ['step' => 'surname', 'action' => 'start_registration'];
-        if ($messageId) {
-            $metadata['message_id'] = $messageId;
-        }
-
-        $this->queueWhatsAppMessage(
-            $conversation->chat_id,
-            $conversation->phone_number,
-            $message,
-            $metadata
-        );
+        // Delegate to WahaService which owns the message content for this step
+        $this->wahaService->askForSurname($conversation->chat_id);
     }
 
     /**
@@ -392,20 +409,8 @@ class WahaWebhookController extends Controller
             'conversation_data' => []
         ]);
 
-        $cancelMessage = "*🚫 REGISTRATION CANCELLED* 🚫\n\n" .
-                        "Your registration has been cancelled.\n\n" .
-                        "If you'd like to start again, simply send `/join`.\n\n" .
-                        "*Need Help?*\n" .
-                        "📧 Email: forwardkenyaparty@gmail.com\n" .
-                        "🌐 Website: https://forwardkenyaparty.com\n\n" .
-                        "*Forward Kenya Party - Building Tomorrow Together* 🇰🇪";
-
-        $this->queueWhatsAppMessage(
-            $conversation->chat_id,
-            $conversation->phone_number,
-            $cancelMessage,
-            ['action' => 'registration_cancelled']
-        );
+        // Delegate cancel message to WahaService which owns the message content
+        $this->wahaService->sendCancelMessage($conversation->chat_id);
     }
 
     /**
@@ -469,6 +474,36 @@ class WahaWebhookController extends Controller
     }
 
     /**
+     * Process email address input
+     */
+    private function processEmailAddress(WhatsappConversation $conversation, string $message)
+    {
+        $validation = $this->validateEmailAddress($message);
+
+        if (!$validation['valid']) {
+            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with *cancel* to start over.";
+            $this->queueWhatsAppMessage(
+                $conversation->chat_id,
+                $conversation->phone_number,
+                $errorMessage,
+                ['step' => 'email_address', 'action' => 'validation_error', 'error' => $validation['error']]
+            );
+            return;
+        }
+
+        // Update conversation data
+        $conversationData = $conversation->conversation_data;
+        $conversationData['email'] = $message;
+
+        $conversation->update([
+            'current_step' => 'id_number',
+            'conversation_data' => $conversationData
+        ]);
+
+        $this->wahaService->askForIdNumber($conversation->chat_id);
+    }
+
+    /**
      * Process phone number input
      */
     private function processPhoneNumber(WhatsappConversation $conversation, string $message)
@@ -486,16 +521,21 @@ class WahaWebhookController extends Controller
             return;
         }
 
+        // Use phoneNumberPrefix helper to format the phone number
+        $formattedPhone = phoneNumberPrefix($message);
+        // Remove + prefix before 254
+        $formattedPhone = ltrim($formattedPhone, '+');
+
         // Update conversation data
         $conversationData = $conversation->conversation_data;
-        $conversationData['telephone'] = $message;
+        $conversationData['telephone'] = $formattedPhone;
 
         $conversation->update([
-            'current_step' => 'id_number',
+            'current_step' => 'email_address',
             'conversation_data' => $conversationData
         ]);
 
-        $this->wahaService->askForIdNumber($conversation->chat_id);
+        $this->wahaService->askForEmailAddress($conversation->chat_id);
     }
 
     /**
@@ -560,6 +600,172 @@ class WahaWebhookController extends Controller
     }
 
     /**
+     * Process ethnicity input
+     */
+    private function processEthnicity(WhatsappConversation $conversation, string $message)
+    {
+        $validation = $this->validateEthnicity($message);
+
+        if (!$validation['valid']) {
+            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with *cancel* to start over.";
+            $this->queueWhatsAppMessage(
+                $conversation->chat_id,
+                $conversation->phone_number,
+                $errorMessage,
+                ['step' => 'ethnicity', 'action' => 'validation_error', 'error' => $validation['error']]
+            );
+            return;
+        }
+
+        // Update conversation data
+        $conversationData = $conversation->conversation_data;
+        $conversationData['ethnicity_id'] = $validation['value'];
+        $conversationData['ethnicity_name'] = $validation['name'];
+
+        $conversation->update([
+            'current_step' => 'religion',
+            'conversation_data' => $conversationData
+        ]);
+
+        // Get religions and send religion selection
+        $religions = Religion::orderBy('name')->get()->toArray();
+        $this->wahaService->askForReligion($conversation->chat_id, $religions);
+    }
+
+    /**
+     * Process religion input
+     */
+    private function processReligion(WhatsappConversation $conversation, string $message)
+    {
+        $validation = $this->validateReligion($message);
+
+        if (!$validation['valid']) {
+            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with *cancel* to start over.";
+            $this->queueWhatsAppMessage(
+                $conversation->chat_id,
+                $conversation->phone_number,
+                $errorMessage,
+                ['step' => 'religion', 'action' => 'validation_error', 'error' => $validation['error']]
+            );
+            return;
+        }
+
+        // Update conversation data
+        $conversationData = $conversation->conversation_data;
+        $conversationData['religion_id'] = $validation['value'];
+        $conversationData['religion_name'] = $validation['name'];
+
+        $conversation->update([
+            'current_step' => 'special_interest_groups',
+            'conversation_data' => $conversationData
+        ]);
+
+        $this->wahaService->askForSpecialInterestGroups($conversation->chat_id);
+    }
+
+    /**
+     * Process special interest groups input
+     */
+    private function processSpecialInterestGroups(WhatsappConversation $conversation, string $message)
+    {
+        $validation = $this->validateSpecialInterestGroups($message);
+
+        if (!$validation['valid']) {
+            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with *cancel* to start over.";
+            $this->queueWhatsAppMessage(
+                $conversation->chat_id,
+                $conversation->phone_number,
+                $errorMessage,
+                ['step' => 'special_interest_groups', 'action' => 'validation_error', 'error' => $validation['error']]
+            );
+            return;
+        }
+
+        // Update conversation data
+        $conversationData = $conversation->conversation_data;
+        $conversationData['special_interest_groups'] = $validation['values'];
+        $conversationData['special_interest_group_names'] = $validation['names'];
+
+        $conversation->update([
+            'current_step' => 'pwd_status',
+            'conversation_data' => $conversationData
+        ]);
+
+        $this->wahaService->askForPWDStatus($conversation->chat_id);
+    }
+
+    /**
+     * Process PWD status input
+     */
+    private function processPWDStatus(WhatsappConversation $conversation, string $message)
+    {
+        $validation = $this->validatePWDStatus($message);
+
+        if (!$validation['valid']) {
+            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with *cancel* to start over.";
+            $this->queueWhatsAppMessage(
+                $conversation->chat_id,
+                $conversation->phone_number,
+                $errorMessage,
+                ['step' => 'pwd_status', 'action' => 'validation_error', 'error' => $validation['error']]
+            );
+            return;
+        }
+
+        // Update conversation data
+        $conversationData = $conversation->conversation_data;
+        $conversationData['disability_status'] = $validation['value'];
+
+        if ($validation['value']) {
+            $conversation->update([
+                'current_step' => 'ncpwd_number',
+                'conversation_data' => $conversationData
+            ]);
+            $this->wahaService->askForNCPWDNumber($conversation->chat_id);
+        } else {
+            $conversation->update([
+                'current_step' => 'county',
+                'conversation_data' => $conversationData
+            ]);
+            // Get counties and send county selection
+            $counties = County::orderBy('name')->get()->toArray();
+            $this->wahaService->askForCounty($conversation->chat_id, $counties);
+        }
+    }
+
+    /**
+     * Process NCPWD number input
+     */
+    private function processNCPWDNumber(WhatsappConversation $conversation, string $message)
+    {
+        $validation = $this->validateNCPWDNumber($message);
+
+        if (!$validation['valid']) {
+            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with *cancel* to start over.";
+            $this->queueWhatsAppMessage(
+                $conversation->chat_id,
+                $conversation->phone_number,
+                $errorMessage,
+                ['step' => 'ncpwd_number', 'action' => 'validation_error', 'error' => $validation['error']]
+            );
+            return;
+        }
+
+        // Update conversation data
+        $conversationData = $conversation->conversation_data;
+        $conversationData['ncpwd_number'] = $message;
+
+        $conversation->update([
+            'current_step' => 'county',
+            'conversation_data' => $conversationData
+        ]);
+
+        // Get counties and send county selection
+        $counties = County::orderBy('name')->get()->toArray();
+        $this->wahaService->askForCounty($conversation->chat_id, $counties);
+    }
+
+    /**
      * Process gender input
      */
     private function processGender(WhatsappConversation $conversation, string $message)
@@ -582,13 +788,13 @@ class WahaWebhookController extends Controller
         $conversationData['gender'] = $validation['value'];
 
         $conversation->update([
-            'current_step' => 'county',
+            'current_step' => 'ethnicity',
             'conversation_data' => $conversationData
         ]);
 
-        // Get counties and send county selection
-        $counties = County::orderBy('name')->get()->toArray();
-        $this->wahaService->askForCounty($conversation->chat_id, $counties);
+        // Get ethnicities and send ethnicity selection
+        $ethnicities = Ethnicity::orderBy('name')->get()->toArray();
+        $this->wahaService->askForEthnicity($conversation->chat_id, $ethnicities);
     }
 
     /**
@@ -614,11 +820,79 @@ class WahaWebhookController extends Controller
         $conversationData['county_id'] = $validation['value'];
         $conversationData['county_name'] = $validation['name'];
 
+        $conversation->update([
+            'current_step' => 'constituency',
+            'conversation_data' => $conversationData
+        ]);
+
+        // Get constituencies for the selected county and send constituency selection
+        $constituencies = \App\Models\Constituency::where('county_id', $validation['value'])
+            ->orderBy('name')
+            ->get()
+            ->toArray();
+        $this->wahaService->askForConstituency($conversation->chat_id, $constituencies);
+    }
+
+    /**
+     * Process constituency input
+     */
+    private function processConstituency(WhatsappConversation $conversation, string $message)
+    {
+        $validation = $this->validateConstituency($message, $conversation->conversation_data['county_id']);
+
+        if (!$validation['valid']) {
+            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with *cancel* to start over.";
+            $this->queueWhatsAppMessage(
+                $conversation->chat_id,
+                $conversation->phone_number,
+                $errorMessage,
+                ['step' => 'constituency', 'action' => 'validation_error', 'error' => $validation['error']]
+            );
+            return;
+        }
+
+        // Update conversation data
+        $conversationData = $conversation->conversation_data;
+        $conversationData['constituency_id'] = $validation['value'];
+        $conversationData['constituency_name'] = $validation['name'];
+
+        $conversation->update([
+            'current_step' => 'ward',
+            'conversation_data' => $conversationData
+        ]);
+
+        // Get wards for the selected constituency and send ward selection
+        $wards = \App\Models\Ward::where('constituency_id', $validation['value'])
+            ->orderBy('name')
+            ->get()
+            ->toArray();
+        $this->wahaService->askForWard($conversation->chat_id, $wards);
+    }
+
+    /**
+     * Process ward input
+     */
+    private function processWard(WhatsappConversation $conversation, string $message)
+    {
+        $validation = $this->validateWard($message, $conversation->conversation_data['constituency_id']);
+
+        if (!$validation['valid']) {
+            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with *cancel* to start over.";
+            $this->queueWhatsAppMessage(
+                $conversation->chat_id,
+                $conversation->phone_number,
+                $errorMessage,
+                ['step' => 'ward', 'action' => 'validation_error', 'error' => $validation['error']]
+            );
+            return;
+        }
+
+        // Update conversation data
+        $conversationData = $conversation->conversation_data;
+        $conversationData['ward_id'] = $validation['value'];
+        $conversationData['ward_name'] = $validation['name'];
+
         // Add default values for required fields
-        $conversationData['special_interest_groups'] = ['general'];
-        $conversationData['ethnicity_id'] = 1; // Default ethnicity
-        $conversationData['religion_id'] = 1; // Default religion
-        $conversationData['disability_status'] = false;
         $conversationData['enlisting_date'] = now()->format('Y-m-d');
         $conversationData['terms'] = true;
 
@@ -667,30 +941,8 @@ class WahaWebhookController extends Controller
             $createNewUser = new CreateNewUser();
             $user = $createNewUser->create($conversationData);
 
-            // Send success message
-            $successMessage = "*🎉 REGISTRATION COMPLETE* 🎉\n\n" .
-                             "Congratulations! You have successfully registered with Forward Kenya Party.\n\n" .
-                             "*Your Details:*\n" .
-                             "• Name: " . ($conversationData['surname'] ?? '') . " " . ($conversationData['other_name'] ?? '') . "\n" .
-                             "• Phone: " . ($conversationData['telephone'] ?? '') . "\n" .
-                             "• Membership Number: " . ($conversationData['party_membership_number'] ?? '') . "\n\n" .
-                             "*Next Steps:*\n" .
-                             "• You will receive updates about party activities\n" .
-                             "• Check your email for important information\n" .
-                             "• Visit our website for more resources\n\n" .
-                             "*Contact Us:*\n" .
-                             "📧 Email: forwardkenyaparty@gmail.com\n" .
-                             "🌐 Website: https://forwardkenyaparty.com\n" .
-                             "📞 Head Office: View Park Towers, P.O. Box 27999-00100 Nairobi\n\n" .
-                             "*Thank you for joining Forward Kenya Party!* 🇰🇪\n\n" .
-                             "*Building Tomorrow Together*";
-
-            $this->queueWhatsAppMessage(
-                $conversation->chat_id,
-                $conversation->phone_number,
-                $successMessage,
-                ['action' => 'registration_success']
-            );
+            // Delegate success message to WahaService which owns the message content
+            $this->wahaService->sendRegistrationSuccess($conversation->chat_id, $conversationData);
 
             // Reset conversation
             $conversation->update([
@@ -710,54 +962,15 @@ class WahaWebhookController extends Controller
                 'data' => $conversation->conversation_data
             ]);
 
-            $errorMessage = "*❌ REGISTRATION FAILED* ❌\n\n" .
-                             "Registration failed: " . $e->getMessage() . "\n\n" .
-                             "Please try again or contact our support team:\n\n" .
-                             "📧 Email: forwardkenyaparty@gmail.com\n" .
-                             "🌐 Website: https://forwardkenyaparty.com\n\n" .
-                             "*Forward Kenya Party - Building Tomorrow Together* 🇰🇪";
-
-            $this->queueWhatsAppMessage(
+            // Delegate error message to WahaService which owns the message content
+            $this->wahaService->sendValidationErrorMessage(
                 $conversation->chat_id,
-                $conversation->phone_number,
-                $errorMessage,
-                ['action' => 'registration_error', 'error' => $e->getMessage()]
+                'Registration failed: ' . $e->getMessage() . "\n\nPlease try again or contact our support team:\n📧 forwardkenyaparty@gmail.com\n📞 +254713447820",
+                'registration_failed'
             );
         }
     }
 
-    /**
-     * Queue help message for sending
-     */
-    private function queueHelpMessage(WhatsappConversation $conversation): void
-    {
-        $helpMessage = "*🇰🇪 FORWARD KENYA PARTY - HELP* 🇰🇪\n\n" .
-                     "*Available Commands:*\n\n" .
-                     "• `/join` - Start registration process\n" .
-                     "• `/help` - Show this help message\n" .
-                     "• `/cancel` - Cancel registration\n\n" .
-                     "*Registration Steps:*\n" .
-                     "1. Surname\n" .
-                     "2. Other names\n" .
-                     "3. Phone number\n" .
-                     "4. ID number\n" .
-                     "5. Date of birth\n" .
-                     "6. Gender\n" .
-                     "7. County\n" .
-                     "8. Confirmation\n\n" .
-                     "*Need Support?*\n" .
-                     "📧 Email: forwardkenyaparty@gmail.com\n" .
-                     "🌐 Website: https://forwardkenyaparty.com\n" .
-                     "📞 Head Office: View Park Towers, P.O. Box 27999-00100 Nairobi\n\n" .
-                     "*Forward Kenya Party - Building Tomorrow Together* 🇰🇪";
-
-        $this->queueWhatsAppMessage(
-            $conversation->chat_id,
-            $conversation->phone_number,
-            $helpMessage,
-            ['action' => 'help_message']
-        );
-    }
 
     /**
      * Queue WhatsApp message for sending
@@ -803,16 +1016,6 @@ class WahaWebhookController extends Controller
     }
 
     /**
-     * Generate membership number
-     */
-    private function generateMembershipNumber(): string
-    {
-        $prefix = 'FKP';
-        $random = mt_rand(0, 999999);
-        return $prefix . '-' . str_pad($random, 6, '0', STR_PAD_LEFT);
-    }
-
-    /**
      * Validation methods
      */
     private function validateSurname(string $surname): array
@@ -839,8 +1042,8 @@ class WahaWebhookController extends Controller
         }
 
         $names = explode(' ', $otherNames);
-        if (count($names) < 1 || count($names) > 3) {
-            return ['valid' => false, 'error' => 'Please provide 1-3 names'];
+        if (count($names) < 2 || count($names) > 4) {
+            return ['valid' => false, 'error' => 'Please provide 2-4 names'];
         }
 
         foreach ($names as $name) {
@@ -885,8 +1088,12 @@ class WahaWebhookController extends Controller
         // Remove any non-digit characters
         $idNumber = preg_replace('/\D/', '', $idNumber);
 
-        if (strlen($idNumber) !== 8) {
-            return ['valid' => false, 'error' => 'ID number must be exactly 8 digits'];
+        if (strlen($idNumber) > 8) {
+            return ['valid' => false, 'error' => 'ID number must be at most 8 digits'];
+        }
+
+        if (!ctype_digit($idNumber)) {
+            return ['valid' => false, 'error' => 'ID number must be numeric'];
         }
 
         return ['valid' => true];
@@ -933,26 +1140,18 @@ class WahaWebhookController extends Controller
 
     private function validateCounty(string $countyInput): array
     {
-        $countyInput = strtolower(trim($countyInput));
+        $countyInput = trim($countyInput);
 
-        // Try to find county by number
-        if (is_numeric($countyInput)) {
-            $counties = County::orderBy('name')->get();
-            $index = (int) $countyInput - 1;
-            
-            if ($index >= 0 && $index < $counties->count()) {
-                $county = $counties[$index];
-                return [
-                    'valid' => true,
-                    'value' => $county->id,
-                    'name' => $county->name
-                ];
-            }
+        // Only accept numbers
+        if (!is_numeric($countyInput)) {
+            return ['valid' => false, 'error' => 'Invalid county selection. Please reply with the number only.'];
         }
 
-        // Try to find county by name
-        $county = County::whereRaw('LOWER(name) = ?', [$countyInput])->first();
-        if ($county) {
+        $counties = County::orderBy('name')->get();
+        $index = (int) $countyInput - 1;
+
+        if ($index >= 0 && $index < $counties->count()) {
+            $county = $counties[$index];
             return [
                 'valid' => true,
                 'value' => $county->id,
@@ -960,7 +1159,188 @@ class WahaWebhookController extends Controller
             ];
         }
 
-        return ['valid' => false, 'error' => 'Invalid county selection. Please reply with the number or county name.'];
+        return ['valid' => false, 'error' => 'Invalid county selection. Please reply with a valid number.'];
+    }
+
+    private function validateEmailAddress(string $email): array
+    {
+        if (empty($email)) {
+            return ['valid' => false, 'error' => 'Email address is required'];
+        }
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return ['valid' => false, 'error' => 'Invalid email address format'];
+        }
+
+        return ['valid' => true];
+    }
+
+    private function validateEthnicity(string $ethnicityInput): array
+    {
+        $ethnicityInput = trim($ethnicityInput);
+
+        // Only accept numbers
+        if (!is_numeric($ethnicityInput)) {
+            return ['valid' => false, 'error' => 'Invalid ethnicity selection. Please reply with the number only.'];
+        }
+
+        $ethnicities = Ethnicity::orderBy('name')->get();
+        $index = (int) $ethnicityInput - 1;
+
+        if ($index >= 0 && $index < $ethnicities->count()) {
+            $ethnicity = $ethnicities[$index];
+            return [
+                'valid' => true,
+                'value' => $ethnicity->id,
+                'name' => $ethnicity->name
+            ];
+        }
+
+        return ['valid' => false, 'error' => 'Invalid ethnicity selection. Please reply with a valid number.'];
+    }
+
+    private function validateReligion(string $religionInput): array
+    {
+        $religionInput = trim($religionInput);
+
+        // Only accept numbers
+        if (!is_numeric($religionInput)) {
+            return ['valid' => false, 'error' => 'Invalid religion selection. Please reply with the number only.'];
+        }
+
+        $religions = Religion::orderBy('name')->get();
+        $index = (int) $religionInput - 1;
+
+        if ($index >= 0 && $index < $religions->count()) {
+            $religion = $religions[$index];
+            return [
+                'valid' => true,
+                'value' => $religion->id,
+                'name' => $religion->name
+            ];
+        }
+
+        return ['valid' => false, 'error' => 'Invalid religion selection. Please reply with a valid number.'];
+    }
+
+    private function validateSpecialInterestGroups(string $input): array
+    {
+        if (empty($input)) {
+            return ['valid' => false, 'error' => 'Special interest groups are required'];
+        }
+
+        $groups = SpecialInterestGroup::getSpecialInterestGroups();
+        $groupNames = $groups->keys()->toArray();
+
+        // Parse multiple selections (comma-separated numbers only)
+        $selections = array_map('trim', explode(',', $input));
+        $selectedValues = [];
+        $selectedNames = [];
+
+        foreach ($selections as $selection) {
+            // Only accept numbers
+            if (!is_numeric($selection)) {
+                return ['valid' => false, 'error' => 'Invalid special interest group selection. Please reply with numbers only.'];
+            }
+
+            $index = (int) $selection - 1;
+            if ($index >= 0 && $index < count($groupNames)) {
+                $name = $groupNames[$index];
+                $selectedValues[] = $groups[$name];
+                $selectedNames[] = $name;
+            }
+        }
+
+        if (empty($selectedValues)) {
+            return ['valid' => false, 'error' => 'Invalid special interest group selection. Please reply with valid numbers.'];
+        }
+
+        return ['valid' => true, 'values' => $selectedValues, 'names' => $selectedNames];
+    }
+
+    private function validatePWDStatus(string $input): array
+    {
+        $input = strtolower(trim($input));
+
+        if ($input === '1' || $input === 'yes') {
+            return ['valid' => true, 'value' => true];
+        } elseif ($input === '2' || $input === 'no') {
+            return ['valid' => true, 'value' => false];
+        }
+
+        return ['valid' => false, 'error' => 'Please reply with 1 (Yes) or 2 (No)'];
+    }
+
+    private function validateNCPWDNumber(string $ncpwdNumber): array
+    {
+        if (empty($ncpwdNumber)) {
+            return ['valid' => false, 'error' => 'NCPWD number is required'];
+        }
+
+        // Remove any non-digit characters
+        $ncpwdNumber = preg_replace('/\D/', '', $ncpwdNumber);
+
+        if (strlen($ncpwdNumber) < 1) {
+            return ['valid' => false, 'error' => 'NCPWD number must be at least 1 digit'];
+        }
+
+        return ['valid' => true];
+    }
+
+    private function validateConstituency(string $constituencyInput, int $countyId): array
+    {
+        $constituencyInput = trim($constituencyInput);
+
+        // Only accept numbers
+        if (!is_numeric($constituencyInput)) {
+            return ['valid' => false, 'error' => 'Invalid constituency selection. Please reply with the number only.'];
+        }
+
+        // Get constituencies for the county
+        $constituencies = \App\Models\Constituency::where('county_id', $countyId)
+            ->orderBy('name')
+            ->get();
+
+        $index = (int) $constituencyInput - 1;
+
+        if ($index >= 0 && $index < $constituencies->count()) {
+            $constituency = $constituencies[$index];
+            return [
+                'valid' => true,
+                'value' => $constituency->id,
+                'name' => $constituency->name
+            ];
+        }
+
+        return ['valid' => false, 'error' => 'Invalid constituency selection. Please reply with a valid number.'];
+    }
+
+    private function validateWard(string $wardInput, int $constituencyId): array
+    {
+        $wardInput = trim($wardInput);
+
+        // Only accept numbers
+        if (!is_numeric($wardInput)) {
+            return ['valid' => false, 'error' => 'Invalid ward selection. Please reply with the number only.'];
+        }
+
+        // Get wards for the constituency
+        $wards = \App\Models\Ward::where('constituency_id', $constituencyId)
+            ->orderBy('name')
+            ->get();
+
+        $index = (int) $wardInput - 1;
+
+        if ($index >= 0 && $index < $wards->count()) {
+            $ward = $wards[$index];
+            return [
+                'valid' => true,
+                'value' => $ward->id,
+                'name' => $ward->name
+            ];
+        }
+
+        return ['valid' => false, 'error' => 'Invalid ward selection. Please reply with a valid number.'];
     }
 
     /**
@@ -1052,9 +1432,14 @@ class WahaWebhookController extends Controller
                         "View Park Towers, P.O. Box 27999-00100 Nairobi\n\n" .
                         "*📞 CONTACT*\n" .
                         "📧 Email: forwardkenyaparty@gmail.com\n" .
+                        "📞 Phone: +254713447820\n" .
                         "🌐 Website: https://forwardkenyaparty.com\n\n" .
                         "*🚀 TO JOIN US*\n" .
                         "Simply reply with */join* to begin your registration process.\n\n" .
+                        "*📋 AVAILABLE COMMANDS*\n" .
+                        "• /join - Start registration process\n" .
+                        "• /help - Show help message\n" .
+                        "• /cancel - Cancel registration\n\n" .
                         "*📋 IMPORTANT*\n" .
                         "Before joining, please check if you're registered with any other party:\n" .
                         "🔹 USSD: Dial *509#\n" .
