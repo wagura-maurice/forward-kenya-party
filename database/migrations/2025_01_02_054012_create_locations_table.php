@@ -51,6 +51,7 @@ return new class extends Migration
                   ->onUpdate('cascade')
                   ->comment('Foreign key referencing the wards table with cascade delete and update');
             $table->string('name')->comment('Name of the location');
+            $table->string('code')->nullable()->unique()->comment('Unique code for the location');
             $table->string('slug')->nullable()->unique()->comment('SEO-friendly URL slug for the location');
             $table->string('iso_code', 2)->nullable()->unique()->comment('ISO 3166-1 alpha-2 country code');
             $table->longText('svg_code')->nullable()->comment('SVG code for the location');

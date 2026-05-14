@@ -37,7 +37,7 @@ return new class extends Migration
             
             // Main fields
             $table->string('name')->comment('Name of the polling station');
-            $table->string('code')->unique()->comment('Unique code for the polling station');
+            $table->string('code')->nullable()->unique()->comment('Unique code for the polling station');
             $table->integer('voter_capacity')->nullable()->comment('Maximum number of voters this station can handle');
             $table->boolean('is_active')->default(true)->comment('Whether the station is currently active');
             $table->text('notes')->nullable()->comment('Additional notes about the station');

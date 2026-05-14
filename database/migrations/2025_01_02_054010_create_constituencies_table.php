@@ -39,6 +39,7 @@ return new class extends Migration
                   ->onUpdate('cascade')
                   ->comment('Foreign key referencing the sub_counties table with cascade delete and update');
             $table->string('name')->comment('Name of the constituency');
+            $table->string('code')->nullable()->unique()->comment('Unique code for the constituency');
             $table->string('slug')->nullable()->unique()->comment('SEO-friendly URL slug for the constituency');
             $table->string('iso_code', 2)->nullable()->unique()->comment('ISO 3166-1 alpha-2 constituency code');
             $table->longText('svg_code')->nullable()->comment('SVG code for the constituency');

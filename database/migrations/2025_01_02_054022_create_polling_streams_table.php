@@ -42,7 +42,7 @@ return new class extends Migration
                   ->comment('Parent polling station');
 
             $table->string('name')->comment('Name of the polling stream');
-            $table->string('code')->unique()->comment('Unique code for the polling stream');
+            $table->string('code')->nullable()->unique()->comment('Unique code for the polling stream');
             $table->integer('voter_capacity')->nullable()->comment('Maximum number of voters this stream can handle');
             $table->integer('registered_voters')->default(0)->comment('Number of registered voters in this stream');
             $table->boolean('is_active')->default(true)->comment('Whether the stream is currently active');
