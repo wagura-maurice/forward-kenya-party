@@ -14,10 +14,20 @@ use Illuminate\Validation\ValidationException;
 class LipaNaMpesaOnlineServices
 {
     private $timestamp;
+    private string $lnmoEnvironment;
+    private string $lnmoConsumerKey;
+    private string $lnmoConsumerSecret;
+    private string $lnmoShortCode;
+    private string $lnmoPassKey;
 
     public function __construct()
     {
         $this->timestamp = Carbon::parse(REQUEST_TIMESTAMP)->format('YmdHis');
+        $this->lnmoEnvironment = config('services.mpesa.lnmo_environment', getSetting('MPESA_LNMO_ENVIRONMENT'));
+        $this->lnmoConsumerKey = config('services.mpesa.lnmo_consumer_key', getSetting('MPESA_LNMO_CONSUMER_KEY'));
+        $this->lnmoConsumerSecret = config('services.mpesa.lnmo_consumer_secret', getSetting('MPESA_LNMO_CONSUMER_SECRET'));
+        $this->lnmoShortCode = config('services.mpesa.lnmo_short_code', getSetting('MPESA_LNMO_SHORT_CODE'));
+        $this->lnmoPassKey = config('services.mpesa.lnmo_pass_key', getSetting('MPESA_LNMO_PASS_KEY'));
     }
 
     private function fetchAccessToken(): string
@@ -29,9 +39,9 @@ class LipaNaMpesaOnlineServices
 
     private function generateAccessToken(): string
     {
-        $url = 'https://' . getSetting('MPESA_LNMO_ENVIRONMENT') . '.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials';
+        $url = 'https://' . $this->lnmoEnvironment . '.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials';
         $response = Http::acceptJson()
-            ->withToken(base64_encode(getSetting('MPESA_LNMO_CONSUMER_KEY') . ':' . getSetting('MPESA_LNMO_CONSUMER_SECRET')), 'Basic')
+            ->withToken(base64_encode($this->lnmoConsumerKey . ':' . $this->lnmoConsumerSecret), 'Basic')
             ->get($url);
 
         return optional($response->object())->access_token;
@@ -70,16 +80,16 @@ class LipaNaMpesaOnlineServices
             throw new ValidationException($validator);
         }
 
-        $url = 'https://' . getSetting('MPESA_LNMO_ENVIRONMENT') . '.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
+        $url = 'https://' . $this->lnmoEnvironment . '.safaricom.co.ke/mpesa/stkpush/v1/processrequest';
 
         $request = [
-            'BusinessShortCode' => getSetting('MPESA_LNMO_SHORT_CODE'),
-            'Password' => base64_encode(getSetting('MPESA_LNMO_SHORT_CODE') . getSetting('MPESA_LNMO_PASS_KEY') . $this->timestamp),
+            'BusinessShortCode' => $this->lnmoShortCode,
+            'Password' => base64_encode($this->lnmoShortCode . $this->lnmoPassKey . $this->timestamp),
             'Timestamp' => $this->timestamp,
             'TransactionType' => Transaction::CUSTOMER_PAY_BILL_ONLINE,
             'Amount' => $data['amount'],
             'PartyA' => str_replace('+', '', phoneNumberPrefix($data['telephone'])), // depositor
-            'PartyB' => getSetting('MPESA_LNMO_SHORT_CODE'),
+            'PartyB' => $this->lnmoShortCode,
             'PhoneNumber' => str_replace('+', '', phoneNumberPrefix($data['telephone'])),
             'CallBackURL' => secure_url(URL::route('mpesa.daraja.lnmo.callback', [], false)),
             'AccountReference' => $data['reference'],
@@ -92,7 +102,7 @@ class LipaNaMpesaOnlineServices
             $transaction = Transaction::create([
                 '_uid' => generateUID(Transaction::class, 10),
                 'party_a' => $request['PhoneNumber'],
-                'party_b' => getSetting('MPESA_LNMO_SHORT_CODE'),
+                'party_b' => $this->lnmoShortCode,
                 'account_reference' => $request['AccountReference'],
                 'transaction_category' => $data['category'],
                 'transaction_type' => Transaction::getMpesaDarajaApiTransactionTypeValueByLabel($request['TransactionType']),
@@ -115,11 +125,11 @@ class LipaNaMpesaOnlineServices
         $transaction = Transaction::where('transaction_id', $transaction_id)->first();
 
         if ($transaction) {
-            $url = 'https://' . getSetting('MPESA_LNMO_ENVIRONMENT') . '.safaricom.co.ke/mpesa/stkpushquery/v1/query';
+            $url = 'https://' . $this->lnmoEnvironment . '.safaricom.co.ke/mpesa/stkpushquery/v1/query';
 
             $data = [
-                'BusinessShortCode' => getSetting('MPESA_LNMO_SHORT_CODE'),
-                'Password' => base64_encode(getSetting('MPESA_LNMO_SHORT_CODE') . getSetting('MPESA_LNMO_PASS_KEY') . $this->timestamp),
+                'BusinessShortCode' => $this->lnmoShortCode,
+                'Password' => base64_encode($this->lnmoShortCode . $this->lnmoPassKey . $this->timestamp),
                 'Timestamp' => $this->timestamp,
                 'CheckoutRequestID' => $transaction_id
             ];
