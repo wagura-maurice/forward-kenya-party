@@ -14,9 +14,9 @@ class WahaService
 
     public function __construct()
     {
-        $this->apiUrl = getSetting('WAHA_API_URL') ?? 'http://84.247.143.79:3000';
-        $this->apiKey = getSetting('WAHA_API_KEY') ?? '782338157f924709910c1fbc2635faff';
-        $this->session = getSetting('WAHA_SESSION') ?? 'default';
+        $this->apiUrl = config('services.waha.api_url', getSetting('WAHA_API_URL'));
+        $this->apiKey = config('services.waha.api_key', getSetting('WAHA_API_KEY'));
+        $this->session = config('services.waha.session', getSetting('WAHA_SESSION'));
     }
 
     /**
@@ -379,8 +379,8 @@ class WahaService
             . "• Support the party's objectives\n"
             . "• Abide by the party constitution\n\n"
             . "*Reply With:*\n"
-            . "🔹 *confirm* to complete registration\n"
-            . "🔹 *cancel* to start over";
+            . "🔹 *1* to complete registration\n"
+            . "🔹 *2* to start over";
 
         return $this->sendText($chatId, $message);
     }
