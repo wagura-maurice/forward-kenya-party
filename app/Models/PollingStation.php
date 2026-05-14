@@ -66,7 +66,55 @@ class PollingStation extends Model
     protected $casts = [
         'is_active' => 'boolean',
         'voter_capacity' => 'integer',
+        'last_verified_at' => 'datetime',
+        '_status' => 'integer',
     ];
+
+    protected function getRequestClass(): string
+    {
+        return \App\Http\Requests\API\PollingStationRequest::class;
+    }
+
+    protected function getResourceClass(): string
+    {
+        return \App\Http\Resources\API\PollingStationResource::class;
+    }
+
+    public static function createRules()
+    {
+        return [
+            'uuid' => ['nullable', 'string', Rule::unique('polling_stations', 'uuid')],
+            'type_id' => 'required|exists:polling_station_types,id',
+            'category_id' => 'required|exists:polling_station_categories,id',
+            'center_id' => 'required|exists:polling_centers,id',
+            'name' => 'required|string',
+            'code' => ['nullable', 'string', Rule::unique('polling_stations', 'code')],
+            'voter_capacity' => 'nullable|integer|min:0',
+            'is_active' => 'boolean',
+            'notes' => 'nullable|string',
+            '_status' => 'integer|in:0,1,2,3',
+            'last_verified_at' => 'nullable|date',
+            'verified_by' => 'nullable|exists:users,id'
+        ];
+    }
+
+    public static function updateRules(int $id)
+    {
+        return [
+            'uuid' => ['nullable', 'string', Rule::unique('polling_stations', 'uuid')->ignore($id)],
+            'type_id' => 'nullable|exists:polling_station_types,id',
+            'category_id' => 'nullable|exists:polling_station_categories,id',
+            'center_id' => 'nullable|exists:polling_centers,id',
+            'name' => 'nullable|string',
+            'code' => ['nullable', 'string', Rule::unique('polling_stations', 'code')->ignore($id)],
+            'voter_capacity' => 'nullable|integer|min:0',
+            'is_active' => 'boolean',
+            'notes' => 'nullable|string',
+            '_status' => 'nullable|integer|in:0,1,2,3',
+            'last_verified_at' => 'nullable|date',
+            'verified_by' => 'nullable|exists:users,id'
+        ];
+    }
 
     /**
      * Get the polling center that owns the polling station.

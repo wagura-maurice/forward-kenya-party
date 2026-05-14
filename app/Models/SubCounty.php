@@ -23,6 +23,7 @@ class SubCounty extends Model
         'country_id',
         'county_id',
         'name',
+        'code',
         'slug',
         'description',
         'configuration'
@@ -46,6 +47,7 @@ class SubCounty extends Model
             'county_id' => 'required|integer|exists:counties,id',
             'region_id' => 'required|integer|exists:regions,id',
             'name' => 'required|string',
+            'code' => ['nullable', 'string', Rule::unique('sub_counties', 'code')],
             'slug' => ['nullable', 'string', Rule::unique('sub_counties', 'slug')],
             'description' => 'nullable|string',
             'configuration' => 'nullable|json'
@@ -60,6 +62,7 @@ class SubCounty extends Model
             'county_id' => 'nullable|integer|exists:counties,id',
             'region_id' => 'nullable|integer|exists:regions,id',
             'name' => 'nullable|string',
+            'code' => ['nullable', 'string', Rule::unique('sub_counties', 'code')->ignore($id)],
             'slug' => ['nullable', 'string', Rule::unique('sub_counties', 'slug')->ignore($id)],
             'description' => 'nullable|string',
             'configuration' => 'nullable|json'

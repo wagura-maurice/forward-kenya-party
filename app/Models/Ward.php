@@ -26,6 +26,7 @@ class Ward extends Model
         'sub_county_id',
         'constituency_id',
         'name',
+        'code',
         'slug',
         'description',
         'configuration'
@@ -51,6 +52,7 @@ class Ward extends Model
             'sub_county_id' => 'nullable|integer|exists:sub_counties,id',
             'constituency_id' => 'required|integer|exists:constituencies,id',
             'name' => 'required|string',
+            'code' => ['nullable', 'string', Rule::unique('wards', 'code')],
             'slug' => ['nullable', 'string', Rule::unique('wards', 'slug')],
             'description' => 'nullable|string',
             'configuration' => 'nullable|json'
@@ -67,6 +69,7 @@ class Ward extends Model
             'sub_county_id' => 'nullable|integer|exists:sub_counties,id',
             'constituency_id' => 'nullable|integer|exists:constituencies,id',
             'name' => 'nullable|string',
+            'code' => ['nullable', 'string', Rule::unique('wards', 'code')->ignore($id)],
             'slug' => ['nullable', 'string', Rule::unique('wards', 'slug')->ignore($id)],
             'description' => 'nullable|string',
             'configuration' => 'nullable|json'

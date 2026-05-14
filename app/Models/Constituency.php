@@ -25,6 +25,7 @@ class Constituency extends Model
         'county_id',
         'sub_county_id',
         'name',
+        'code',
         'slug',
         'description',
         'configuration'
@@ -49,6 +50,7 @@ class Constituency extends Model
             'county_id' => 'required|integer|exists:counties,id',
             'sub_county_id' => 'nullable|integer|exists:sub_counties,id',
             'name' => 'required|string',
+            'code' => ['nullable', 'string', Rule::unique('constituencies', 'code')],
             'slug' => ['nullable', 'string', Rule::unique('constituencies', 'slug')],
             'description' => 'nullable|string',
             'configuration' => 'nullable|json'
@@ -64,6 +66,7 @@ class Constituency extends Model
             'county_id' => 'nullable|integer|exists:counties,id',
             'sub_county_id' => 'nullable|integer|exists:sub_counties,id',
             'name' => 'nullable|string',
+            'code' => ['nullable', 'string', Rule::unique('constituencies', 'code')->ignore($id)],
             'slug' => ['nullable', 'string', Rule::unique('constituencies', 'slug')->ignore($id)],
             'description' => 'nullable|string',
             'configuration' => 'nullable|json'

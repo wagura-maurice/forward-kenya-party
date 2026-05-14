@@ -28,6 +28,7 @@ class Village extends Model
         'ward_id',
         'location_id',
         'name',
+        'code',
         'slug',
         'description',
         'configuration'
@@ -55,6 +56,7 @@ class Village extends Model
             'ward_id' => 'required|integer|exists:wards,id',
             'location_id' => 'required|integer|exists:locations,id',
             'name' => 'required|string',
+            'code' => ['nullable', 'string', Rule::unique('villages', 'code')],
             'slug' => ['nullable', 'string', Rule::unique('villages', 'slug')],
             'description' => 'nullable|string',
             'configuration' => 'nullable|json'
@@ -73,6 +75,7 @@ class Village extends Model
             'ward_id' => 'nullable|integer|exists:wards,id',
             'location_id' => 'nullable|integer|exists:locations,id',
             'name' => 'nullable|string',
+            'code' => ['nullable', 'string', Rule::unique('villages', 'code')->ignore($id)],
             'slug' => ['nullable', 'string', Rule::unique('villages', 'slug')->ignore($id)],
             'description' => 'nullable|string',
             'configuration' => 'nullable|json'

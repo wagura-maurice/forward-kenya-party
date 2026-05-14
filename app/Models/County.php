@@ -23,6 +23,7 @@ class County extends Model
         'country_id',
         'region_id',
         'name',
+        'code',
         'slug',
         'description',
         'configuration'
@@ -45,6 +46,7 @@ class County extends Model
             'country_id' => 'required|exists:countries,id',
             'region_id' => 'required|exists:regions,id',
             'name' => 'required|string',
+            'code' => ['nullable', 'string', Rule::unique('counties', 'code')],
             'slug' => ['nullable', 'string', Rule::unique('counties', 'slug')],
             'description' => 'nullable|string',
             'configuration' => 'nullable|json'
@@ -58,6 +60,7 @@ class County extends Model
             'country_id' => 'nullable|exists:countries,id',
             'region_id' => 'nullable|exists:regions,id',
             'name' => 'nullable|string',
+            'code' => ['nullable', 'string', Rule::unique('counties', 'code')->ignore($id)],
             'slug' => ['nullable', 'string', Rule::unique('counties', 'slug')->ignore($id)],
             'description' => 'nullable|string',
             'configuration' => 'nullable|json'

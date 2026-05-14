@@ -27,6 +27,7 @@ class Location extends Model
         'constituency_id',
         'ward_id',
         'name',
+        'code',
         'slug',
         'description',
         'configuration'
@@ -45,7 +46,7 @@ class Location extends Model
     public static function createRules()
     {
         return [
-            'uuid' => ['nullable', 'string', Rule::unique('wards', 'uuid')],
+            'uuid' => ['nullable', 'string', Rule::unique('locations', 'uuid')],
             'country_id' => 'required|exists:countries,id',
             'region_id' => 'required|integer|exists:regions,id',
             'county_id' => 'required|integer|exists:counties,id',
@@ -53,7 +54,8 @@ class Location extends Model
             'constituency_id' => 'required|integer|exists:constituencies,id',
             'ward_id' => 'required|integer|exists:wards,id',
             'name' => 'required|string',
-            'slug' => ['nullable', 'string', Rule::unique('wards', 'slug')],
+            'code' => ['nullable', 'string', Rule::unique('locations', 'code')],
+            'slug' => ['nullable', 'string', Rule::unique('locations', 'slug')],
             'description' => 'nullable|string',
             'configuration' => 'nullable|json'
         ];
@@ -62,7 +64,7 @@ class Location extends Model
     public static function updateRules(int $id)
     {
         return [
-            'uuid' => ['nullable', 'string', Rule::unique('wards', 'uuid')->ignore($id)],
+            'uuid' => ['nullable', 'string', Rule::unique('locations', 'uuid')->ignore($id)],
             'country_id' => 'nullable|exists:countries,id',
             'region_id' => 'nullable|integer|exists:regions,id',
             'county_id' => 'nullable|integer|exists:counties,id',
@@ -70,7 +72,8 @@ class Location extends Model
             'constituency_id' => 'nullable|integer|exists:constituencies,id',
             'ward_id' => 'nullable|integer|exists:wards,id',
             'name' => 'nullable|string',
-            'slug' => ['nullable', 'string', Rule::unique('wards', 'slug')->ignore($id)],
+            'code' => ['nullable', 'string', Rule::unique('locations', 'code')->ignore($id)],
+            'slug' => ['nullable', 'string', Rule::unique('locations', 'slug')->ignore($id)],
             'description' => 'nullable|string',
             'configuration' => 'nullable|json'
         ];

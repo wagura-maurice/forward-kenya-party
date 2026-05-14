@@ -68,7 +68,59 @@ class PollingStream extends Model
         'is_active' => 'boolean',
         'voter_capacity' => 'integer',
         'registered_voters' => 'integer',
+        'last_verified_at' => 'datetime',
+        '_status' => 'integer',
     ];
+
+    protected function getRequestClass(): string
+    {
+        return \App\Http\Requests\API\PollingStreamRequest::class;
+    }
+
+    protected function getResourceClass(): string
+    {
+        return \App\Http\Resources\API\PollingStreamResource::class;
+    }
+
+    public static function createRules()
+    {
+        return [
+            'uuid' => ['nullable', 'string', Rule::unique('polling_streams', 'uuid')],
+            'type_id' => 'required|exists:polling_station_types,id',
+            'category_id' => 'required|exists:polling_station_categories,id',
+            'center_id' => 'required|exists:polling_centers,id',
+            'station_id' => 'required|exists:polling_stations,id',
+            'name' => 'required|string',
+            'code' => ['nullable', 'string', Rule::unique('polling_streams', 'code')],
+            'voter_capacity' => 'nullable|integer|min:0',
+            'registered_voters' => 'integer|min:0',
+            'is_active' => 'boolean',
+            'notes' => 'nullable|string',
+            '_status' => 'integer|in:0,1,2,3',
+            'last_verified_at' => 'nullable|date',
+            'verified_by' => 'nullable|exists:users,id'
+        ];
+    }
+
+    public static function updateRules(int $id)
+    {
+        return [
+            'uuid' => ['nullable', 'string', Rule::unique('polling_streams', 'uuid')->ignore($id)],
+            'type_id' => 'nullable|exists:polling_station_types,id',
+            'category_id' => 'nullable|exists:polling_station_categories,id',
+            'center_id' => 'nullable|exists:polling_centers,id',
+            'station_id' => 'nullable|exists:polling_stations,id',
+            'name' => 'nullable|string',
+            'code' => ['nullable', 'string', Rule::unique('polling_streams', 'code')->ignore($id)],
+            'voter_capacity' => 'nullable|integer|min:0',
+            'registered_voters' => 'nullable|integer|min:0',
+            'is_active' => 'boolean',
+            'notes' => 'nullable|string',
+            '_status' => 'nullable|integer|in:0,1,2,3',
+            'last_verified_at' => 'nullable|date',
+            'verified_by' => 'nullable|exists:users,id'
+        ];
+    }
 
     /**
      * Get the polling center that owns the stream.
