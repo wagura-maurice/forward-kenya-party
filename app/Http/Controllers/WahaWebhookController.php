@@ -909,14 +909,14 @@ class WahaWebhookController extends Controller
      */
     private function processConfirmation(WhatsappConversation $conversation, string $message)
     {
-        $message = strtolower($message);
+        $message = trim($message);
 
-        if ($message === 'confirm') {
+        if ($message === '1') {
             $this->completeRegistration($conversation);
-        } elseif ($message === 'cancel') {
+        } elseif ($message === '2') {
             $this->cancelRegistration($conversation);
         } else {
-            $errorMessage = "*❌ Invalid Input*\n\nPlease reply with \"confirm\" or \"cancel\"";
+            $errorMessage = "*❌ Invalid Input*\n\nPlease reply with \"1\" to confirm or \"2\" to cancel";
             $this->queueWhatsAppMessage(
                 $conversation->chat_id,
                 $conversation->phone_number,
