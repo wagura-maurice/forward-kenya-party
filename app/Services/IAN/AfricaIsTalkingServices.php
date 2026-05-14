@@ -9,18 +9,33 @@ use Illuminate\Support\Facades\Http;
 
 class AfricaIsTalkingServices
 {
+    private string $username;
+    private string $apiKey;
+    private string $senderId;
+    private string $messagingEndpoint;
+    private string $userEndpoint;
+
+    public function __construct()
+    {
+        $this->username = config('services.africas_talking.username', getSetting('AFRICAS_TALKING_USERNAME'));
+        $this->apiKey = config('services.africas_talking.api_key', getSetting('AFRICAS_TALKING_API_KEY'));
+        $this->senderId = config('services.africas_talking.sender_id', getSetting('AFRICAS_TALKING_SENDER_ID'));
+        $this->messagingEndpoint = config('services.africas_talking.messaging_endpoint', getSetting('AFRICAS_TALKING_MESSAGING_ENDPOINT'));
+        $this->userEndpoint = config('services.africas_talking.user_endpoint', getSetting('AFRICAS_TALKING_USER_ENDPOINT'));
+    }
+
     public function send(string $recipient, string $content): array|null
     {
         // Initialize Africa's Talking service
         $response = Http::withHeaders([
             'Accept' => 'application/json',
             'Content-Type' => 'application/x-www-form-urlencoded',
-            'apiKey' => getSetting('AFRICAS_TALKING_API_KEY'),
-        ])->asForm()->post(getSetting('AFRICAS_TALKING_MESSAGING_ENDPOINT'), array_filter([
-            'username' => getSetting('AFRICAS_TALKING_USERNAME'),
+            'apiKey' => $this->apiKey,
+        ])->asForm()->post($this->messagingEndpoint, array_filter([
+            'username' => $this->username,
             'to' => $recipient,
             'message' => $content,
-            'from' => getSetting('AFRICAS_TALKING_SENDER_ID') ?? NULL,
+            'from' => $this->senderId ?? NULL,
         ]));
 
         // Validate if the response was successful
@@ -59,9 +74,9 @@ class AfricaIsTalkingServices
         $response = Http::withHeaders([
             'Accept' => 'application/json',
             'Content-Type' => 'application/x-www-form-urlencoded',
-            'apiKey' => getSetting('AFRICAS_TALKING_API_KEY'),
-        ])->get(getSetting('AFRICAS_TALKING_USER_ENDPOINT'), [
-            'username' => getSetting('AFRICAS_TALKING_USERNAME'),
+            'apiKey' => $this->apiKey,
+        ])->get($this->userEndpoint, [
+            'username' => $this->username,
         ]);
 
         if ($response->successful()) {
