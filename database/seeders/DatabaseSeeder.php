@@ -32,15 +32,13 @@ class DatabaseSeeder extends Seeder
         $this->call(RolesTableSeeder::class);
         $this->call(AbilitiesTableSeeder::class);
         
-        // Currency system - must run before countries that reference currency_types
+        // Currency system
         $this->call(CurrencyTypesTableSeeder::class);
         $this->call(CurrencyCategoriesTableSeeder::class);
         $this->call(CurrenciesTableSeeder::class);
         $this->call(ExchangeRatesTableSeeder::class);
         
-        // Geographic hierarchy (must come after currencies)
-        $this->call(CountriesTableSeeder::class);
-        $this->call(RegionsTableSeeder::class);
+        // Geographic hierarchy (Kenya-specific)
         $this->call(CountiesTableSeeder::class);
         $this->call(SubCountiesTableSeeder::class);
         $this->call(ConstituenciesTableSeeder::class);
