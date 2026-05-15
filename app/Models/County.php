@@ -20,8 +20,6 @@ class County extends Model
      */
     protected $fillable = [
         'uuid',
-        'country_id',
-        'region_id',
         'name',
         'code',
         'slug',
@@ -43,8 +41,6 @@ class County extends Model
     {
         return [
             'uuid' => ['nullable', 'string', Rule::unique('counties', 'uuid')],
-            'country_id' => 'required|exists:countries,id',
-            'region_id' => 'required|exists:regions,id',
             'name' => 'required|string',
             'code' => ['nullable', 'string', Rule::unique('counties', 'code')],
             'slug' => ['nullable', 'string', Rule::unique('counties', 'slug')],
@@ -57,24 +53,12 @@ class County extends Model
     {
         return [
             'uuid' => ['nullable', 'string', Rule::unique('counties', 'uuid')->ignore($id)],
-            'country_id' => 'nullable|exists:countries,id',
-            'region_id' => 'nullable|exists:regions,id',
             'name' => 'nullable|string',
             'code' => ['nullable', 'string', Rule::unique('counties', 'code')->ignore($id)],
             'slug' => ['nullable', 'string', Rule::unique('counties', 'slug')->ignore($id)],
             'description' => 'nullable|string',
             'configuration' => 'nullable|json'
         ];
-    }
-
-    public function country(): BelongsTo
-    {
-        return $this->belongsTo(Country::class, 'country_id', 'id');
-    }
-
-    public function region(): BelongsTo
-    {
-        return $this->belongsTo(Region::class, 'region_id', 'id');
     }
 
     public function sub_counties()

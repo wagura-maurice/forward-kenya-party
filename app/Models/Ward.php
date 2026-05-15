@@ -20,8 +20,6 @@ class Ward extends Model
      */
     protected $fillable = [
         'uuid',
-        'country_id',
-        'region_id',
         'county_id',
         'sub_county_id',
         'constituency_id',
@@ -46,8 +44,6 @@ class Ward extends Model
     {
         return [
             'uuid' => ['nullable', 'string', Rule::unique('wards', 'uuid')],
-            'country_id' => 'required|exists:countries,id',
-            'region_id' => 'required|integer|exists:regions,id',
             'county_id' => 'required|integer|exists:counties,id',
             'sub_county_id' => 'nullable|integer|exists:sub_counties,id',
             'constituency_id' => 'required|integer|exists:constituencies,id',
@@ -63,8 +59,6 @@ class Ward extends Model
     {
         return [
             'uuid' => ['nullable', 'string', Rule::unique('wards', 'uuid')->ignore($id)],
-            'country_id' => 'nullable|exists:countries,id',
-            'region_id' => 'nullable|integer|exists:regions,id',
             'county_id' => 'nullable|integer|exists:counties,id',
             'sub_county_id' => 'nullable|integer|exists:sub_counties,id',
             'constituency_id' => 'nullable|integer|exists:constituencies,id',
@@ -74,16 +68,6 @@ class Ward extends Model
             'description' => 'nullable|string',
             'configuration' => 'nullable|json'
         ];
-    }
-
-    public function country(): BelongsTo
-    {
-        return $this->belongsTo(Country::class, 'country_id', 'id');
-    }
-
-    public function region(): BelongsTo
-    {
-        return $this->belongsTo(Region::class, 'region_id', 'id');
     }
 
     public function county(): BelongsTo

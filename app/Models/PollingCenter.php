@@ -52,8 +52,6 @@ class PollingCenter extends Model
         'uuid',
         'type_id',
         'category_id',
-        'country_id',
-        'region_id',
         'county_id',
         'sub_county_id',
         'constituency_id',
@@ -149,8 +147,6 @@ class PollingCenter extends Model
             'uuid' => ['nullable', 'string', Rule::unique('polling_centers', 'uuid')],
             'type_id' => 'required|exists:polling_center_types,id',
             'category_id' => 'required|exists:polling_center_categories,id',
-            'country_id' => 'required|exists:countries,id',
-            'region_id' => 'required|integer|exists:regions,id',
             'county_id' => 'required|integer|exists:counties,id',
             'sub_county_id' => 'nullable|integer|exists:sub_counties,id',
             'constituency_id' => 'required|integer|exists:constituencies,id',
@@ -194,8 +190,6 @@ class PollingCenter extends Model
             'uuid' => ['nullable', 'string', Rule::unique('polling_centers', 'uuid')->ignore($id)],
             'type_id' => 'nullable|exists:polling_center_types,id',
             'category_id' => 'nullable|exists:polling_center_categories,id',
-            'country_id' => 'nullable|exists:countries,id',
-            'region_id' => 'nullable|integer|exists:regions,id',
             'county_id' => 'nullable|integer|exists:counties,id',
             'sub_county_id' => 'nullable|integer|exists:sub_counties,id',
             'constituency_id' => 'nullable|integer|exists:constituencies,id',
@@ -243,19 +237,9 @@ class PollingCenter extends Model
         return $this->belongsTo(PollingCenterCategory::class, 'category_id', 'id');
     }
 
-    public function country(): BelongsTo
-    {
-        return $this->belongsTo(Country::class, 'country_id', 'id');
-    }
-    
     public function verifiedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'verified_by', 'id');
-    }
-
-    public function region(): BelongsTo
-    {
-        return $this->belongsTo(Region::class, 'region_id', 'id');
     }
 
     public function county(): BelongsTo
