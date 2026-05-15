@@ -21,7 +21,6 @@ use App\Http\Controllers\API\TicketController;
 use App\Http\Controllers\API\WalletController;
 use App\Http\Controllers\API\AbilityController;
 use App\Http\Controllers\API\MemberController;
-use App\Http\Controllers\API\CountryController;
 use App\Http\Controllers\API\InvoiceController;
 use App\Http\Controllers\API\JournalController;
 use App\Http\Controllers\API\ManagerController;
@@ -31,11 +30,8 @@ use App\Http\Controllers\API\DocumentController;
 use App\Http\Controllers\API\FeedbackController;
 use App\Http\Controllers\API\MediaTypeController;
 use App\Http\Controllers\API\SubCountyController;
-use App\Http\Controllers\REST\LocationController;
-use App\Http\Controllers\REST\ReligionController;
 use App\Http\Controllers\API\DepartmentController;
 use App\Http\Controllers\API\TicketTypeController;
-use App\Http\Controllers\REST\EthnicityController;
 use App\Http\Controllers\AfricaIsTalkingController;
 use App\Http\Controllers\API\InvoiceTypeController;
 use App\Http\Controllers\API\ReceiptTypeController;
@@ -130,9 +126,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
     Route::apiResource('/ability', AbilityController::class, ['as' => 'ability']);
     // user profile management
     Route::apiResource('/profile', ProfileController::class, ['as' => 'profile']);
-    // user country management
-    Route::apiResource('/country', CountryController::class, ['as' => 'country']);
-    // county management
+    // user county management
     Route::apiResource('/county', CountyController::class, ['as' => 'county']);
     // sub_county management
     Route::apiResource('/sub/county', SubCountyController::class, ['as' => 'sub.county']);
