@@ -1,5 +1,5 @@
 <?php
-
+// routes/api.php
 use Illuminate\Http\Request;
 use App\Http\Controllers\WahaWebhookController;
 use Illuminate\Support\Facades\Route;
