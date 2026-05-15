@@ -25,18 +25,6 @@ return new class extends Migration
                   ->onDelete('cascade')
                   ->onUpdate('cascade')
                   ->comment('Category of polling center');
-            $table->foreignId('country_id')
-                  ->nullable()
-                  ->constrained('countries')
-                  ->onDelete('cascade')
-                  ->onUpdate('cascade')
-                  ->comment('Foreign key referencing the countries table with cascade delete and update');
-            $table->foreignId('region_id')
-                  ->nullable()
-                  ->constrained('regions')
-                  ->onDelete('cascade')
-                  ->onUpdate('cascade')
-                  ->comment('Foreign key referencing the regions table with cascade delete and update');
             $table->foreignId('county_id')
                   ->nullable()
                   ->constrained('counties')

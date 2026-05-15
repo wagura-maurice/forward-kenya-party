@@ -14,18 +14,6 @@ return new class extends Migration
         Schema::create('counties', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique()->comment('Globally unique identifier for the county');
-            $table->foreignId('country_id')
-                  ->nullable()
-                  ->constrained('countries')
-                  ->onDelete('cascade')
-                  ->onUpdate('cascade')
-                  ->comment('Foreign key referencing the countries table with cascade delete and update');
-            $table->foreignId('region_id')
-                  ->nullable()
-                  ->constrained('regions')
-                  ->onDelete('cascade')
-                  ->onUpdate('cascade')
-                  ->comment('Foreign key referencing the regions table with cascade delete and update');
             $table->string('name')->comment('Name of the county');
             $table->string('code')->nullable()->unique()->comment('Unique code for the county');
             $table->string('slug')->nullable()->unique()->comment('SEO-friendly URL slug for the county');

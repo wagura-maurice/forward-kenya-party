@@ -14,18 +14,6 @@ return new class extends Migration
         Schema::create('constituencies', function (Blueprint $table) {
             $table->id();
             $table->uuid('uuid')->unique()->comment('Globally unique identifier for the constituency');
-            $table->foreignId('country_id')
-                  ->nullable()
-                  ->constrained('countries')
-                  ->onDelete('cascade')
-                  ->onUpdate('cascade')
-                  ->comment('Foreign key referencing the countries table with cascade delete and update');
-            $table->foreignId('region_id')
-                  ->nullable()
-                  ->constrained('regions')
-                  ->onDelete('cascade')
-                  ->onUpdate('cascade')
-                  ->comment('Foreign key referencing the regions table with cascade delete and update');
             $table->foreignId('county_id')
                   ->nullable()
                   ->constrained('counties')
