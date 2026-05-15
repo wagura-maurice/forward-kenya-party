@@ -346,7 +346,6 @@ class AppServiceProvider extends ServiceProvider
         CommunicationCategory::observe(CommunicationCategoryObserver::class);
         CommunicationType::observe(CommunicationTypeObserver::class);
         Constituency::observe(ConstituencyObserver::class);
-        Country::observe(CountryObserver::class);
         County::observe(CountyObserver::class);
         Currency::observe(CurrencyObserver::class);
         CurrencyCategory::observe(CurrencyCategoryObserver::class);
@@ -449,7 +448,6 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(CommunicationCategory::class, CommunicationCategoryPolicy::class);
         Gate::policy(CommunicationType::class, CommunicationTypePolicy::class);
         Gate::policy(Constituency::class, ConstituencyPolicy::class);
-        Gate::policy(Country::class, CountryPolicy::class);
         Gate::policy(County::class, CountyPolicy::class);
         Gate::policy(Currency::class, CurrencyPolicy::class);
         Gate::policy(CurrencyCategory::class, CurrencyCategoryPolicy::class);
