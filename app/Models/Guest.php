@@ -44,8 +44,6 @@ class Guest extends Model
     protected $fillable = [
         'uuid',
         'user_id',
-        'country_id',
-        'region_id',
         'county_id',
         'sub_county_id',
         'constituency_id',
@@ -129,8 +127,6 @@ class Guest extends Model
         return [
             'uuid' => 'required|uuid|unique:guests,uuid',
             'user_id' => 'required|exists:users,id',
-            'country_id' => 'nullable|exists:countries,id',
-            'region_id' => 'nullable|exists:regions,id',
             'county_id' => 'nullable|exists:counties,id',
             'sub_county_id' => 'nullable|exists:sub_counties,id',
             'constituency_id' => 'nullable|exists:constituencies,id',
@@ -169,8 +165,6 @@ class Guest extends Model
         return [
             'uuid' => 'nullable|uuid|unique:guests,uuid,' . $guestId,
             'user_id' => 'nullable|exists:users,id',
-            'country_id' => 'nullable|exists:countries,id',
-            'region_id' => 'nullable|exists:regions,id',
             'county_id' => 'nullable|exists:counties,id',
             'sub_county_id' => 'nullable|exists:sub_counties,id',
             'constituency_id' => 'nullable|exists:constituencies,id',
@@ -204,22 +198,6 @@ class Guest extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
-    }
-
-    /**
-     * Get the country of the guest.
-     */
-    public function country()
-    {
-        return $this->belongsTo(Country::class);
-    }
-
-    /**
-     * Get the region of the guest.
-     */
-    public function region()
-    {
-        return $this->belongsTo(Region::class);
     }
 
     /**
