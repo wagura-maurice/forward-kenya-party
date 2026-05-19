@@ -28,8 +28,8 @@ class Seed extends Command
     {
         try {
             // logic for looping database tables though Orange hill's i-seed commands.
-            Artisan::call('iseed settings,roles,abilities,countries,regions,counties,sub_counties,constituencies,wards,locations,villages,polling_stations,banks --force');
-
+            Artisan::call('iseed settings,roles,abilities,counties,sub_counties,constituencies,wards,locations,villages,polling_centers,polling_stations,polling_streams,banks --force');
+            
             // Artisan::call('iseed media_types,media_categories,document_types,document_categories,department_types,department_categories,service_types,service_categories,activity_types,activity_categories,notification_types,notification_categories,currency_types,currency_categories,account_types,account_categories,receipt_types,receipt_categories,invoice_types,invoice_categories,transaction_types,transaction_categories,feedback_types,feedback_categories,ticket_types,ticket_categories,announcement_types,announcement_categories,communication_types,communication_categories --force');
 
             // Artisan::call('iseed departments,services --force');
