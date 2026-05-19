@@ -40,22 +40,22 @@ class DatabaseSeeder extends Seeder
         
         // Geographic hierarchy (Kenya-specific)
         $this->call(CountiesTableSeeder::class);
-        $this->call(SubCountiesTableSeeder::class);
+        // $this->call(SubCountiesTableSeeder::class);
         $this->call(ConstituenciesTableSeeder::class);
         $this->call(WardsTableSeeder::class);
-        $this->call(LocationsTableSeeder::class);
-        $this->call(VillagesTableSeeder::class);
+        // $this->call(LocationsTableSeeder::class);
+        // $this->call(VillagesTableSeeder::class);
         
         // Polling system (user requested to keep these)
         $this->call(PollingCenterTypeSeeder::class);
         $this->call(PollingCenterCategorySeeder::class);
-        $this->call(PollingCenterSeeder::class);
+        // $this->call(PollingCenterSeeder::class);
         $this->call(PollingStationTypeSeeder::class);
         $this->call(PollingStationCategorySeeder::class);
-        $this->call(PollingStationsTableSeeder::class);
+        // $this->call(PollingStationsTableSeeder::class);
         $this->call(PollingStreamTypeSeeder::class);
         $this->call(PollingStreamCategorySeeder::class);
-        $this->call(PollingStreamSeeder::class);
+        // $this->call(PollingStreamSeeder::class);
         
         // Banking system
         $this->call(BankTypesTableSeeder::class);

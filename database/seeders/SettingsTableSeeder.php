@@ -181,7 +181,7 @@ class SettingsTableSeeder extends Seeder
             array (
                 'id' => 17,
                 'item' => 'IPPMS_BASE_URL',
-                'default_value' => 'https://api-ippms-uat.orpp.or.ke',
+                'default_value' => 'https://api-ippms.orpp.or.ke',
                 'current_value' => NULL,
                 'deleted_at' => NULL,
                 'created_at' => '2025-05-15 00:00:00',
