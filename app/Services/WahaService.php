@@ -478,4 +478,49 @@ class WahaService
 
         return $this->sendText($chatId, $message);
     }
+
+    /**
+     * Send message asking for OTP confirmation code
+     */
+    public function askForOTP(string $chatId): array
+    {
+        $message = "*🔐 OTP Verification*\n\n"
+            . "A confirmation code (OTP) has been sent to your phone number via SMS.\n\n"
+            . "Please enter the OTP you received to complete your registration with the Office of the Registrar of Political Parties (ORPP).\n\n"
+            . "*Example:* 123456\n\n"
+            . "*Note:* The OTP is sent by ORPP/IPPMS, not Forward Kenya Party.";
+
+        return $this->sendText($chatId, $message);
+    }
+
+    /**
+     * Send OTP request failed message
+     */
+    public function sendOTPRequestFailedMessage(string $chatId, string $error): array
+    {
+        $message = "*❌ OTP Request Failed*\n\n"
+            . "We encountered an error while requesting your confirmation code:\n\n"
+            . "{$error}\n\n"
+            . "Please try again later or contact our support team:\n"
+            . "📧 Email: forwardkenyaparty@gmail.com\n"
+            . "📞 Phone: +254713447820";
+
+        return $this->sendText($chatId, $message);
+    }
+
+    /**
+     * Send IPPMS registration failed message
+     */
+    public function sendIPPMSRegistrationFailedMessage(string $chatId, string $error): array
+    {
+        $message = "*❌ ORPP Registration Failed*\n\n"
+            . "We encountered an error while registering you with ORPP/IPPMS:\n\n"
+            . "{$error}\n\n"
+            . "Your WhatsApp registration with Forward Kenya Party was successful, but we could not complete the ORPP registration.\n\n"
+            . "Please contact our support team for assistance:\n"
+            . "📧 Email: forwardkenyaparty@gmail.com\n"
+            . "📞 Phone: +254713447820";
+
+        return $this->sendText($chatId, $message);
+    }
 }

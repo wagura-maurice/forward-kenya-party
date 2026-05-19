@@ -2,11 +2,12 @@
 // app/Services/IppmsService.php
 namespace App\Services;
 
+use App\Contracts\IppmsServiceInterface;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 
-class IppmsService
+class IppmsService implements IppmsServiceInterface
 {
     private string $baseUrl;
     private string $username;
@@ -15,9 +16,17 @@ class IppmsService
 
     public function __construct()
     {
-        $this->baseUrl = config('services.ippms.base_url', getSetting('IPPMS_BASE_URL'));
-        $this->username = config('services.ippms.username', getSetting('IPPMS_USERNAME'));
-        $this->password = config('services.ippms.password', getSetting('IPPMS_PASSWORD'));
+        // Use settings for IPPMS credentials (not config/env)
+        $this->baseUrl = getSetting('IPPMS_BASE_URL') ?? config('services.ippms.base_url');
+        $this->username = getSetting('IPPMS_USERNAME') ?? config('services.ippms.username');
+        $this->password = getSetting('IPPMS_PASSWORD') ?? config('services.ippms.password');
+        
+        // Log the values for debugging
+        Log::info('IppmsService constructor values', [
+            'baseUrl' => $this->baseUrl,
+            'username' => $this->username,
+            'password' => $this->password ? '***' : null,
+        ]);
     }
 
     /**
@@ -26,7 +35,7 @@ class IppmsService
     public function login(): array
     {
         try {
-            $response = Http::timeout(30)
+            $response = Http::timeout(60)
                 ->withHeaders([
                     'Content-Type' => 'application/json',
                     'Accept' => 'application/json',
@@ -166,7 +175,7 @@ class IppmsService
         }
 
         try {
-            $response = Http::timeout(30)
+            $response = Http::timeout(60)
                 ->withHeaders([
                     'Content-Type' => 'application/json',
                     'Accept' => 'application/json',
@@ -219,6 +228,13 @@ class IppmsService
             ];
         }
 
+        Log::info('IPPMS confirmation code request data', [
+            'documentNo' => $documentNo,
+            'documentType' => $documentType,
+            'phoneNumber' => phoneNumberPrefix($phoneNumber),
+            'firstName' => $firstName,
+        ]);
+
         try {
             $response = Http::timeout(30)
                 ->withHeaders([
@@ -229,7 +245,7 @@ class IppmsService
                 ->post("{$this->baseUrl}/api/Membership/ConfirmationCode", [
                     'documentNo' => $documentNo,
                     'documentType' => $documentType,
-                    'phoneNumber' => $phoneNumber,
+                    'phoneNumber' => phoneNumberPrefix($phoneNumber),
                     'firstName' => $firstName,
                 ]);
 
@@ -267,6 +283,8 @@ class IppmsService
      */
     public function registerMember(array $data): array
     {
+        Log::info('IPPMS membership detail data', $data);
+
         $token = $this->getBearerToken();
         if (!$token) {
             return [
@@ -276,7 +294,7 @@ class IppmsService
         }
 
         try {
-            $response = Http::timeout(30)
+            $response = Http::timeout(60)
                 ->withHeaders([
                     'Content-Type' => 'application/json',
                     'Accept' => 'application/json',
@@ -330,7 +348,7 @@ class IppmsService
         }
 
         try {
-            $response = Http::timeout(30)
+            $response = Http::timeout(60)
                 ->withHeaders([
                     'Accept' => 'application/json',
                     'Authorization' => 'Bearer ' . $token,
@@ -629,7 +647,7 @@ class IppmsService
         }
 
         try {
-            $response = Http::timeout(30)
+            $response = Http::timeout(60)
                 ->withHeaders([
                     'Authorization' => 'Bearer ' . $token,
                 ])
@@ -656,6 +674,150 @@ class IppmsService
         } catch (\Exception $e) {
             Log::error('Exception during IPPMS party delete', [
                 'id' => $id,
+                'exception' => $e->getMessage()
+            ]);
+            return [
+                'success' => false,
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Get ethnicities from IPPMS reference data
+     */
+    public function getEthnicities(): array
+    {
+        $token = $this->getBearerToken();
+        if (!$token) {
+            return [
+                'success' => false,
+                'error' => 'Failed to authenticate'
+            ];
+        }
+
+        try {
+            $response = Http::timeout(30)
+                ->withHeaders([
+                    'Accept' => 'application/json',
+                    'Authorization' => 'Bearer ' . $token,
+                ])
+                ->get("{$this->baseUrl}/api/Membership/Ethnicities");
+
+            if ($response->successful()) {
+                return [
+                    'success' => true,
+                    'data' => $response->json()
+                ];
+            } else {
+                Log::error('IPPMS ethnicities fetch failed', [
+                    'status' => $response->status(),
+                    'response' => $response->json()
+                ]);
+                return [
+                    'success' => false,
+                    'error' => 'HTTP Error: ' . $response->status(),
+                    'response' => $response->json()
+                ];
+            }
+        } catch (\Exception $e) {
+            Log::error('Exception during IPPMS ethnicities fetch', [
+                'exception' => $e->getMessage()
+            ]);
+            return [
+                'success' => false,
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Get religions from IPPMS reference data
+     */
+    public function getReligions(): array
+    {
+        $token = $this->getBearerToken();
+        if (!$token) {
+            return [
+                'success' => false,
+                'error' => 'Failed to authenticate'
+            ];
+        }
+
+        try {
+            $response = Http::timeout(30)
+                ->withHeaders([
+                    'Accept' => 'application/json',
+                    'Authorization' => 'Bearer ' . $token,
+                ])
+                ->get("{$this->baseUrl}/api/Membership/Religions");
+
+            if ($response->successful()) {
+                return [
+                    'success' => true,
+                    'data' => $response->json()
+                ];
+            } else {
+                Log::error('IPPMS religions fetch failed', [
+                    'status' => $response->status(),
+                    'response' => $response->json()
+                ]);
+                return [
+                    'success' => false,
+                    'error' => 'HTTP Error: ' . $response->status(),
+                    'response' => $response->json()
+                ];
+            }
+        } catch (\Exception $e) {
+            Log::error('Exception during IPPMS religions fetch', [
+                'exception' => $e->getMessage()
+            ]);
+            return [
+                'success' => false,
+                'error' => $e->getMessage()
+            ];
+        }
+    }
+
+    /**
+     * Get special interest groups from IPPMS reference data
+     */
+    public function getSpecialInterestGroups(): array
+    {
+        $token = $this->getBearerToken();
+        if (!$token) {
+            return [
+                'success' => false,
+                'error' => 'Failed to authenticate'
+            ];
+        }
+
+        try {
+            $response = Http::timeout(30)
+                ->withHeaders([
+                    'Accept' => 'application/json',
+                    'Authorization' => 'Bearer ' . $token,
+                ])
+                ->get("{$this->baseUrl}/api/Membership/SpecialInterestGroups");
+
+            if ($response->successful()) {
+                return [
+                    'success' => true,
+                    'data' => $response->json()
+                ];
+            } else {
+                Log::error('IPPMS special interest groups fetch failed', [
+                    'status' => $response->status(),
+                    'response' => $response->json()
+                ]);
+                return [
+                    'success' => false,
+                    'error' => 'HTTP Error: ' . $response->status(),
+                    'response' => $response->json()
+                ];
+            }
+        } catch (\Exception $e) {
+            Log::error('Exception during IPPMS special interest groups fetch', [
                 'exception' => $e->getMessage()
             ]);
             return [
