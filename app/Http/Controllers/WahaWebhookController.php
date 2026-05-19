@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Services\WahaService;
+use App\Services\IppmsService;
 use App\Models\WhatsappConversation;
 use App\Models\WhatsappMessageQueue;
 use App\Models\County;
@@ -20,10 +21,12 @@ use Illuminate\Support\Str;
 class WahaWebhookController extends Controller
 {
     private WahaService $wahaService;
+    private IppmsService $ippmsService;
 
-    public function __construct(WahaService $wahaService)
+    public function __construct(WahaService $wahaService, IppmsService $ippmsService)
     {
         $this->wahaService = $wahaService;
+        $this->ippmsService = $ippmsService;
     }
 
     /**
@@ -323,6 +326,10 @@ class WahaWebhookController extends Controller
 
             case 'confirmation':
                 $this->processConfirmation($conversation, $message);
+                break;
+
+            case 'otp_entry':
+                $this->processOTPEntry($conversation, $message);
                 break;
 
             default:
@@ -912,7 +919,7 @@ class WahaWebhookController extends Controller
         $message = trim($message);
 
         if ($message === '1') {
-            $this->completeRegistration($conversation);
+            $this->requestOTPAndProceed($conversation);
         } elseif ($message === '2') {
             $this->cancelRegistration($conversation);
         } else {
@@ -927,15 +934,266 @@ class WahaWebhookController extends Controller
     }
 
     /**
+     * Request OTP from IPPMS and proceed to OTP entry step
+     */
+    private function requestOTPAndProceed(WhatsappConversation $conversation)
+    {
+        try {
+            $conversationData = $conversation->conversation_data;
+
+            // Extract required fields for IPPMS confirmation code request
+            $documentNo = $conversationData['identification_number'] ?? null;
+            $phoneNumber = $conversationData['telephone'] ?? null;
+            $firstName = explode(' ', $conversationData['other_name'] ?? '')[0] ?? '';
+
+            if (!$documentNo || !$phoneNumber || !$firstName) {
+                throw new \Exception('Missing required fields for OTP request');
+            }
+
+            // Check membership status before requesting OTP
+            Log::info('Checking membership status before OTP request', [
+                'chat_id' => $conversation->chat_id,
+                'documentNo' => $documentNo
+            ]);
+            
+            $membershipStatus = $this->ippmsService->getMembershipStatus($documentNo, 1);
+            
+            Log::info('Membership status check result', [
+                'chat_id' => $conversation->chat_id,
+                'documentNo' => $documentNo,
+                'success' => $membershipStatus['success'] ?? false,
+                'data' => $membershipStatus['data'] ?? null
+            ]);
+            
+            // Handle different IPPMS response structures
+            if ($membershipStatus['success']) {
+                $data = $membershipStatus['data'] ?? [];
+                
+                // Check for statusCode-based response (new IPPMS format)
+                if (isset($data['statusCode'])) {
+                    if ($data['statusCode'] === '0' && ($data['statusDescription'] ?? '') === 'Rejected') {
+                        $error = "Your ID number could not be verified in the ORPP/IPPMS system. This could mean:\n\n• Your ID number is not found in the ORPP database\n• There is a mismatch in your details\n• You may need to update your details with ORPP\n\nPlease visit your nearest ORPP office or use USSD *509# to verify your status before proceeding.";
+                        
+                        Log::warning('IPPMS membership status rejected', [
+                            'chat_id' => $conversation->chat_id,
+                            'documentNo' => $documentNo,
+                            'status_description' => $data['statusDescription'] ?? 'Unknown'
+                        ]);
+                        
+                        $this->wahaService->sendOTPRequestFailedMessage($conversation->chat_id, $error);
+                        return;
+                    }
+                }
+                
+                // Check for isRegistered field (old IPPMS format)
+                if (isset($data['isRegistered'])) {
+                    if ($data['isRegistered']) {
+                        $existingParty = $data['partyName'] ?? 'another party';
+                        $error = "You are already registered with {$existingParty}. Please resign from your current party before joining Forward Kenya Party. Use USSD *509# or visit https://ippms.orpp.or.ke to check your status.";
+                        
+                        Log::warning('User already registered with another party', [
+                            'chat_id' => $conversation->chat_id,
+                            'documentNo' => $documentNo,
+                            'existing_party' => $existingParty
+                        ]);
+                        
+                        $this->wahaService->sendOTPRequestFailedMessage($conversation->chat_id, $error);
+                        return;
+                    }
+                    
+                    Log::info('User is not registered with any party, proceeding with OTP request', [
+                        'chat_id' => $conversation->chat_id,
+                        'documentNo' => $documentNo
+                    ]);
+                } else {
+                    Log::warning('Membership status check returned unexpected data structure, proceeding with OTP request anyway', [
+                        'chat_id' => $conversation->chat_id,
+                        'documentNo' => $documentNo,
+                        'membership_status' => $membershipStatus
+                    ]);
+                }
+            } else {
+                Log::warning('Membership status check failed, proceeding with OTP request anyway', [
+                    'chat_id' => $conversation->chat_id,
+                    'documentNo' => $documentNo,
+                    'membership_status' => $membershipStatus
+                ]);
+            }
+
+            // Request confirmation code from IPPMS (this triggers SMS)
+            $ippmsResponse = $this->ippmsService->getConfirmationCode(
+                $documentNo,
+                1, // document type: 1 = national ID
+                $phoneNumber,
+                $firstName
+            );
+
+            if (!$ippmsResponse['success']) {
+                // Extract detailed error message from IPPMS response
+                $error = $ippmsResponse['error'] ?? 'Failed to request confirmation code';
+                $ippmsResponseData = $ippmsResponse['response'] ?? [];
+                
+                // Check for specific IPPMS error messages - handle nested response structure
+                $errors = null;
+                if (isset($ippmsResponseData['response']['errors'])) {
+                    $errors = $ippmsResponseData['response']['errors'];
+                } elseif (isset($ippmsResponseData['errors'])) {
+                    $errors = $ippmsResponseData['errors'];
+                }
+                
+                if ($errors && is_array($errors) && !empty($errors)) {
+                    $firstError = $errors[0];
+                    $errorMessage = $firstError['message'] ?? $error;
+                    // Remove quotes from error message if present
+                    $errorMessage = str_replace('"', '', $errorMessage);
+                    $errorCode = $firstError['code'] ?? 'Unknown';
+                    $error = "IPPMS Error (Code {$errorCode}): {$errorMessage}";
+                } elseif (isset($ippmsResponseData['response']['message'])) {
+                    $error = $ippmsResponseData['response']['message'];
+                } elseif (isset($ippmsResponseData['message'])) {
+                    $error = $ippmsResponseData['message'];
+                }
+
+                Log::error('IPPMS confirmation code request failed', [
+                    'chat_id' => $conversation->chat_id,
+                    'error' => $error,
+                    'response' => $ippmsResponse
+                ]);
+                $this->wahaService->sendOTPRequestFailedMessage($conversation->chat_id, $error);
+                return;
+            }
+
+            // Update conversation step to OTP entry
+            $conversation->update([
+                'current_step' => 'otp_entry',
+                'conversation_data' => array_merge($conversationData, [
+                    'ippms_confirmation_response' => $ippmsResponse['data'] ?? []
+                ])
+            ]);
+
+            // Ask user to enter OTP
+            $this->wahaService->askForOTP($conversation->chat_id);
+
+            Log::info('OTP requested successfully, waiting for user input', [
+                'chat_id' => $conversation->chat_id,
+                'phone_number' => $phoneNumber
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error requesting OTP', [
+                'chat_id' => $conversation->chat_id,
+                'error' => $e->getMessage(),
+                'data' => $conversation->conversation_data
+            ]);
+
+            $this->wahaService->sendOTPRequestFailedMessage(
+                $conversation->chat_id,
+                $e->getMessage()
+            );
+        }
+    }
+
+    /**
+     * Process OTP entry and complete IPPMS registration
+     */
+    private function processOTPEntry(WhatsappConversation $conversation, string $message)
+    {
+        $otp = trim($message);
+
+        // Validate OTP format (should be numeric, typically 6 digits)
+        if (!preg_match('/^\d{4,8}$/', $otp)) {
+            $errorMessage = "*❌ Invalid OTP*\n\nPlease enter the numeric OTP you received via SMS (4-8 digits).\n\nExample: 123456";
+            $this->queueWhatsAppMessage(
+                $conversation->chat_id,
+                $conversation->phone_number,
+                $errorMessage,
+                ['step' => 'otp_entry', 'action' => 'validation_error', 'error' => 'Invalid OTP format']
+            );
+            return;
+        }
+
+        try {
+            $conversationData = $conversation->conversation_data;
+
+            // Prepare IPPMS registration data
+            $ippmsData = $this->prepareIPPMSRegistrationData($conversationData, $otp);
+
+            // Register member with IPPMS
+            $ippmsResponse = $this->ippmsService->registerMember($ippmsData);
+
+            if (!$ippmsResponse['success']) {
+                $error = $ippmsResponse['error'] ?? 'Failed to register with IPPMS';
+                Log::error('IPPMS member registration failed', [
+                    'chat_id' => $conversation->chat_id,
+                    'error' => $error,
+                    'response' => $ippmsResponse
+                ]);
+                $this->wahaService->sendIPPMSRegistrationFailedMessage($conversation->chat_id, $error);
+                return;
+            }
+
+            // IPPMS registration successful, now complete local registration
+            $this->completeRegistration($conversation, $ippmsResponse['data']);
+
+        } catch (\Exception $e) {
+            Log::error('Error processing OTP entry', [
+                'chat_id' => $conversation->chat_id,
+                'error' => $e->getMessage(),
+                'data' => $conversation->conversation_data
+            ]);
+
+            $this->wahaService->sendIPPMSRegistrationFailedMessage(
+                $conversation->chat_id,
+                $e->getMessage()
+            );
+        }
+    }
+
+    /**
+     * Prepare IPPMS registration data from conversation data
+     */
+    private function prepareIPPMSRegistrationData(array $conversationData, string $otp): array
+    {
+        // Map conversation data to IPPMS expected format
+        return [
+            'membershipNo' => $conversationData['party_membership_number'] ?? '',
+            'surname' => $conversationData['surname'] ?? '',
+            'otherName' => $conversationData['other_name'] ?? '',
+            'identificationNumber' => $conversationData['identification_number'] ?? '',
+            'identificationType' => 'national_identification_number',
+            'dateOfBirth' => $conversationData['date_of_birth'] ?? '',
+            'gender' => $conversationData['gender'] ?? '',
+            'phoneNumber' => $conversationData['telephone'] ?? '',
+            'email' => $conversationData['email'] ?? '',
+            'ethnicityId' => $conversationData['ethnicity_id'] ?? '',
+            'religionId' => $conversationData['religion_id'] ?? '',
+            'specialInterestGroups' => $conversationData['special_interest_groups'] ?? [],
+            'disabilityStatus' => $conversationData['disability_status'] ?? false,
+            'ncpwdNumber' => $conversationData['ncpwd_number'] ?? null,
+            'countyId' => $conversationData['county_id'] ?? '',
+            'constituencyId' => $conversationData['constituency_id'] ?? '',
+            'wardId' => $conversationData['ward_id'] ?? '',
+            'enlistingDate' => $conversationData['enlisting_date'] ?? now()->format('Y-m-d'),
+            'terms' => $conversationData['terms'] ?? true,
+            'confirmationCode' => $otp,
+        ];
+    }
+
+    /**
      * Complete registration by creating user and member
      */
-    private function completeRegistration(WhatsappConversation $conversation)
+    private function completeRegistration(WhatsappConversation $conversation, ?array $ippmsResponseData = null)
     {
         try {
             $conversationData = $conversation->conversation_data;
 
             // Add dummy captcha response for WhatsApp registration
             $conversationData['g-recaptcha-response'] = 'whatsapp_bypass';
+
+            // Store IPPMS response data if available
+            if ($ippmsResponseData) {
+                $conversationData['ippms_registration_data'] = $ippmsResponseData;
+            }
 
             // Create user using Fortify action
             $createNewUser = new CreateNewUser();
@@ -950,9 +1208,10 @@ class WahaWebhookController extends Controller
                 'conversation_data' => []
             ]);
 
-            Log::info('WhatsApp registration completed successfully', [
+            Log::info('WhatsApp and IPPMS registration completed successfully', [
                 'chat_id' => $conversation->chat_id,
-                'user_id' => $user->id
+                'user_id' => $user->id,
+                'ippms_response' => $ippmsResponseData
             ]);
 
         } catch (\Exception $e) {
