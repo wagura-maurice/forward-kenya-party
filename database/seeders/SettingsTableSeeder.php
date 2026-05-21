@@ -161,7 +161,7 @@ class SettingsTableSeeder extends Seeder
             array (
                 'id' => 15,
                 'item' => 'WAHA_API_KEY',
-                'default_value' => '782338157f924709910c1fbc2635faff',
+                'default_value' => '1d9c86f76fa94822b6e34bceb3d736e6',
                 'current_value' => NULL,
                 'deleted_at' => NULL,
                 'created_at' => '2025-05-12 00:00:00',
