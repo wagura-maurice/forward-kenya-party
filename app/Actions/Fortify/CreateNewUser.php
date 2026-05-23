@@ -137,58 +137,60 @@ class CreateNewUser implements CreatesNewUsers
 
         // Start database transaction
         return DB::transaction(function () use ($input) {
-            return tap(User::create([
+            $user = User::create([
                 'name' => $input['surname'],
                 'email' => null,
                 'telephone' => $input['telephone'],
                 'email_verified_at' => null,
                 'password' => Hash::make($input['identification_number']),
-                'last_login_at' => now(),
-                'last_login_ip' => request()->ip(),
-            ]), function (User $user) use ($input) {
-                // Assign member role
-                $user->assignRole('member');
-        
-                // Split other_name into first and middle names
-                $nameParts = explode(' ', $input['other_name'], 2);
-        
-                // Create profile
-                Profile::create([
-                    'uuid' => Str::uuid()->toString(),
-                    'user_id' => $user->id,
-                    'first_name' => $nameParts[0] ?? null,
-                    'middle_name' => $nameParts[1] ?? null,
-                    'last_name' => $input['surname'],
-                    'gender' => $input['gender'],
-                    'date_of_birth' => Carbon::parse($input['date_of_birth'])->format('Y-m-d'),
-                    'telephone' => $input['telephone'],
-                    'address_line_1' => null,
-                    'address_line_2' => null,
-                    'city' => null,
-                    'state' => null,
-                ]);
-        
-                // Create member record
-                Member::create([
-                    'uuid' => Str::uuid()->toString(),
-                    'user_id' => $user->id,
-                    'county_id' => $input['county_id'],
-                    'constituency_id' => $input['constituency_id'],
-                    'ward_id' => $input['ward_id'],
-                    'special_interest_groups' => $input['special_interest_groups'] ?? null,
-                    'disability_status' => (bool)$input['disability_status'],
-                    'ncpwd_number' => (bool)$input['disability_status'] ? $input['ncpwd_number'] : null,
-                    'ethnicity_id' => $input['ethnicity_id'],
-                    'religion_id' => $input['religion_id'],
-                    'passport_number' => $input['identification_type'] === 'passport_number' 
-                        ? $input['identification_number'] 
-                        : null,
-                    'national_identification_number' => $input['identification_type'] === 'national_identification_number'
-                        ? $input['identification_number']
-                        : null,
-                    'party_membership_number' => $input['party_membership_number']
-                ]);
-            });
+                // Don't set last_login_at and last_login_ip - user should not be auto-logged in
+            ]);
+            
+            // Assign member role
+            $user->assignRole('member');
+    
+            // Split other_name into first and middle names
+            $nameParts = explode(' ', $input['other_name'], 2);
+    
+            // Create profile
+            Profile::create([
+                'uuid' => Str::uuid()->toString(),
+                'user_id' => $user->id,
+                'first_name' => $nameParts[0] ?? null,
+                'middle_name' => $nameParts[1] ?? null,
+                'last_name' => $input['surname'],
+                'gender' => $input['gender'],
+                'date_of_birth' => Carbon::parse($input['date_of_birth'])->format('Y-m-d'),
+                'telephone' => $input['telephone'],
+                'address_line_1' => null,
+                'address_line_2' => null,
+                'city' => null,
+                'state' => null,
+            ]);
+    
+            // Create member record
+            Member::create([
+                'uuid' => Str::uuid()->toString(),
+                'user_id' => $user->id,
+                'county_id' => $input['county_id'],
+                'constituency_id' => $input['constituency_id'],
+                'ward_id' => $input['ward_id'],
+                'special_interest_groups' => $input['special_interest_groups'] ?? null,
+                'disability_status' => (bool)$input['disability_status'],
+                'ncpwd_number' => (bool)$input['disability_status'] ? $input['ncpwd_number'] : null,
+                'ethnicity_id' => $input['ethnicity_id'],
+                'religion_id' => $input['religion_id'],
+                'passport_number' => $input['identification_type'] === 'passport_number' 
+                    ? $input['identification_number'] 
+                    : null,
+                'national_identification_number' => $input['identification_type'] === 'national_identification_number'
+                    ? $input['identification_number']
+                    : null,
+                'party_membership_number' => $input['party_membership_number'],
+                'is_synced' => false // Will be synced to IPPMS after OTP verification
+            ]);
+            
+            return $user;
         });
     }
 }
