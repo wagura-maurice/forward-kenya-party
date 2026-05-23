@@ -82,6 +82,7 @@ return new class extends Migration
             $table->string('party_membership_number')->unique()->comment('Member\'s party membership number (unique)');
             $table->json('configuration')->nullable()->comment('JSON configuration for the member metadata');
             $table->boolean('is_featured')->default(false)->comment('Whether to feature this member');
+            $table->boolean('is_synced')->default(false)->comment('Whether the member has been synced with the authority');
             $table->json('metadata')->nullable()->comment('Additional metadata in JSON format');           
             $table->timestamp('last_verified_at')->nullable()->comment('When the member information was last verified');
             $table->foreignId('verified_by')
