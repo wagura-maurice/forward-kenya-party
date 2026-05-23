@@ -486,8 +486,8 @@ class WahaService
     {
         $message = "*🔐 OTP Verification*\n\n"
             . "A confirmation code (OTP) has been sent to your phone number via SMS.\n\n"
-            . "Please enter the OTP you received to complete your registration with the Office of the Registrar of Political Parties (ORPP).\n\n"
-            . "*Example:* 123456\n\n"
+            . "Please enter the alphanumeric OTP you received to complete your registration with the Office of the Registrar of Political Parties (ORPP).\n\n"
+            . "*Example:* L97MT\n\n"
             . "*Note:* The OTP is sent by ORPP/IPPMS, not Forward Kenya Party.";
 
         return $this->sendText($chatId, $message);
