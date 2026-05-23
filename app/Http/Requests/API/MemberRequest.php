@@ -34,6 +34,7 @@ class MemberRequest extends FormRequest
             'party_membership_number' => ['required', 'string', 'max:50', 'unique:members,party_membership_number,' . $memberId],
             'configuration' => ['nullable', 'json'],
             'is_featured' => ['boolean'],
+            'is_synced' => ['boolean'],
             'metadata' => ['nullable', 'json'],
             'last_verified_at' => ['nullable', 'date'],
             'verified_by' => ['nullable', 'exists:users,id'],
