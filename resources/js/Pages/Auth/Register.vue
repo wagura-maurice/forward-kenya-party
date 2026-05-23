@@ -19,16 +19,6 @@ const props = defineProps({
     formData: Object,
 });
 
-// Get OTP configuration from props
-const otpConfig = computed(
-    () =>
-        props.formData?.otp_config || {
-            ttl: 300, // Default: 5 minutes in seconds
-            rate_limit: 60, // Default: 60 seconds between requests
-            attempts_limit: 5, // Default: 5 attempts before OTP is invalidated
-        }
-);
-
 const totalSteps = 4; // Updated to 4 steps to include party resignation validation
 const currentStep = ref(1);
 const activeAccordion = ref("personal");
@@ -155,15 +145,17 @@ const form = useForm({
     // Step 3: Review & Submit
     terms: false,
 
-    // OTP verification
-    otpVerified: false,
-
     // ReCaptcha response
     'g-recaptcha-response': '',
 });
 
 const isLoading = ref(false);
 const isSubmitting = ref(false);
+const isCheckingMembershipStatus = ref(false);
+const membershipStatusError = ref(null);
+const membershipStatus = ref(null);
+const ippmsRegistrationId = ref(null);
+const memberId = ref(null);
 
 const setCaptchaResponse = (response) => {
     form['g-recaptcha-response'] = response;
@@ -220,6 +212,57 @@ watch(
     }
 );
 
+// Watch for identification_number changes to validate against IPPMS
+watch(
+    () => form.identification_number,
+    async (newIdNumber) => {
+        // Only trigger when exactly 8 characters and not already checking
+        if (newIdNumber.length === 8 && !isCheckingMembershipStatus.value) {
+            // Clear previous errors
+            membershipStatusError.value = null;
+            membershipStatus.value = null;
+
+            // Start loading state
+            isCheckingMembershipStatus.value = true;
+
+            try {
+                const response = await axios.post(route('auth.check-membership-status'), {
+                    identification_number: newIdNumber
+                });
+
+                if (response.data.status === 'success') {
+                    const data = response.data.data || {};
+                    const statusDescription = data.statusDescription || response.data.membership_status;
+                    
+                    membershipStatus.value = statusDescription;
+
+                    if (statusDescription === 'Accepted') {
+                        // Clear any error states and allow proceeding
+                        membershipStatusError.value = null;
+                    } else if (statusDescription === 'Rejected') {
+                        // Prevent further progress and show error
+                        membershipStatusError.value = response.data.message || 'Your ID has been rejected by the authority body.';
+                        showToast('error', 'ID Rejected', membershipStatusError.value);
+                    }
+                } else {
+                    membershipStatusError.value = response.data.message || 'Failed to verify membership status.';
+                }
+            } catch (error) {
+                // Handle network failures gracefully
+                membershipStatusError.value = error.response?.data?.message || 'Unable to verify membership status at this time. Please try again later.';
+                console.error('Membership status check error:', error);
+            } finally {
+                // End loading state
+                isCheckingMembershipStatus.value = false;
+            }
+        } else if (newIdNumber.length !== 8) {
+            // Reset status when ID is not 8 characters
+            membershipStatus.value = null;
+            membershipStatusError.value = null;
+        }
+    }
+);
+
 const validateStep = (step) => {
     if (step === 1) {
         // Step 1: Party Registration Check - Only validate the acknowledgment
@@ -260,6 +303,14 @@ const validateStep = (step) => {
             return {
                 isValid: false,
                 message: "Identification number must be exactly 8 characters long"
+            };
+        }
+
+        // Check if membership status was rejected
+        if (membershipStatusError.value) {
+            return {
+                isValid: false,
+                message: membershipStatusError.value
             };
         }
         if (!form.identification_number?.trim())
@@ -335,479 +386,8 @@ const handleSubmit = async () => {
     if (currentStep.value < totalSteps) {
         await nextStep();
     } else {
-        // If OTP is not verified, show OTP verification modal
-        if (!form.otpVerified) {
-            await sendOtp();
-        } else {
-            await submit();
-        }
-    }
-};
-
-// Send OTP to the user's telephone number
-const sendOtp = async () => {
-    try {
-        // Validate the telephone number
-        if (!form.telephone) {
-            showToast(
-                "error",
-                "Validation Error",
-                "Telephone number is required for OTP verification"
-            );
-            return;
-        }
-
-        // Show loading state
-        Swal.fire({
-            title: "Sending OTP",
-            text: "Please wait while we send an OTP to your telephone...",
-            allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading();
-            },
-        });
-
-        // Reset attempts counter and expiration time when requesting new OTP
-        otpAttempts.value = 0;
-        cleanupOtpTimer();
-        const expTime = new Date();
-        expTime.setSeconds(expTime.getSeconds() + otpConfig.value.ttl);
-        otpExpirationTime.value = expTime;
-
-        // Send OTP request
-        const response = await axios.post(route("auth.request-otp"), {
-            telephone: form.telephone
-        });
-
-        // console.log(response.data);
-
-        if (response.data.status === "success") {
-            // Show OTP verification modal
-            showOtpVerificationModal();
-        } else {
-            throw new Error(response.data.message || "Failed to send OTP. Please try again.");
-        }
-    } catch (error) {
-        // Check if it's a rate limit error
-        if (
-            error.response?.data?.message &&
-            error.response.data.message.includes("wait")
-        ) {
-            // Show countdown timer for rate limit
-            let secondsLeft = otpConfig.value.rate_limit; // Use the rate limit from config
-
-            // Try to extract the exact time from the message if available
-            const timeMatch = error.response.data.message.match(
-                /wait (\d+) (?:seconds|second)/i
-            );
-
-            if (timeMatch && timeMatch[1]) {
-                secondsLeft = parseInt(timeMatch[1]);
-            }
-
-            const timerInterval = setInterval(() => {
-                secondsLeft -= 1;
-
-                // Update the timer text
-                const timerElement = document.getElementById("otp-timer");
-                if (timerElement) {
-                    timerElement.textContent = `${secondsLeft}`;
-                }
-
-                // When timer reaches zero
-                if (secondsLeft <= 0) {
-                    clearInterval(timerInterval);
-                    Swal.close();
-                }
-            }, 1000);
-
-            Swal.fire({
-                icon: "warning",
-                title: "Rate Limited",
-                html: `
-                    <p>You must wait before requesting another OTP.</p>
-                    <div class="mt-4 text-center">
-                        <p>Try again in <span id="otp-timer" class="font-bold text-lg">${secondsLeft}</span> seconds</p>
-                    </div>
-                `,
-                showConfirmButton: true,
-                confirmButtonText: "OK",
-                confirmButtonColor: "#10b981",
-                willClose: () => {
-                    clearInterval(timerInterval);
-                },
-            });
-        } else {
-            // Regular error handling
-            showToast(
-                "error",
-                "OTP Error",
-                error.response?.data?.message || "Failed to send OTP. Please try again."
-            );
-        }
-    }
-};
-
-// Track OTP verification attempts and timer state
-const otpAttempts = ref(0);
-const maxOtpAttempts = computed(() => otpConfig.value.attempts_limit || 5);
-const otpExpirationTime = ref(null);
-let otpTimerInterval = null;
-
-// Format time remaining
-const formatTimeRemaining = (endTime) => {
-    const now = new Date();
-    const diffInSeconds = Math.max(0, Math.floor((endTime - now) / 1000));
-    const minutes = Math.floor(diffInSeconds / 60);
-    const seconds = diffInSeconds % 60;
-    return {
-        formatted: `${minutes}:${seconds.toString().padStart(2, '0')}`,
-        isExpired: diffInSeconds <= 0
-    };
-};
-
-// Clean up timer
-const cleanupOtpTimer = () => {
-    if (otpTimerInterval) {
-        clearInterval(otpTimerInterval);
-        otpTimerInterval = null;
-    }
-};
-
-// Show OTP verification modal
-const showOtpVerificationModal = () => {
-    // Track if resend is on cooldown
-    let isResendDisabled = false;
-    let resendCountdown = 0;
-    let countdownInterval = null;
-    
-    // Initialize or reuse existing expiration time
-    if (!otpExpirationTime.value) {
-        const expTime = new Date();
-        expTime.setSeconds(expTime.getSeconds() + otpConfig.value.ttl);
-        otpExpirationTime.value = expTime;
-    }
-    
-    // Clean up any existing timer
-    cleanupOtpTimer();
-
-    Swal.fire({
-        title: "Application Submission Verification",
-        html: `
-            <p class="mb-4 text-md">You'll receive a 6-digit verification code on your telephone number: <strong>${
-                form.telephone
-            }</strong>.</p>
-            <p class="text-xs text-gray-600">Please check your mobile device for the OTP code text message.</p>
-            <div class="flex flex-col items-center">
-                <input id="swal-otp-input" class="swal2-input w-full text-center mb-1" placeholder="Enter 6-digit code" maxlength="6" type="text">
-                <div id="otp-timer-container" class="text-sm text-gray-600 mt-2">
-                    <span id="otp-timer-message">Verification code expires in </span>
-                    <strong id="otp-timer" class="font-medium">${formatTimeRemaining(otpExpirationTime.value).formatted}</strong>
-                    <span id="otp-expired-message" class="hidden">
-                        <span class="text-red-500 font-medium">Verification code expired!</span>
-                        <button id="resend-otp-btn" class="ml-1 font-medium text-green-600 hover:text-green-800 cursor-pointer bg-transparent border-none p-0">Resend OTP</button>
-                    </span>
-                </div>
-                ${otpAttempts.value > 0 ? `
-                <div class="text-sm text-red-500 mt-1">
-                    ${otpAttempts.value} failed attempt${otpAttempts.value > 1 ? 's' : ''}${otpAttempts.value === maxOtpAttempts.value - 1 ? ' (last attempt)' : otpAttempts.value >= maxOtpAttempts.value ? '. Maximum attempts reached' : ''}.
-                </div>
-                ` : ''}
-            </div>
-        `,
-        showCancelButton: true,
-        confirmButtonText: "Verify",
-        confirmButtonColor: "#10b981",
-        cancelButtonText: "Cancel",
-        allowOutsideClick: false,
-        preConfirm: () => {
-            const otpInput = document.getElementById("swal-otp-input");
-            const otp = otpInput.value;
-
-            if (!otp || otp.length !== 6) {
-                Swal.showValidationMessage(
-                    "Please enter the 6-digit verification code"
-                );
-                return false;
-            }
-
-            return otp;
-        },
-        didOpen: () => {
-            const resendBtn = document.getElementById("resend-otp-btn");
-            const resendCountdownEl = document.getElementById("resend-countdown");
-            // Update the timer display
-            const updateTimerDisplay = () => {
-                const now = new Date();
-                const timeLeft = Math.max(0, Math.ceil((otpExpirationTime.value - now) / 1000));
-                const minutes = Math.floor(timeLeft / 60);
-                const seconds = timeLeft % 60;
-                
-                const otpTimerEl = document.getElementById('otp-timer');
-                const timerMessageEl = document.getElementById('otp-timer-message');
-                const expiredMessageEl = document.getElementById('otp-expired-message');
-                const otpInput = document.getElementById('swal-otp-input');
-                const confirmButton = document.querySelector('.swal2-confirm');
-                
-                if (!otpTimerEl || !timerMessageEl || !expiredMessageEl) return;
-                
-                const isExpired = timeLeft <= 0;
-                const formattedTime = `${minutes}:${seconds.toString().padStart(2, '0')}`;
-                
-                // Only update DOM if the value has changed
-                if (otpTimerEl.textContent !== formattedTime) {
-                    otpTimerEl.textContent = formattedTime;
-                }
-                
-                // Toggle visibility and states based on expiration
-                if (isExpired) {
-                    if (!expiredMessageEl.classList.contains('hidden')) return; // Already in correct state
-                    
-                    timerMessageEl.classList.add('hidden');
-                    otpTimerEl.classList.add('hidden');
-                    expiredMessageEl.classList.remove('hidden');
-                    
-                    // Disable input and button
-                    if (otpInput) otpInput.disabled = true;
-                    if (confirmButton) confirmButton.disabled = true;
-                } else {
-                    if (!timerMessageEl.classList.contains('hidden') && 
-                        !otpTimerEl.classList.contains('hidden') && 
-                        expiredMessageEl.classList.contains('hidden')) {
-                        // Already in correct state, just update colors if needed
-                        otpTimerEl.classList.toggle('text-red-500', timeLeft <= 60);
-                        otpTimerEl.classList.toggle('text-gray-600', timeLeft > 60);
-                        return;
-                    }
-                    
-                    // Update to show countdown
-                    timerMessageEl.textContent = 'Verification code expires in ';
-                    timerMessageEl.classList.remove('hidden');
-                    otpTimerEl.classList.remove('hidden');
-                    expiredMessageEl.classList.add('hidden');
-                    
-                    // Update colors
-                    otpTimerEl.classList.toggle('text-red-500', timeLeft <= 60);
-                    otpTimerEl.classList.toggle('text-gray-600', timeLeft > 60);
-                    
-                    // Enable input and button
-                    if (otpInput) otpInput.disabled = false;
-                    if (confirmButton) confirmButton.disabled = false;
-                }
-            };
-            
-            // Set up the timer interval with requestAnimationFrame for smoother updates
-            let lastUpdate = 0;
-            let animationFrameId = null;
-            
-            const updateLoop = (timestamp) => {
-                if (!otpTimerInterval) {
-                    if (animationFrameId) {
-                        cancelAnimationFrame(animationFrameId);
-                        animationFrameId = null;
-                    }
-                    return;
-                }
-                
-                // Only update DOM at most every 500ms for better performance
-                if (timestamp - lastUpdate > 500) {
-                    updateTimerDisplay();
-                    lastUpdate = timestamp;
-                }
-                
-                // Continue the animation loop
-                animationFrameId = requestAnimationFrame(updateLoop);
-            };
-            
-            // Initial update
-            updateTimerDisplay();
-            
-            // Start the animation loop
-            otpTimerInterval = true; // Use a truthy value as a flag
-            animationFrameId = requestAnimationFrame(updateLoop);
-            
-            // Cleanup function for when the modal is closed
-            const cleanup = () => {
-                if (animationFrameId) {
-                    cancelAnimationFrame(animationFrameId);
-                    animationFrameId = null;
-                }
-                otpTimerInterval = null;
-            };
-            
-            // Return cleanup function to be called when modal closes
-            return cleanup;
-
-            // Function to update the resend button state
-            const updateResendButton = () => {
-                if (isResendDisabled) {
-                    resendBtn.disabled = true;
-                    resendBtn.classList.remove("text-green-600", "hover:text-green-800");
-                    resendBtn.classList.add("text-gray-400", "cursor-not-allowed");
-                    resendCountdownEl.textContent = `(${resendCountdown}s)`;
-                } else {
-                    // Only enable the button if the OTP has expired
-                    const isOtpExpired = formatTimeRemaining(otpExpirationTime.value).isExpired;
-                    if (isOtpExpired) {
-                        resendBtn.disabled = false;
-                        resendBtn.classList.add("text-green-600", "hover:text-green-800");
-                        resendBtn.classList.remove("text-gray-400", "cursor-not-allowed");
-                        resendCountdownEl.textContent = '';
-                    } else {
-                        resendBtn.disabled = true;
-                        resendBtn.classList.remove("text-green-600", "hover:text-green-800");
-                        resendBtn.classList.add("text-gray-400", "cursor-not-allowed");
-                        const timeLeft = formatTimeRemaining(otpExpirationTime.value).formatted;
-                        resendCountdownEl.textContent = `(wait ${timeLeft})`;
-                    }
-                }
-            };
-
-            // Add event listener for resend button
-            resendBtn.addEventListener("click", async () => {
-                if (!isResendDisabled) {
-                    try {
-                        await sendOtp();
-                    } catch (error) {
-                        // Check if it's a rate limit error
-                        if (
-                            error.response?.data?.message &&
-                            error.response.data.message.includes("wait")
-                        ) {
-                            // Extract the wait time or use the rate limit from config
-                            const timeMatch = error.response.data.message.match(
-                                /wait (\d+) (?:seconds|second)/i
-                            );
-                            resendCountdown =
-                                timeMatch && timeMatch[1]
-                                    ? parseInt(timeMatch[1])
-                                    : otpConfig.value.rate_limit;
-
-                            isResendDisabled = true;
-                            updateResendButton();
-
-                            // Start countdown
-                            countdownInterval = setInterval(() => {
-                                resendCountdown -= 1;
-                                updateResendButton();
-
-                                if (resendCountdown <= 0) {
-                                    clearInterval(countdownInterval);
-                                    isResendDisabled = false;
-                                    updateResendButton();
-                                }
-                            }, 1000);
-                        }
-                    }
-                }
-            });
-        },
-        willClose: () => {
-            // Clear any running intervals when the modal is closed
-            if (countdownInterval) {
-                clearInterval(countdownInterval);
-            }
-            // Don't clean up the timer when modal closes
-            // We want to maintain the countdown state
-        },
-    }).then(async (result) => {
-        if (result.isConfirmed) {
-            await verifyOtp(result.value);
-        }
-    });
-};
-
-// Verify OTP
-const verifyOtp = async (otp) => {
-    // If OTP is expired, don't proceed with verification
-    if (otpExpirationTime.value && new Date() > otpExpirationTime.value) {
-        Swal.fire({
-            icon: 'error',
-            title: 'OTP Expired',
-            text: 'The verification code has expired. Please request a new one.',
-            confirmButtonColor: '#10b981',
-        });
-        return;
-    }
-    
-    // Increment attempts counter
-    otpAttempts.value += 1;
-
-    // Check if max attempts reached
-    if (otpAttempts.value >= maxOtpAttempts.value) {
-        Swal.fire({
-            icon: 'error',
-            title: 'Maximum Attempts Reached',
-            text: `You've exceeded the maximum number of verification attempts. Please request a new OTP.`,
-            confirmButtonColor: '#10b981',
-        });
-        return;
-    }
-
-    try {
-        // Show loading state
-        Swal.fire({
-            title: "Verifying OTP",
-            text: "Please wait while we verify your OTP...",
-            allowOutsideClick: false,
-            didOpen: () => {
-                Swal.showLoading();
-            },
-        });
-
-        // Verify OTP request
-        const response = await axios.post(route("auth.verify-otp"), {
-            telephone: form.telephone,
-            otp: otp,
-        });
-
-        if (response.data.status === "success" && response.data.verified) {
-            // Reset attempts on successful verification
-            otpAttempts.value = 0;
-            // Mark OTP as verified
-            form.otpVerified = true;
-
-            // Show success message
-            Swal.fire({
-                icon: "success",
-                title: "Telephone Verified",
-                text: response.data.message,
-                confirmButtonColor: "#10b981",
-            }).then(() => {
-                // Submit the form after OTP verification
-                submit();
-            });
-        } else {
-            Swal.fire({
-                icon: "error",
-                title: "Verification Failed",
-                text: response.data.message || "Invalid OTP. Please try again.",
-                confirmButtonColor: "#10b981",
-            }).then(() => {
-                // Show OTP verification modal again
-                showOtpVerificationModal();
-            });
-        }
-    } catch (error) {
-        Swal.fire({
-            icon: "error",
-            title: "Verification Failed",
-            html: `
-                <p>${
-                    error.response?.data?.message ||
-                    "Failed to verify OTP. Please try again."
-                }</p>
-                ${
-                    error.response?.data?.message?.includes("attempts exceeded")
-                        ? `<p class="mt-2 text-sm">You have exceeded the maximum of ${maxOtpAttempts.value} attempts. Please request a new OTP.</p>`
-                        : ""
-                }
-            `,
-            confirmButtonColor: "#10b981",
-        }).then(() => {
-            // Show OTP verification modal again
-            showOtpVerificationModal();
-        });
+        // Submit form directly to local DB first, then trigger IPPMS verification
+        await submit();
     }
 };
 
@@ -834,49 +414,185 @@ const submit = async () => {
             return;
         }
 
-        // Ensure OTP is verified before submitting
-        if (!form.otpVerified) {
-            await sendOtp();
-            return;
+        // Submit form to custom registration endpoint (no auto-login)
+        const response = await axios.post(route('auth.register-without-login'), form);
+
+        if (response.data.status === 'success') {
+            // Extract member_id and user_id from response
+            memberId.value = response.data.data.member_id;
+            const userId = response.data.data.user_id;
+            
+            // Store userId for later login after IPPMS verification
+            localStorage.setItem('pending_user_id', userId);
+            
+            // Show success message for local registration
+            showToast(
+                "success",
+                "Local Registration Complete",
+                "You have been registered in our local system. Now complete legal verification with IPPMS."
+            );
+            
+            // Trigger IPPMS verification flow
+            showIppmsVerificationModal();
+        } else {
+            throw new Error(response.data.message || 'Registration failed');
         }
-
-        // Use Inertia's form helper to submit the form
-        form.post(route("register"), {
-            forceFormData: true,
-            onSuccess: () => {
-                // Handle successful registration
-                showToast(
-                    "success",
-                    "Registration Successful",
-                    "Your registration was successful! Redirecting..."
-                );
-                // The server should handle the redirect in the response
-            },
-            onError: (errors) => {
-                // Handle form errors
-                let errorMessage = "An error occurred during registration.";
-
-                if (errors && typeof errors === "object") {
-                    errorMessage = Object.values(errors).flat().join(" ");
-                } else if (typeof errors === "string") {
-                    errorMessage = errors;
-                }
-
-                showToast("error", "Registration Failed", errorMessage);
-            },
-            onFinish: () => {
-                form.processing = false;
-            },
-        });
     } catch (error) {
-        Swal.fire({
-            icon: "error",
-            title: "Registration Failed",
-            text: error.message || "An error occurred during registration.",
-            confirmButtonColor: "#10b981",
-        });
+        if (error.response?.data?.errors) {
+            // Handle validation errors
+            const errors = error.response.data.errors;
+            let errorMessage = "Validation failed:\n";
+            for (const field in errors) {
+                errorMessage += `${field}: ${errors[field].join(', ')}\n`;
+            }
+            showToast("error", "Registration Failed", errorMessage);
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: "Registration Failed",
+                text: error.response?.data?.message || error.message || "An error occurred during registration.",
+                confirmButtonColor: "#10b981",
+            });
+        }
     } finally {
         isSubmitting.value = false;
+    }
+};
+
+// Show IPPMS verification modal with legal consent messaging
+const showIppmsVerificationModal = async () => {
+    console.log('showIppmsVerificationModal called');
+    
+    if (!memberId.value) {
+        showToast("error", "Error", "Member ID not found. Please contact support.");
+        return;
+    }
+
+    try {
+        console.log('Requesting IPPMS confirmation code for member:', memberId.value);
+        
+        // Request IPPMS confirmation code
+        const response = await axios.post(route('auth.request-ippms-confirmation-code'), {
+            member_id: memberId.value
+        });
+
+        console.log('IPPMS confirmation code response:', response.data);
+
+        if (response.data.status !== 'success') {
+            throw new Error(response.data.message || 'Failed to request IPPMS confirmation code');
+        }
+
+        // Extract registrationId from response
+        ippmsRegistrationId.value = response.data.data?.registrationId || null;
+        console.log('Registration ID:', ippmsRegistrationId.value);
+
+        // Show OTP verification modal using a simple prompt
+        const otp = prompt(
+            "Legal Registration Verification\n\n" +
+            "Step 1: Local Registration Complete ✓\n" +
+            "Step 2: Legal Consent Required\n" +
+            "To become a legally registered party member, you must provide formal consent through the IPPMS authority system.\n\n" +
+            "Step 3: Complete Verification\n" +
+            "Enter the 5-character alphanumeric OTP sent to your registered phone number.\n\n" +
+            "Important: By entering the OTP, you are providing legal consent to register as a party member with IEBC through IPPMS.\n\n" +
+            "Enter 5-character OTP (e.g., L97MT):"
+        );
+
+        console.log('OTP entered:', otp);
+
+        if (otp && otp.length === 5 && /^[A-Za-z0-9]{5}$/.test(otp)) {
+            console.log('User confirmed OTP, calling completeIppmsRegistration');
+            await completeIppmsRegistration(otp);
+        } else if (otp !== null) {
+            showToast("error", "Invalid OTP", "OTP must be exactly 5 alphanumeric characters (e.g., L97MT)");
+        } else {
+            console.log('User cancelled or dismissed modal');
+        }
+
+    } catch (error) {
+        console.error('IPPMS verification error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Verification Failed',
+            text: error.response?.data?.message || error.message || 'Unable to initiate IPPMS verification. Please try again later.',
+            confirmButtonColor: '#10b981',
+        });
+    }
+};
+
+// Complete IPPMS registration with OTP
+const completeIppmsRegistration = async (otp) => {
+    try {
+        Swal.fire({
+            title: "Completing Legal Registration",
+            text: "Please wait while we synchronize your registration with IPPMS...",
+            allowOutsideClick: false,
+            didOpen: () => {
+                Swal.showLoading();
+            },
+        });
+
+        const response = await axios.post(route('auth.complete-ippms-registration'), {
+            member_id: memberId.value,
+            otp: otp,
+            registration_id: ippmsRegistrationId.value
+        });
+
+        if (response.data.status === 'success') {
+            // Log the user in after successful IPPMS verification
+            const userId = localStorage.getItem('pending_user_id');
+            
+            if (userId) {
+                const loginResponse = await axios.post(route('auth.login-after-ippms-verification'), {
+                    user_id: userId
+                });
+
+                if (loginResponse.data.status === 'success') {
+                    // Clear the stored user_id
+                    localStorage.removeItem('pending_user_id');
+                    
+                    // Store the Sanctum token
+                    if (loginResponse.data.data.token) {
+                        localStorage.setItem('sanctum_token', loginResponse.data.data.token);
+                    }
+                    
+                    Swal.fire({
+                        icon: "success",
+                        title: "Legal Registration Complete",
+                        html: `
+                            <div class="text-left">
+                                <p class="mb-2">Congratulations! You are now a legally registered party member.</p>
+                                <p class="text-sm text-gray-600">Your registration has been successfully synchronized with the IPPMS authority system.</p>
+                            </div>
+                        `,
+                        confirmButtonColor: "#10b981",
+                    }).then(() => {
+                        // Redirect to dashboard
+                        window.location.href = route('dashboard');
+                    });
+                } else {
+                    throw new Error(loginResponse.data.message || 'Failed to log in after IPPMS verification');
+                }
+            } else {
+                throw new Error('User ID not found. Please try logging in manually.');
+            }
+        } else {
+            throw new Error(response.data.message || 'Failed to complete IPPMS registration');
+        }
+
+    } catch (error) {
+        console.error('IPPMS registration completion error:', error);
+        Swal.fire({
+            icon: 'error',
+            title: 'Registration Failed',
+            html: `
+                <div class="text-left">
+                    <p class="mb-2">${error.response?.data?.message || error.message || 'Failed to complete IPPMS registration.'}</p>
+                    <p class="text-sm text-gray-600">Your local registration is saved. You can retry the IPPMS verification later from your dashboard.</p>
+                </div>
+            `,
+            confirmButtonColor: '#10b981',
+        });
     }
 };
 
@@ -1640,7 +1356,12 @@ const canProceedToNextStep = computed(() => {
                                         "
                                         v-model="form.identification_number"
                                         type="number"
-                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-green-500 focus:ring-green-500 sm:text-sm py-2 px-3 border transition duration-150 ease-in-out"
+                                        :class="[
+                                            'block w-full rounded-md shadow-sm sm:text-sm py-2 px-3 border transition duration-150 ease-in-out',
+                                            membershipStatusError 
+                                                ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+                                                : 'border-gray-300 focus:border-green-500 focus:ring-green-500'
+                                        ]"
                                         :placeholder="
                                             form.identification_type ===
                                             'national_identification_number'
@@ -1650,9 +1371,16 @@ const canProceedToNextStep = computed(() => {
                                         required
                                         maxlength="8"
                                     />
+                                    <div v-if="isCheckingMembershipStatus" class="mt-1 text-sm text-gray-500 flex items-center">
+                                        <svg class="animate-spin -ml-1 mr-2 h-4 w-4 text-gray-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Verifying membership status...
+                                    </div>
                                     <InputError
                                         :message="
-                                            form.errors.identification_number
+                                            form.errors.identification_number || membershipStatusError
                                         "
                                         class="mt-1 text-sm text-red-600"
                                     />
