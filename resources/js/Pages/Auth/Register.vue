@@ -273,10 +273,8 @@ const validateStep = (step) => {
             };
         if (!form.date_of_birth)
             return { isValid: false, message: "Date of birth is required" };
-        if (!form.gender) 
+        if (!form.gender)
             return { isValid: false, message: "Sex is required" };
-        if (!form.special_interest_groups.length)
-            return { isValid: false, message: "Special interest group is required" };
         if (!form.ethnicity_id)
             return { isValid: false, message: "Ethnicity is required" };
         if (!form.religion_id)
