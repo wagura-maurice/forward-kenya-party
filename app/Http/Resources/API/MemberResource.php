@@ -57,6 +57,7 @@ class MemberResource extends JsonResource
             'party_membership_number' => $this->party_membership_number,
             'configuration' => $this->configuration,
             'is_featured' => $this->is_featured,
+            'is_synced' => $this->is_synced,
             'metadata' => $this->metadata,
             'last_verified_at' => $this->last_verified_at,
             'verified_by' => $this->verified_by,
