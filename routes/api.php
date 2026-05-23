@@ -87,8 +87,15 @@ Route::group(['prefix' => 'auth'], function () {
     Route::post('/reset-password', [AuthenticationController::class, 'resetPassword'])->name('auth.reset-password');
     Route::get('/request-email-verification', [AuthenticationController::class, 'requestEmailVerification'])->name('auth.request-email-verification');
     Route::post('/verify-email', [AuthenticationController::class, 'verifyEmail'])->name('auth.verify-email');
-    Route::post('/request-otp', [AuthenticationController::class, 'requestOTP'])->name('auth.request-otp');
-    Route::post('/verify-otp', [AuthenticationController::class, 'verifyOTP'])->name('auth.verify-otp');
+    // Old OTP routes removed - now using IPPMS for OTP verification
+    // Route::post('/request-otp', [AuthenticationController::class, 'requestOTP'])->name('auth.request-otp');
+    // Route::post('/verify-otp', [AuthenticationController::class, 'verifyOTP'])->name('auth.verify-otp');
+    Route::post('/check-membership-status', [AuthenticationController::class, 'checkMembershipStatus'])->name('auth.check-membership-status');
+    Route::post('/request-ippms-confirmation-code', [AuthenticationController::class, 'requestIppmsConfirmationCode'])->name('auth.request-ippms-confirmation-code');
+    Route::post('/complete-ippms-registration', [AuthenticationController::class, 'completeIppmsRegistration'])->name('auth.complete-ippms-registration');
+    Route::post('/register-without-login', [AuthenticationController::class, 'registerWithoutLogin'])->name('auth.register-without-login');
+    Route::post('/login-after-ippms-verification', [AuthenticationController::class, 'loginAfterIppmsVerification'])->name('auth.login-after-ippms-verification');
+    Route::middleware('auth:sanctum')->get('/current-member', [AuthenticationController::class, 'getCurrentMember'])->name('auth.current-member');
     Route::middleware('auth:sanctum')->post('/sign-out', [AuthenticationController::class, 'signOut'])->name('auth.sign-out');
 });
 
