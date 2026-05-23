@@ -7,6 +7,8 @@ use App\Services\IppmsService;
 use App\Models\WhatsappConversation;
 use App\Models\WhatsappMessageQueue;
 use App\Models\County;
+use App\Models\Constituency;
+use App\Models\Ward;
 use App\Models\Gender;
 use App\Models\Ethnicity;
 use App\Models\Religion;
@@ -428,7 +430,7 @@ class WahaWebhookController extends Controller
         $validation = $this->validateSurname($message);
 
         if (!$validation['valid']) {
-            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with *cancel* to start over.";
+            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with */cancel* to start over.";
             $this->queueWhatsAppMessage(
                 $conversation->chat_id,
                 $conversation->phone_number,
@@ -458,7 +460,7 @@ class WahaWebhookController extends Controller
         $validation = $this->validateOtherNames($message);
 
         if (!$validation['valid']) {
-            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with *cancel* to start over.";
+            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with */cancel* to start over.";
             $this->queueWhatsAppMessage(
                 $conversation->chat_id,
                 $conversation->phone_number,
@@ -488,7 +490,7 @@ class WahaWebhookController extends Controller
         $validation = $this->validateEmailAddress($message);
 
         if (!$validation['valid']) {
-            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with *cancel* to start over.";
+            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with */cancel* to start over.";
             $this->queueWhatsAppMessage(
                 $conversation->chat_id,
                 $conversation->phone_number,
@@ -518,7 +520,7 @@ class WahaWebhookController extends Controller
         $validation = $this->validatePhoneNumber($message);
 
         if (!$validation['valid']) {
-            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with *cancel* to start over.";
+            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with */cancel* to start over.";
             $this->queueWhatsAppMessage(
                 $conversation->chat_id,
                 $conversation->phone_number,
@@ -553,7 +555,7 @@ class WahaWebhookController extends Controller
         $validation = $this->validateIdNumber($message);
 
         if (!$validation['valid']) {
-            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with *cancel* to start over.";
+            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with */cancel* to start over.";
             $this->queueWhatsAppMessage(
                 $conversation->chat_id,
                 $conversation->phone_number,
@@ -584,7 +586,7 @@ class WahaWebhookController extends Controller
         $validation = $this->validateDateOfBirth($message);
 
         if (!$validation['valid']) {
-            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with *cancel* to start over.";
+            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with */cancel* to start over.";
             $this->queueWhatsAppMessage(
                 $conversation->chat_id,
                 $conversation->phone_number,
@@ -614,7 +616,7 @@ class WahaWebhookController extends Controller
         $validation = $this->validateEthnicity($message);
 
         if (!$validation['valid']) {
-            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with *cancel* to start over.";
+            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with */cancel* to start over.";
             $this->queueWhatsAppMessage(
                 $conversation->chat_id,
                 $conversation->phone_number,
@@ -647,7 +649,7 @@ class WahaWebhookController extends Controller
         $validation = $this->validateReligion($message);
 
         if (!$validation['valid']) {
-            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with *cancel* to start over.";
+            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with */cancel* to start over.";
             $this->queueWhatsAppMessage(
                 $conversation->chat_id,
                 $conversation->phone_number,
@@ -678,7 +680,7 @@ class WahaWebhookController extends Controller
         $validation = $this->validateSpecialInterestGroups($message);
 
         if (!$validation['valid']) {
-            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with *cancel* to start over.";
+            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with */cancel* to start over.";
             $this->queueWhatsAppMessage(
                 $conversation->chat_id,
                 $conversation->phone_number,
@@ -709,7 +711,7 @@ class WahaWebhookController extends Controller
         $validation = $this->validatePWDStatus($message);
 
         if (!$validation['valid']) {
-            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with *cancel* to start over.";
+            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with */cancel* to start over.";
             $this->queueWhatsAppMessage(
                 $conversation->chat_id,
                 $conversation->phone_number,
@@ -748,7 +750,7 @@ class WahaWebhookController extends Controller
         $validation = $this->validateNCPWDNumber($message);
 
         if (!$validation['valid']) {
-            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with *cancel* to start over.";
+            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with */cancel* to start over.";
             $this->queueWhatsAppMessage(
                 $conversation->chat_id,
                 $conversation->phone_number,
@@ -780,7 +782,7 @@ class WahaWebhookController extends Controller
         $validation = $this->validateGender($message);
 
         if (!$validation['valid']) {
-            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with *cancel* to start over.";
+            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with */cancel* to start over.";
             $this->queueWhatsAppMessage(
                 $conversation->chat_id,
                 $conversation->phone_number,
@@ -812,7 +814,7 @@ class WahaWebhookController extends Controller
         $validation = $this->validateCounty($message);
 
         if (!$validation['valid']) {
-            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with *cancel* to start over.";
+            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with */cancel* to start over.";
             $this->queueWhatsAppMessage(
                 $conversation->chat_id,
                 $conversation->phone_number,
@@ -848,7 +850,7 @@ class WahaWebhookController extends Controller
         $validation = $this->validateConstituency($message, $conversation->conversation_data['county_id']);
 
         if (!$validation['valid']) {
-            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with *cancel* to start over.";
+            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with */cancel* to start over.";
             $this->queueWhatsAppMessage(
                 $conversation->chat_id,
                 $conversation->phone_number,
@@ -884,7 +886,7 @@ class WahaWebhookController extends Controller
         $validation = $this->validateWard($message, $conversation->conversation_data['constituency_id']);
 
         if (!$validation['valid']) {
-            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with *cancel* to start over.";
+            $errorMessage = "*❌ Invalid Input*\n\n" . $validation['error'] . "\n\nPlease try again or reply with */cancel* to start over.";
             $this->queueWhatsAppMessage(
                 $conversation->chat_id,
                 $conversation->phone_number,
@@ -920,10 +922,10 @@ class WahaWebhookController extends Controller
 
         if ($message === '1') {
             $this->requestOTPAndProceed($conversation);
-        } elseif ($message === '2') {
+        } elseif ($message === '2' || $message === '/cancel') {
             $this->cancelRegistration($conversation);
         } else {
-            $errorMessage = "*❌ Invalid Input*\n\nPlease reply with \"1\" to confirm or \"2\" to cancel";
+            $errorMessage = "*❌ Invalid Input*\n\nPlease reply with \"1\" to confirm, \"2\" or \"/cancel\" to cancel";
             $this->queueWhatsAppMessage(
                 $conversation->chat_id,
                 $conversation->phone_number,
@@ -1100,9 +1102,9 @@ class WahaWebhookController extends Controller
     {
         $otp = trim($message);
 
-        // Validate OTP format (should be numeric, typically 6 digits)
-        if (!preg_match('/^\d{4,8}$/', $otp)) {
-            $errorMessage = "*❌ Invalid OTP*\n\nPlease enter the numeric OTP you received via SMS (4-8 digits).\n\nExample: 123456";
+        // Validate OTP format (should be 5 alphanumeric characters)
+        if (!preg_match('/^[A-Za-z0-9]{5}$/', $otp)) {
+            $errorMessage = "*❌ Invalid OTP*\n\nPlease enter the alphanumeric OTP you received via SMS (5 characters).\n\nExample: L97MT";
             $this->queueWhatsAppMessage(
                 $conversation->chat_id,
                 $conversation->phone_number,
@@ -1117,7 +1119,7 @@ class WahaWebhookController extends Controller
 
             // Prepare IPPMS registration data
             $ippmsData = $this->prepareIPPMSRegistrationData($conversationData, $otp);
-
+            
             // Register member with IPPMS
             $ippmsResponse = $this->ippmsService->registerMember($ippmsData);
 
@@ -1154,29 +1156,36 @@ class WahaWebhookController extends Controller
      */
     private function prepareIPPMSRegistrationData(array $conversationData, string $otp): array
     {
-        // Map conversation data to IPPMS expected format
-        return [
-            'membershipNo' => $conversationData['party_membership_number'] ?? '',
-            'surname' => $conversationData['surname'] ?? '',
-            'otherName' => $conversationData['other_name'] ?? '',
-            'identificationNumber' => $conversationData['identification_number'] ?? '',
-            'identificationType' => 'national_identification_number',
-            'dateOfBirth' => $conversationData['date_of_birth'] ?? '',
-            'gender' => $conversationData['gender'] ?? '',
-            'phoneNumber' => $conversationData['telephone'] ?? '',
-            'email' => $conversationData['email'] ?? '',
-            'ethnicityId' => $conversationData['ethnicity_id'] ?? '',
-            'religionId' => $conversationData['religion_id'] ?? '',
-            'specialInterestGroups' => $conversationData['special_interest_groups'] ?? [],
-            'disabilityStatus' => $conversationData['disability_status'] ?? false,
-            'ncpwdNumber' => $conversationData['ncpwd_number'] ?? null,
-            'countyId' => $conversationData['county_id'] ?? '',
-            'constituencyId' => $conversationData['constituency_id'] ?? '',
-            'wardId' => $conversationData['ward_id'] ?? '',
-            'enlistingDate' => $conversationData['enlisting_date'] ?? now()->format('Y-m-d'),
-            'terms' => $conversationData['terms'] ?? true,
+        // Get county, constituency, and ward codes from IDs
+        $county = County::find($conversationData['county_id']);
+        $constituency = Constituency::find($conversationData['constituency_id']);
+        $ward = Ward::find($conversationData['ward_id']);
+
+        // Convert gender to sex format (XY -> M, XX -> F) using Gender model
+        $genderName = Gender::getGenderName($conversationData['gender']);
+        $sex = $genderName === 'Male' ? 'M' : 'F';
+
+        // Build base registration data
+        $data = [
+            'registrationId' => $conversationData['ippms_confirmation_response']['registrationId'],
             'confirmationCode' => $otp,
+            'partyCode' => '872',
+            'birthDate' => $conversationData['date_of_birth'] ?? '',
+            'sex' => $sex,
+            'regDate' => now()->format('Y-m-d'),
+            'countyCode' => $county ? $county->code : '',
+            'constituencyCode' => $constituency ? $constituency->code : '',
+            'wardCode' => $ward ? $ward->code : '',
+            'pwd' => (bool)($conversationData['disability_status'] ?? false),
+            'membershipNo' => $conversationData['party_membership_number'] ?? '',
         ];
+
+        // Add ncpwdNumber only if pwd is true
+        if ($data['pwd'] && !empty($conversationData['ncpwd_number'])) {
+            $data['ncpwdNumber'] = $conversationData['ncpwd_number'];
+        }
+
+        return $data;
     }
 
     /**
@@ -1198,6 +1207,12 @@ class WahaWebhookController extends Controller
             // Create user using Fortify action
             $createNewUser = new CreateNewUser();
             $user = $createNewUser->create($conversationData);
+
+            // Set is_synced to true for the newly created member
+            $member = \App\Models\Member::where('user_id', $user->id)->first();
+            if ($member) {
+                $member->update(['is_synced' => true]);
+            }
 
             // Delegate success message to WahaService which owns the message content
             $this->wahaService->sendRegistrationSuccess($conversation->chat_id, $conversationData);
@@ -1250,6 +1265,14 @@ class WahaWebhookController extends Controller
                 'message_preview' => substr($message, 0, 100) . '...',
                 'recent_queue_id' => $recentMessage->id
             ]);
+
+            // Send notification to user that their message was already received
+            $this->wahaService->sendValidationErrorMessage(
+                $chatId,
+                "⚠️ *Message Already Received*\n\nYour previous message is still being processed. Please wait a moment before trying again.",
+                'duplicate_message'
+            );
+
             return;
         }
 

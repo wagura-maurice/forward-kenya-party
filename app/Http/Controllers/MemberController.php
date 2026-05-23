@@ -84,6 +84,7 @@ class MemberController extends Controller
             'constituency_id' => ['required', 'exists:constituencies,id'],
             'ward_id' => ['required', 'exists:wards,id'],
             'enlisting_date' => ['required', 'date', 'before_or_equal:today'],
+            'is_synced' => ['nullable', 'boolean'],
             'terms' => ['required', 'accepted', 'in:1,true']
         ], [
             'ncpwd_number.required' => 'The NCPWD number is required when disability status is "Yes".',
