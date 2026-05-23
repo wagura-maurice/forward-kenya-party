@@ -37,8 +37,8 @@ const syncOptions = ref({
 
 // Form for sync operation
 const form = useForm({
-    sync_type: 'both',
-    force_update: false
+    sync_type: 'push',
+    force_update: true
 });
 
 // Close modal and reset state
@@ -154,11 +154,12 @@ const formatNumber = (num) => {
                         <div>
                             <h4 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Synchronization Type</h4>
                             <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                                <label class="relative flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                <label class="relative flex items-center p-4 border rounded-lg cursor-not-allowed opacity-50">
                                     <input 
                                         type="radio" 
                                         v-model="form.sync_type" 
                                         value="pull" 
+                                        disabled
                                         class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                                     >
                                     <div class="ml-3 flex flex-col">
@@ -178,11 +179,12 @@ const formatNumber = (num) => {
                                         <span class="block text-xs text-gray-500 dark:text-gray-400">Upload local changes to authority</span>
                                     </div>
                                 </label>
-                                <label class="relative flex items-center p-4 border rounded-lg cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-700/50">
+                                <label class="relative flex items-center p-4 border rounded-lg cursor-not-allowed opacity-50">
                                     <input 
                                         type="radio" 
                                         v-model="form.sync_type" 
                                         value="both" 
+                                        disabled
                                         class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
                                     >
                                     <div class="ml-3 flex flex-col">
@@ -199,12 +201,15 @@ const formatNumber = (num) => {
                                     id="force-update" 
                                     v-model="form.force_update" 
                                     type="checkbox" 
+                                    disabled
+                                    readonly
                                     class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
                                 >
                             </div>
-                            <div class="ml-3 text-sm">
+                            <div class="ml-3 text-sm"><s>
                                 <label for="force-update" class="font-medium text-gray-700 dark:text-gray-300">Force update all records</label>
                                 <p class="text-gray-500 dark:text-gray-400">Overwrite local/remote records even if they haven't changed</p>
+                                </s>
                             </div>
                         </div>
 
@@ -216,8 +221,9 @@ const formatNumber = (num) => {
                                     </svg>
                                 </div>
                                 <div class="ml-3">
-                                    <p class="text-sm text-yellow-700 dark:text-yellow-400">
+                                    <p class="text-sm text-yellow-700 dark:text-yellow-400"><s>
                                         This operation will synchronize member data with the authority. Deleted members on either side will be processed according to the synchronization type selected.
+                                        </s>
                                     </p>
                                 </div>
                             </div>
