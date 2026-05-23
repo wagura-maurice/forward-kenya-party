@@ -294,7 +294,7 @@
     ]
   },
   "resources/js/Pages/Auth/Register.vue": {
-    "file": "assets/Register-BOjK1KLb.js",
+    "file": "assets/Register-D3z1nSy1.js",
     "name": "Register",
     "src": "resources/js/Pages/Auth/Register.vue",
     "isDynamicEntry": true,
@@ -355,7 +355,7 @@
     ]
   },
   "resources/js/Pages/Dashboard.vue": {
-    "file": "assets/Dashboard-DRDIDvBM.js",
+    "file": "assets/Dashboard-D_VXzEFm.js",
     "name": "Dashboard",
     "src": "resources/js/Pages/Dashboard.vue",
     "isDynamicEntry": true,
@@ -714,7 +714,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-N_ZhVT9g.js",
+    "file": "assets/app-O7UHzRnf.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
