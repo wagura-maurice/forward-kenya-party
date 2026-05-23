@@ -380,7 +380,7 @@ class WahaService
             . "• Abide by the party constitution\n\n"
             . "*Reply With:*\n"
             . "🔹 *1* to complete registration\n"
-            . "🔹 *2* to start over";
+            . "🔹 *2* or */cancel* to start over";
 
         return $this->sendText($chatId, $message);
     }
@@ -418,7 +418,7 @@ class WahaService
     {
         $message = "*❌ Invalid Input*\n\n"
             . "{$error}\n\n"
-            . "Please try again or reply with *cancel* to start over.";
+            . "Please try again or reply with */cancel* to start over.";
 
         return $this->sendText($chatId, $message);
     }
