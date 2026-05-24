@@ -291,7 +291,7 @@ class AppServiceProvider extends ServiceProvider
         // App Environment.
         if (env('APP_ENV') === 'production') {
             // primary requirement for digital ocean MySQL network
-            DB::statement('SET SESSION sql_require_primary_key=0');
+            // DB::statement('SET SESSION sql_require_primary_key=0');
         }
     }
 
