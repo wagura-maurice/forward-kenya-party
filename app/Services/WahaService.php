@@ -435,7 +435,7 @@ class WahaService
             . "🔹 */cancel* - Cancel current registration\n\n"
             . "*Registration Steps:*\n"
             . "1. Surname\n"
-            . "2. Other names (2-4 words)\n"
+            . "2. Other names (2-3 words)\n"
             . "3. Phone number\n"
             . "4. Email address\n"
             . "5. National Id number\n"

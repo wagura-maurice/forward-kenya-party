@@ -1719,9 +1719,9 @@ class WahaWebhookController extends Controller
                         "*🚀 TO JOIN US*\n" .
                         "Simply reply with */join* to begin your registration process.\n\n" .
                         "*📋 AVAILABLE COMMANDS*\n" .
-                        "• /join - Start registration process\n" .
-                        "• /help - Show help message\n" .
-                        "• /cancel - Cancel registration\n\n" .
+                        "• */join* - Start registration process\n" .
+                        "• */help* - Show help message\n" .
+                        "• */cancel* - Cancel registration\n\n" .
                         "*📋 IMPORTANT*\n" .
                         "Before joining, please check if you're registered with any other party:\n" .
                         "🔹 USSD: Dial *509#\n" .
