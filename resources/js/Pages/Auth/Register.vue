@@ -425,14 +425,18 @@ const submit = async () => {
             // Store userId for later login after IPPMS verification
             localStorage.setItem('pending_user_id', userId);
             
-            // Show success message for local registration
-            showToast(
-                "success",
-                "Local Registration Complete",
-                "You have been registered in our local system. Now complete legal verification with IPPMS."
-            );
+            // Show success message for local registration (awaited to prevent SweetAlert conflict)
+            await Swal.fire({
+                icon: "success",
+                title: "Local Registration Complete",
+                text: "You have been registered in our local system. Now complete legal verification with IPPMS.",
+                timer: 2500,
+                timerProgressBar: true,
+                showConfirmButton: false,
+                allowOutsideClick: false,
+            });
             
-            // Trigger IPPMS verification flow
+            // Trigger IPPMS verification flow (only after success modal is fully dismissed)
             showIppmsVerificationModal();
         } else {
             throw new Error(response.data.message || 'Registration failed');
@@ -486,25 +490,87 @@ const showIppmsVerificationModal = async () => {
         ippmsRegistrationId.value = response.data.data?.registrationId || null;
         console.log('Registration ID:', ippmsRegistrationId.value);
 
-        // Show OTP verification modal using a simple prompt
-        const otp = prompt(
-            "Legal Registration Verification\n\n" +
-            "Step 1: Local Registration Complete ✓\n" +
-            "Step 2: Legal Consent Required\n" +
-            "To become a legally registered party member, you must provide formal consent through the IPPMS authority system.\n\n" +
-            "Step 3: Complete Verification\n" +
-            "Enter the 5-character alphanumeric OTP sent to your registered phone number.\n\n" +
-            "Important: By entering the OTP, you are providing legal consent to register as a party member with IEBC through IPPMS.\n\n" +
-            "Enter 5-character OTP (e.g., L97MT):"
-        );
+        // Small delay to ensure page is stable before showing modal
+        await new Promise(resolve => setTimeout(resolve, 200));
 
-        console.log('OTP entered:', otp);
+        // Show OTP verification modal using SweetAlert
+        console.log('About to show SweetAlert modal');
+        
+        const result = await Swal.fire({
+            title: "Legal Registration Verification",
+            html: `
+                <div class="text-left">
+                    <p class="mb-4 text-sm text-gray-700">
+                        <strong>Step 1: Local Registration Complete ✓</strong><br>
+                        You have been successfully registered in our local system.
+                    </p>
+                    
+                    <p class="mb-4 text-sm text-gray-700">
+                        <strong>Step 2: Legal Consent Required</strong><br>
+                        To become a legally registered party member, you must provide formal consent through the IPPMS authority system. This is a mandatory legal requirement.
+                    </p>
+                    
+                    <p class="mb-4 text-sm text-gray-700">
+                        <strong>Step 3: Complete Verification</strong><br>
+                        Enter the 5-character alphanumeric OTP sent to your registered phone number. This OTP submission is the definitive step that legally synchronizes your identity with the authorities.
+                    </p>
+                    
+                    <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-4">
+                        <p class="text-sm text-blue-700">
+                            <strong>Important:</strong> By entering the OTP, you are providing legal consent to register as a party member with the Independent Electoral and Boundaries Commission (IEBC) through IPPMS.
+                        </p>
+                    </div>
+                    
+                    <div class="flex flex-col items-center mt-4">
+                        <input id="ippms-otp-input" class="swal2-input w-full text-center mb-2" placeholder="Enter 5-character OTP (e.g., L97MT)" maxlength="5" type="text">
+                    </div>
+                </div>
+            `,
+            showCancelButton: true,
+            confirmButtonText: "Complete Legal Registration",
+            confirmButtonColor: "#10b981",
+            cancelButtonText: "Cancel",
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showLoaderOnConfirm: true,
+            didOpen: () => {
+                console.log('SweetAlert modal opened');
+                const otpInput = document.getElementById("ippms-otp-input");
+                if (otpInput) {
+                    setTimeout(() => otpInput.focus(), 100);
+                }
+            },
+            willClose: () => {
+                console.log('SweetAlert modal will close');
+            },
+            preConfirm: async () => {
+                const otpInput = document.getElementById("ippms-otp-input");
+                const otp = otpInput.value;
+                console.log('preConfirm called with OTP:', otp);
 
-        if (otp && otp.length === 5 && /^[A-Za-z0-9]{5}$/.test(otp)) {
+                if (!otp || otp.length !== 5) {
+                    Swal.showValidationMessage(
+                        "Please enter the 5-character alphanumeric OTP"
+                    );
+                    return false;
+                }
+
+                if (!/^[A-Za-z0-9]{5}$/.test(otp)) {
+                    Swal.showValidationMessage(
+                        "OTP must be exactly 5 alphanumeric characters (e.g., L97MT)"
+                    );
+                    return false;
+                }
+
+                return otp;
+            }
+        });
+
+        console.log('SweetAlert result:', result);
+
+        if (result.isConfirmed) {
             console.log('User confirmed OTP, calling completeIppmsRegistration');
-            await completeIppmsRegistration(otp);
-        } else if (otp !== null) {
-            showToast("error", "Invalid OTP", "OTP must be exactly 5 alphanumeric characters (e.g., L97MT)");
+            await completeIppmsRegistration(result.value);
         } else {
             console.log('User cancelled or dismissed modal');
         }
