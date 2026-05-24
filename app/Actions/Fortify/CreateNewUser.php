@@ -93,7 +93,7 @@ class CreateNewUser implements CreatesNewUsers
             }],
             'telephone' => ['required', 'string', 'max:20', 'telephone', 'unique:profiles,telephone'],
             'identification_type' => ['required', 'string', 'in:national_identification_number,passport_number'],
-            'identification_number' => ['required', 'string', 'max:50', 'unique:members,national_identification_number'],
+            'identification_number' => ['required', 'string', 'min:7', 'max:9', 'unique:members,national_identification_number'],
             'party_membership_number' => ['required', 'string', 'max:50', 'unique:members,party_membership_number'],
             'date_of_birth' => ['required', 'date', 'before:today', function ($attribute, $value, $fail) {
                 $age = Carbon::parse($value)->age;

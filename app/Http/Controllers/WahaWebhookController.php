@@ -1370,8 +1370,8 @@ class WahaWebhookController extends Controller
         // Remove any non-digit characters
         $idNumber = preg_replace('/\D/', '', $idNumber);
 
-        if (strlen($idNumber) > 8) {
-            return ['valid' => false, 'error' => 'ID number must be at most 8 digits'];
+        if (strlen($idNumber) < 7 || strlen($idNumber) > 9) {
+            return ['valid' => false, 'error' => 'ID number must be 7, 8, or 9 digits'];
         }
 
         if (!ctype_digit($idNumber)) {

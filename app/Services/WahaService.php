@@ -161,7 +161,7 @@ class WahaService
     {
         $message = "*📝 Registration - Step 5/16*\n\n"
             . "Please enter your *National Id Number*:\n\n"
-            . "Format: Maximum 8 digits\n\n"
+            . "Format: 7-9 digits\n\n"
             . "Example: 12345678";
 
         return $this->sendText($chatId, $message);

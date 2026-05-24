@@ -216,8 +216,8 @@ watch(
 watch(
     () => form.identification_number,
     async (newIdNumber) => {
-        // Only trigger when exactly 8 characters and not already checking
-        if (newIdNumber.length === 8 && !isCheckingMembershipStatus.value) {
+        // Only trigger when 7, 8, or 9 characters and not already checking
+        if ((newIdNumber.length === 7 || newIdNumber.length === 8 || newIdNumber.length === 9) && !isCheckingMembershipStatus.value) {
             // Clear previous errors
             membershipStatusError.value = null;
             membershipStatus.value = null;
@@ -298,11 +298,11 @@ const validateStep = (step) => {
                 message: "National ID/Passport Number is required",
             };
             
-        // Validate identification number length (exactly 8 characters)
-        if (form.identification_number.length !== 8) {
+        // Validate identification number length (7, 8, or 9 characters)
+        if (form.identification_number.length < 7 || form.identification_number.length > 9) {
             return {
                 isValid: false,
-                message: "Identification number must be exactly 8 characters long"
+                message: "Identification number must be 7, 8, or 9 characters long"
             };
         }
 

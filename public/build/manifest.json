@@ -294,7 +294,7 @@
     ]
   },
   "resources/js/Pages/Auth/Register.vue": {
-    "file": "assets/Register-PnPVJrg3.js",
+    "file": "assets/Register-BNAmJTKC.js",
     "name": "Register",
     "src": "resources/js/Pages/Auth/Register.vue",
     "isDynamicEntry": true,
@@ -714,7 +714,7 @@
     ]
   },
   "resources/js/app.js": {
-    "file": "assets/app-DjIkNF3q.js",
+    "file": "assets/app-Cb16FH5r.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
