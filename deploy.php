@@ -52,7 +52,7 @@ task('release:application', function () {
     // optimize config and cache
     run('{{bin/php}} {{release_path}}/artisan optimize');
     // Run database migrations
-    // run('{{bin/php}} {{release_path}}/artisan migrate:fresh --seed --force');
+    run('{{bin/php}} {{release_path}}/artisan migrate:fresh --seed --force');
     // Run custom commands
     run('{{bin/php}} {{release_path}}/artisan app:optimize');
     // run('{{bin/php}} {{release_path}}/artisan app:debug');
