@@ -39,7 +39,7 @@ class Optimize extends Command
             Artisan::call('view:cache');
             Artisan::call('storage:link');
             Artisan::call('optimize');
-            // Artisan::call('up');
+            Artisan::call('up');
             // logic for running composer's commands.
             shell_exec('composer dump-autoload');
             // shell_exec('composer update');

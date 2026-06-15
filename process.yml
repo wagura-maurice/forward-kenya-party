@@ -2,18 +2,18 @@
 # * * * * * cd /var/www/html/forward-kenya-party/current && /usr/bin/php8.4 artisan schedule:run >> /dev/null 2>&1
 apps:
   # Run php artisan queue:work to execute queue job
-  # - script: "artisan"
-  #   name: "forward-kenya-party-queue-work"
-  #   cwd: "/var/www/html/forward-kenya-party/current"
-  #   args: "queue:work"
-  #   interpreter: "/usr/bin/php8.4"
+  - script: "artisan"
+    name: "forward-kenya-party-queue-work"
+    cwd: "/var/www/html/forward-kenya-party/current"
+    args: "queue:work"
+    interpreter: "/usr/bin/php8.4"
 
   # Run php artisan queue:listen to listen for new jobs on the queue
-  # - script: "artisan"
-  #   name: "forward-kenya-party-queue-listen"
-  #   cwd: "/var/www/html/forward-kenya-party/current"
-  #   args: "queue:listen"
-  #   interpreter: "/usr/bin/php8.4"
+  - script: "artisan"
+    name: "forward-kenya-party-queue-listen"
+    cwd: "/var/www/html/forward-kenya-party/current"
+    args: "queue:listen"
+    interpreter: "/usr/bin/php8.4"
 
   # Run php artisan horizon to start the Laravel Horizon process
   - script: "artisan"
